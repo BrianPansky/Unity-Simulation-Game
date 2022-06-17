@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4374915457360721625}
   - component: {fileID: -951165740514222979}
   - component: {fileID: 5344811819512824186}
+  - component: {fileID: 4973758645746404304}
   - component: {fileID: 4474087527148379903}
   m_Layer: 0
   m_Name: NPC
@@ -110,7 +111,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   theFunctions: {fileID: 0}
-  stateGrabber: {fileID: 0}
 --- !u!114 &-951165740514222979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +137,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4973758645746404304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5963062928679372863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d9bffd9108b6cc44b04cdf330997ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stateGrabber: {fileID: 0}
+  theHub: {fileID: 0}
 --- !u!195 &4474087527148379903
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -8,7 +8,7 @@ public class premadeStuffForAI : MonoBehaviour
 
     //initializing:
 
-    
+
     ////////////////////////////////////////////////
     //               STATE ITEMS
     ////////////////////////////////////////////////
@@ -29,7 +29,7 @@ public class premadeStuffForAI : MonoBehaviour
     //feelings
     public stateItem profitMotive0 = new stateItem();
     public stateItem hungry0 = new stateItem();
-    
+
 
 
     ////////////////////////////////////////////////
@@ -44,17 +44,14 @@ public class premadeStuffForAI : MonoBehaviour
     public action eat = new action();
     public action goToCashierZone = new action();
     public action goToCheckout = new action();
+    public action restock = new action();
+
+
+
+
+
+
     
-
-
-
-
-    //the NPC "state":
-    public Dictionary<string, List<stateItem>> state = new Dictionary<string, List<stateItem>>();// { { "locationState", {{ }} }, { 2, "World" }, { 2, "World" } };
-
-    public List<stateItem> feelings = new List<stateItem>();
-    public List<stateItem> inventory = new List<stateItem>();
-    public List<stateItem> locationState = new List<stateItem>();
 
 
     public List<action> toDoList = new List<action>();
@@ -70,7 +67,7 @@ public class premadeStuffForAI : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
 
         //stateItems:
@@ -88,7 +85,7 @@ public class premadeStuffForAI : MonoBehaviour
             work1 = stateItemCreator("workPlace", "locationState", 1);
             hungry0 = stateItemCreator("hungry", "feelings", 0);
             checkout1 = stateItemCreator("checkout", "locationState", 1);
-            
+
             profitMotive0 = stateItemCreator("profitMotive", "feelings", 0);
             cashierZone1 = stateItemCreator("cashierZone", "locationState", 1);
 
@@ -102,37 +99,69 @@ public class premadeStuffForAI : MonoBehaviour
             goToStore = actionCreator("goToStore", "goTo", createListOfStateItems(), createListOfStateItems(store1), 1);
             goToWork = actionCreator("goToWork", "goTo", createListOfStateItems(), createListOfStateItems(work1), 1);
             goToHome = actionCreator("goToHome", "goTo", createListOfStateItems(), createListOfStateItems(home1), 1);
-            goToCashierZone = actionCreator("cashierZone", "goTo", createListOfStateItems(), createListOfStateItems(cashierZone1), 1);
-            goToCheckout = actionCreator("checkout", "goTo", createListOfStateItems(store1), createListOfStateItems(checkout1), 1);
+            goToCashierZone = actionCreator("goToCashierZone", "goTo", createListOfStateItems(), createListOfStateItems(cashierZone1), 1);
+            goToCheckout = actionCreator("goToCheckout", "goTo", createListOfStateItems(store1), createListOfStateItems(checkout1), 1);
 
             //other actions:
             eat = actionCreator("eat", "use", createListOfStateItems(home1, food1), createListOfStateItems(hungry0, food0), 1);
             buyFood = actionCreator("buyFood", "socialTrade", createListOfStateItems(money1, checkout1), createListOfStateItems(money0, food1), 1);
-            sellFood = actionCreator("sellFood", "socialTrade", createListOfStateItems(food1, cashierZone1), createListOfStateItems(money1, food0, profitMotive0), 1);
-            doTheWork = actionCreator("doTheWork", "action", createListOfStateItems(work1), createListOfStateItems(money1), 4);
+            sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1, cashierZone1), createListOfStateItems(money1, food0, profitMotive0), 1);
+            doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(work1), createListOfStateItems(money1), 4);
+            restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
         }
     }
 
 
 
     ////////////////////////////////////////////////////
-    //                 Pre-Made NPCs
+    //              Pre-Made NPC STATES
     ////////////////////////////////////////////////////
 
     //regular default NPC:
     public Dictionary<string, List<stateItem>> createNPCstate1()
     {
-        inventory.Add(food1);
-        inventory.Add(money1);
+        Dictionary<string, List<stateItem>> state1 = new Dictionary<string, List<stateItem>>();
+        List<stateItem> feelings1 = new List<stateItem>();
+        List<stateItem> inventory1 = new List<stateItem>();
+        List<stateItem> locationState1 = new List<stateItem>();
 
-        feelings.Add(hungry0);
+        inventory1.Add(food1);
+        inventory1.Add(money1);
 
-        state.Add("locationState", locationState);
-        state.Add("feelings", feelings);
-        state.Add("inventory", inventory);
+        feelings1.Add(hungry0);
 
-        return state;
+        state1.Add("locationState", locationState1);
+        state1.Add("feelings", feelings1);
+        state1.Add("inventory", inventory1);
+
+
+        return state1;
     }
+
+    //shopkeeper:
+    public Dictionary<string, List<stateItem>> createShopkeeperState()
+    {
+        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
+        List<stateItem> feelings2 = new List<stateItem>();
+        List<stateItem> inventory2 = new List<stateItem>();
+        List<stateItem> locationState2 = new List<stateItem>();
+
+        inventory2.Add(food1);
+        //inventory2.Add();
+
+        feelings2.Add(profitMotive0);
+
+        state2.Add("locationState", locationState2);
+        state2.Add("feelings", feelings2);
+        state2.Add("inventory", inventory2);
+
+        return state2;
+    }
+
+
+    ////////////////////////////////////////////////////
+    //               NPC KNOWN ACTIONS
+    ////////////////////////////////////////////////////
 
     public List<action> createKnownActions1()
     {
@@ -146,8 +175,32 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(buyFood);
         knownActions.Add(goToCheckout);
 
+
         return knownActions;
     }
+
+    public List<action> createShopkeeperKnownActions()
+    {
+        knownActions.Add(goToHome);
+        //knownActions.Add(goToWork);
+        knownActions.Add(doTheWork);
+
+        knownActions.Add(goToStore);
+        knownActions.Add(sellFood);
+
+        knownActions.Add(eat);
+        //knownActions.Add(buyFood);
+        knownActions.Add(goToCashierZone);
+        knownActions.Add(restock);
+
+        return knownActions;
+    }
+
+
+
+    ////////////////////////////////////////////////////
+    //                 NPC KNOWN MAPS
+    ////////////////////////////////////////////////////
 
     public Dictionary<string, stateItem> createMap1()
     {
@@ -168,37 +221,6 @@ public class premadeStuffForAI : MonoBehaviour
     }
 
 
-    //shopkeeper:
-
-    public Dictionary<string, List<stateItem>> createShopkeeperState()
-    {
-        inventory.Add(food1);
-        //inventory.Add();
-
-        feelings.Add(profitMotive0);
-
-        state.Add("locationState", locationState);
-        state.Add("feelings", feelings);
-        state.Add("inventory", inventory);
-
-        return state;
-    }
-
-    public List<action> createShopkeeperKnownActions()
-    {
-        knownActions.Add(goToHome);
-        //knownActions.Add(goToWork);
-        knownActions.Add(doTheWork);
-
-        knownActions.Add(goToStore);
-        knownActions.Add(sellFood);
-
-        knownActions.Add(eat);
-        //knownActions.Add(buyFood);
-        knownActions.Add(goToCashierZone);
-
-        return knownActions;
-    }
 
 
     ////////////////////////////////////////////////////
@@ -209,7 +231,7 @@ public class premadeStuffForAI : MonoBehaviour
     {
         List<stateItem> aNewList = new List<stateItem>();
 
-        foreach(stateItem x in listofStateItems)
+        foreach (stateItem x in listofStateItems)
         {
             aNewList.Add(x);
         }
@@ -232,7 +254,7 @@ public class premadeStuffForAI : MonoBehaviour
         return thisAction;
     }
 
-    stateItem stateItemCreator(string name, string stateCategory, int inStateOrNot)
+    public stateItem stateItemCreator(string name, string stateCategory, int inStateOrNot)
     {
         stateItem thisStateItem = new stateItem();
 
@@ -255,6 +277,25 @@ public class premadeStuffForAI : MonoBehaviour
 
 }
 
+public class stateItem
+{
+    //just the same as "prereq", just different name
+    public string name;
+    public string stateCategory;
+    public bool inStateOrNot;
+    //public int quantity;
+    //public float coords[3];  //gotta fix this, should be vector?  WHAT IS THIS FOR???
+    //public float valueEach;  //value for each item.  Needed for cost calcualtions.
+}
 
+public class action
+{
+    public string name;
+    public string type;
 
+    public List<stateItem> prereqs = new List<stateItem>();
+    public List<stateItem> effects = new List<stateItem>();
 
+    public int cost;
+
+}

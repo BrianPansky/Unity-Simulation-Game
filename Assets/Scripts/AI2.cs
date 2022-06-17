@@ -27,7 +27,7 @@ public class AI2 : MonoBehaviour
     public stateItem recurringGoal = new stateItem();
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
-    public premadeStuffForAI2 stateGrabber;
+    
     //public stateForAI state;
 
     // Start is called before the first frame update
@@ -35,14 +35,7 @@ public class AI2 : MonoBehaviour
     {
         // this is my shopkeeper creation, should be in my AI2 file
         theFunctions = GetComponent<functionsForAI>();
-        stateGrabber = GetComponent<premadeStuffForAI2>();
-
-        recurringGoal = stateGrabber.profitMotive0;
-        //print(stateGrabber.profitMotive0.name);
-        state = stateGrabber.createShopkeeperState();
-        knownActions = stateGrabber.createShopkeeperKnownActions();
-
-        map = stateGrabber.createMap1();
+        
 
 
     }

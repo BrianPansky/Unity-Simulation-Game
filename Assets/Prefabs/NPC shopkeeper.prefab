@@ -12,10 +12,11 @@ GameObject:
   - component: {fileID: 3229309114129078226}
   - component: {fileID: 998973992460705436}
   - component: {fileID: 215909877929927081}
-  - component: {fileID: 3085961464163024811}
+  - component: {fileID: 8638543676797519505}
   - component: {fileID: -951165740514222979}
   - component: {fileID: 4474087527148379903}
-  - component: {fileID: 9163921782485206807}
+  - component: {fileID: 418249366537334465}
+  - component: {fileID: 1107403957602663128}
   m_Layer: 0
   m_Name: NPC shopkeeper
   m_TagString: anNPC
@@ -97,7 +98,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3085961464163024811
+--- !u!114 &8638543676797519505
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,11 +107,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5963062928679372863}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7db44023ab8d6e54cbafbab3679e9423, type: 3}
+  m_Script: {fileID: 11500000, guid: c64c7d0e81b470c40ad75f58cb11f2b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   theFunctions: {fileID: 0}
-  stateGrabber: {fileID: 0}
 --- !u!114 &-951165740514222979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -147,7 +147,7 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &9163921782485206807
+--- !u!114 &418249366537334465
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,6 +156,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5963062928679372863}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 941d0ad2a11c76e49941468cad6068fd, type: 3}
+  m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1107403957602663128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5963062928679372863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a13df4c72d1fae43a5638e2ae056467, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stateGrabber: {fileID: 0}
+  theHub: {fileID: 0}

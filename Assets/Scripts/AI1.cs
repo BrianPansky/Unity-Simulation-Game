@@ -27,7 +27,6 @@ public class AI1 : MonoBehaviour
     public stateItem recurringGoal = new stateItem();
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
-    public premadeStuffForAI stateGrabber;
     //public stateForAI state;
 
     // Start is called before the first frame update
@@ -36,15 +35,11 @@ public class AI1 : MonoBehaviour
         //this is my regular NPC, shoudl be in my AI1 file
 
         theFunctions = GetComponent<functionsForAI>();
-        stateGrabber = GetComponent<premadeStuffForAI>();
-
-        recurringGoal = stateGrabber.hungry0;
-        //print(recurringGoal.name);
-        state = stateGrabber.createNPCstate1();
-        knownActions = stateGrabber.createKnownActions1();
-        map = stateGrabber.createMap1();
 
     }
+
+
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -72,20 +67,26 @@ public class AI1 : MonoBehaviour
     }
 
 
+
     // Update is called once per frame
     void Update()
     {
         //constantlyCheckLocationState();
-        
-        //make sure list isn't empty:
+        //theFunctions.printInventory(state["inventory"]);
+
+        //make sure list isn't empty, remove completed action:
         if (toDoList.Count > 0)
         {
 
             //ad hoc for now
-            //Debug.Log("are we CHECKING???");
+            //print("are we CHECKING???");
             //theFunctions.printState(state);
             if (theFunctions.isThisActionDone(toDoList[0], state))
             {
+                //print("11111111111111111111says this action is done:");
+                //print(toDoList[0].name);
+                //print("here is state:22222222222222222222222222222222");
+                //theFunctions.printState(state);
                 //Debug.Log("yes good, on we go!!!!!!!!!!!!!!!!!!");
                 toDoList.Remove(toDoList[0]);
             }
@@ -100,6 +101,7 @@ public class AI1 : MonoBehaviour
             }
             //print("need to find a plan:");
             List<List<action>> planList = new List<List<action>>();
+            //print(recurringGoal.name);
             planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
             //theFunctions.printPlan(planList[0]);
             //print("state before imagination:");
