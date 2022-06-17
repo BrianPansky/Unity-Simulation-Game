@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 
-public class AI1 : MonoBehaviour
+public class AI2 : MonoBehaviour
 {
 
     

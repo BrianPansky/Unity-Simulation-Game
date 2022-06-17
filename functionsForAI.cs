@@ -1,10 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 public class functionsForAI : MonoBehaviour
 {
+    [SerializeField]
+    Transform _destination;
+    NavMeshAgent _navMeshAgent;
+
+
     private GameObject t1;
 
 
@@ -133,10 +139,13 @@ public class functionsForAI : MonoBehaviour
             //Debug.Log("hello this is where one thing is printing");
             //Debug.Log(nextAction.effects[0]);
             //Debug.Log("done printing");
+
             stateItem stateItemX = nextAction.effects[0];
             string name1 = stateItemX.name;
             t1 = GameObject.Find(name1);
-            transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
+            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
+            Vector3 targetVector = t1.GetComponent<Transform>().position;
+            _navMeshAgent.SetDestination(targetVector);
         }
 
         //if (nextAction.type == "socialTrade")
@@ -385,6 +394,7 @@ public class functionsForAI : MonoBehaviour
     {
         
         theAI = GetComponent<AI1>();
+        _navMeshAgent = this.GetComponent<NavMeshAgent>();
     }
 
 }
