@@ -30,33 +30,67 @@ public class AI1 : MonoBehaviour
 
     public stateItem store1 = new stateItem();
     public action goToStore = new action();
+    public stateItem money1 = new stateItem();
+    public stateItem money0 = new stateItem();
+    public action buyFood = new action();
 
     public stateItem home1 = new stateItem();
     public action goToHome = new action();
 
+    public stateItem food1 = new stateItem();
+    public action eat = new action();
+    public stateItem food0 = new stateItem();
+
+    public stateItem hungry0 = new stateItem();
+
+    void print(string text)
+    {
+        Debug.Log(text);
+    }
+
     bool isThisActionDone(action thisAction)
     {
+        //I might eventually want to change this so that "state" is one of the inputs???
+
         //assume true, then check and change to false where needed
         bool tf;
         tf = true;
 
+        //print("========================1==========================");
+        //print(thisAction.name);
+
+        int howMany;
+        howMany = 1;
+
         foreach (stateItem effectX in thisAction.effects)
         {
-            if (isGoalAccomplished(effectX) == false)
+            //Debug.Log("how many freaking effects?????????????");
+            //Debug.Log(howMany);
+            //print("2------checks if no more ______ is in _______, confirm false:");
+            //print(effectX.name);
+            //print(effectX.stateCategory);
+            //print(effectX.inStateOrNot);
+            if (isGoalAccomplished(effectX, state) == false)
             {
+                //Debug.Log(effectX.name);
+                //print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
                 return false;
             }
+            //print("do we get here?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????");
+            howMany += 1;
         }
-
+        //print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         return tf;
     }
 
-    bool isGoalAccomplished(stateItem goal)
+    bool isGoalAccomplished(stateItem goal, Dictionary<string, List<stateItem>> state)
     {
         //assume false, then check and change to true where needed
         bool tf;
         tf = false;
-
+        //print("3:  should see ''inStateOrNot'' == false");
+        //Debug.Log(goal.name);
+        //print(goal.inStateOrNot);
         if (goal.inStateOrNot == true)
         {
             foreach (stateItem stateI in state[goal.stateCategory])
@@ -64,8 +98,11 @@ public class AI1 : MonoBehaviour
 
 
                 //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
-                //oh no this is text, "stateItemName" needs to be just a stateItem!  Or something!
-                if (stateI.stateItemName == goal.stateItemName)
+                //oh no this is text, "name" needs to be just a stateItem!  Or something!
+                //print("1111111111111111111111111111111111111111");
+                //print(goal.name);
+                //print(stateI.name);
+                if (stateI.name == goal.name)
                 {
                     tf = true;
                 }
@@ -73,15 +110,24 @@ public class AI1 : MonoBehaviour
         }
         if (goal.inStateOrNot == false)
         {
+            //actually here I have to reverse it?
+            //assume false, then if I find it, change to true?
+            //ya I had to do that in my C++ code too
+            tf = true;
+
+            //print("4:  should look through each item in list of________:");
+            //print(goal.stateCategory);
             foreach (stateItem stateI in state[goal.stateCategory])
             {
-                //actually here I have to reverse it?
-                //assume false, then if I find it, change to true?
-                //ya I had to do that in my C++ code too
-                tf = true;
-
-                if (stateI.stateItemName == goal.stateItemName)
+                
+                //print("222222222222222222222222222222222222222");
+                //print(goal.name);
+                //print(stateI.name);
+                if (stateI.name == goal.name)
                 {
+                    //print("whaaaaaat>>>>>>>>>>>>>>>>");
+                    //print(stateI.name);
+                    //print(goal.name);
                     tf = false;
                 }
             }
@@ -89,7 +135,7 @@ public class AI1 : MonoBehaviour
         return tf;
     }
 
-    bool prereqChecker(action thisAction)
+    bool prereqChecker(action thisAction, Dictionary<string, List<stateItem>> state)
     {
         //assume true, then check and change to false where needed
         bool tf;
@@ -97,7 +143,8 @@ public class AI1 : MonoBehaviour
 
         foreach (stateItem prereqX in thisAction.prereqs)
         {
-            if (isGoalAccomplished(prereqX) == false)
+            //print("don't count this");
+            if (isGoalAccomplished(prereqX, state) == false)
             {
                 return false;
             }
@@ -105,6 +152,7 @@ public class AI1 : MonoBehaviour
 
         return tf;
     }
+
     void constantlyCheckLocationState()
     {
 
@@ -119,26 +167,62 @@ public class AI1 : MonoBehaviour
             //Debug.Log(nextAction.effects[0]);
             //Debug.Log("done printing");
             stateItem stateItemX = nextAction.effects[0];
-            string name1 = stateItemX.stateItemName;
+            string name1 = stateItemX.name;
             w = GameObject.Find(name1);
             transform.position = Vector3.MoveTowards(transform.position, w.GetComponent<Transform>().position, speed * Time.deltaTime);
         }
+
+        //if (nextAction.type == "socialTrade")
+        else
+        {
+            if (prereqChecker(nextAction, state) == true)
+            {
+                //Debug.Log("cccccccccccccccccccccc");
+                //printState(state);
+                state = implementALLEffectsForImagination(nextAction, state);
+                //printState(state);
+            }
+        }
     }
 
+    void printPlan(List<action> plan)
+    {
+        foreach(action listItem in plan)
+        {
+            print(listItem.name);
+        }
+    }
+
+    void printState(Dictionary<string, List<stateItem>> state)
+    {
+        string text;
+        text = "{";
+        foreach (string key in state.Keys)
+        {
+            text = string.Concat(text, key, ", ");
+            foreach (stateItem content in state[key])
+            {
+                text = string.Concat(text, content.name, ", ");
+            }
+            text = string.Concat(text, "} ");
+        }
+        text = string.Concat(text, "}");
+        print(text);
+    }
 
     List<List<action>> problemSolver(stateItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
         List<List<action>> planList = new List<List<action>>();
 
-        if (isGoalAccomplished(goal) == false)
+        if (isGoalAccomplished(goal, state) == false)
         {
             foreach(action thisAction in knownActions)
             {
                 foreach(stateItem thisEffect in thisAction.effects)
                 {
-                    if (goal.stateItemName == thisEffect.stateItemName & goal.inStateOrNot == thisEffect.inStateOrNot)
+                    if (goal.name == thisEffect.name & goal.inStateOrNot == thisEffect.inStateOrNot)
                     {
-                        if (prereqChecker(thisAction))
+                        if (prereqChecker(thisAction, state))
                         {
                             List<action> shortPlan = new List<action>();
                             shortPlan.Add(thisAction);
@@ -150,7 +234,7 @@ public class AI1 : MonoBehaviour
 
                             foreach (stateItem eachPrereq in thisAction.prereqs)
                             {
-                                if (isGoalAccomplished(eachPrereq) == false)
+                                if (isGoalAccomplished(eachPrereq, state) == false)
                                 {
                                     List<List<action>> plansForThisPrereq = new List<List<action>>();
                                     plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
@@ -199,9 +283,144 @@ public class AI1 : MonoBehaviour
         return planList;
     }
 
+    Dictionary<string, List<stateItem>> stateCopyer(Dictionary<string, List<stateItem>> state)
+    {
+        Dictionary<string, List<stateItem>> newState = new Dictionary<string, List<stateItem>>();
+
+        foreach(string keyString in state.Keys)
+        {
+            List<stateItem> emptyList = new List<stateItem>();
+            //newState[keyString] = state[keyString];
+            newState[keyString] = emptyList;
+            foreach (stateItem item in state[keyString])
+            {
+                newState[keyString].Add(item);
+            }
+        }
+        return newState;
+    }
+
+    Dictionary<string, List<stateItem>> removeStateItem(stateItem thisStateItem, Dictionary<string, List<stateItem>> state)
+    {
+        //just because they are not quite identical enough for .Remove to work properly I don't think
+
+        //find the correct stateItem, then remove it
+        foreach (stateItem eachStateItem in state[thisStateItem.stateCategory])
+        {
+            if (eachStateItem.name == thisStateItem.name)
+            {
+                state[thisStateItem.stateCategory].Remove(eachStateItem);
+                break;
+            }
+        }
+
+        return state;
+    }
+
+    Dictionary<string, List<stateItem>> implementALLEffectsForImagination(action currentAction, Dictionary<string, List<stateItem>> imaginaryState)
+    {
+        foreach(stateItem eachEffect in currentAction.effects)
+        {
+            if(eachEffect.inStateOrNot == true)
+            {
+                if(eachEffect.stateCategory == "locationState")
+                {
+                    imaginaryState["locationState"].Clear();
+                }
+                imaginaryState[eachEffect.stateCategory].Add(eachEffect);
+            }
+            else
+            {
+                imaginaryState = removeStateItem(eachEffect, imaginaryState);
+                //imaginaryState[eachEffect.stateCategory].Remove(eachEffect);
+            }
+        }
+        return imaginaryState;
+    }
+
+    List<List<action>> simulatingPlansToEnsurePrereqs(List<List<action>> planList, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
+    {
+        //print("111111111111111111111111111111111111111");
+        foreach (List<action> eachPlan in planList)
+        {
+            Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
+            imaginaryState = stateCopyer(realState);
+            //print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            //printState(realState);
+            //imaginaryState.Clear();
+            //Debug.Log(realState["inventory"]);
+            //imaginaryState["inventory"].Remove(money1);
+            //printState(imaginaryState);
+            //printState(realState);
+            //print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
+            int counter;
+            int halt;
+
+            counter = 0;
+            halt = 0;
+            //print("222222222222222222222222222222222222222222222");
+            while ((counter + 1) <= eachPlan.Count)
+            {
+                halt += 1;
+                if (halt > 20)
+                {
+                    break;
+                }
+                action currentAction;
+                currentAction = eachPlan[counter];
+                //print("333333333333333333333333333333333333333333333");
+                //print(currentAction.name);
+                if(prereqChecker(currentAction, imaginaryState) != true)
+                {
+                    //print("yes this should happen for ''eat'':");
+                    //print(currentAction.name);
+                    foreach(stateItem eachPrereq in currentAction.prereqs)
+                    {
+                        if(isGoalAccomplished(eachPrereq, imaginaryState) != true)
+                        {
+                            //print("and this should happen for ''home''");
+                            //print(eachPrereq.name);
+                            List<List<action>> prereqFillerList;
+                            prereqFillerList = problemSolver(eachPrereq, knownActions, imaginaryState);
+                            //print("should have found this plan to fill the prereq:");
+                            //printPlan(prereqFillerList[0]);
+
+
+                            if (prereqFillerList.Count > 0)
+                            {
+                                //see python code for why this part is unfinished code
+                                foreach(action eachAction in prereqFillerList[0])
+                                {
+                                    eachPlan.Insert(counter, eachAction);
+                                }
+                                counter += 1;
+                            }
+                            else
+                            {
+                                counter += 1;
+                                planList.Remove(eachPlan);
+
+                            }
+                        }
+                    }
+                }
+
+                imaginaryState = implementALLEffectsForImagination(currentAction, imaginaryState);
+                counter += 1;
+            }
+
+        }
+        return planList;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        inventory.Add(food1);
+        inventory.Add(money1);
+
+        feelings.Add(hungry0);
+
         state.Add("locationState", locationState);
         state.Add("feelings", feelings);
         state.Add("inventory", inventory);
@@ -214,7 +433,7 @@ public class AI1 : MonoBehaviour
 
         work1.stateCategory = "locationState";
         work1.inStateOrNot = true;
-        work1.stateItemName = "workPlace";
+        work1.name = "workPlace";
 
         goToWork.name = "goToWork";
         goToWork.type = "goTo";
@@ -224,7 +443,7 @@ public class AI1 : MonoBehaviour
 
         store1.stateCategory = "locationState";
         store1.inStateOrNot = true;
-        store1.stateItemName = "store";
+        store1.name = "store";
 
         goToStore.name = "goToStore";
         goToStore.type = "goTo";
@@ -234,7 +453,7 @@ public class AI1 : MonoBehaviour
 
         home1.stateCategory = "locationState";
         home1.inStateOrNot = true;
-        home1.stateItemName = "home";
+        home1.name = "home";
 
         goToHome.name = "goToHome";
         goToHome.type = "goTo";
@@ -247,11 +466,55 @@ public class AI1 : MonoBehaviour
 
         //toDoList.Add(goToStore);
 
+        food1.inStateOrNot = true;
+        food1.stateCategory = "inventory";
+        food1.name = "food";
+
+        food0.inStateOrNot = false;
+        food0.stateCategory = "inventory";
+        food0.name = "food";
+
+        money1.inStateOrNot = true;
+        money1.stateCategory = "inventory";
+        money1.name = "money";
+
+        money0.inStateOrNot = false;
+        money0.stateCategory = "inventory";
+        money0.name = "money";
+
+
+        hungry0.inStateOrNot = false;
+        hungry0.stateCategory = "feelings";
+        hungry0.name = "hungry";
+
+        eat.name = "eat";
+        eat.cost = 1;
+        eat.type = "use";
+        eat.prereqs.Add(home1);
+        eat.prereqs.Add(food1);
+        eat.effects.Add(hungry0);
+        eat.effects.Add(food0);
+
+        buyFood.name = "buyFood";
+        buyFood.cost = 1;
+        buyFood.type = "socialTrade";
+        buyFood.prereqs.Add(money1);
+        buyFood.prereqs.Add(store1);
+        buyFood.effects.Add(money0);
+        buyFood.effects.Add(food1);
+
+
+
+
         knownActions.Add(goToHome);
         knownActions.Add(goToWork);
 
 
         knownActions.Add(goToStore);
+
+        knownActions.Add(eat);
+        knownActions.Add(buyFood);
+        
     }
 
     // Update is called once per frame
@@ -262,32 +525,51 @@ public class AI1 : MonoBehaviour
         //make sure list isn't empty:
         if (toDoList.Count > 0)
         {
+
             //ad hoc for now
+            //Debug.Log("are we CHECKING???");
+            //printState(state);
             if (isThisActionDone(toDoList[0]))
             {
+                //Debug.Log("yes good, on we go!!!!!!!!!!!!!!!!!!");
                 toDoList.Remove(toDoList[0]);
-            } 
+            }
+            //print("and how about here?.................................................................................................................................................................................................................................................");
         }
         else
         {
-            Debug.Log("need to find a plan");
+            if (state["feelings"].Count == 0)
+            {
+                state["feelings"].Add(hungry0);
+            }
+            //print("need to find a plan:");
             List<List<action>> planList = new List<List<action>>();
-            planList = problemSolver(work1, knownActions, state);
+            planList = problemSolver(hungry0, knownActions, state);
+            //printPlan(planList[0]);
+            //print("state before imagination:");
+            //printState(state);
+            planList = simulatingPlansToEnsurePrereqs(planList, knownActions, state);
+            //print("the plan after imagination fix:");
+            //printPlan(planList[0]);
+            //print("state AFTER imagination:");
+            //printState(state);
             //ad hoc for now
             if (planList.Count > 0)
             {
-                Debug.Log("plan found");
+                //print("plan found");
                 toDoList = planList[0];
             }
         }
+
+        //printPlan(toDoList);
 
         //make sure list isn't empty AGAIN:
         if (toDoList.Count > 0)
         {
             doNextAction(toDoList[0]);
         }
+        //printState(state);
         
-
     }
 }
 
@@ -295,7 +577,7 @@ public class AI1 : MonoBehaviour
 public class stateItem
 {
     //just the same as "prereq", just different name
-    public string stateItemName;
+    public string name;
     public string stateCategory;
     public bool inStateOrNot;
     //public int quantity;
