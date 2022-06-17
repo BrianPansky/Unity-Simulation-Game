@@ -66,6 +66,15 @@ public class AI1 : MonoBehaviour
         }
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "aMapZone")
+        {
+            //just blank out the locationState, I think:
+            List<stateItem> newLocationList = new List<stateItem>();
+            state["locationState"] = newLocationList;
+        }
+    }
 
 
     // Update is called once per frame
@@ -74,29 +83,100 @@ public class AI1 : MonoBehaviour
         //constantlyCheckLocationState();
         //theFunctions.printInventory(state["inventory"]);
 
+        /*
+        if (this.name == "NPC")
+        {
+            theFunctions.print("==============================================================");
+        }
+        */
+
         //make sure list isn't empty, remove completed action:
         if (toDoList.Count > 0)
         {
-
-            //ad hoc for now
-            //print("are we CHECKING???");
-            //theFunctions.printState(state);
+            //ad hoc for now, remove action if it is done
             if (theFunctions.isThisActionDone(toDoList[0], state))
             {
-                //print("11111111111111111111says this action is done:");
-                //print(toDoList[0].name);
-                //print("here is state:22222222222222222222222222222222");
-                //theFunctions.printState(state);
-                //Debug.Log("yes good, on we go!!!!!!!!!!!!!!!!!!");
                 toDoList.Remove(toDoList[0]);
             }
-            //print("and how about here?.................................................................................................................................................................................................................................................");
+        }
+
+        //remove plan if prereqs that should be filled already are not filled
+        //will somehow need to tell which prereqs should already be filled
+        //probably by adding up effects (using imagination simulation of plan), basically
+        //but would be nice if it was simpler than that function...
+        if (toDoList.Count > 0)
+        {
+
+            int Z;
+            Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+
+            if(Z != -2)
+            {
+                
+                toDoList.RemoveRange(0, toDoList.Count);
+                theFunctions.printPlan(toDoList);
+            }
+
+
+
+            /*
+
+            while (Z != -2)
+            {
+                toDoList.RemoveAt(Z);
+                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+            }
+
+            
+
+
+            List<List<action>> planListx = new List<List<action>>();
+            planListx.Add(toDoList);
+
+            //ad hoc for now
+            if (theFunctions.simulatingPlansToEnsurePrereqs(planListx, knownActions, state).Count > 0)
+            {
+                //this will (stil) be true basically every frame for every NPC, though...
+
+                //print("plan found");
+                toDoList = planListx[0];
+                theFunctions.print("is this a weird plan?11111111111111111111111111111111111111");
+                theFunctions.printPlan(toDoList);
+            }
+            else
+            {
+                toDoList.RemoveRange(0, toDoList.Count);
+            }
+
+            
+
+            //since "goTo" actions don't have prereqs, we need to skip past them to check if prereqs are failed:
+            int actionToCheck;
+            actionToCheck = 0;
+            while (toDoList[actionToCheck].type == "goTo")
+            {
+                actionToCheck += 1;
+            }
+
+
+            
+            //check if prereqs are failed:
+            if (theFunctions.prereqChecker(toDoList[actionToCheck], state) == false)
+            {
+                //ok but now it deletes the plan EVERY FRAME, 
+                //because the action after "goTo" ALWAYS has its prereqs unmet!
+                //Because being at a location IS ONE OF THE PREREQS!
+                //(thus, the above "if" statement is ALWAYS TRUE)
+                toDoList.RemoveRange(0, toDoList.Count);
+            }
+            */
         }
         else
         {
+            //ad-hoc adding the goal once it is completed, to create behavior loop
             if (state["feelings"].Count == 0)
             {
-                //print("heloooooooooooooooooooooo");
                 state["feelings"].Add(recurringGoal);
             }
             //print("need to find a plan:");
@@ -121,6 +201,7 @@ public class AI1 : MonoBehaviour
 
         //printPlan(toDoList);
 
+        
         //make sure list isn't empty AGAIN:
         if (toDoList.Count > 0)
         {

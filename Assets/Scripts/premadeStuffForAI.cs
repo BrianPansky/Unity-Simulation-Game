@@ -46,12 +46,17 @@ public class premadeStuffForAI : MonoBehaviour
     public action goToCheckout = new action();
     public action restock = new action();
 
+    //public action findVictim = new action();
+    //public action goToVictim = new action();
+    public action seekVictim = new action();
+    public action pickVictimsPocket = new action();
 
 
 
 
 
-    
+
+
 
 
     public List<action> toDoList = new List<action>();
@@ -108,6 +113,12 @@ public class premadeStuffForAI : MonoBehaviour
             sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1, cashierZone1), createListOfStateItems(money1, food0, profitMotive0), 1);
             doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(work1), createListOfStateItems(money1), 4);
             restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
+
+            //pickpocket, under construction
+            //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
+            //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
+            //seekVictim = actionCreator("seekVictim", "seek", createListOfStateItems(), createListOfStateItems(victim1), 1);
+            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", createListOfStateItems(), createListOfStateItems(money1, food1), 1);
         }
     }
 
@@ -158,6 +169,24 @@ public class premadeStuffForAI : MonoBehaviour
         return state2;
     }
 
+    //pickpocket:
+    public Dictionary<string, List<stateItem>> createPickpocketState()
+    {
+        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
+        List<stateItem> feelings2 = new List<stateItem>();
+        List<stateItem> inventory2 = new List<stateItem>();
+        List<stateItem> locationState2 = new List<stateItem>();
+
+        
+
+        feelings2.Add(hungry0);
+
+        state2.Add("locationState", locationState2);
+        state2.Add("feelings", feelings2);
+        state2.Add("inventory", inventory2);
+
+        return state2;
+    }
 
     ////////////////////////////////////////////////////
     //               NPC KNOWN ACTIONS
@@ -196,6 +225,25 @@ public class premadeStuffForAI : MonoBehaviour
         return knownActions;
     }
 
+    public List<action> createPickpocketKnownActions()
+    {
+        knownActions.Add(goToHome);
+        
+
+        knownActions.Add(goToStore);
+
+        knownActions.Add(eat);
+        knownActions.Add(buyFood);
+        knownActions.Add(goToCheckout);
+
+        //knownActions.Add(findVictim);
+        //knownActions.Add(goToVictim);
+        knownActions.Add(pickVictimsPocket);
+
+
+        return knownActions;
+    }
+    
 
 
     ////////////////////////////////////////////////////

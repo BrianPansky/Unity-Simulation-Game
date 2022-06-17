@@ -69,6 +69,42 @@ public class functionsForAI : MonoBehaviour
             trade(state["inventory"], theTargetState.state["inventory"], nextAction);
         }
         
+        else if (nextAction.name == "pickVictimsPocket")
+        {
+            //ad hoc for now
+            //print("yuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+
+            //zoneForPickpocket
+
+            GameObject victim = GameObject.Find("NPC");
+
+            //navigation
+            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
+            Vector3 targetVector = victim.GetComponent<Transform>().position;
+            _navMeshAgent.SetDestination(targetVector);
+
+
+            //now check distance
+            GameObject thePickpocket = GameObject.Find("NPC pickpocket");
+            float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
+            if (distance < 2.0f)
+            {
+                
+
+                //now do the pickpocketing
+                AI1 theTargetState = victim.GetComponent("AI1") as AI1;
+                steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+
+                //ad-hoc action completion:
+                theAI.toDoList.RemoveAt(0);
+
+                //state = implementALLEffectsForImagination(nextAction, state);
+            }
+
+
+
+        }
 
         else if (prereqChecker(nextAction, state) == true)
         {
@@ -110,7 +146,25 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public void steal(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
+    {
+        //probably ad-hoc for now
+        
+        //actioner is the one doing the nextAction
 
+        //need to initialize:
+        stateItem actionerReceives = new stateItem();
+
+        //set up items to trade:
+        foreach (stateItem effect in nextAction.effects)
+        {
+            actionerReceives = effect;
+            actionerInventory.Add(actionerReceives);
+            inventory2.RemoveAll(y => y.name == actionerReceives.name);
+        }
+    }
+
+    //public void steal()
 
 
     ////////////////////////////////////////////////
@@ -781,6 +835,40 @@ public class functionsForAI : MonoBehaviour
         //printState(realState);
         //print("xxxxxxxxxxxxxxxxxxxxxvvvvvvvvvvvvvvvvvvvvvvvvvvvvxxxxxxxxxxxxxxxxxxxxxxxx");
         return planList;
+    }
+
+    public int findFirstImpossibleAction(List<action> plan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
+    {
+        //imagines it's way through a plan list
+        //returns the index number of the first aciton on that list that CANNOT be completed
+        //if all actions can be completed fine, it returns negative two
+
+        int noProblem;
+        noProblem = -2;
+
+        int counter;
+        counter = 0;
+
+        Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
+        imaginaryState = stateCopyer(realState);
+
+        
+
+        foreach(action currentAction in plan)
+        {
+            if (prereqChecker(currentAction, imaginaryState) != true)
+            {
+                print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                print(currentAction.name);
+                return counter;
+            }
+
+            imaginaryState = implementALLEffectsForImagination(currentAction, imaginaryState);
+            counter += 1;
+        }
+
+
+        return noProblem;
     }
 
     // Start is called before the first frame update
