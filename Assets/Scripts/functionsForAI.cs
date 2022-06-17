@@ -45,19 +45,30 @@ public class functionsForAI : MonoBehaviour
             _navMeshAgent.SetDestination(targetVector);
         }
 
-        /*
+        
         else if (nextAction.type == "socialTrade")
         {
             //print(nextAction.name);
-            GameObject theTarget = GameObject.Find("NPC shopkeeper");
-            AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
+            //GameObject theTarget = GameObject.Find("NPC shopkeeper");
+            //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
             //print(theTargetState.state["locationState"][0].name);
+            GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+
+            GameObject cashierMapZone = getCashierMapZone(customerLocation);
+            //print(casheirMapZone.name);
+
+            //print(locationRoot.name);
+
+            GameObject cashier = whoIsTrader(cashierMapZone);
+
+            
+            AI1 theTargetState = cashier.GetComponent("AI1") as AI1;
 
             //now implement trade
             //state["inventory"].Remove(nextAction.effects[0]);
             trade(state["inventory"], theTargetState.state["inventory"], nextAction);
         }
-        */
+        
 
         else if (prereqChecker(nextAction, state) == true)
         {
@@ -101,11 +112,67 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    //public GameObject whoIsTrader(string nameOfCustomerZone, string nameOfTraderZone)
-    //{
-    //using the name of the customer zone, can find the attached trader zone
-    //returns the trader zone game object.....?
-    //}
+
+    ////////////////////////////////////////////////
+    //         Misc functions for ACTIONS
+    ////////////////////////////////////////////////
+
+
+    public GameObject getLocationObject(string nameOfLocation)
+    {
+        //is this redundant?  Whatever.  I might change how it works later...
+        //ya, later I want this to get the object based on TOUCH, not name...
+
+        GameObject locationObject = GameObject.Find(nameOfLocation);
+
+
+
+        return locationObject;
+
+    }
+
+    public GameObject getCashierMapZone(GameObject customerLocation)
+    {
+        GameObject cashierMapZone = new GameObject();
+        GameObject locationParent = customerLocation.transform.parent.gameObject;
+
+        //now search for the correct "child" object:
+        foreach(Transform child in locationParent.transform)
+        {
+            if(child.name == "cashierZone")
+            {
+                //but the actual "mapZone" is a CHILD of this casheirZone object:
+                cashierMapZone = child.GetChild(0).gameObject;
+                return cashierMapZone;
+            }
+
+        }
+
+        //should suceed in the loop and NOT execute the following code
+        //thus the following code prints an error:
+        print("cashierZone not found, perhaps it is not a child of the checkout zone's parent object");
+        return cashierMapZone;
+
+    }
+
+    public GameObject whoIsTrader(GameObject cashierZone)
+    {
+        //get the "listOfTouchingNPCs" script on the casheirZone
+        //get first item on that list, it should be be the cashier
+        //return that item
+
+        GameObject cashier = new GameObject();
+
+        listOfTouchingNPCs listOfNPCs = cashierZone.GetComponent<listOfTouchingNPCs>();
+
+        cashier = listOfNPCs.theList[0];
+
+        return cashier;
+
+
+    }
+    
+
 
 
 
