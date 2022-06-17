@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 
-public class AI1 : MonoBehaviour
+public class AI2 : MonoBehaviour
 {
 
     
@@ -15,7 +15,7 @@ public class AI1 : MonoBehaviour
     public List<action> toDoList = new List<action>();
     public List<action> knownActions = new List<action>();
     //public string locationState;
-    
+
     //is this not used right now?  I'm using "recurringGoal" instead?
     public List<stateItem> goals = new List<stateItem>();
 
@@ -27,22 +27,23 @@ public class AI1 : MonoBehaviour
     public stateItem recurringGoal = new stateItem();
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
-    public premadeStuffForAI stateGrabber;
+    public premadeStuffForAI2 stateGrabber;
     //public stateForAI state;
 
     // Start is called before the first frame update
     void Start()
     {
-        //this is my regular NPC, shoudl be in my AI1 file
-
+        // this is my shopkeeper creation, should be in my AI2 file
         theFunctions = GetComponent<functionsForAI>();
-        stateGrabber = GetComponent<premadeStuffForAI>();
+        stateGrabber = GetComponent<premadeStuffForAI2>();
 
-        recurringGoal = stateGrabber.hungry0;
-        //print(recurringGoal.name);
-        state = stateGrabber.createNPCstate1();
-        knownActions = stateGrabber.createKnownActions1();
+        recurringGoal = stateGrabber.profitMotive0;
+        //print(stateGrabber.profitMotive0.name);
+        state = stateGrabber.createShopkeeperState();
+        knownActions = stateGrabber.createShopkeeperKnownActions();
+
         map = stateGrabber.createMap1();
+
 
     }
 
@@ -54,7 +55,7 @@ public class AI1 : MonoBehaviour
         {
             //print("it works");
 
-
+            
             List<stateItem> newLocationList = new List<stateItem>();
             //Debug.Log(f);
             //print(this.transform.parent.name);
@@ -70,7 +71,6 @@ public class AI1 : MonoBehaviour
 
         }
     }
-
 
     // Update is called once per frame
     void Update()
@@ -100,6 +100,7 @@ public class AI1 : MonoBehaviour
             }
             //print("need to find a plan:");
             List<List<action>> planList = new List<List<action>>();
+            
             planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
             //theFunctions.printPlan(planList[0]);
             //print("state before imagination:");
