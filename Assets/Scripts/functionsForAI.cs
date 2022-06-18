@@ -1689,63 +1689,42 @@ public class functionsForAI : MonoBehaviour
         List<List<action>> planList = new List<List<action>>();
 
         //one planList for each prereq, then merge later:
-        List<List<List<action>>> plansForEachRegularPrereq = new List<List<List<action>>>();
-        List<List<action>> thePlansForLocationStatePrereq = new List<List<action>>();
+        List<List<List<action>>> plansForEachPrereq = new List<List<List<action>>>();
 
-        //go thoruhg ALL prereqs, need to make sure they're ALL filled:
+        //go through ALL prereqs, need to make sure they're ALL filled:
         foreach (actionItem eachPrereq in thisAction.prereqs)
         {
             //only make plans to fill prereqs that aren't ALREADY filled:
             if (isStateAccomplished(eachPrereq, state) == false)
             {
                 //so, found a prereq that isn't filled.  Need plans to fill it!
-                
-
-
-
                 List<List<action>> plansForThisPrereq = new List<List<action>>();
+
+
+                
+                //do this if it ISN'T time to generate actions on-the-fly:
                 plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
                 
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
-                    
                     break;
                 }
-
-
-
-
-                //if we have plans, good, now...what?
-                //well, can't add those results to the planList just yet
-                //because they only fill ONE prereq
-                //still need to at least CHECK that other prereqs CAN be filled
-                //and also find plans to fill thos eother prereqs
-                //and combine the plans in the correct way
-                //so I'm guessing that's what I'm doing here?
-                ////////////////////////////////////////////////////////////
                 else
                 {
+                    //this "else" means we have plans...
+                    //if we have plans, good, now...what?
+                    //well, can't add those results to the planList just yet
+                    //because they only fill ONE prereq
+                    //still need to at least CHECK that other prereqs CAN be filled
+                    //and also find plans to fill thos eother prereqs
+                    //and combine the plans in the correct way
+                    //so I'm guessing that's what I'm doing here?
 
-                    //I'll sort the plans based on whether this prereq is a locationState
-                    //so that later I can ensure that prereq is the one that get's fulfilled LAST
-                    if (eachPrereq.stateCategory == "locationState")
-                    {
-                        //so add these found plans to locationStatePlans
-                        //hopefully this doesn't need deep copy...
-                        thePlansForLocationStatePrereq = plansForThisPrereq;
-                    }
-                    else
-                    {
-                        plansForEachRegularPrereq.Add(plansForThisPrereq);
-                    }
+                    plansForEachPrereq.Add(plansForThisPrereq);
+                    
                 }
-                ////////////////////////////////////////////////////////////
-
-
-
-
-
+                
 
 
             }
@@ -1754,15 +1733,10 @@ public class functionsForAI : MonoBehaviour
         
         
 
-        //ok, now should be a simple matter of creating all combinations of regular plans
-        //then handle locationState plans by adding them to the ends
-        //again in a combinitorial way
-        //so I'll create two funcitons, one to do each of those steps
+        //ok, now should be a simple matter of creating all combinations of plans
         //[[[[also, should be checking if things are empty or null or whatever...]]]]
-        planList = mergePlanLists(planList, combinitorialMergingOfRegularPrereqFillers(plansForEachRegularPrereq));
-        planList = combinitorialMergingOfLocationStatePrereqFillers(thePlansForLocationStatePrereq, planList);
-
-
+        planList = mergePlanLists(planList, combinitorialMergingOfPrereqFillers(plansForEachPrereq));
+        
         //now, add thisAction to the end of ALL these plans:
         planList = addActionToEndOfAllPlans(planList, thisAction);
 
@@ -1780,7 +1754,7 @@ public class functionsForAI : MonoBehaviour
         return list1;
     }
 
-    public List<List<action>> combinitorialMergingOfRegularPrereqFillers(List<List<List<action>>> plansForEachRegularPrereq)
+    public List<List<action>> combinitorialMergingOfPrereqFillers(List<List<List<action>>> plansForEachRegularPrereq)
     {
         //input sets of plans (that is, lists (plural) of planLists)
         //(each set fulfills a separate prereq)
@@ -1816,7 +1790,7 @@ public class functionsForAI : MonoBehaviour
         plansForEachRegularPrereq.RemoveAt(0);
 
         //now, do recursion, then merge:
-        allPossiblePlansFromRemainingPrereqs = combinitorialMergingOfRegularPrereqFillers(plansForEachRegularPrereq);
+        allPossiblePlansFromRemainingPrereqs = combinitorialMergingOfPrereqFillers(plansForEachRegularPrereq);
 
         //now, merge.
         //each of the ways to fill the first prereq (each item in "plansForFirstPrereq")
@@ -1850,43 +1824,7 @@ public class functionsForAI : MonoBehaviour
         return completedPlan;
 
     }
-
-    public List<List<action>> combinitorialMergingOfLocationStatePrereqFillers(List<List<action>> thePlansForLocationStatePrereq, List<List<action>> planList)
-    {
-        //this function is unused now that I don't plan to fill locationPrereqs
-
-
-        //so, we don't know which list is bigger
-        //so we'll initialize a NEW list, and just add results to it as we go
-        List<List<action>> newPlanList = new List<List<action>>();
-
-        //[[[[also, should be checking if things are empty or null or whatever...]]]]
-        //yes, so if thePlansForLocationStatePrereq is empty, just return the planList unchanged:
-        if(thePlansForLocationStatePrereq.Count == 0)
-        {
-            return planList;
-        }
-
-        //if planList is empty, just return the other plans we have:
-        if(planList.Count == 0)
-        {
-            return thePlansForLocationStatePrereq;
-        }
-
-        foreach (List<action> regularPlan in planList)
-        {
-            foreach(List<action> locationStatePlan in thePlansForLocationStatePrereq)
-            {
-                //now add merged result into newPLanList, making sure the locationState
-                //is fulfilled at the END of each plan
-                newPlanList.Add(appendPlanToEndOfOtherPlan(regularPlan, locationStatePlan));
-
-            }
-        }
-
-        return newPlanList;
-    }
-
+    
     public List<List<action>> addActionToEndOfAllPlans(List<List<action>> planList, action thisAction)
     {
         foreach(List<action> plan in planList)
