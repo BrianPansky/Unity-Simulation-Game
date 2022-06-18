@@ -250,32 +250,6 @@ public class functionsForAI : MonoBehaviour
             {
 
             }
-            else if (nextAction.name == "giveMoneyToLeader")
-            {
-                //ad-hoc fo rnow
-                //should generalize to a "delivery" type action
-
-                //just "gift" the delivery item to the target
-                //GameObject victim;
-                //victim = target;
-                
-
-                AI1 theTargetState = target.GetComponent("AI1") as AI1;
-                //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
-
-                //gift(state["inventory"], theTargetState.state["inventory"], nextAction);
-                addMoney(state["inventory"], -1);
-                addMoney(theTargetState.state["inventory"], 1);
-
-                //state = implementALLEffects(nextAction, state);
-
-                target = dumpAction(target);
-
-                
-
-
-
-            }
             else if (nextAction.type == "deliverAnyXtoLeader")
             {
                 startTest();
@@ -391,8 +365,10 @@ public class functionsForAI : MonoBehaviour
                 //ad hoc for now
 
 
+
                 //if we have a target, use that one
                 //(so always blank out targets BEFORE this action happens, I guess)
+                //WY IS THIS HERE?  HOW DO YOU GET HERE WITH NO TARGET?
                 if (target == null)
                 {
                     //print("uuuuuuuuuuuuuuuuuuuuuuhhhhhhhhhhhhhhhhhhhhhhhhhhh");
@@ -647,17 +623,6 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffects(nextAction, state);
                 
             }
-            else if(nextAction.name == "eat")
-            {
-                
-
-                //ad-hoc update of state:
-                state = implementALLEffects(nextAction, state);
-                //thisAI.toDoList.RemoveAt(0);
-                target = dumpAction(target);
-
-                
-            }
             else
             {
                 //for actions like "eat" that currently just need a quick
@@ -678,11 +643,17 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    //..................................................................
+    //============================================================
+
     //functions to handle important finishing steps of specific actions:
 
+    //modify state:
     public void addMoney(List<stateItem> inventory, int amount)
     {
+        //probably redundant [just use increment item]
+        //and might not have properly solved deep copy issues yet?
+        //i don't recall tracing errors here though...
+
         //adds an amount of money to someone's inventory
 
         //if inventory aready has money, just increment the quantity
@@ -840,11 +811,17 @@ public class functionsForAI : MonoBehaviour
             {
                 //!!!  R E A D   T H I S  !!!!!!S
                 //when subtracting "hunger" from state, if the "food" increment is more than one, it can make the "hunger" go into negatives.how to handle ?
-                //---should never do that.food should just increment 1.my current larger numbers were for testing only
-                //---check after incrementing.  if ANYWEHRE BELOW 1, count as zero, remove item from state.yes this "wastes" all those extra food increments.could maybe just subtract whatever was needed, have "leftovers" of food.
-                print("!!!!>>>  Increment went BELOW ZERO!  shoudl this EVER happen?? how to handle???");
+                //---should never do that.  food should just increment 1.  my current larger numbers were for testing only
+                //---check after incrementing.  if ANYWEHRE BELOW 1, count as zero, remove item from state.  yes this "wastes" all those extra food increments.  could maybe just subtract whatever was needed, have "leftovers" of food.
+                print("!!!!>>>  Increment went BELOW ZERO!  should this EVER happen?? how to handle???");
 
+                print(this.name);
 
+                //print(itemToIncrement.quantity);
+                print(itemToIncrement.name);
+                //print(theItem.quantity);
+                printState(thisAI.state);
+                printKnownActionsDeeply(thisAI.knownActions);
 
                 //imaginaryState = removeStateItem(eachEffect, imaginaryState);
 
@@ -918,7 +895,7 @@ public class functionsForAI : MonoBehaviour
             {
                 if (itemInInventory2.name == effect.name)
                 {
-                    actionerReceives.Add(effect);
+                    actionerReceives.Add(deepStateItemCopier(effect));
                     otherInventoryLoses.Add(itemInInventory2);
                 }
             }
@@ -985,13 +962,16 @@ public class functionsForAI : MonoBehaviour
         
     }
 
+
+    //change knownActions and such:
     public void addKnownActionToGameObject(GameObject agent, action theAction)
     {
         //first, go from "GameObject" to it's script that has knownActions:
         AI1 hubScript = getHubScriptFromGameObject(agent);
 
         //now add the knownAction:
-        hubScript.knownActions.Add(theAction);
+        hubScript.knownActions.Add(premadeStuff.deepActionCopier(theAction));
+        
     }
 
     public void removeKnownActionFromGameObject(GameObject agent, action theAction)
@@ -1013,6 +993,7 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    //other:
     public void travelToactionItem(actionItem X)
     {
 
@@ -1023,7 +1004,7 @@ public class functionsForAI : MonoBehaviour
         _navMeshAgent.SetDestination(targetVector);
     }
 
-    //..................................................................
+    //============================================================
 
 
 
