@@ -27,7 +27,6 @@ public class AI1 : MonoBehaviour
 
     //wait do I use this:
     public List<action> knownActions = new List<action>();
-    //public string locationState;
     
     //is this not used right now?  I'm using "recurringGoal" instead?
     public List<stateItem> goals = new List<stateItem>();
@@ -76,247 +75,95 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
-        if (this.name == "NPC pickpocket")
+        //diagnostic stuff I use sometimes:
         {
-            theFunctions.print("00000000000000000  Plan List:   000000000000000000");
-            printPlanList(planList);
-        }
 
-        //constantlyCheckLocationState();
-        //theFunctions.printInventory(state["inventory"]);
+            /*
+            if (this.name == "NPC pickpocket")
+            {
+                theFunctions.print("00000000000000000  Plan List:   000000000000000000");
+                printPlanList(planList);
+            }
 
-        
-        if (this.name == "NPC")
-        {
-            theFunctions.print("==================================================");
-            theFunctions.printInventory(state["inventory"]);
+            //constantlyCheckLocationState();
+            //theFunctions.printInventory(state["inventory"]);
 
-            
+
+            if (this.name == "NPC")
+            {
+                theFunctions.print("==================================================");
+                theFunctions.printInventory(state["inventory"]);
+
+
+                if (toDoList.Count > 0)
+                {
+                    theFunctions.print(toDoList[0].name);
+                }
+
+            }
+            */
+
+            /*
+            //if (this.name == "NPC pickpocket")
+            if (this.name == "NPC shopkeeper")
+            {
+                theFunctions.print("==================================================");
+                theFunctions.printPlan(toDoList);
+            }
+            */
+
+
+            /*
+            //make sure list isn't empty, remove completed action:
             if (toDoList.Count > 0)
             {
-                theFunctions.print(toDoList[0].name);
-            }
-            
-        }
-        */
-
-        /*
-        //if (this.name == "NPC pickpocket")
-        if (this.name == "NPC shopkeeper")
-        {
-            theFunctions.print("==================================================");
-            theFunctions.printPlan(toDoList);
-        }
-        */
-
-
-        /*
-        //make sure list isn't empty, remove completed action:
-        if (toDoList.Count > 0)
-        {
-            //ad hoc for now, remove action if it is done
-            if (theFunctions.isThisActionDone(toDoList[0], state))
-            {
-                toDoList.Remove(toDoList[0]);
-            }
-        }
-        */
-
-
-        
-
-        
-        if(inConversation == false)
-        {
-            //get NPC moving again i it was stopped by conversation:
-            //but player has no navmesh agent, so need to check if it's null:
-            if(theFunctions._navMeshAgent != null)
-            {
-                if (theFunctions._navMeshAgent.isStopped == true)
+                //ad hoc for now, remove action if it is done
+                if (theFunctions.isThisActionDone(toDoList[0], state))
                 {
-                    theFunctions._navMeshAgent.isStopped = false;
+                    toDoList.Remove(toDoList[0]);
                 }
             }
-            
+            */
+
+            //theFunctions.printState(state);
+            //printPlan(toDoList);
+            /*
+            if (this.name == "NPC")
+            {
+                theFunctions.print("---------------------END OF UPDATE----------------------");
+            }
+            */
+        }
 
 
+        if (inConversation == false)
+        {
+            //get NPC moving again if it was stopped by conversation:
+            getGoingAgan();
 
-            //remove plan if it is impossible
-            //(it can become impossible if a necessary prereq that was previously met
-            //unexpectedly becomes UNMET, and if the plan doesn't fill it)
+            //fine time to re-fill goals, I guess...
+            refillGoals();
+
+            //fine time to do sensing, I guess...
+            doSensing();
+
+            //remove all plans that contain "ineffective actions":
+            removeIneffectiveActions();
+
             if (toDoList.Count > 0)
             {
-                //FIRST, do sensing:
-                if (target != null)
-                {
-                    theFunctions.sensing(toDoList[0], target, state);
-                }
-
-
-                //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
-                //theFunctions.printPlan(toDoList);
-
-
-                //remove all plans that contain "ineffective actions":
-                //first have a list of all plans to remove, because it's bad to modify a list while iterating over it in effing C# apparently
-                List<List<action>> plansToRemove = new List<List<action>>();
-                foreach (action thisIneffectiveAction in ineffectiveActions)
-                {
-                    //go through each plan
-                    foreach (List<action> thisPlan in planList)
-                    {
-                        //check each ACTION in this plan:
-                        foreach (action thisAction in thisPlan)
-                        {
-                            //checked if this is the ineffective action:
-                            if (thisAction.name == thisIneffectiveAction.name)
-                            {
-                                //if so, add this plan to list of plans to remove:
-                                plansToRemove.Add(thisPlan);
-
-                            }
-                        }
-                    }
-                }
-
-                //NOW can remove the plans with ineffective actions:
-                foreach (List<action> thisPlan in plansToRemove)
-                {
-                    //remove the plan from the planList
-                    planList.Remove(thisPlan);
-                }
-
-
-
-                //Now find and remove all IMPOSSIBLE plans
-                int Z;
-                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-
-
-                if (Z != -2)
-                {
-                    //print("says this plan is imposible:");
-                    //theFunctions.printPlan(toDoList);
-                    toDoList.RemoveRange(0, toDoList.Count);
-                    target = null;
-
-                }
+                //blank to-do list if it is impossible:
+                blankImpossibleToDoList();
             }
             else
             {
-                //well, if "toDoList" is of zero length, need a plan
-
-                //choose next one from planList, unless planlist is "null" or empty:
-                //so check if it's null or empty, fill it up if so:
-                if (planList == null || planList.Count == 0)
-                {
-                    //need to make planList:
-
-
-                    //print(recurringGoal.name);
-                    planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
-                    //theFunctions.printPlan(planList[0]);
-                    //print("state before imagination:");
-                    //theFunctions.printState(state);
-                    planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
-                    //print("the plan after imagination fix:");
-                    //theFunctions.printPlan(planList[0]);
-                    //print("state AFTER imagination:");
-
-
-                    //theFunctions.printState(state);
-
-                    //now to rank the plans by cost:
-                    if (planList != null && planList.Count > 0)
-                    {
-                        planList = theFunctions.planRanker(planList);
-                    }
-
-                    //also, blank out the list of "ineffective actions":
-                    if (ineffectiveActions != null && ineffectiveActions.Count > 0)
-                    {
-                        ineffectiveActions.Clear();
-                    }
-
-                }
-
-
-
-
-                //ad-hoc adding the goal once it is completed, to create behavior loop
-                //WHY IS THIS HERE????  SHOULDN'T IT BE SOMEWHERE ELSE???  maybe at the END, or START of update???
-                if (state["feelings"].Count == 0)
-                {
-                    state["feelings"].Add(recurringGoal);
-                }
-
-
-
-
-                /////////////////////////////////////////////////
-                //          POST-PLANNING PHASE
-                /////////////////////////////////////////////////
-
-                //now to rank the plans by cost [no, I do that above]:
-                //(first check we have any palns)
-                if (planList != null && planList.Count > 0)
-                {
-
-
-
-                    //now, choose first one:
-                    toDoList = deepCopyFirstPlan(planList);
-                    //and REMOVE that first one from the planList:
-                    planList.RemoveAt(0);
-
-                    
-                    if (this.name == "NPC pickpocket")
-                    {
-                        theFunctions.print("00000000000000000  Plan:   000000000000000000");
-                        //printPlanList(planList);
-                        theFunctions.printPlan(toDoList);
-                    }
-                    
-
-                    //am I generating impossible plans???
-                    //int Z;
-                    //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-
-                }
-
+                //this "else" means the "toDoList" is of zero length, so we need a plan:
+                getPlan();
+                
             }
-
-            //printPlan(toDoList);
-
-
-
-
-
-
-
-            //theFunctions.print("yes hello, this is a conversation");
-            //inConversation = false;
-
-            //make sure list isn't empty AGAIN:
-            if (toDoList.Count > 0)
-            {
-                //but don't do the action if it is already done
-                //if it's done, remove it:
-                if(checkIfEffectsAreDone(toDoList[0], state) == false)
-                {
-                    target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
-                }
-                else
-                {
-                    //this "else" means the nextAction is redundant, already done.
-                    //so dump the action:
-                    target = theFunctions.dumpAction(target);
-                }
-
-
-
-            }
+            
+            //doing the to-do list (checks if it's not zero length):
+            doToDoList();
         }
         else
         {
@@ -327,21 +174,186 @@ public class AI1 : MonoBehaviour
         }
 
         
-        //theFunctions.printState(state);
-
-        /*
-        if (this.name == "NPC")
-        {
-            theFunctions.print("---------------------END OF UPDATE----------------------");
-        }
-        */
-        
     }
 
+    ////////////////////////////////////////////////////
+    //       Stuff for the Update function:
+    ////////////////////////////////////////////////////
+
+    public void getGoingAgan()
+    {
+        //get NPC moving again if it was stopped by conversation.
+
+
+        //but player has no navmesh agent, so need to check if it's null:
+        if (theFunctions._navMeshAgent != null)
+        {
+            if (theFunctions._navMeshAgent.isStopped == true)
+            {
+                theFunctions._navMeshAgent.isStopped = false;
+            }
+        }
+    }
+            
+    public void doSensing()
+    {
+        //hmm, I can't do SENSING if target is null?!?!?
+        //sounds like that could be a problem...why is that???
+        //will have to check...see if I can fix it...
+        if (target != null)
+        {
+            theFunctions.sensing(toDoList[0], target, state);
+        }
+    }
+    
+    public void removeIneffectiveActions()
+    {
+        //using our global variables ("ineffectiveActions" and "planList"
+        //check ALL plans, remove that plan if it has ANY ineffective actions
+
+        //presumably never has to check to-do list?
+
+        //doesn't need to check if lists are empty, because "foreach" handles that gracefully???
+
+        //first have a list of all plans to remove, because it's bad to modify a list while iterating over it in effing C# apparently
+        List<List<action>> plansToRemove = new List<List<action>>();
+        foreach (action thisIneffectiveAction in ineffectiveActions)
+        {
+            //go through each plan
+            foreach (List<action> thisPlan in planList)
+            {
+                //check each ACTION in this plan:
+                foreach (action thisAction in thisPlan)
+                {
+                    //checked if this is the ineffective action:
+                    if (thisAction.name == thisIneffectiveAction.name)
+                    {
+                        //if so, add this plan to list of plans to remove:
+                        plansToRemove.Add(thisPlan);
+
+                        //then break, so it doesn't do this plan again?
+                        break;
+
+                    }
+                }
+            }
+        }
+
+        //NOW can remove the plans with ineffective actions:
+        //but what if the plan has been added to the list of plansToRemove TWICE???
+        //I tried adding "break" above, hopefully that's the correct way to avoid duplicates...
+        foreach (List<action> thisPlan in plansToRemove)
+        {
+            //remove the plan from the planList
+            planList.Remove(thisPlan);
+        }
+    }
+
+    public void blankImpossibleToDoList()
+    {
+        //only checks CURRENT to-do list.
+        //blanks it out if it has ANY impossible action.
+
+        //my checking function returns an index integer
+        //why am I doing it this way?  What if there's MORE THAN ONE impossible action?
+        //very weird, need to re-write this somehow...
+        int Z;
+        Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+        
+        if (Z != -2)
+        {
+            //so, remove the ENTIRE to-do list:
+
+            //print("says this plan is imposible:");
+            //theFunctions.printPlan(toDoList);
+            toDoList.RemoveRange(0, toDoList.Count);
+            target = null;
+
+        }
+    }
+
+    public void getPlan()
+    {
+        //choose next one from planList, unless planlist is "null" or empty:
+        //so check if it's null or empty, fill it up if so:
+        if (planList == null || planList.Count == 0)
+        {
+            //need to make planList:
+            
+            planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
+            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
+
+            //now to rank the plans by cost:
+            if (planList != null && planList.Count > 0)
+            {
+                planList = theFunctions.planRanker(planList);
+            }
+
+            //also, blank out the list of "ineffective actions":
+            //[I think this code could/should be moved elsewhere...]
+            clearIneffectiveActions();
+
+        }
+
+
+
+        
+        //now, pick top-ranked plan (if there are any)
+        if (planList != null && planList.Count > 0)
+        {
+            //choose first one:
+            toDoList = deepCopyFirstPlan(planList);
+            //and REMOVE that first one from the planList:
+            planList.RemoveAt(0);
+            
+        }
+
+    }
+
+    public void doToDoList()
+    {
+        //make sure list isn't empty AGAIN:
+        if (toDoList.Count > 0)
+        {
+            //but don't do the action if it is already done
+            //if it's done, remove it:
+            if (checkIfEffectsAreDone(toDoList[0], state) == false)
+            {
+                target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+            }
+            else
+            {
+                //this "else" means the nextAction is redundant, already done.
+                //so dump the action:
+                target = theFunctions.dumpAction(target);
+            }
+
+
+
+        }
+    }
+            
+    public void refillGoals()
+    {
+        if (state["feelings"].Count == 0)
+        {
+            state["feelings"].Add(recurringGoal);
+        }
+    }
+                
+    public void clearIneffectiveActions()
+    {
+        if (ineffectiveActions != null && ineffectiveActions.Count > 0)
+        {
+            ineffectiveActions.Clear();
+        }
+    }
+            
 
 
     /////////////////////////////////////
-    
+
     public void printPlanList(List<List<action>> planList)
     {
         if (planList == null)
