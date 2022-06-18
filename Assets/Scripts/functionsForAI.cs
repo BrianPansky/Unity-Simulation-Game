@@ -30,45 +30,56 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
-        if (nextAction.type == "goTo")
+
+        //handle actions with travel prereqs here:
+        if (nextAction.locationPrereq != null)
         {
+            //here we FIRST automatically try to fill all travel prereqs
 
-            //Debug.Log("hello this is where one thing is printing");
-            //Debug.Log(nextAction.effects[0]);
-            //Debug.Log("done printing");
+            //I still currently use a "stateItem", but it could perhaps
+            //be replaced with mere text?  The name of the location?
 
-            stateItem stateItemX = nextAction.effects[0];
-            string name1 = stateItemX.name;
-            t1 = GameObject.Find(name1);
-            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
-            Vector3 targetVector = t1.GetComponent<Transform>().position;
-            _navMeshAgent.SetDestination(targetVector);
+            travelToStateItem(nextAction.locationPrereq);
+
+
+            //NOW check if it's DONE, if so, can perform THE REST of the action:
+            if (prereqAndLocationChecker(nextAction, state) == true)
+            {
+                if (nextAction.type == "socialTrade")
+                {
+                    //print(nextAction.name);
+                    //GameObject theTarget = GameObject.Find("NPC shopkeeper");
+                    //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
+                    //print(theTargetState.state["locationState"][0].name);
+                    GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+
+                    GameObject cashierMapZone = getCashierMapZone(customerLocation);
+                    //print(casheirMapZone.name);
+
+                    //print(locationRoot.name);
+
+                    GameObject cashier = whoIsTrader(cashierMapZone);
+
+
+                    AI1 theTargetState = cashier.GetComponent("AI1") as AI1;
+
+                    //now implement trade
+                    //state["inventory"].Remove(nextAction.effects[0]);
+                    trade(state["inventory"], theTargetState.state["inventory"], nextAction);
+                }
+                else
+                {
+                    //for actions like "eat" that currently just need a quick
+                    //ad-hoc update of state:
+                    state = implementALLEffectsForImagination(nextAction, state);
+                }
+
+            }
+
         }
 
-        
-        else if (nextAction.type == "socialTrade")
-        {
-            //print(nextAction.name);
-            //GameObject theTarget = GameObject.Find("NPC shopkeeper");
-            //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
-            //print(theTargetState.state["locationState"][0].name);
-            GameObject customerLocation = getLocationObject(state["locationState"][0].name);
 
-            GameObject cashierMapZone = getCashierMapZone(customerLocation);
-            //print(casheirMapZone.name);
-
-            //print(locationRoot.name);
-
-            GameObject cashier = whoIsTrader(cashierMapZone);
-
-            
-            AI1 theTargetState = cashier.GetComponent("AI1") as AI1;
-
-            //now implement trade
-            //state["inventory"].Remove(nextAction.effects[0]);
-            trade(state["inventory"], theTargetState.state["inventory"], nextAction);
-        }
-        
+        //handle actions WITHOUT travel prereqs below:
         else if (nextAction.name == "pickVictimsPocket")
         {
             //ad hoc for now
@@ -305,6 +316,16 @@ public class functionsForAI : MonoBehaviour
         
 
         return thisNPC;
+    }
+
+    public void travelToStateItem(stateItem X)
+    {
+        
+        string name1 = X.name;
+        t1 = GameObject.Find(name1);
+        
+        Vector3 targetVector = t1.GetComponent<Transform>().position;
+        _navMeshAgent.SetDestination(targetVector);
     }
 
 
@@ -775,11 +796,41 @@ public class functionsForAI : MonoBehaviour
         return tf;
     }
 
+    public bool prereqAndLocationChecker(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //since location is now a separate prereq, and is not always checked,
+        //this funciton checks both regular prereqs AND the location one
+
+        //first, jus tcheck the regular prereqs using my regular prereqChecker:
+        if (prereqChecker(thisAction, state) == false)
+        {
+            return false;
+        }
+
+        //now, check the location Prereq:
+        //(to be safe, check that it's not null, print error if it is)
+        if (thisAction.locationPrereq != null)
+        {
+            if (isGoalAccomplished(thisAction.locationPrereq, state) == false)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            //hmm, it's null, print error:
+            print("hmm, the locationPrereq is null, but it's being checked, is that an error?");
+        }
+
+        //if the above didn't fail, return true:
+        return true;
+
+    }
 
 
-    
 
-    
+
+
     public Dictionary<string, List<stateItem>> stateCopyer(Dictionary<string, List<stateItem>> state)
     {
         Dictionary<string, List<stateItem>> newState = new Dictionary<string, List<stateItem>>();

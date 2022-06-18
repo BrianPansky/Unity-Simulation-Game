@@ -108,10 +108,10 @@ public class premadeStuffForAI : MonoBehaviour
             goToCheckout = actionCreator("goToCheckout", "goTo", createListOfStateItems(store1), createListOfStateItems(checkout1), 1);
 
             //other actions:
-            eat = actionCreator("eat", "use", createListOfStateItems(home1, food1), createListOfStateItems(hungry0, food0), 1);
-            buyFood = actionCreator("buyFood", "socialTrade", createListOfStateItems(money1, checkout1), createListOfStateItems(money0, food1), 1);
-            sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1, cashierZone1), createListOfStateItems(money1, food0, profitMotive0), 1);
-            doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(work1), createListOfStateItems(money1), 4);
+            eat = actionCreator("eat", "use", createListOfStateItems(food1), createListOfStateItems(hungry0, food0), 1, home1);
+            buyFood = actionCreator("buyFood", "socialTrade", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
+            sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0, profitMotive0), 1, cashierZone1);
+            doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(), createListOfStateItems(money1), 4, work1);
             restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //pickpocket, under construction
@@ -305,7 +305,7 @@ public class premadeStuffForAI : MonoBehaviour
         return aNewList;
     }
 
-    action actionCreator(string name, string type, List<stateItem> prereqs, List<stateItem> effects, int cost, stateItem locationPrereq)
+    action actionCreator(string name, string type, List<stateItem> prereqs, List<stateItem> effects, int cost, stateItem locationPrereq = null)
     {
         action thisAction = new action();
 
