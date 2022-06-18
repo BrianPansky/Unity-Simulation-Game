@@ -31,6 +31,7 @@ public class AI1 : MonoBehaviour
     public bool jobSeeking;
 
 
+
     public stateItem recurringGoal = new stateItem();
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();

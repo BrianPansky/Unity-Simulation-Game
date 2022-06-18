@@ -99,9 +99,11 @@ public class premadeStuffForAI : MonoBehaviour
             work1 = stateItemCreator("workPlace", "locationState", 1);
             hungry0 = stateItemCreator("hungry", "feelings", 0);
             checkout1 = stateItemCreator("checkout", "locationState", 1);
+            checkout1.locationType = "any";
 
             profitMotive0 = stateItemCreator("profitMotive", "feelings", 0);
             cashierZone1 = stateItemCreator("cashierZone", "locationState", 1);
+            cashierZone1.locationType = "roleLocation";
 
             employee1 = stateItemCreator("employee", "organizationState", 1);
 
