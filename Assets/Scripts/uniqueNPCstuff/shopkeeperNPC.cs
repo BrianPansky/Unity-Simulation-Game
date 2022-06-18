@@ -6,21 +6,26 @@ public class shopkeeperNPC : MonoBehaviour
 {
     public premadeStuffForAI stateGrabber;
     public AI1 theHub;
-    // Start is called before the first frame update
-    void Start()
+
+
+    void Awake()
     {
         stateGrabber = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
+    }
 
-        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.profitMotive, 0);
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
+
+        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.profitMotive), 0);
         theHub.recurringGoal = goalActionItem;
-        //print(stateGrabber.profitMotive0.name);
         theHub.state = stateGrabber.createShopkeeperState();
         theHub.knownActions = stateGrabber.createShopkeeperKnownActions();
         
-
-        //ad-hoc make the shopkeeper "know" which store is "theirs":
-        //theHub.roleLocation = 
+        
     }
 
 

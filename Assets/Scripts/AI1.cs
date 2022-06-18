@@ -14,6 +14,9 @@ public class AI1 : MonoBehaviour
 
     public GameObject target;
 
+    public job currentJob;
+
+
     public GameObject roleLocation;
     public GameObject homeLocation;
     public GameObject leader;
@@ -54,11 +57,33 @@ public class AI1 : MonoBehaviour
     //public stateForAI state;
     public taggedWith thisIsTaggedWith;
 
+
+    //ad-hoc
+    //this is so i can use this script on stuff like storage containers [which have an inventory] even though stuff won't work normally like AI
+    //for these abnormal things, edit in in Unity side panel to be true
+    //otherwise, i'll try to make it false in "start" function
+    public bool ignore;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
-        //get some other scripts I'll need:
-        theFunctions = GetComponent<functionsForAI>();
+
+        //ad-hoc
+        //this is so i can use this script on stuff like storage containers [which have an inventory] even though stuff won't work normally like AI
+        //for these abnormal things, edit in in Unity side panel to be true
+        //otherwise, i'll try to make it false in this "start" function
+        if(ignore != true)
+        {
+            ignore = false;
+        }
+
+
+
+
+    //get some other scripts I'll need:
+    theFunctions = GetComponent<functionsForAI>();
         thisIsTaggedWith = GetComponent<taggedWith>();
 
         //add a "person" tag to this agent:
@@ -79,88 +104,92 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
+        if(ignore == false)
+        {
+            if (inConversation == false)
+            {
+
+                //get NPC moving again if it was stopped by conversation:
+                getGoingAgan();
+
+                //fine time to re-fill goals, I guess...
+                refillGoals();
+
+                //fine time to do sensing, I guess...
+                doSensing();
+
+                //remove all plans that contain "ineffective actions":
+                removeIneffectiveActions();
+
+                if (inputtedToDoList.Count > 0)
+                {
+                    //theFunctions.print("is it this????????????????????????????");
+                    //for now, do orders/favors and such first
+                    planList = theFunctions.prereqFiller(inputtedToDoList[0], knownActions, state);
+
+                    //....remove that action from "inputtedToDoList"?  I geuss for now
+                    //but eventually want to keep it remembered UNTIL it is completed or cancelled
+                    //but right now it isn't guaranteed that one of those outcomes will occurr
+                    inputtedToDoList.RemoveAt(0);
+                }
+                else if (toDoList.Count == 0)
+                {
+
+                    if (this.name == "NPC")
+                    {
+                        //theFunctions.print("state before getting plan:");
+                        //printPlanListForSpecificNPC();
+                        //theFunctions.printState(state);
+                    }
+                    //so we need a plan:
+                    getPlan();
+
+                    if (this.name == "NPC")
+                    {
+                        //theFunctions.print("here are plans:");
+                        //printPlanListForSpecificNPC();
+                        //printPlanList(planList);
+                        //printToDoList(toDoList);
+
+                        //theFunctions.print("here was goal:");
+                        //theFunctions.print(recurringGoal.name);
+                        //theFunctions.print("state AFTER getting plan:");
+                        //printPlanListForSpecificNPC();
+                        //theFunctions.printState(state);
+
+                    }
+                }
+
+                if (this.name == "NPC")
+                {
+                    //theFunctions.print("1111111111111111 is it here? 111111111111");
+                    //printPlanListForSpecificNPC();
+                    //theFunctions.printState(state);
+                    //theFunctions.printKnownActionsDeeply(knownActions);
+                }
+
+                //doing the to-do list (checks if it's not zero length):
+                handleAnyNextAction();
+
+                if (this.name == "NPC")
+                {
+                    //theFunctions.print("xxxxxxxxxxxxxx is it at the end? xxxxxxxxxxxxxxxxxxxx");
+                    //printPlanListForSpecificNPC();
+                    //theFunctions.printState(state);
+                    //theFunctions.printKnownActionsDeeply(knownActions);
+                }
+
+            }
+            else
+            {
+                //this "else" means we are in conversation, need to stop:
+                theFunctions._navMeshAgent.isStopped = true;
+                //UnityEngine.AI.NavMeshAgent.Stop();
+
+            }
+        }
         
-        if (inConversation == false)
-        {
-            
-            //get NPC moving again if it was stopped by conversation:
-            getGoingAgan();
-
-            //fine time to re-fill goals, I guess...
-            refillGoals();
-
-            //fine time to do sensing, I guess...
-            doSensing();
-
-            //remove all plans that contain "ineffective actions":
-            removeIneffectiveActions();
-
-            if (inputtedToDoList.Count > 0)
-            {
-                //theFunctions.print("is it this????????????????????????????");
-                //for now, do orders/favors and such first
-                planList = theFunctions.prereqFiller(inputtedToDoList[0], knownActions, state);
-
-                //....remove that action from "inputtedToDoList"?  I geuss for now
-                //but eventually want to keep it remembered UNTIL it is completed or cancelled
-                //but right now it isn't guaranteed that one of those outcomes will occurr
-                inputtedToDoList.RemoveAt(0);
-            }
-            else if (toDoList.Count == 0)
-            {
-
-                if (this.name == "NPC")
-                {
-                    //theFunctions.print("state before getting plan:");
-                    //printPlanListForSpecificNPC();
-                    //theFunctions.printState(state);
-                }
-                //so we need a plan:
-                getPlan();
-
-                if (this.name == "NPC")
-                {
-                    //theFunctions.print("here are plans:");
-                    //printPlanListForSpecificNPC();
-                    //printPlanList(planList);
-                    //printToDoList(toDoList);
-
-                    //theFunctions.print("here was goal:");
-                    //theFunctions.print(recurringGoal.name);
-                    //theFunctions.print("state AFTER getting plan:");
-                    //printPlanListForSpecificNPC();
-                    //theFunctions.printState(state);
-
-                }
-            }
-
-            if (this.name == "NPC")
-            {
-                //theFunctions.print("1111111111111111 is it here? 111111111111");
-                //printPlanListForSpecificNPC();
-                //theFunctions.printState(state);
-                //theFunctions.printKnownActionsDeeply(knownActions);
-            }
-
-            //doing the to-do list (checks if it's not zero length):
-            handleAnyNextAction();
-
-            if (this.name == "NPC")
-            {
-                //theFunctions.print("xxxxxxxxxxxxxx is it at the end? xxxxxxxxxxxxxxxxxxxx");
-                //printPlanListForSpecificNPC();
-                //theFunctions.printState(state);
-                //theFunctions.printKnownActionsDeeply(knownActions);
-            }
-
-        }
-        else
-        {
-            //this "else" means we are in conversation, need to stop:
-            theFunctions._navMeshAgent.isStopped = true;
-            //UnityEngine.AI.NavMeshAgent.Stop();
-            
-        }
 
         
     }
@@ -289,7 +318,7 @@ public class AI1 : MonoBehaviour
         {
             if (this.name == "NPC pickpocket")
             {
-                theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
+                //theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
 
                 //printPlanListForSpecificNPC();
                 //printPlanList(planList);

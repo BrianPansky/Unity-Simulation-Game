@@ -23,7 +23,7 @@ public class premadeStuffForAI : MonoBehaviour
     //inventory items:
     public stateItem money = new stateItem();
     public stateItem food = new stateItem();
-
+    public stateItem resource1 = new stateItem();
     public stateItem gun = new stateItem();
 
     //feelings
@@ -52,6 +52,10 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem myLeader = new stateItem();
 
     public stateItem anyLandPlot = new stateItem();
+
+    public stateItem anyResource1 = new stateItem();
+
+    public stateItem storagePlace = new stateItem();
     
 
 
@@ -95,6 +99,18 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action createShop = new action();
 
+    public action gatherResource1 = new action();
+
+    public action resource1Dropoff = new action();
+
+
+
+    //jobs
+    public job cashierJob = new job();
+    public job resource1GatheringJob = new job();
+
+
+
 
     ////////////////////////////////////////////////
     //                   LISTS
@@ -125,9 +141,14 @@ public class premadeStuffForAI : MonoBehaviour
             myLeader = stateItemCreator("myLeader", "target");
             myLeader.locationType = "deliverTo";
 
+            storagePlace = stateItemCreator("storagePlace", "target");
+            storagePlace.locationType = "deliverTo";
+
             home = stateItemCreator("home", "locationState");
             food = stateItemCreator("food", "inventory");
             money = stateItemCreator("money", "inventory");
+            resource1 = stateItemCreator("resource1", "inventory");
+
             store = stateItemCreator("store", "locationState");
             workPlace = stateItemCreator("workPlace", "locationState");
             hungry = stateItemCreator("hungry", "feelings");
@@ -148,8 +169,13 @@ public class premadeStuffForAI : MonoBehaviour
             anyStore = stateItemCreator("anyStore", "locationState");
             anyStore.locationType = "any";
 
+            //I SHOULD JUST MAKE MY ACTION CREATOR FUNCTIONS AUTOMATICALLY GENERATE THESE TARGET THING SBASED ON SOME INPUT(S)
             anyLandPlot = stateItemCreator("anyLandPlot", "locationState");
             anyLandPlot.locationType = "any";
+
+            anyResource1 = stateItemCreator("anyResource1", "locationState");
+            anyResource1.locationType = "any";
+            
 
             homeOwnership = stateItemCreator("homeOwnership", "property");
             anyHome = stateItemCreator("anyHome", "locationState");
@@ -171,12 +197,15 @@ public class premadeStuffForAI : MonoBehaviour
 
             giveMoneyToLeader = actionCreator("giveMoneyToLeader", "deliver", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, myLeader);
 
+            resource1Dropoff = actionCreator("resource1Dropoff", "realInventoryChanges", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(resource1), 0, storagePlace);
+
+            
             //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
             eat = actionCreator("eat", "use", wantedPrereqsLister(food, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry, food), 1, home);
             //eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
             buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
             
-            doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 4, workPlace);
+            doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 9, workPlace);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
@@ -192,12 +221,24 @@ public class premadeStuffForAI : MonoBehaviour
             handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1);
             handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4);
             
-            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food), UNwantedEffectsLister(), 1, victim);
+            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food, resource1), UNwantedEffectsLister(), 1, victim);
+            
 
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
             giftGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(gun), 1);
 
             extort = actionCreator("extort", "crime", wantedPrereqsLister(gun), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 0, checkout);
+            
+            gatherResource1 = actionCreator("gatherResource1", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, anyResource1);
+        }
+
+        //jobs:
+        {
+            //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
+            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 1000, 0, 1);
+            resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
+            
+            
         }
     }
 
@@ -255,7 +296,17 @@ public class premadeStuffForAI : MonoBehaviour
         return state;
     }
 
+    
 
+    //money stockpile:
+    public Dictionary<string, List<stateItem>> createMoneyStockpileState()
+    {
+        Dictionary<string, List<stateItem>> state = createEmptyState();
+        
+        theFunctions.incrementItem(state["inventory"], money, 72);
+
+        return state;
+    }
 
 
 
@@ -291,7 +342,10 @@ public class premadeStuffForAI : MonoBehaviour
         //simply adds item:
         //  SHOULD I MODIFY THIS TO BE DEEP COPIES???
         //DUNNO, RIGHT NOW DEEP COPY STATE ISN'T CHANGING BEHAVIOR...
-        state[item.stateCategory].Add(item);
+        //state[item.stateCategory].Add(item);
+
+        //yes, now deep copy:
+        state[item.stateCategory].Add(deepStateItemCopier(item));
 
         return state;
     }
@@ -307,8 +361,15 @@ public class premadeStuffForAI : MonoBehaviour
     {
         List<action> newList = new List<action>();
 
+
+        //newList.Add(gatherResource1);
+        //newList.Add(resource1Dropoff);
+
+
         newList.Add(doTheWork);
         newList.Add(buyHome);
+        
+        
 
         //knownActions.Add(handleSecurityMild);
         //knownActions.Add(handleSecurityEscalationOne);
@@ -666,6 +727,79 @@ public class premadeStuffForAI : MonoBehaviour
         return actionCreator("give" + itemX.name + "ToLeader", "deliverAnyXtoLeader", wantedPrereqsLister(itemX), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(itemX), 1, myLeader);
 
     }
+
+
+
+    //generate JOBS:
+    public job jobCreator(GameObject boss, GameObject roleLocation, List<action> theKnownActions, int duration, int quota, int paymentQuantity = 1)
+    {
+        job thisJob = new job();
+
+        thisJob.boss = boss;  //just make it null [by input] when initializing, then fill it in when actual hiring event happens?
+        thisJob.roleLocation = roleLocation;  //ok to reuse this name?  gonna delete old one?
+        thisJob.theKnownActions = theKnownActions;
+
+        thisJob.duration = duration;
+        thisJob.quota = quota;
+
+        thisJob.paymentQuantity = paymentQuantity;
+
+
+        return thisJob;
+    }
+
+    public List<action> actionListCreator(params action[] listofActions)
+    {
+        List<action> aNewList = new List<action>();
+
+        foreach (action x in listofActions)
+        {
+            aNewList.Add(x);
+        }
+
+        return aNewList;
+    }
+
+    public job jobDeepCopier(job theJob)
+    {
+        job deepCopiedJob = new job();
+
+        //game objects do not need any special treatment because they don't need to be deep copied:
+        deepCopiedJob.boss = theJob.boss;
+        deepCopiedJob.roleLocation = theJob.roleLocation;
+
+
+        deepCopiedJob.theKnownActions = deepCopyActionList(theJob.theKnownActions);
+
+        deepCopiedJob.duration = 0;
+        deepCopiedJob.quota = 0;
+        deepCopiedJob.duration += theJob.duration;
+        deepCopiedJob.quota += theJob.quota;
+        deepCopiedJob.paymentQuantity = 0;
+        deepCopiedJob.paymentQuantity += theJob.paymentQuantity;
+
+
+
+        return deepCopiedJob;
+    }
+
+    public job jobFinisher(job theJob, GameObject boss, GameObject roleLocation)
+    {
+        //finishes the details of a job during the hiring process
+
+        //first, deep copy
+        job finishedJob = new job();
+        finishedJob = jobDeepCopier(theJob);
+
+        //now, modify the two gameObject parameters:
+        finishedJob.boss = boss;
+        finishedJob.roleLocation = roleLocation;
+
+
+
+
+        return finishedJob;
+    }
 }
 
 public class stateItem
@@ -709,4 +843,16 @@ public class action
     {
 
     }
+}
+
+public class job
+{
+    public GameObject boss;
+    public GameObject roleLocation;  //ok to reuse this name?  gonna delete old one?
+    public List<action> theKnownActions;
+
+    public int duration;
+    public int quota;
+
+    public int paymentQuantity = 1;  //default
 }

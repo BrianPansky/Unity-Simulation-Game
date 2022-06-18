@@ -20,7 +20,6 @@ public class regularNPC : MonoBehaviour
     {
         //this is my regular NPC
         
-
         actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.hungry), 0);
         theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createNPCstate1();

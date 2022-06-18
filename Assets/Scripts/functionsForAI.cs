@@ -34,13 +34,18 @@ public class functionsForAI : MonoBehaviour
 
     public Dictionary<string, List<GameObject>> globalTags;
 
+    void Awake()
+    {
+        thisAI = GetComponent<AI1>();
+        premadeStuff = GetComponent<premadeStuffForAI>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         testTime = false;
 
-        thisAI = GetComponent<AI1>();
-        premadeStuff = GetComponent<premadeStuffForAI>();
+        
 
         stopwatch = 0;
         effectivenessTimer = 0;
@@ -195,7 +200,7 @@ public class functionsForAI : MonoBehaviour
             if (nextAction.type == "buyFromStore")
             {
                 testSwitch();
-                startTest();
+                //startTest();
 
                 //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                 //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
@@ -225,8 +230,45 @@ public class functionsForAI : MonoBehaviour
                     //print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
                 }
 
-                endTest();
+                //endTest();
                 testSwitch();
+
+            }
+            else if (nextAction.name == "resource1Dropoff")
+            {
+
+                //using "stopwatch" as a QUOTA rather than a timer:
+
+                //AI1 theTargetState = target.GetComponent("AI1") as AI1;
+
+                //incrementTwoInventoriesFromActionEffects(state["inventory"], theTargetState.state["inventory"], nextAction);
+                incremintInventoriesOfThisAndTargetFromEffects(target, nextAction);
+
+                //if quota not met, COMMAND the NPC to do another delivery round!
+                if (stopwatch < thisAI.currentJob.quota)
+                {
+                    stopwatch += 1;
+
+                    //going to blank out their to-do list, and fill it with "orders":
+
+                    thisAI.inputtedToDoList.Add(nextAction);
+                    
+                    //do i need this?
+                    target = dumpAction(target);
+
+                    //AD HOC, SHOULD NOT DO THIS?!?!?
+                    thisAI.toDoList.Clear();
+                }
+                else
+                {
+                    //NOW we're done quota!
+                    //reset counter, and dump action!
+                    stopwatch = 0;
+                    target = dumpAction(target);
+                }
+
+                
+
 
             }
             else if (nextAction.name == "shootSpree")
@@ -252,7 +294,7 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.type == "deliverAnyXtoLeader")
             {
-                startTest();
+                //startTest();
                 
                 //
 
@@ -264,13 +306,13 @@ public class functionsForAI : MonoBehaviour
                 AI1 theTargetState = target.GetComponent("AI1") as AI1;
                 //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
 
-                
+
 
                 //print("===============================surely here START=============================");
                 //printState(state);
                 //printKnownActionsDeeply(thisAI.knownActions);
 
-                gift(state["inventory"], theTargetState.state["inventory"], nextAction);
+                incrementTwoInventoriesFromActionEffects(state["inventory"], theTargetState.state["inventory"], nextAction);
 
                 //print("----------------------mid---------------------------");
                 //printState(state);
@@ -278,7 +320,8 @@ public class functionsForAI : MonoBehaviour
                 //print("xxxxxxxxxxxxxxxxxtttttttttttttttttttttttttt");
                 //print("----------------------mid---------------------------");
 
-                state = implementALLEffects(nextAction, state);
+                //IF I ALREADY ALTERED THE INVENTORIES ABOVE, WHY AM I IMPLEMENTING ALL EFFECTS HERE?  ISN'T THAT DONE?
+                //state = implementALLEffects(nextAction, state);
 
                 //printState(state);
                 //printKnownActionsDeeply(thisAI.knownActions);
@@ -287,7 +330,7 @@ public class functionsForAI : MonoBehaviour
 
                 target = dumpAction(target);
 
-                endTest();
+                //endTest();
 
             }
             else if (nextAction.name == "hireSomeone")
@@ -314,49 +357,30 @@ public class functionsForAI : MonoBehaviour
 
                 //check for an NPC customer in the checkoutZone:
                 GameObject customer = checkForCustomer(checkoutZone);
-                if (customer != null && customer.name != "NPC shopkeeper" && customer.name != "NPC shopkeeper (1)")
+                //GameObject whoToHire, job theJob, string jobLocationTypeTag
+                if (customer != null && customer.name != "NPC shopkeeper" && customer.name != "NPC shopkeeper (1)" && hiring(customer, premadeStuff.cashierJob, "shop"))
                 {
+                    //successfully hired them!
+
                     //ad-hoc way to hire more than one employee for now:
-                    //if (listOfCashiers.Contains(customer) == false)
-                    AI1 customerAI = customer.GetComponent("AI1") as AI1;
-                    if (customerAI.jobSeeking == true)
+                    listOfCashiers.Add(customer);
+                    //print(customer.name);
+
+
+                    workerCount += 1;
+                    
+                    //ad-hoc way to hire more than one worker for now:
+                    if (workerCount > 1)
                     {
-                        customerAI.jobSeeking = false;
-
-                        listOfCashiers.Add(customer);
-                        changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
-
-                        //print(customer.name);
+                        //also, to easily put the "employee1" actionItem in the organizationState:
+                        state = implementALLEffects(nextAction, state);
+                        //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
 
 
-                        workerCount += 1;
+                        //and ad hoc strike this action off the to-do list:
+                        //thisAI.toDoList.RemoveAt(0);
 
-                        //print(workerCount);
-
-                        //need the worker to show up at the correct store for their shift:
-                        //customerAI.roleLocation = thisAI.roleLocation;
-                        string ownershipTag = "owned by " + this.name;
-                        //need cashierZone of the owned store:
-                        customerAI.roleLocation = randomTaggedWithMultiple("shop", ownershipTag);
-
-                        //Increase the "clearance level" of the worker:
-                        //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
-                        customerAI.clearanceLevel = 1;
-
-
-                        //ad-hoc way to hire more than one worker for now:
-                        if (workerCount > 1)
-                        {
-                            //also, to easily put the "employee1" actionItem in the organizationState:
-                            state = implementALLEffects(nextAction, state);
-                            //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
-
-
-                            //and ad hoc strike this action off the to-do list:
-                            //thisAI.toDoList.RemoveAt(0);
-
-                            target = dumpAction(target);
-                        }
+                        target = dumpAction(target);
                     }
                 }
             }
@@ -381,7 +405,7 @@ public class functionsForAI : MonoBehaviour
 
                 //now do the pickpocketing
                 AI1 theTargetState = victim.GetComponent("AI1") as AI1;
-                steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+                incrementTwoInventoriesFromActionEffects(state["inventory"], theTargetState.state["inventory"], nextAction);
 
 
                 //ad-hoc action completion:
@@ -390,39 +414,6 @@ public class functionsForAI : MonoBehaviour
                 target = dumpAction(target);
 
                 //state = implementALLEffects(nextAction, state);
-
-
-
-
-
-                /*
-                //navigation
-                //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, thisAI.speed * Time.deltaTime);
-                Vector3 targetVector = victim.GetComponent<Transform>().position;
-                _navMeshAgent.SetDestination(targetVector);
-
-
-                //now check distance
-                //GameObject thePickpocket = GameObject.Find("NPC pickpocket");
-                GameObject thePickpocket = GameObject.Find(this.name);
-                float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
-                if (distance < 2.0f)
-                {
-
-
-                    //now do the pickpocketing
-                    AI1 theTargetState = victim.GetComponent("AI1") as AI1;
-                    steal(state["inventory"], theTargetState.state["inventory"], nextAction);
-
-
-                    //ad-hoc action completion:
-                    thisAI.toDoList.RemoveAt(0);
-                    target = null;
-
-                    //state = implementALLEffects(nextAction, state);
-                }
-                */
-
 
                 //print(target.name);
             }
@@ -450,7 +441,7 @@ public class functionsForAI : MonoBehaviour
                     stopwatch += 1;
 
                     //ad-hoc work shift timer:
-                    if (stopwatch > 1000)
+                    if (stopwatch > thisAI.currentJob.duration)
                     {
                         state = implementALLEffects(nextAction, state);
                         //thisAI.toDoList.RemoveAt(0);
@@ -623,6 +614,18 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffects(nextAction, state);
                 
             }
+            else if (nextAction.type == "realInventoryChanges")
+            {
+
+                AI1 theTargetState = target.GetComponent("AI1") as AI1;
+
+                incrementTwoInventoriesFromActionEffects(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                target = dumpAction(target);
+
+
+            }
+
             else
             {
                 //for actions like "eat" that currently just need a quick
@@ -647,53 +650,10 @@ public class functionsForAI : MonoBehaviour
 
     //functions to handle important finishing steps of specific actions:
 
+    //DANGER OF MALFUNCTION IF CLASS OBJECTS ARE NOT DEEP COPIED!!!!
+
     //modify state:
-    public void addMoney(List<stateItem> inventory, int amount)
-    {
-        //probably redundant [just use increment item]
-        //and might not have properly solved deep copy issues yet?
-        //i don't recall tracing errors here though...
-
-        //adds an amount of money to someone's inventory
-
-        //if inventory aready has money, just increment the quantity
-        //if inventory has no money, add it as a stateItem, then increment the quantity
-        bool foundMoney = false;
-        stateItem theMoney = null;
-        foreach (stateItem item in inventory)
-        {
-            if(item.name == "money")
-            {
-                foundMoney = true;
-                theMoney = item;
-                //print("111111111111111111111111111111111111");
-                
-            }
-        }
-
-        if (foundMoney == false)
-        {
-            //print("222222222222222222222222222222222222");
-            //need to add money to inventory
-            stateItem newMoney = premadeStuff.money;
-            //but, this money will already start with 1 quantity.  will need to subtract one so it starts at zero...
-            newMoney.quantity += amount - 1;
-            inventory.Add(newMoney);
-            
-
-            
-        }
-        else
-        {
-            //just add, don't need to zero it out:
-            theMoney.quantity += amount;
-        }
-
-        
-
-
-    }
-
+    
     public void incrementItem(List<stateItem> inventory, stateItem theItem, int amount)
     {
         //"theItem" is actually an effect built into an action.  
@@ -838,128 +798,100 @@ public class functionsForAI : MonoBehaviour
         
     }
 
-    public void trade(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
+    public void incrementTwoInventoriesFromActionEffects(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
     {
-        //actioner is the one doing the nextAction
-
-        //need to initialize:
-        stateItem actionerGives = new stateItem();
-        stateItem actionerReceives = new stateItem();
-
-        //set up items to trade:
-        foreach (actionItem effect in nextAction.effects)
-        {
-            if (effect.inStateOrNot == false)
-            {
-                actionerGives = effect.item;
-            }
-            if (effect.inStateOrNot == true)
-            {
-                actionerReceives = effect.item;
-            }
-        }
-
-
-        //do the trade:
-        actionerInventory.RemoveAll(x => x.name == actionerGives.name);
-        actionerInventory.Add(actionerReceives);
-
-        inventory2.RemoveAll(y => y.name == actionerReceives.name);
-        inventory2.Add(actionerGives);
-
-    }
-
-    public void steal(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
-    {
-        //probably ad-hoc for now
-
-        //should this have "nextAction" as an input AT ALL?  Probably NOT!  Maybe just the list of items to try stealing...
+        //so, to make it simple to work, assume:
+        //1)---any gained item (in action effect) is taken from 2nd inventory
+        //2)---any lost item is GIVEN to 2nd inventory
+        //3)---just swap the sign on the quantity if the bool is false
 
         //actioner is the one doing the nextAction
 
         //https://stackoverflow.com/a/605390
-        List<stateItem> actionerReceives = new List<stateItem>();
-        List<stateItem> otherInventoryLoses = new List<stateItem>();
-
-        //look to steal EACH item in the "effects" of the steal aciton
-        //but only LOOK and take note, don't modify inventories YET (can lead to error)
-        foreach (actionItem FIXeffect in nextAction.effects)
-        {
-            stateItem effect = FIXeffect.item;
-            //actionerReceives = effect;
-            //actionerInventory.Add(actionerReceives);
-            //inventory2.RemoveAll(y => y.name == actionerReceives.name);
-
-            //but must only steal items if they exist in the victim's inventory!
-            foreach (stateItem itemInInventory2 in inventory2)
-            {
-                if (itemInInventory2.name == effect.name)
-                {
-                    actionerReceives.Add(deepStateItemCopier(effect));
-                    otherInventoryLoses.Add(itemInInventory2);
-                }
-            }
-        }
-
-        //NOW modify inventories
-        foreach (stateItem item in actionerReceives)
-        {
-            //actionerInventory.Add(item);
-            incrementItem(actionerInventory, item, 1);
-        }
-        foreach (stateItem item in otherInventoryLoses)
-        {
-            //inventory2.Remove(item);
-            incrementItem(inventory2, item, -1);
-        }
-        
-    }
-
-    public void gift(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
-    {
-        //just like the reverse of steal
-
-        //probably ad-hoc for now
-
-        //actioner is the one doing the nextAction
-
-        //https://stackoverflow.com/a/605390
-        List<stateItem> actionerGives = new List<stateItem>();
-        List<stateItem> otherInventoryReceives = new List<stateItem>();
+        List<actionItem> deepCopyVERIFIEDeffectsList = new List<actionItem>();
+        List<actionItem> actionerGives = new List<actionItem>();
+        List<actionItem> actionerReceives = new List<actionItem>();
 
         //look to gift EACH item in the "effects" of the gift action
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
         foreach (actionItem effect in nextAction.effects)
         {
+            //must only give items if they exist in the giver's inventory!
+            //but to get here we should assume that such prereqs are already met
+            //BUT PREREQS HAVE NOT CHECKED THE 2ND INVENTORY
 
-            //but must only give items if they exist in the giver's inventory!
-            foreach (stateItem itemInInventory in actionerInventory)
+            //just deep copy the effects list so i can use them without messing anything up:
+            //deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+            //first, determine whose inventory to VERIFY the contents of, based on bool, and the assumptions listed at start of funciton:
+            if (effect.inStateOrNot == false)
             {
-                if (itemInInventory.name == effect.name)
+                //"false" means it comes out of actioner's inventory, so need to check to make sure it is IN the actioner's inventory to start with:
+                foreach (stateItem itemInInventory in actionerInventory)
                 {
-                    actionerGives.Add(itemInInventory);
+                    if (itemInInventory.name == effect.name)
+                    {
+                        //actionerGives.Add(itemInInventory);
 
-                    //need to deep copy this one so we don't modify stuff in "knownActions":
-                    otherInventoryReceives.Add(deepStateItemCopier(effect.item));
+                        //need to deep copy this one so we don't modify stuff in "knownActions":
+                        //otherInventoryReceives.Add(deepStateItemCopier(effect.item));
+                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+                    }
                 }
+            }
+            if (effect.inStateOrNot == true)
+            {
+                //"true" means it comes out of the2nd inventory, so need to check to make sure it is IN the 2nd inventory to start with:
+                foreach (stateItem itemInInventory2 in inventory2)
+                {
+                    if (itemInInventory2.name == effect.name)
+                    {
+                        //actionerReceives.Add(deepStateItemCopier(effect));
+                        //otherInventoryLoses.Add(itemInInventory2);
+                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+                    }
+
+                }
+
             }
         }
 
-        
-
         //NOW modify inventories
-        foreach (stateItem item in actionerGives)
+        int amount = 1;
+        //actioner inventory:
+        foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
         {
-            //actionerInventory.Remove(item);
-            incrementItem(actionerInventory, item, -1);
+            if(effect.inStateOrNot == false)
+            {
+                amount = -1;
+            }
+            incrementItem(actionerInventory, effect.item, amount);
         }
-        foreach (stateItem item in otherInventoryReceives)
+        //target's inventory:
+        amount = -1;
+        foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
         {
-            //inventory2.Add(item);
-            incrementItem(inventory2, item, 1);
+            if (effect.inStateOrNot == false)
+            {
+                amount = 1;
+            }
+            incrementItem(inventory2, effect.item, amount);
         }
 
-        
+
+    }
+
+    public void incremintInventoriesOfThisAndTargetFromEffects(GameObject theTargetPerson, action theAction)
+    {
+        //just more clean and tidy than having to fetch the AI inventory and plug it in all the time!
+        //make sure inputted target has an inventory script!
+        //requires "state" of current person, but that's accounted for at start of this script, i think?
+        //well, start gives us "thisAI", i can use that...
+        AI1 theTargetState = theTargetPerson.GetComponent("AI1") as AI1;
+
+        incrementTwoInventoriesFromActionEffects(thisAI.state["inventory"], theTargetState.state["inventory"], theAction);
+
     }
 
 
@@ -991,6 +923,72 @@ public class functionsForAI : MonoBehaviour
         addKnownActionToGameObject(agent, roleToAdd);
         removeKnownActionFromGameObject(agent, roleToRemove);
 
+    }
+
+    public bool hiring(GameObject whoToHire, job theJob, string jobLocationTypeTag)
+    {
+        //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
+        //Has to return bool to show if it worked or no.  clunky, but oh well?
+
+
+        //ad-hoc way to hire more than one employee for now:
+        //if (listOfCashiers.Contains(customer) == false)
+        AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
+        if (targetAI.jobSeeking == true)
+        {
+            
+
+            //listOfCashiers.Add(customer);
+            //changeRoles(whotoHire, premadeStuff.workAsCashier, premadeStuff.doTheWork);
+
+            //print(customer.name);
+
+
+            //workerCount += 1;
+
+            //print(workerCount);
+
+            //need the worker to show up at the correct store for their shift:
+            //customerAI.roleLocation = thisAI.roleLocation;
+            string ownershipTag = "owned by " + this.name;
+            //need cashierZone of the owned store:
+            GameObject roleLocation = randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
+
+            if(roleLocation == null)
+            {
+                print("cannot find a role location, probably trying to hire someone before you've made a business, or my system is unfinished");
+
+                return false;
+            }
+            else
+            {
+                print(roleLocation);
+                targetAI.jobSeeking = false;
+
+                //Increase the "clearance level" of the worker:
+                //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
+                targetAI.clearanceLevel = 1;
+
+                //now...to finish and deliver "theJob" class object...
+                targetAI.currentJob = premadeStuff.jobFinisher(theJob, this.gameObject, roleLocation);
+
+                //but still have to add the known actions to their known actions!  sigh.
+                foreach (action x in theJob.theKnownActions)
+                {
+                    addKnownActionToGameObject(whoToHire, x);
+                }
+            }
+
+            
+
+
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     //other:
@@ -1157,9 +1155,20 @@ public class functionsForAI : MonoBehaviour
         }
         else if (criteria.locationType == "deliverTo")
         {
-            //for now ad hoc, just deliver to me, the leader
-            //should have a "deliveryTarget" variable?  But could have multiple...need it embedded in the "deliver" action...
-            target = thisAI.leader;
+
+            if(criteria.name == "storagePlace")
+            {
+                target = GameObject.Find("storage");
+            }
+            else
+            {
+                //for now ad hoc, just deliver to me, the leader
+                //should have a "deliveryTarget" variable?  But could have multiple...need it embedded in the "deliver" action...
+                target = thisAI.leader;
+            }
+            
+
+
         }
         else if (criteria.locationType == "any")
         {
@@ -1178,6 +1187,10 @@ public class functionsForAI : MonoBehaviour
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("home", "forSale");
+            }
+            else if (criteria.name == "anyResource1")
+            {
+                target = randomTaggedWith("resource1");
             }
             else if (criteria.name == "checkout")
             {
@@ -1200,7 +1213,7 @@ public class functionsForAI : MonoBehaviour
             //no, that variable just goes to the store building
             //I need them to go to the cashierZone IN that store
             //so:
-            target = getCashierMapZoneOfStore(thisAI.roleLocation);
+            target = getCashierMapZoneOfStore(thisAI.currentJob.roleLocation);
 
         }
         else if (criteria.name == "hiringZone")
@@ -2348,7 +2361,7 @@ public class functionsForAI : MonoBehaviour
                 //for some types of prereqs, I generate actions to fill them on-the-fly
                 //here, check if it is that type of action, fill them that way
                 //else, fill them the regular way using "problemSolver"
-                if (eachPrereq.stateCategory == "inventory" && eachPrereq.name != "money")
+                if (eachPrereq.stateCategory == "inventory" && eachPrereq.name != "money" && eachPrereq.name != "resource1")
                 {
                     //printNumberForSpecificNPC(1);
                     //so we need an inventory item
@@ -3320,7 +3333,8 @@ public class functionsForAI : MonoBehaviour
 
     public void startTest()
     {
-        if (testTime == true && this.name == "NPC pickpocket")
+        //NPC pickpocket
+        if (testTime == true && this.name == "NPC 5")
         {
             print("===============================surely here START=============================");
             printState(thisAI.state);
@@ -3332,7 +3346,8 @@ public class functionsForAI : MonoBehaviour
     
     public void endTest()
     {
-        if (testTime == true && this.name == "NPC pickpocket")
+        //NPC pickpocket
+        if (testTime == true && this.name == "NPC 5")
         {
             //print(itemToIncrement.quantity);
             //print(theItem.quantity);

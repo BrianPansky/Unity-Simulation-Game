@@ -46,6 +46,7 @@ public class playerClickInteraction : MonoBehaviour
     public bool haveStore;
     public bool weapon;
     public GameObject myPrefab;
+    public bool swapDirection;
 
     // Start is called before the first frame update
     void Start()
@@ -76,10 +77,12 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //ad-hoc list of orders:
-        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.food));
-        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.money));
+        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
+        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.money)));
+        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.resource1)));
+        commandList.Add(premadeStuff.deepActionCopier(premadeStuff.resource1Dropoff));
 
-
+        swapDirection = true;
     }
 
     // Update is called once per frame
@@ -282,7 +285,8 @@ public class playerClickInteraction : MonoBehaviour
         {
             //Debug.Log("MONEY$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
-            theHub.state["inventory"].Add(premadeStuff.money);
+            //theHub.state["inventory"].Add(premadeStuff.deepStateItemCopier(premadeStuff.money));
+            theFunctions.incrementItem(theHub.state["inventory"], premadeStuff.deepStateItemCopier(premadeStuff.money), 1);
         }
 
         if (clickedOn.tag == "anNPC")
@@ -393,6 +397,40 @@ public class playerClickInteraction : MonoBehaviour
             }
 
         }
+
+        if (clickedOn.tag == "container")
+        {
+            //Debug.Log("this is a container");
+
+            //------from workPlace:
+            //theFunctions.incrementItem(theHub.state["inventory"], premadeStuff.deepStateItemCopier(premadeStuff.money), 1);
+
+            //------from pickpocketing:
+            //AI1 theTargetState = selectedNPC.GetComponent("AI1") as AI1;
+            //note the "premadeStuff.pickVictimsPocket" input, this function is clunky like that for now...
+            //theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], theTargetState.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
+
+            //------from giftgun:
+            //AI1 hubOfNPC = selectedNPC.GetComponent("AI1") as AI1;
+            //theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], hubOfNPC.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.giftGun));
+
+            AI1 hubOfStorage = clickedOn.GetComponent("AI1") as AI1;
+
+            //ad hoc.  if "swapDirection" = true, swap in one direction.  if false, swap in other direction:
+            //[and then change the bool to its opposite]
+            if (swapDirection == true)
+            {
+                swapDirection = false;
+                theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], hubOfStorage.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
+            }
+            else
+            {
+                swapDirection = true;
+                theFunctions.incrementTwoInventoriesFromActionEffects(hubOfStorage.state["inventory"], theHub.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
+            }
+
+
+        }
     }
 
     
@@ -424,11 +462,14 @@ public class playerClickInteraction : MonoBehaviour
         //see that documentation page about having inputs?
         //need to modify the "makeButton" function, because of strong typing
         //I guess will need a "makeButton1FuncInput" function?
-        makeButton("my side", () => this.announcePoliticalSideButton(-50));
+        //makeButton("my side", () => this.announcePoliticalSideButton(-50));
 
-        makeButton("i'm left wing", this.leftPoliticalSideButton);
+        makeButton("increase trust", this.leftPoliticalSideButton);
 
-        makeButton("i'm right wing", this.rightPoliticalSideButton);
+        makeButton("decrease trust", this.rightPoliticalSideButton);
+
+        makeButton("hire as resource gatherer", this.hireResource1GathererButton);
+        
 
 
         //only if you own a store, menu will include a hiring option:
@@ -519,10 +560,10 @@ public class playerClickInteraction : MonoBehaviour
     public void aFullPlanTest()
     {
         List<action> planToGive = new List<action>();
-        planToGive.Add(premadeStuff.doTheWork);
+        planToGive.Add(premadeStuff.deepActionCopier(premadeStuff.doTheWork));
         //planToGive.Add(premadeStuff.buyFood);  //but I generate buy actions now???
         //planToGive.Add(premadeStuff.buyHome);
-        planToGive.Add(premadeStuff.eat);
+        planToGive.Add(premadeStuff.deepActionCopier(premadeStuff.eat));
 
         //now tell them the plan:
         //need to get the social script on them:
@@ -535,11 +576,11 @@ public class playerClickInteraction : MonoBehaviour
     public void shopkeeperGivePlanTest()
     {
         List<action> planToGive = new List<action>();
-        planToGive.Add(premadeStuff.buyShop);
+        planToGive.Add(premadeStuff.deepActionCopier(premadeStuff.buyShop));
         //planToGive.Add(premadeStuff.buyFood);  //but I generate buy actions now???
         //planToGive.Add(premadeStuff.buyHome);
-        planToGive.Add(premadeStuff.hireSomeone);
-        planToGive.Add(premadeStuff.beBoss);
+        planToGive.Add(premadeStuff.deepActionCopier(premadeStuff.hireSomeone));
+        planToGive.Add(premadeStuff.deepActionCopier(premadeStuff.beBoss));
         
 
         //now tell them the plan:
@@ -556,7 +597,7 @@ public class playerClickInteraction : MonoBehaviour
         
         AI1 theTargetState = selectedNPC.GetComponent("AI1") as AI1;
         //note the "premadeStuff.pickVictimsPocket" input, this function is clunky like that for now...
-        theFunctions.steal(theHub.state["inventory"], theTargetState.state["inventory"], premadeStuff.pickVictimsPocket);
+        theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], theTargetState.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
 
 
     }
@@ -675,6 +716,8 @@ public class playerClickInteraction : MonoBehaviour
             //very ad-hoc
             //I should instead be generataing these "buy" buttons at the store based on some INVENTORY that the store HAS.
 
+            //WHY AM I CREATING A STATEITEM FROM SCRATCH??
+            //oh well, at elast it's not shallow copied???
             stateItem food1;
             food1 = premadeStuff.stateItemCreator("food", "inventory");
 
@@ -682,7 +725,7 @@ public class playerClickInteraction : MonoBehaviour
             //fooood = premadeStuff.convertToActionItem(food1, 1);
 
             action buyFoooooood;
-            buyFoooooood = premadeStuff.actionCreator("buyFood", "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.money), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(food1), premadeStuff.UNwantedEffectsLister(premadeStuff.money), 1, premadeStuff.checkout);
+            buyFoooooood = premadeStuff.actionCreator("buyFood", "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.deepStateItemCopier(premadeStuff.money)), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(premadeStuff.deepStateItemCopier(food1)), premadeStuff.UNwantedEffectsLister(premadeStuff.deepStateItemCopier(premadeStuff.money)), 1, premadeStuff.checkout);
 
             theHub.state = theFunctions.implementALLEffects(buyFoooooood, theHub.state);
         }
@@ -828,7 +871,7 @@ public class playerClickInteraction : MonoBehaviour
                 selectedAI.jobSeeking = false;
 
                 //listOfCashiers.Add(customer);
-                theFunctions.changeRoles(selectedNPC, premadeStuff.workAsCashier, premadeStuff.doTheWork);
+                theFunctions.changeRoles(selectedNPC, premadeStuff.deepActionCopier(premadeStuff.workAsCashier), premadeStuff.deepActionCopier(premadeStuff.doTheWork));
 
                 print(selectedNPC.name);
 
@@ -853,6 +896,17 @@ public class playerClickInteraction : MonoBehaviour
 
     }
 
+    public void hireResource1GathererButton()
+    {
+        if(theFunctions.hiring(selectedNPC, premadeStuff.resource1GatheringJob, "storage"))
+        {
+            Debug.Log("hired..........");
+        }
+        else
+        {
+            Debug.Log("FAILED TO HIRE");
+        }
+    }
 
     public void fetchXButton(action availableCommand)
     {
@@ -927,7 +981,7 @@ public class playerClickInteraction : MonoBehaviour
         //need to get the NPC inventory:
         AI1 hubOfNPC = selectedNPC.GetComponent("AI1") as AI1;
 
-        theFunctions.gift(theHub.state["inventory"], hubOfNPC.state["inventory"], premadeStuff.giftGun);
+        theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], hubOfNPC.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.giftGun));
         //theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
         Debug.Log("gave gun?");
     }
