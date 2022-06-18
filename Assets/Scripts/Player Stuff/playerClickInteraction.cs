@@ -11,6 +11,8 @@ public class playerClickInteraction : MonoBehaviour
     //ad-hoc?
     GameObject selectedNPC;
 
+    public string ownershipTag;
+
     //plug-in menu objects:
     public GameObject recruitingMenu;
 
@@ -24,6 +26,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
     public bool inMenu;
+    public bool buildMode;
 
     public premadeStuffForAI premadeStuff;
     public AI1 theHub;
@@ -33,12 +36,22 @@ public class playerClickInteraction : MonoBehaviour
 
     public taggedWith theTagScript;
 
+
+    //definitely ad-hoc:
+    public bool haveStore;
+    public bool weapon;
+    public GameObject myPrefab;
+
     // Start is called before the first frame update
     void Start()
     {
 
-        
 
+        haveStore = false;
+        weapon = false;
+        buildMode = false;
+
+        ownershipTag = "owned by " + this.name;
 
         premadeStuff = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
@@ -52,7 +65,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //just for testing, give me a gun at start:
-        theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
+        //theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
 
 
     }
@@ -60,22 +73,12 @@ public class playerClickInteraction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //only interact with world if we are NOT in menu:
-        if(inMenu == false)
-        {
-            //check for mouse click, see what it's "clicking on"
-            clickedOn = clickingFunction();
 
-            //now do stuff:
-            if (clickedOn != null)
-            {
+        //check for click:
+        handleAnyClick();
 
-                doStuffAfterWorldClick(clickedOn);
-
-                //blank out mouse click each frame:
-                clickedOn = null;
-            }
-        }
+        //handle other butons:
+        toggleBuildMode();
 
         ///*
         //debugging
@@ -95,8 +98,123 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-    public GameObject clickingFunction()
+    public void handleAnyClick()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if(buildMode == true)
+            {
+                //ad-hoc:
+                //Instantiate(myPrefab, new Vector3(5, 0, -11), Quaternion.identity);
+                //Debug.Log("should be made");
+
+                raycastBuildingPlacement();
+            }
+            
+
+
+
+            //only interact with world if we are NOT in menu:
+            if (inMenu == false)
+            {
+                if (weapon == false)
+                {
+                    //check for mouse click, see what it's "clicking on"
+                    clickedOn = rayReturnFunction();
+
+                    //now do stuff:
+                    if (clickedOn != null)
+                    {
+                        doStuffAfterWorldClick(clickedOn);
+
+                        //blank out mouse click each frame:
+                        clickedOn = null;
+                    }
+
+
+
+                }
+                else
+                {
+                    //weapon is drawn, so this click is a shooting action
+                    simpleShoot();
+
+                }
+            }
+
+
+        }
+    }
+
+    public void toggleBuildMode()
+    {
+        
+        //[SerializeField]
+        //private KeyCode newObjectHotkey = KeyCode.A;
+
+    if (Input.GetKeyDown(KeyCode.B))
+        {
+            //Debug.Log("222222222222222222222");
+            if (buildMode == false)
+            {
+                //Debug.Log("build mode activated");
+                buildMode = true;
+            }
+            else
+            {
+                //Debug.Log("build mode de-activated");
+                buildMode = false;
+            }
+        }
+}
+
+    //public void buildModeVisualCue()
+
+    private void raycastBuildingPlacement()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hitInfo;
+        if (Physics.Raycast(ray, out hitInfo))
+        {
+            GameObject x = new GameObject();
+            x = Instantiate(myPrefab, hitInfo.point, Quaternion.identity);
+            //myPrefab.transform.position = hitInfo.point;
+            //myPrefab.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+        }
+    }
+
+
+    public GameObject rayReturnFunction()
+    {
+        //returns the object that was clicked on
+
+        GameObject clickedOn;
+        clickedOn = null;
+
+        
+
+        
+        RaycastHit myHit;
+        Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(myRay, out myHit, 3.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.transform != null)
+            {
+                //Debug.Log(myHit.transform.gameObject);
+                clickedOn = myHit.transform.gameObject;
+            }
+        }
+        
+
+        return clickedOn;
+    }
+
+    public GameObject whatDoesBulletHit()
+    {
+        //returns the object that was clicked on
+
         GameObject clickedOn;
         clickedOn = null;
 
@@ -105,7 +223,7 @@ public class playerClickInteraction : MonoBehaviour
             RaycastHit myHit;
             Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(myRay, out myHit, 3.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(myRay, out myHit, 50.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 if (myHit.transform != null)
                 {
@@ -116,6 +234,31 @@ public class playerClickInteraction : MonoBehaviour
         }
 
         return clickedOn;
+    }
+
+    public void simpleShoot()
+    {
+        //beginning shooting mechanic
+
+        clickedOn = whatDoesBulletHit();
+        if (clickedOn != null)
+        {
+            if (clickedOn.tag == "anNPC")
+            {
+                Debug.Log("you just shot " + clickedOn.name);
+                Debug.Log("object to be destroyed ");
+                Debug.Log(clickedOn);
+                Destroy(clickedOn);
+
+
+            }
+
+            //blank out mouse click each frame:
+            clickedOn = null;
+        }
+
+       
+
     }
 
     public void doStuffAfterWorldClick(GameObject clickedOn)
@@ -193,6 +336,51 @@ public class playerClickInteraction : MonoBehaviour
 
         }
 
+        if (clickedOn.tag == "aProperty")
+        {
+            //check if it's for sale:
+            //get other script I need:
+            taggedWith otherIsTaggedWith = clickedOn.GetComponent<taggedWith>() as taggedWith;
+            if (otherIsTaggedWith.tags.Contains("forSale"))
+            {
+                //ok, it's for sale, now can buy it
+
+                //printTextList(otherIsTaggedWith.tags);
+                //remove the "for sale" tag:
+                otherIsTaggedWith.foreignRemoveTag("forSale", clickedOn);
+                //printTextList(otherIsTaggedWith.tags);
+                //add the "owned by _____" tag...:
+                string ownershipTag = "owned by " + this.name;
+                otherIsTaggedWith.foreignAddTag(ownershipTag, clickedOn);
+
+                //need to remember in the future WHICH store is theirs
+                //so they ca go to it, and sned their employees there:
+                //thisAI.roleLocation = target;
+
+                //ad-hoc action completion:
+                //thisAI.toDoList.RemoveAt(0);
+
+
+                //ad-hoc update of state:
+                //state = implementALLEffects(nextAction, state);
+
+                haveStore = true;
+                theFunctions.print("you got a store!");
+
+                Debug.Log(clickedOn.transform.position);
+
+            }
+
+
+            else
+            {
+                //well, this one is NOT for sale, so 
+                theFunctions.print("not for sale");
+
+                Debug.Log(clickedOn.transform.position);
+            }
+
+        }
     }
 
     
@@ -203,6 +391,8 @@ public class playerClickInteraction : MonoBehaviour
     
     public void createRecruitmentButtonGrid()
     {
+
+        makeButton("[pick their pockets]", this.pickTheirPocketsButton);
 
         //makeButton("recruit to gang", this.recruitButton);
 
@@ -225,6 +415,18 @@ public class playerClickInteraction : MonoBehaviour
         makeButton("i'm left wing", this.leftPoliticalSideButton);
 
         makeButton("i'm right wing", this.rightPoliticalSideButton);
+
+
+        //only if you own a store, menu will include a hiring option:
+        GameObject check = theFunctions.randomTaggedWithMultiple("shop", ownershipTag);
+        
+        if (check != null)
+        {
+            theFunctions.print("let's see::::::::::::::::::");
+            theFunctions.print(ownershipTag);
+            theFunctions.print(check.name);
+            makeButton("hireCashier", this.hireCashierButton);
+        }
 
     }
 
@@ -304,6 +506,17 @@ public class playerClickInteraction : MonoBehaviour
         theSocialScript.toldPlan(planToGive);
 
         personOfInterest = selectedNPC;
+    }
+
+
+    public void pickTheirPocketsButton()
+    {
+        
+        AI1 theTargetState = selectedNPC.GetComponent("AI1") as AI1;
+        //note the "premadeStuff.pickVictimsPocket" input, this function is clunky like that for now...
+        theFunctions.steal(theHub.state["inventory"], theTargetState.state["inventory"], premadeStuff.pickVictimsPocket);
+
+
     }
 
 
@@ -500,7 +713,46 @@ public class playerClickInteraction : MonoBehaviour
         //hubScript.knownActions.RemoveAll(y => y.type == "work");
     }
 
-    
+    public void hireCashierButton()
+    {
+        
+        if (selectedNPC != null && selectedNPC.name != "NPC shopkeeper" && selectedNPC.name != "NPC shopkeeper (1)")
+        {
+            
+            AI1 selectedAI = selectedNPC.GetComponent("AI1") as AI1;
+            if (selectedAI.jobSeeking == true)
+            {
+                selectedAI.jobSeeking = false;
+
+                //listOfCashiers.Add(customer);
+                theFunctions.changeRoles(selectedNPC, premadeStuff.workAsCashier, premadeStuff.doTheWork);
+
+                print(selectedNPC.name);
+
+
+                //workerCount += 1;
+
+                //print(workerCount);
+
+                //need the worker to show up at the correct store for their shift:
+                //selectedAI.roleLocation = thisAI.roleLocation;
+                
+                //need cashierZone of the owned store [PROBABLY SHOULDN"T BE RANDOM, BUT USING IT FOR NOW]:
+                selectedAI.roleLocation = theFunctions.randomTaggedWithMultiple("shop", ownershipTag);
+
+                //Increase the "clearance level" of the worker:
+                //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
+                selectedAI.clearanceLevel = 1;
+
+                
+            }
+        }
+
+    }
+
+
+
+
     public void announcePoliticalSideButton(int yourSide)
     {
         //ad hoc
@@ -576,6 +828,106 @@ public class playerClickInteraction : MonoBehaviour
         social theSocialScript = selectedNPC.GetComponent("social") as social;
         return theSocialScript;
     }
+
+
+
+
+
+
+
+
+    public class GroundPlacementController : MonoBehaviour
+    {
+        [SerializeField]
+        private GameObject placeableObjectPrefab;
+        
+        [SerializeField]
+        private KeyCode newObjectHotkey = KeyCode.A;
+
+        private GameObject currentPlaceableObject;
+
+        //private float mouseWheelRotation;
+
+        private void Update()
+        {
+            HandleNewObjectHotkey();
+
+            if (currentPlaceableObject != null)
+            {
+                MoveCurrentObjectToMouse();
+                //RotateFromMouseWheel();
+                ReleaseIfClicked();
+            }
+        }
+
+        private void HandleNewObjectHotkey()
+        {  //i think this is just to make it follow mouse around??? yes, partly, bad entangled code...
+           //initializes the action i think, toggles it, i dunno...
+           //should be called "togglePlacementMode" or something....
+            if (Input.GetKeyDown(newObjectHotkey))
+            {
+                if (currentPlaceableObject != null)
+                {
+                    Destroy(currentPlaceableObject);
+                }
+                else
+                {
+                    currentPlaceableObject = Instantiate(placeableObjectPrefab);
+                }
+            }
+        }
+
+        private void MoveCurrentObjectToMouse()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            RaycastHit hitInfo;
+            if (Physics.Raycast(ray, out hitInfo))
+            {
+                currentPlaceableObject.transform.position = hitInfo.point;
+                currentPlaceableObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+            }
+        }
+
+        /*
+        private void RotateFromMouseWheel()
+        {
+            Debug.Log(Input.mouseScrollDelta);
+            mouseWheelRotation += Input.mouseScrollDelta.y;
+            currentPlaceableObject.transform.Rotate(Vector3.up, mouseWheelRotation * 10f);
+        }
+        */
+
+        private void ReleaseIfClicked()
+        {
+            //....the fuck is this shit?
+            if (Input.GetMouseButtonDown(0))
+            {
+                currentPlaceableObject = null;
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

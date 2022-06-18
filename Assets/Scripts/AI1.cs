@@ -232,7 +232,7 @@ public class AI1 : MonoBehaviour
             
             planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
 
-            //printPlanListForSpecificNPC(planList);
+            //printPlanListForSpecificNPC();
 
             planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
 
@@ -249,8 +249,8 @@ public class AI1 : MonoBehaviour
             clearIneffectiveActions();
 
         }
-        
 
+        
 
         //now, pick top-ranked plan (if there are any)
         if (planList != null && planList.Count > 0)
@@ -368,18 +368,20 @@ public class AI1 : MonoBehaviour
 
     }
 
-    public void printPlanListForSpecificNPC(List<List<action>> planList)
+    public void printPlanListForSpecificNPC()
     {
         //List<List<action>>
 
 
         //to help, encapsulating this:
 
-        if (this.name == "NPC 4")
+        if (this.name == "NPC shopkeeper (1)")
         {
             print("00000000000000000  Plan List:   000000000000000000");
             printPlanList(planList);
         }
+
+
 
 
         /*

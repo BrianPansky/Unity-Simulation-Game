@@ -32,6 +32,7 @@ public class premadeStuffForAI : MonoBehaviour
 
     //organizationState stuff:
     public stateItem employee = new stateItem();
+    public stateItem rentalProperty = new stateItem();
 
     public stateItem victim = new stateItem();
 
@@ -85,6 +86,10 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action giveMoneyToLeader = new action();
 
+    public action landLording = new action();
+
+    public action shootSpree = new action();
+
 
     ////////////////////////////////////////////////
     //                   LISTS
@@ -110,6 +115,8 @@ public class premadeStuffForAI : MonoBehaviour
 
         //stateItems:
         {
+            rentalProperty = stateItemCreator("rentalProperty", "property");
+
             myLeader = stateItemCreator("myLeader", "target");
             myLeader.locationType = "deliverTo";
 
@@ -150,6 +157,9 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
+            landLording = actionCreator("landLording", "capitalism", wantedPrereqsLister(homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(rentalProperty), UNwantedEffectsLister(homeOwnership, profitMotive), 1);
+            shootSpree = actionCreator("shootSpree", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
+
             giveMoneyToLeader = actionCreator("giveMoneyToLeader", "deliver", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, myLeader);
 
             //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
@@ -288,7 +298,7 @@ public class premadeStuffForAI : MonoBehaviour
         //knownActions.Add(handleSecurityMild);
         //knownActions.Add(handleSecurityEscalationOne);
 
-        //knownActions.Add(eat);
+        knownActions.Add(eat);
         knownActions.Add(buyFood);
         
 
@@ -299,9 +309,11 @@ public class premadeStuffForAI : MonoBehaviour
     public List<action> createShopkeeperKnownActions()
     {
         knownActions.Add(hireSomeone);
-        //knownActions.Add(beBoss);
+        knownActions.Add(beBoss);
         knownActions.Add(buyShop);
         knownActions.Add(buyHome);
+        //knownActions.Add(landLording);
+        
 
         knownActions.Add(handleSecurityMild);
         knownActions.Add(handleSecurityEscalationOne);
@@ -325,12 +337,13 @@ public class premadeStuffForAI : MonoBehaviour
         //knownActions.Add(buyFood);
         knownActions.Add(buyHome);
 
-        knownActions.Add(doTheWork);
-        
+        //knownActions.Add(doTheWork);
+
 
         //knownActions.Add(findVictim);
         //knownActions.Add(goToVictim);
         knownActions.Add(pickVictimsPocket);
+        //knownActions.Add(shootSpree); 
 
 
         return knownActions;

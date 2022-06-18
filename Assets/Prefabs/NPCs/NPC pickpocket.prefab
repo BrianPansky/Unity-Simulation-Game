@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4474087527148379903}
   - component: {fileID: 418249366537334465}
   - component: {fileID: 3651601685852517964}
+  - component: {fileID: 7580308142088309404}
   m_Layer: 0
   m_Name: NPC pickpocket
   m_TagString: anNPC
@@ -128,7 +129,10 @@ MonoBehaviour:
   target: {fileID: 0}
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
+  leader: {fileID: 0}
   jobSeeking: 0
+  inConversation: 0
+  clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
 --- !u!114 &-951165740514222979
@@ -144,7 +148,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
+  _navMeshAgent: {fileID: 0}
   stopwatch: 0
+  effectivenessTimer: 0
   workerCount: 0
   listOfCashiers: []
   thisAI: {fileID: 0}
@@ -197,6 +203,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stateGrabber: {fileID: 0}
   theHub: {fileID: 0}
+--- !u!114 &7580308142088309404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5963062928679372863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6953b2bcb18ab64baa17503ca0ad7d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3837084469687796168
 PrefabInstance:
   m_ObjectHideFlags: 0

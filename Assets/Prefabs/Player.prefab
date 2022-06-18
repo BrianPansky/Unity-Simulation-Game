@@ -177,6 +177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseSpeed: 290
   playerBody: {fileID: 8239240193439217677}
+  thePlayerClickInteractionScript: {fileID: 0}
 --- !u!1 &8239240193203668758
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,6 +226,7 @@ GameObject:
   - component: {fileID: 3217855257292685481}
   - component: {fileID: 6128988794682438767}
   - component: {fileID: 310021312455318196}
+  - component: {fileID: 7378499042799406245}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -316,7 +318,10 @@ MonoBehaviour:
   target: {fileID: 0}
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
+  leader: {fileID: 0}
   jobSeeking: 0
+  inConversation: 0
+  clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
 --- !u!114 &8055269175595927325
@@ -344,7 +349,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
+  _navMeshAgent: {fileID: 0}
   stopwatch: 0
+  effectivenessTimer: 0
   workerCount: 0
   listOfCashiers: []
   thisAI: {fileID: 0}
@@ -375,9 +382,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de6e5efdc6c81948aaf829ee8556b68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  recruitingMenu: {fileID: 0}
+  myPrefabButton1: {fileID: 0}
+  myGridCanvas: {fileID: 0}
+  currentGridButtons: []
+  personOfInterest: {fileID: 0}
+  inMenu: 0
   premadeStuff: {fileID: 0}
   theHub: {fileID: 0}
   myHUD: {fileID: 0}
+  theFunctions: {fileID: 0}
+  theTagScript: {fileID: 0}
 --- !u!114 &310021312455318196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,6 +408,18 @@ MonoBehaviour:
   myCanvas: {fileID: 0}
   myText: {fileID: 0}
   theHub: {fileID: 0}
+--- !u!114 &7378499042799406245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8239240193439217715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6953b2bcb18ab64baa17503ca0ad7d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2208505812413378550
 PrefabInstance:
   m_ObjectHideFlags: 0

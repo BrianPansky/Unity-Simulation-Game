@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class taggedWith : MonoBehaviour
 {
+    //my own tagging system, not using the unity tagging system
 
     public List<string> tags = new List<string>();
 
@@ -37,13 +38,13 @@ public class taggedWith : MonoBehaviour
         if(globalTags.ContainsKey(tag))
         {
             //add the game object to the list of objects tagged with that tag:
-            globalTags[tag].Add(GameObject.Find(this.name));
+            globalTags[tag].Add(gameObject);
         }
         else
         {
             //sigh, need to add the key first, which means the list it unlocks as well...
             List<GameObject> needsList = new List<GameObject>();
-            needsList.Add(GameObject.Find(this.name));
+            needsList.Add(gameObject);
             globalTags.Add(tag, needsList);
         }
 
@@ -63,7 +64,7 @@ public class taggedWith : MonoBehaviour
 
         //update "global" tags...
         //remove the game object to the list of objects tagged with that tag:
-        globalTags[tag].Remove(GameObject.Find(this.name));
+        globalTags[tag].Remove(gameObject);
     }
 
 

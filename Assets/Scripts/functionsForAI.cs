@@ -125,6 +125,22 @@ public class functionsForAI : MonoBehaviour
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
     {
 
+
+        //List<GameObject> allPotentialTargets = new List<GameObject>();
+
+        //now to find suitable targets using my new tagging system:
+        //NOTE: RIGHT NOW THIS LIST WILL INCLUDE EVERYONE, EVEN THE PERSON DOING THE ACTION, SO THEY MIGHT TARGET THEMSELVES!
+        //allPotentialTargets = globalTags["person"];
+        //print("ya every one leofjrjfir");
+        //print(allPotentialTargets.Count);
+
+
+
+
+
+
+
+
         //handle the travel prereqs here:
         if (nextAction.locationPrereq != null)
         {
@@ -141,7 +157,12 @@ public class functionsForAI : MonoBehaviour
                 print("the chooseTarget function returned null, for the following action:");
                 print(nextAction.name);
             }
-            travelToTargetObject(target);
+            else
+            {
+                //the following shoudl only happen if target is NOT null, right?
+                travelToTargetObject(target);
+            }
+            
 
 
             //I still currently use a "actionItem", but it could perhaps
@@ -153,7 +174,7 @@ public class functionsForAI : MonoBehaviour
 
 
         //actions with ALL prereqs met (including location prereq) can proceed below:
-        if (whicheverprereqStateChecker(nextAction, state, target) == true)
+        if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
         {
 
             //if(gameObject.name == "NPC")
@@ -185,6 +206,27 @@ public class functionsForAI : MonoBehaviour
                     //thisAI.toDoList.RemoveAt(0);
                     target = dumpAction(target);
                 }
+
+            }
+            else if (nextAction.name == "shootSpree")
+            {
+                //print("yo");
+                //don't kill player for now:
+                if(target.name != "Player")
+                {
+                    //print("a killer just shot " + target.name);
+                    //print("object to be destroyed:");
+                    //print(target);
+                    Destroy(target);
+                }
+                else
+                {
+                    //print("you are shot!");
+                    target = null;
+                }
+            }
+            else if (nextAction.name == "landLording")
+            {
 
             }
             else if (nextAction.name == "giveMoneyToLeader")
@@ -246,7 +288,7 @@ public class functionsForAI : MonoBehaviour
                         listOfCashiers.Add(customer);
                         changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
-                        print(customer.name);
+                        //print(customer.name);
 
 
                         workerCount += 1;
@@ -554,6 +596,8 @@ public class functionsForAI : MonoBehaviour
     {
         //probably ad-hoc for now
 
+        //should this have "nextAction" as an input AT ALL?  Probably NOT!  Maybe just the list of items to try stealing...
+
         //actioner is the one doing the nextAction
 
         //https://stackoverflow.com/a/605390
@@ -831,7 +875,7 @@ public class functionsForAI : MonoBehaviour
             //sorta ad-hoc for now...
             if (criteria.name == "anyStore")
             {
-                //print("anyStore");
+                print("anyStore");
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("shop", "forSale");
@@ -847,7 +891,7 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("checkout");
                 //get any store:
-                //print("hello?????????????????????????????");
+                print("hello?????????????????????????????");
                 target = anyCheckout();
             }
         }
@@ -902,7 +946,7 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    //find objects using tags:
+    //find objects using tags [should these be moved to tag script?]:
     public GameObject randomTaggedWith(string theTag)
     {
         //should return ONE random GameObject that is tagged with the inputted tag
@@ -912,6 +956,18 @@ public class functionsForAI : MonoBehaviour
         allPotentialTargets = globalTags[theTag];
 
 
+        if (theTag == "shop")
+        {
+            print("choosing a shop...");
+
+            print(allPotentialTargets.Count);
+
+            foreach(GameObject item in allPotentialTargets)
+            {
+                print(item.transform.position);
+            }
+        }
+
 
         if (allPotentialTargets.Count > 0)
         {
@@ -919,6 +975,17 @@ public class functionsForAI : MonoBehaviour
             thisObject = null;
             int randomIndex = Random.Range(0, allPotentialTargets.Count);
             thisObject = allPotentialTargets[randomIndex];
+
+            if (theTag == "shop")
+            {
+                print("FOUND a shop...");
+                print(randomIndex);
+                print(thisObject.name);
+
+                //print coordinates?  how?
+                print(thisObject.transform.position);
+            }
+
             return thisObject;
         }
         else
@@ -944,6 +1011,16 @@ public class functionsForAI : MonoBehaviour
             listOfIndices.Add(length);
             length += 1;
         }
+
+        /*
+        if (theTag == "shop")
+        {
+            print("choosing a shop...");
+            //print(length);
+        }
+        */
+            
+
 
         //put the optional other tags in a list:
         List<string> otherTags = new List<string>();
@@ -972,7 +1049,7 @@ public class functionsForAI : MonoBehaviour
 
             thisObject = allPotentialTargets[myIndex];
 
-
+            
             //now, check all the other tags on that^ object
             //if it lacks a needed tag, remove that item from the array
             //and choose again
@@ -997,6 +1074,9 @@ public class functionsForAI : MonoBehaviour
 
                         doWeHaveGoodTarget = false;
                         listOfIndices.RemoveAt(randomNumber);
+
+                        //set thisObject back to null:
+                        thisObject = null;
                         break;
                     }
                     /*
@@ -1012,6 +1092,15 @@ public class functionsForAI : MonoBehaviour
             //see if the object passed the test:
             if (doWeHaveGoodTarget == true)
             {
+                /*
+                if (theTag == "shop")
+                {
+                    print("FOUND a shop...");
+                    print(myIndex);
+                    print(thisObject.name);
+                }
+                */
+
                 return thisObject;
             }
         }
@@ -1055,7 +1144,7 @@ public class functionsForAI : MonoBehaviour
         //check if there ARE any NPCs there at all:
         if (listOfNPCs.theList.Count > 0)
         {
-            if (listOfNPCs.theList[0].name != "NPC pickpocket")
+            if (listOfNPCs.theList[0] != null && listOfNPCs.theList[0].name != "NPC pickpocket")
             {
                 customer = listOfNPCs.theList[0];
             }
@@ -1117,7 +1206,9 @@ public class functionsForAI : MonoBehaviour
         GameObject thisShop;
         thisShop = null;
 
+        print("sooooooooooooooooooooooo");
         thisShop = randomTaggedWith("shop");
+        print("---------done----------");
 
         return thisShop;
     }
@@ -1338,6 +1429,7 @@ public class functionsForAI : MonoBehaviour
         List<GameObject> allPotentialTargets = new List<GameObject>();
 
         //now to find suitable targets using my new tagging system:
+        //NOTE: RIGHT NOW THIS LIST WILL INCLUDE EVERYONE, EVEN THE PERSON DOING THE ACTION, SO THEY MIGHT TARGET THEMSELVES!
         allPotentialTargets = globalTags["person"];
 
         //....................................................................
@@ -1362,6 +1454,8 @@ public class functionsForAI : MonoBehaviour
         GameObject thisNPC;
         thisNPC = null;
         bool doWeHaveGoodTarget = false;
+        //print(">>>>>>>>>>>>>>>>>>");
+        //print(allPotentialTargets.Count);
 
         while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
         {
@@ -1370,15 +1464,23 @@ public class functionsForAI : MonoBehaviour
             //but, criteria, ad-hoc for now
             //if it's the shopkeeper, remove that item from the array (will that leave a "null" hole in array???)
             //and choose again
-            if (thisNPC.name == "NPC shopkeeper")
-            {
-                allPotentialTargets.RemoveAt(randomIndex);
-                thisNPC = null;
+            //print("during iteration:");
+            //print(allPotentialTargets.Count);
+            if (thisNPC != null)
+            { 
+                if (thisNPC.name == "NPC shopkeeper" || thisNPC.name == "NPC pickpocket")
+                {
+                    allPotentialTargets.RemoveAt(randomIndex);
+                    thisNPC = null;
+                }
+                else
+                {
+                    doWeHaveGoodTarget = true;
+                }
+            
+
             }
-            else
-            {
-                doWeHaveGoodTarget = true;
-            }
+                
         }
 
 
@@ -1758,6 +1860,7 @@ public class functionsForAI : MonoBehaviour
         if (this.name == "NPC 4")
         {
             print(x);
+            print("no plan found for NPC 4??");
         }
         
     }
@@ -1876,7 +1979,10 @@ public class functionsForAI : MonoBehaviour
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
-                    printNumberForSpecificNPC(5);
+                    //printNumberForSpecificNPC(5);
+                    //what is goal??????
+                    //print("goal (eachPrereq.name) was:");
+                    //print(eachPrereq.name);
 
                     break;
                 }
@@ -2161,7 +2267,7 @@ public class functionsForAI : MonoBehaviour
         //doesn't matter if the action has a locationPrereq or not
         //it can handle both types of action
 
-        //first, just check the regular prereqs using my regular prereqStateChecker:
+        //first [for some reason i don't recall, this one has to be first, otherwise it crashes], just check the regular prereqs using my regular prereqStateChecker:
         if (prereqStateChecker(thisAction, state) == false)
         {
             
@@ -2171,7 +2277,7 @@ public class functionsForAI : MonoBehaviour
         //now, check the location Prereq, IF THERE IS ONE:
         if (thisAction.locationPrereq != null)
         {
-            if (locationPrereqChecker(target) == false)
+            if (locationPrereqChecker(target, thisAction) == false)
             {
                 
                 return false;
@@ -2184,7 +2290,7 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public bool locationPrereqChecker(GameObject target)
+    public bool locationPrereqChecker(GameObject target, action thisAction)
     {
         //for now just copy the proximity check from pickpocket action?
 
@@ -2194,7 +2300,19 @@ public class functionsForAI : MonoBehaviour
         //print("distance, for this target:");
         //print(target.name);
         //print(distance);
-        if (distance < 3.5f)
+
+        //some actions need a bigger or smaller range.  Ad-hoc adding that here for now...
+        //default is basically zero range:
+        float theRange = 3.5f;
+
+        //change range for some things:
+        if(thisAction.name == "shootSpree")
+        {
+            theRange = 15;
+        }
+
+
+        if (distance < theRange)
         {
             return true;
         }
