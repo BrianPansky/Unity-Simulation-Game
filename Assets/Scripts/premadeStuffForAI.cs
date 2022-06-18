@@ -111,13 +111,13 @@ public class premadeStuffForAI : MonoBehaviour
     public Dictionary<string, stateItem> map = new Dictionary<string, stateItem>();
 
 
-
+    public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
 
     //Start is called before the first frame update, but too late
     //Awake is used to avoid issues, it's called even earlier than Start, I think (see notes somewhere):
     void Awake()
     {
-
+        theFunctions = GetComponent<functionsForAI>();
         //stateItems:
         {
             rentalProperty = stateItemCreator("rentalProperty", "property");
@@ -201,7 +201,10 @@ public class premadeStuffForAI : MonoBehaviour
         }
     }
 
-
+    void Start()
+    {
+        
+    }
 
     ////////////////////////////////////////////////////
     //              Pre-Made NPC STATES
@@ -212,9 +215,9 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        addToState(food, state);
-        addToState(money, state);
-        addToState(hungry, state);
+        addToState(deepStateItemCopier(food), state);
+        addToState(deepStateItemCopier(money), state);
+        addToState(deepStateItemCopier(hungry), state);
 
         return state;
     }
@@ -237,7 +240,7 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        addToState(hungry, state);
+        addToState(deepStateItemCopier(hungry), state);
 
         return state;
     }
@@ -286,6 +289,8 @@ public class premadeStuffForAI : MonoBehaviour
     public Dictionary<string, List<stateItem>> addToState(stateItem item, Dictionary<string, List<stateItem>> state)
     {
         //simply adds item:
+        //  SHOULD I MODIFY THIS TO BE DEEP COPIES???
+        //DUNNO, RIGHT NOW DEEP COPY STATE ISN'T CHANGING BEHAVIOR...
         state[item.stateCategory].Add(item);
 
         return state;
@@ -300,18 +305,37 @@ public class premadeStuffForAI : MonoBehaviour
 
     public List<action> createKnownActions1()
     {
-        
-        knownActions.Add(doTheWork);
-        knownActions.Add(buyHome);
+        List<action> newList = new List<action>();
+
+        newList.Add(doTheWork);
+        newList.Add(buyHome);
 
         //knownActions.Add(handleSecurityMild);
         //knownActions.Add(handleSecurityEscalationOne);
 
-        knownActions.Add(eat);
-        knownActions.Add(buyFood);
+        newList.Add(eat);
+        newList.Add(buyFood);
+
+
+
+        //knownActions.Add(doTheWork);
+        //knownActions.Add(buyHome);
+
+        //knownActions.Add(handleSecurityMild);
+        //knownActions.Add(handleSecurityEscalationOne);
+
+        //knownActions.Add(eat);
+        //knownActions.Add(buyFood);
+        //theFunctions.testSwitch();
+        //Debug.Log("////////////////////////// surely here START /////////////////////////");
+
+        knownActions = deepCopyActionList(newList);
         
+        //theFunctions.testSwitch();
 
 
+        //theFunctions.printKnownActionsDeeply(knownActions);
+        //Debug.Log("//////////////////////////////// surely here END ///////////////////////////////");
         return knownActions;
     }
 
@@ -338,24 +362,38 @@ public class premadeStuffForAI : MonoBehaviour
         
         knownActions.Add(restock);
 
-        return knownActions;
+        return deepCopyActionList(knownActions);
     }
 
     public List<action> createPickpocketKnownActions()
     {
-        
+        List<action> newList = new List<action>();
 
-        knownActions.Add(eat);
+
+        newList.Add(eat);
         //knownActions.Add(buyFood);
-        knownActions.Add(buyHome);
+        newList.Add(buyHome);
 
         //knownActions.Add(doTheWork);
 
 
         //knownActions.Add(findVictim);
         //knownActions.Add(goToVictim);
-        knownActions.Add(pickVictimsPocket);
+        newList.Add(pickVictimsPocket);
         //knownActions.Add(shootSpree); 
+
+
+        //theFunctions.testSwitch();
+        //Debug.Log("////////////////////////// surely here START /////////////////////////");
+
+        knownActions = deepCopyActionList(newList);
+
+        //theFunctions.testSwitch();
+
+
+        //theFunctions.printKnownActionsDeeply(knownActions);
+        //Debug.Log("//////////////////////////////// surely here END ///////////////////////////////");
+
 
 
         return knownActions;
@@ -370,6 +408,114 @@ public class premadeStuffForAI : MonoBehaviour
         listToModify.Add(theAction);
     }
     
+    public List<action> deepCopyActionList(List<action> theList)
+    {
+        //required to prevent quantities from screwing up i think
+
+        List<action> newList = new List<action>();
+
+        foreach (action thisAction in theList)
+        {
+            newList.Add(deepActionCopier(thisAction));
+        }
+
+
+        if (theFunctions.testTime == true && newList.Count > 0)
+        {
+            Debug.Log(newList[0].effects[0].item.name);
+            Debug.Log(newList[0].effects[0].item.quantity);
+        }
+
+        return newList;
+
+    }
+    
+    public action deepActionCopier(action thisAction)
+    {
+
+        action newAction = new action();
+
+        //these can be directly copied, they are never dynamically modified?  will cause no problems??
+        newAction.name = thisAction.name;
+        newAction.type = thisAction.type;
+        newAction.cost = thisAction.cost;
+        newAction.locationPrereq = thisAction.locationPrereq;
+
+
+        newAction.prereqs = deepPrereqEffectCopier(thisAction.prereqs);
+        newAction.effects = deepPrereqEffectCopier(thisAction.effects);
+
+        if (theFunctions.testTime == true && newAction.effects.Count > 0)
+        {
+            //Debug.Log(newAction.effects[0].item.name);
+            //Debug.Log(newAction.effects[0].item.quantity);
+        }
+
+        return newAction;
+        
+    }
+
+    public List<actionItem> deepPrereqEffectCopier(List<actionItem> thisPrereqOrEffectList)
+    {
+        List<actionItem> newPrereqOrEffectList = new List<actionItem>();
+
+        foreach(actionItem thisActionItem in thisPrereqOrEffectList)
+        {
+            newPrereqOrEffectList.Add(deepActionItemCopier(thisActionItem));
+        }
+
+        if (theFunctions.testTime == true  && newPrereqOrEffectList.Count > 0)
+        {
+            //Debug.Log(newPrereqOrEffectList[0].item.name);
+            //Debug.Log(newPrereqOrEffectList[0].item.quantity);
+        }
+
+
+        return newPrereqOrEffectList;
+    }
+
+    public actionItem deepActionItemCopier(actionItem thisActionItem)
+    {
+        actionItem newActionItem = new actionItem();
+
+        newActionItem.item = deepStateItemCopier(thisActionItem.item);
+
+        //the rest can be shallow copy?  i never dynamically modify them, so no problems?
+        newActionItem.inStateOrNot = thisActionItem.inStateOrNot;
+        newActionItem.name = thisActionItem.name;
+        newActionItem.stateCategory = thisActionItem.stateCategory;
+        newActionItem.locationType = thisActionItem.locationType;
+
+        if (theFunctions.testTime == true)
+        {
+            //Debug.Log(newActionItem.item.name);
+            //Debug.Log(newActionItem.item.quantity);
+        }
+
+        return newActionItem;
+    }
+
+    public stateItem deepStateItemCopier(stateItem item)
+    {
+        stateItem newItem = null;
+        newItem = stateItemCreator(item.name, item.stateCategory);
+        newItem.locationType = item.locationType;
+
+        newItem.quantity = 0; //just zero it out first
+        newItem.quantity += item.quantity;
+
+        //Debug.Log(newItem.name);
+        //Debug.Log(newItem.quantity);
+
+        if (theFunctions.testTime == true)
+        {
+            //Debug.Log(newItem.name);
+            //Debug.Log(newItem.quantity);
+        }
+
+
+        return newItem;
+    }
 
 
     ////////////////////////////////////////////////////

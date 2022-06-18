@@ -29,12 +29,15 @@ public class functionsForAI : MonoBehaviour
     public AI1 thisAI;// = GetComponent<AI1>();
     public premadeStuffForAI premadeStuff;
 
+    //ad hoc test thing
+    public bool testTime;
+
     public Dictionary<string, List<GameObject>> globalTags;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        testTime = false;
 
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
@@ -129,7 +132,8 @@ public class functionsForAI : MonoBehaviour
     //handles the enactment of ALL actions:
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
     {
-
+        //testSwitch();
+        //alert();
 
         //List<GameObject> allPotentialTargets = new List<GameObject>();
 
@@ -138,7 +142,7 @@ public class functionsForAI : MonoBehaviour
         //allPotentialTargets = globalTags["person"];
         //print("ya every one leofjrjfir");
         //print(allPotentialTargets.Count);
-        
+
 
 
         //handle the travel prereqs here:
@@ -190,6 +194,9 @@ public class functionsForAI : MonoBehaviour
 
             if (nextAction.type == "buyFromStore")
             {
+                testSwitch();
+                startTest();
+
                 //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                 //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
                 //if casheir isn't there, shouldn't wait forever, that is unrealistic, but right now that's what will happen
@@ -207,12 +214,19 @@ public class functionsForAI : MonoBehaviour
                 //but that cashier variable might come back null (if no one is there), check:
                 if (cashier != null)
                 {
+
                     //ad-hoc update of state:
                     state = implementALLEffects(nextAction, state);
 
                     //thisAI.toDoList.RemoveAt(0);
                     target = dumpAction(target);
+
+                    //alert();
+                    //print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
                 }
+
+                endTest();
+                testSwitch();
 
             }
             else if (nextAction.name == "shootSpree")
@@ -244,23 +258,30 @@ public class functionsForAI : MonoBehaviour
                 //just "gift" the delivery item to the target
                 //GameObject victim;
                 //victim = target;
-
-
+                
 
                 AI1 theTargetState = target.GetComponent("AI1") as AI1;
                 //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
 
-                gift(state["inventory"], theTargetState.state["inventory"], nextAction);
+                //gift(state["inventory"], theTargetState.state["inventory"], nextAction);
+                addMoney(state["inventory"], -1);
+                addMoney(theTargetState.state["inventory"], 1);
 
                 //state = implementALLEffects(nextAction, state);
 
                 target = dumpAction(target);
+
+                
 
 
 
             }
             else if (nextAction.type == "deliverAnyXtoLeader")
             {
+                startTest();
+                
+                //
+
                 //ad-hoc for now
                 //should generalize to be able to deliver to any target
 
@@ -269,13 +290,30 @@ public class functionsForAI : MonoBehaviour
                 AI1 theTargetState = target.GetComponent("AI1") as AI1;
                 //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
 
+                
+
+                //print("===============================surely here START=============================");
+                //printState(state);
+                //printKnownActionsDeeply(thisAI.knownActions);
+
                 gift(state["inventory"], theTargetState.state["inventory"], nextAction);
 
-                //state = implementALLEffects(nextAction, state);
+                //print("----------------------mid---------------------------");
+                //printState(state);
+                //printKnownActionsDeeply(thisAI.knownActions);
+                //print("xxxxxxxxxxxxxxxxxtttttttttttttttttttttttttt");
+                //print("----------------------mid---------------------------");
+
+                state = implementALLEffects(nextAction, state);
+
+                //printState(state);
+                //printKnownActionsDeeply(thisAI.knownActions);
+                //print("xxxxxxxxxxxxxxxxxtttttttttttttttttttttttttt");
+                //print("===============================surely here END=============================");
 
                 target = dumpAction(target);
 
-
+                endTest();
 
             }
             else if (nextAction.name == "hireSomeone")
@@ -609,6 +647,17 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffects(nextAction, state);
                 
             }
+            else if(nextAction.name == "eat")
+            {
+                
+
+                //ad-hoc update of state:
+                state = implementALLEffects(nextAction, state);
+                //thisAI.toDoList.RemoveAt(0);
+                target = dumpAction(target);
+
+                
+            }
             else
             {
                 //for actions like "eat" that currently just need a quick
@@ -616,18 +665,201 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffects(nextAction, state);
                 //thisAI.toDoList.RemoveAt(0);
                 target = dumpAction(target);
+
+                //alert();
             }
 
         }
 
 
         //ad hoc for now:
+        //testSwitch();
         return target;
     }
 
 
     //..................................................................
     //functions to handle important finishing steps of specific actions:
+
+    public void addMoney(List<stateItem> inventory, int amount)
+    {
+        //adds an amount of money to someone's inventory
+
+        //if inventory aready has money, just increment the quantity
+        //if inventory has no money, add it as a stateItem, then increment the quantity
+        bool foundMoney = false;
+        stateItem theMoney = null;
+        foreach (stateItem item in inventory)
+        {
+            if(item.name == "money")
+            {
+                foundMoney = true;
+                theMoney = item;
+                //print("111111111111111111111111111111111111");
+                
+            }
+        }
+
+        if (foundMoney == false)
+        {
+            //print("222222222222222222222222222222222222");
+            //need to add money to inventory
+            stateItem newMoney = premadeStuff.money;
+            //but, this money will already start with 1 quantity.  will need to subtract one so it starts at zero...
+            newMoney.quantity += amount - 1;
+            inventory.Add(newMoney);
+            
+
+            
+        }
+        else
+        {
+            //just add, don't need to zero it out:
+            theMoney.quantity += amount;
+        }
+
+        
+
+
+    }
+
+    public void incrementItem(List<stateItem> inventory, stateItem theItem, int amount)
+    {
+        //"theItem" is actually an effect built into an action.  
+        //it is not any realy item in any inventory.  as such it should not be modified
+        //(but can be copied, we will know how much it is in quantity)
+
+        //adds an amount of an item to someone's inventory
+
+        //if inventory aready has this item, just increment the quantity
+        //if inventory has none of the item, add it as a stateItem, then increment the quantity
+        bool foundItem = false;
+        stateItem itemToIncrement = null;
+
+        //find item to increment:
+        foreach (stateItem item in inventory)
+        {
+            if (item.name == theItem.name)
+            {
+                foundItem = true;
+                itemToIncrement = item;
+                //print("111111111111111111111111111111111111");
+
+            }
+        }
+
+        
+        if (foundItem == false)
+        {
+            if (this.name == "NPC")
+            {
+                //print("222222222222222222222222222222222222");
+                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+                //print(currentAction.name);
+                //print(newItem.quantity);
+                //print(amount);
+            }
+
+
+
+            //startTest();
+
+            //need to add money to inventory
+            //will this deepcopy or not???  do we want to?  won't it have wrong quantities if it does deep copy, but break if it doesn't deep copy???
+            stateItem newItem = deepStateItemCopier(theItem);
+            //but, this money will already start with 1 quantity.  will need to subtract one so it starts at zero...
+            //no, since we know in this logic branch of "if" statemetn that we are starting from ZERO
+            //just set it EQUAL to "amount".  don't subtract anything
+            //well, to avoid any deep copy nightmare, will use "+=" as follows:
+            newItem.quantity = 0;
+            newItem.quantity += amount;
+
+            //endTest();
+
+            if (this.name == "NPC")
+            {
+                //print(newItem.quantity);  //this should be JUST EQUAL TO "amount", no more, no less
+            }
+            //print(newItem.quantity);  //this should be JUST EQUAL TO "amount", no more, no less
+
+            inventory.Add(newItem);
+
+
+
+        }
+        else
+        {
+            
+            if (this.name == "NPC")
+            {
+                //print("===============================surely here START=============================");
+                //printState(thisAI.state);
+                //printKnownActionsDeeply(thisAI.knownActions);
+                //print(itemToIncrement.quantity);
+                //print(theItem.quantity);
+            }
+
+
+            //startTest();
+
+            //just add, don't need to zero it out:
+            itemToIncrement.quantity += amount;
+
+
+
+
+            //endTest();
+
+            //alert();
+
+            if (this.name == "NPC")
+            {
+                //print(itemToIncrement.quantity);
+                //print(itemToIncrement.name);
+                //print(theItem.quantity);
+                //printState(thisAI.state);
+                //printKnownActionsDeeply(thisAI.knownActions);
+                //print("===============================surely here END=============================");
+            }
+            
+
+            //if there are zero left in inventory, due to subtraction, completely remove the stateItem:
+            //if (itemToIncrement.quantity == 0)
+            if (itemToIncrement.quantity == 0)
+            {
+                
+                //imaginaryState = removeStateItem(eachEffect, imaginaryState);
+
+                //  SHOULD THIS BE "ITEM TO INCREMENT", NOT "THEITEM"????????
+                //removeInventoryItem(theItem, inventory);
+                removeInventoryItem(itemToIncrement, inventory);
+
+                
+            }
+            if (itemToIncrement.quantity < 0)
+            {
+                //!!!  R E A D   T H I S  !!!!!!S
+                //when subtracting "hunger" from state, if the "food" increment is more than one, it can make the "hunger" go into negatives.how to handle ?
+                //---should never do that.food should just increment 1.my current larger numbers were for testing only
+                //---check after incrementing.  if ANYWEHRE BELOW 1, count as zero, remove item from state.yes this "wastes" all those extra food increments.could maybe just subtract whatever was needed, have "leftovers" of food.
+                print("!!!!>>>  Increment went BELOW ZERO!  shoudl this EVER happen?? how to handle???");
+
+
+
+                //imaginaryState = removeStateItem(eachEffect, imaginaryState);
+
+                //  SHOULD THIS BE "ITEM TO INCREMENT", NOT "THEITEM"????????
+                //removeInventoryItem(theItem, inventory);
+                //removeInventoryItem(itemToIncrement, inventory);
+
+
+            }
+
+
+        }
+
+        
+    }
 
     public void trade(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
     {
@@ -695,12 +927,15 @@ public class functionsForAI : MonoBehaviour
         //NOW modify inventories
         foreach (stateItem item in actionerReceives)
         {
-            actionerInventory.Add(item);
+            //actionerInventory.Add(item);
+            incrementItem(actionerInventory, item, 1);
         }
         foreach (stateItem item in otherInventoryLoses)
         {
-            inventory2.Remove(item);
+            //inventory2.Remove(item);
+            incrementItem(inventory2, item, -1);
         }
+        
     }
 
     public void gift(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
@@ -726,20 +961,28 @@ public class functionsForAI : MonoBehaviour
                 if (itemInInventory.name == effect.name)
                 {
                     actionerGives.Add(itemInInventory);
-                    otherInventoryReceives.Add(effect.item);
+
+                    //need to deep copy this one so we don't modify stuff in "knownActions":
+                    otherInventoryReceives.Add(deepStateItemCopier(effect.item));
                 }
             }
         }
 
+        
+
         //NOW modify inventories
         foreach (stateItem item in actionerGives)
         {
-            actionerInventory.Remove(item);
+            //actionerInventory.Remove(item);
+            incrementItem(actionerInventory, item, -1);
         }
         foreach (stateItem item in otherInventoryReceives)
         {
-            inventory2.Add(item);
+            //inventory2.Add(item);
+            incrementItem(inventory2, item, 1);
         }
+
+        
     }
 
     public void addKnownActionToGameObject(GameObject agent, action theAction)
@@ -1771,22 +2014,31 @@ public class functionsForAI : MonoBehaviour
     {
         string printout = string.Empty;
 
+        printout += "[ ";
+
         foreach (action listItem in plan)
         {
             printout += listItem.name + ' ';
         }
+
+        printout += "]";
 
         return printout;
     }
 
     public string planListToText(List<List<action>> planList)
     {
+        print("number of plans on planList = " + planList.Count());
         string printout = string.Empty;
+
+        printout += "[ ";
 
         foreach (List<action> list in planList)
         {
             printout += "[ " + planToText(list) + " ] ";
         }
+
+        printout += "]";
 
         return printout;
     }
@@ -1810,18 +2062,21 @@ public class functionsForAI : MonoBehaviour
 
     public void printState(Dictionary<string, List<stateItem>> state)
     {
-        string text;
-        text = "{";
+        string text = string.Empty;
+        text += "{";
         foreach (string key in state.Keys)
         {
-            text = string.Concat(text, key, ", ");
+            text += "{ " + key + ": ";
+            //text = string.Concat(text, key, ", ");
             foreach (stateItem content in state[key])
             {
-                text = string.Concat(text, content.name, ", ");
+                text += content.quantity + " " + content.name + ", ";
+                //text = string.Concat(text, content.name, ", ");
             }
-            text = string.Concat(text, "} ");
+            //text = string.Concat(text, "} ");
+            text += "}";
         }
-        text = string.Concat(text, "}");
+        text += "}";
         print(text);
     }
 
@@ -1970,12 +2225,70 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
+
+    public void printPlanWithQuantities(List<action> plan)
+    {
+        //print quantities in effects, for now
+
+        string printout = string.Empty;
+
+        printout += "[ ";
+
+        foreach (action listItem in plan)
+        {
+            printout += actionToTextDeep(listItem);
+        }
+
+        printout += "]";
+
+        print(printout);
+    }
+
+    public string actionToTextDeep(action thisAction)
+    {
+        string printout = string.Empty;
+
+        printout += thisAction.name + ": ";
+
+        foreach (actionItem effect in thisAction.effects)
+        {
+            //printout += "( ";
+            //printout += effect.name + ": " + effect.item.quantity;
+            //printout += ")";
+            printout += actionItemToTextDeep(effect);
+            printout += ", ";
+        }
+
+        return printout;
+    }
+
+    public string actionItemToTextDeep(actionItem thisActionItem)
+    {
+        string printout = string.Empty;
+
+        printout += "( ";
+        printout += thisActionItem.name + ": " + thisActionItem.item.quantity;
+        printout += ")";
+
+        return printout;
+    }
+
+    public void printKnownActionsDeeply(List<action> knownActions)
+    {
+        //print quantities in effects, for now
+
+        printPlanWithQuantities(knownActions);
+
+
+    }
+
     ////////////////////////////////////////////////
     //                Planning
     ////////////////////////////////////////////////
 
     public List<List<action>> problemSolver(actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
+        alert();
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
         List<List<action>> planList = new List<List<action>>();
@@ -2023,7 +2336,7 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-
+    
 
 
     public List<List<action>> prereqFiller(action thisAction, List<action> knownActions, Dictionary<string, List<stateItem>> state)
@@ -2281,7 +2594,16 @@ public class functionsForAI : MonoBehaviour
         //print(goal.inStateOrNot);
 
         //do stuff as if "wantedInstateOrNot" == true, then can reverse it later if it's false
-        
+
+
+        if (this.name == "NPC")
+        {
+            //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+            //print(currentAction.name);
+            //printState(state);
+        }
+
+
         foreach (stateItem stateI in state[goal.stateCategory])
         {
 
@@ -2294,6 +2616,30 @@ public class functionsForAI : MonoBehaviour
             if (stateI.name == goal.name)
             {
                 tf = true;
+
+                if (this.name == "NPC")
+                {
+                    //print("1111111111111111111111");
+                    //print(currentAction.name);
+                }
+
+
+                //but false if it's not enough money:
+                if (stateI.quantity < goal.item.value)
+                {
+
+                    if (this.name == "NPC")
+                    {
+                        print("2222222222222222222222222222");
+                        print("have: " + stateI.name +" = " + stateI.quantity);
+                        print("need: " + goal.item.name + " = " + goal.item.value);
+                        printState(thisAI.state);
+                        
+                    }
+
+
+                    tf = false;
+                }
             }
         }
         
@@ -2449,13 +2795,29 @@ public class functionsForAI : MonoBehaviour
             newState[keyString] = emptyList;
             foreach (stateItem item in state[keyString])
             {
-                newState[keyString].Add(item);
+                //but...kinda need to ALSO make a deep copy of EVERY INDIVIDUAL ITEM
+                //including all their quantities etc...sigh...
+                //so, here we go:
+
+                newState[keyString].Add(deepStateItemCopier(item));
             }
         }
         return newState;
     }
 
-    public Dictionary<string, List<stateItem>> removeStateItem(stateItem thisactionItem, Dictionary<string, List<stateItem>> state)
+    public stateItem deepStateItemCopier(stateItem item)
+    {
+        stateItem newItem = null;
+        newItem = premadeStuff.stateItemCreator(item.name, item.stateCategory);
+        newItem.locationType = item.locationType;
+
+        newItem.quantity = 0; //just zero it out first
+        newItem.quantity += item.quantity;
+
+        return newItem;
+    }
+
+    public Dictionary<string, List<stateItem>> removeStateItem(stateItem thisActionItem, Dictionary<string, List<stateItem>> state)
     {
         //just because they are not quite identical enough for .Remove to work properly I don't think
 
@@ -2465,14 +2827,14 @@ public class functionsForAI : MonoBehaviour
 
 
         //find the correct actionItem, then remove it
-        foreach (stateItem eachactionItem in state[thisactionItem.stateCategory])
+        foreach (stateItem eachActionItem in state[thisActionItem.stateCategory])
         {
-            if (eachactionItem.name == thisactionItem.name)
+            if (eachActionItem.name == thisActionItem.name)
             {
                 //*****EVENTUALLY might want to check MORE than just the name
                 //because I might need multiple actionItems with same name, but differences in other fields?
 
-                state[thisactionItem.stateCategory].Remove(eachactionItem);
+                state[thisActionItem.stateCategory].Remove(eachActionItem);
                 break;
             }
         }
@@ -2480,10 +2842,41 @@ public class functionsForAI : MonoBehaviour
         return state;
     }
 
+    public List<stateItem> removeInventoryItem(stateItem thisActionItem, List<stateItem> inventory)
+    {
+        //just because they are not quite identical enough for .Remove to work properly I don't think
+
+        //EDIT, turns out C# already has a way to do this.
+        //though it is ugly and I don't know the syntax:
+        //inventory.RemoveAll(x => x.name == myItem.name);
+
+
+        //find the correct actionItem, then remove it
+        foreach (stateItem eachActionItem in inventory)
+        {
+            if (eachActionItem.name == thisActionItem.name)
+            {
+                //*****EVENTUALLY might want to check MORE than just the name
+                //because I might need multiple actionItems with same name, but differences in other fields?
+
+                inventory.Remove(eachActionItem);
+                break;
+            }
+        }
+
+        return inventory;
+    }
+
     public Dictionary<string, List<stateItem>> implementALLEffects(action currentAction, Dictionary<string, List<stateItem>> imaginaryState)
     {
         foreach (actionItem FIXeachEffect in currentAction.effects)
         {
+            if (this.name == "NPC" && FIXeachEffect.name == "money")
+            {
+                //print("amount of money to implement, should never be zero i don't think:");
+                //printPlanListForSpecificNPC();
+                //print(FIXeachEffect.item.quantity);
+            }
             imaginaryState = implementTHISEffect(FIXeachEffect, imaginaryState);
         }
         return imaginaryState;
@@ -2491,22 +2884,55 @@ public class functionsForAI : MonoBehaviour
 
     public Dictionary<string, List<stateItem>> implementTHISEffect(actionItem FIXeachEffect, Dictionary<string, List<stateItem>> imaginaryState)
     {
-        //just have to fix this first:
+        //just have to get the "stateItem" from the actionItem:
         stateItem eachEffect = FIXeachEffect.item;
+        if (this.name == "NPC" && eachEffect.name == "money")
+        {
+            //print("is this money effect zero???: ");
+            //print(currentAction.name);
+            //print(eachEffect.quantity);
+        }
+        
+
+        if (FIXeachEffect.name == "food")
+        {
+            //print("before incrementing food:");
+            //printInv
+            //printState(imaginaryState);
+        }
 
         if (FIXeachEffect.inStateOrNot == true)
         {
+
             if (eachEffect.stateCategory == "locationState")
             {
                 imaginaryState["locationState"].Clear();
             }
-            imaginaryState[eachEffect.stateCategory].Add(eachEffect);
+
+            //imaginaryState[eachEffect.stateCategory].Add(eachEffect);
+            incrementItem(imaginaryState[eachEffect.stateCategory], eachEffect, eachEffect.quantity);
+
+            
         }
         else
         {
-            imaginaryState = removeStateItem(eachEffect, imaginaryState);
+            //imaginaryState = removeStateItem(eachEffect, imaginaryState);
             //imaginaryState[eachEffect.stateCategory].Remove(eachEffect);
+            incrementItem(imaginaryState[eachEffect.stateCategory], eachEffect, (-1)*eachEffect.quantity);
+
+            //if there are zero left in inventory, completely remove the stateItem:
+            //well, this should technically be handled over in "incrementItem, i think
+            //if ()
+            
         }
+
+        if (FIXeachEffect.name == "food")
+        {
+            //print("AFTER incrementing food:");
+            //printInv
+            //printState(imaginaryState);
+        }
+
         return imaginaryState;
     }
 
@@ -2528,6 +2954,12 @@ public class functionsForAI : MonoBehaviour
         //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible acitons
         //keep working on all impossible plans until they are fixed...or give up and discard them
 
+        if (this.name == "NPC")
+        {
+            //print("--------------realState at START simulation step");
+            //printPlanListForSpecificNPC();
+            //printState(realState);
+        }
 
         List<List<action>> fixedPlanList = new List<List<action>>();
         //print("111111111111111111111111111111111111111");
@@ -2543,6 +2975,13 @@ public class functionsForAI : MonoBehaviour
             {
                 fixedPlanList = mergePlanLists(fixedPlanList, fixedPlan);
             }
+        }
+
+        if (this.name == "NPC")
+        {
+            //print("--------------realState at END simulation step");
+            //printPlanListForSpecificNPC();
+            //printState(realState);
         }
 
         return fixedPlanList;
@@ -2612,8 +3051,21 @@ public class functionsForAI : MonoBehaviour
                 //print(currentAction.name);
                 //printPlan(planInProgress);
             }
-
+            if (this.name == "NPC")
+            {
+                //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa here??");
+                //print("--------------imaginaryState at START of implementALLEffects");
+                //printPlanListForSpecificNPC();
+                //printState(imaginaryState);
+            }
             imaginaryState = implementALLEffects(currentAction, imaginaryState);
+            if (this.name == "NPC")
+            {
+                //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa end");
+                //print("--------------imaginaryState at END of implementALLEffects");
+                //printPlanListForSpecificNPC();
+                //printState(imaginaryState);
+            }
         }
 
 
@@ -2677,6 +3129,7 @@ public class functionsForAI : MonoBehaviour
 
     public int findFirstImpossibleAction(List<action> plan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
+        alert();
         //imagines it's way through a plan list
         //returns the index number of the first action on that list that CANNOT be completed
         //if all actions can be completed fine, it returns negative two
@@ -2696,13 +3149,32 @@ public class functionsForAI : MonoBehaviour
         {
             if (impossibleActionprereqStateChecker(currentAction, imaginaryState) != true)
             {
-                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
-                //print(currentAction.name);
+                if (this.name == "NPC")
+                {
+                    //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+                    //print(currentAction.name);
+                }
+                    
                 return counter;
             }
 
+            if (this.name == "NPC")
+            {
+                //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb here??");
+                //print("--------------imaginaryState at START of implementALLEffects");
+                //printPlanListForSpecificNPC();
+                //pr
+            }
             imaginaryState = implementALLEffects(currentAction, imaginaryState);
             counter += 1;
+
+            if (this.name == "NPC")
+            {
+                //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb end");
+                //print("--------------imaginaryState at START of implementALLEffects");
+                //printPlanListForSpecificNPC();
+                //pr
+            }
         }
 
 
@@ -2720,13 +3192,17 @@ public class functionsForAI : MonoBehaviour
             //print("don't count this");
             if (isStateAccomplished(prereqX, state) == false)
             {
-                /*
-                print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
-                print(thisAction.name);
-                print("BECAUSE of this prereq:");
-                print(prereqX.name);
-                print(gameObject.name);
-                */
+                if (this.name == "NPC")
+                {
+                    //print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                    //print(thisAction.name);
+                    //print("BECAUSE of this prereq:");
+                    //print(prereqX.name);
+                    //print(gameObject.name);
+                }
+
+
+
 
                 return false;
             }
@@ -2780,4 +3256,120 @@ public class functionsForAI : MonoBehaviour
 
 
 
+
+    //other diagnostics:
+    public void alert()
+    {
+        //check an error condition, print only when it happens
+        //scatter this funciton throughout the code, 
+        //then can check the traceback to see which one first printed it
+        //and that is aproximately wher ethe trouble started
+
+        if(conditionX() == true)
+        {
+            print("!!!!!!!!!! F O U N D !!!!!!!!!!!");
+        }
+    }
+
+    public bool conditionX()
+    {
+        //return true if ALL conditions are met
+        //that is if it is right NPC and the error is found
+        //so, return false if it is wrong NPC, return false if error condition is not met
+
+        //start with true
+        //then if any ONE desired condition is false, it falsifies it
+        bool tf = true;
+
+        //junk:
+        //print("===============================surely here START=============================");
+        //printState(thisAI.state);
+        //printKnownActionsDeeply(thisAI.knownActions);
+        //print(itemToIncrement.quantity);
+        //print(theItem.quantity);
+
+
+        if (this.name != "NPC")
+        {
+            return false;
+        }
+
+        if(isActionModified() != true)
+        {
+            return false;
+        }
+
+        return tf;
+    }
+
+    public bool isActionModified()
+    {
+        //check knownActions
+        //if (for the moment) food has hunger = 0, then return 
+        //...true i guess.  "is action modified?  yes, true, it is"
+
+        //junk:
+        //print("===============================surely here START=============================");
+        //printState(thisAI.state);
+        //printKnownActionsDeeply(thisAI.knownActions);
+        //print(itemToIncrement.quantity);
+        //print(theItem.quantity);
+        //printKnownActionsDeeply(thisAI.knownActions);
+        foreach (action thisAction in thisAI.knownActions)
+        {
+            foreach(actionItem thisActionItem in thisAction.effects)
+            {
+                //print(thisActionItem.item.name);
+                //print(thisActionItem.item.quantity);
+                if(thisActionItem.item.name == "hungry" && thisActionItem.item.quantity == 0)
+                {
+                    //print("=======???hewwwwwwoooo????==========");
+                    return true;
+                }
+                
+            }
+        }
+
+        //print("=======???????????????????==========");
+
+        return false;
+
+    }
+
+
+    public void startTest()
+    {
+        if (testTime == true && this.name == "NPC pickpocket")
+        {
+            print("===============================surely here START=============================");
+            printState(thisAI.state);
+            printKnownActionsDeeply(thisAI.knownActions);
+            //print(itemToIncrement.quantity);
+            //print(theItem.quantity);
+        }
+    }
+    
+    public void endTest()
+    {
+        if (testTime == true && this.name == "NPC pickpocket")
+        {
+            //print(itemToIncrement.quantity);
+            //print(theItem.quantity);
+            printState(thisAI.state);
+            printKnownActionsDeeply(thisAI.knownActions);
+            print("===============================surely here END=============================");
+        }
+    }
+
+    public void testSwitch()
+    {
+        if(testTime == false)
+        {
+            testTime = true;
+        }
+        else
+        {
+            testTime = false;
+        }
+    }
 }
