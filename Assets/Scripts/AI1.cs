@@ -258,7 +258,7 @@ public class AI1 : MonoBehaviour
                 //          POST-PLANNING PHASE
                 /////////////////////////////////////////////////
 
-                //now to rank the plans by cost:
+                //now to rank the plans by cost [no, I do that above]:
                 //(first check we have any palns)
                 if (planList != null && planList.Count > 0)
                 {
@@ -269,6 +269,15 @@ public class AI1 : MonoBehaviour
                     toDoList = deepCopyFirstPlan(planList);
                     //and REMOVE that first one from the planList:
                     planList.RemoveAt(0);
+
+                    
+                    if (this.name == "NPC pickpocket")
+                    {
+                        theFunctions.print("00000000000000000  Plan:   000000000000000000");
+                        //printPlanList(planList);
+                        theFunctions.printPlan(toDoList);
+                    }
+                    
 
                     //am I generating impossible plans???
                     //int Z;
@@ -292,8 +301,18 @@ public class AI1 : MonoBehaviour
             //make sure list isn't empty AGAIN:
             if (toDoList.Count > 0)
             {
-
-                target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+                //but don't do the action if it is already done
+                //if it's done, remove it:
+                if(checkIfEffectsAreDone(toDoList[0], state) == false)
+                {
+                    target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+                }
+                else
+                {
+                    //this "else" means the nextAction is redundant, already done.
+                    //so dump the action:
+                    target = theFunctions.dumpAction(target);
+                }
 
 
 
@@ -301,7 +320,7 @@ public class AI1 : MonoBehaviour
         }
         else
         {
-            //in conversation, need to stop:
+            //this "else" means we are in conversation, need to stop:
             theFunctions._navMeshAgent.isStopped = true;
             //UnityEngine.AI.NavMeshAgent.Stop();
             
@@ -346,6 +365,31 @@ public class AI1 : MonoBehaviour
         }
 
         return thisDeepCopy;
+    }
+
+    public bool checkIfEffectsAreDone(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //used to check if an action is redundant, if it's done already.
+        //this is similar to the funciton that checks prereqs.  Could probably use that fact to cut down on duplicate code...
+
+
+        //assume true, then check and change to false where needed
+        bool tf;
+        tf = true;
+        
+
+        foreach (stateItem effectX in thisAction.effects)
+        {
+            
+            if (theFunctions.isStateAccomplished(effectX, state) == false)
+            {
+
+                return false;
+            }
+        }
+
+        return tf;
+
     }
 }
 

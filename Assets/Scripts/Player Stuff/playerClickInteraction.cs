@@ -188,91 +188,25 @@ public class playerClickInteraction : MonoBehaviour
     
     public void createRecruitmentButtonGrid()
     {
-        //all buttons should be added to "currentGridButtons"
-        //so that they are easy to delete etc. later
-
-        Action myDelegate = this.recruitButton;
-        makeButton("recruit to gang", myDelegate);
-
-        myDelegate = this.testButton;
-        makeButton("regular work", myDelegate);
-
-        myDelegate = this.giftGunButton;
-        makeButton("give gun", myDelegate);
-
-        myDelegate = this.extortOrderButton;
-        makeButton("order extortion", myDelegate);
-
-
-        /*
-        //DYNAMICALLY CREATE RECRUIT BUTTON, AD-HOC FOR NOW
-        GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject.GetComponentInChildren<Text>().text = "recruit to gang";
-        myNewGameObject.transform.SetParent(myGridCanvas.transform);
-        myNewGameObject.GetComponent<Button>().onClick.AddListener(() => recruitButton());
         
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject);
-
+        makeButton("recruit to gang", this.recruitButton);
         
-        //DYNAMICALLY CREATE TEST BUTTON, AD-HOC FOR NOW
-        GameObject myNewGameObject2 = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject2.GetComponentInChildren<Text>().text = "regular work";
-        myNewGameObject2.transform.SetParent(myGridCanvas.transform);
-        myNewGameObject2.GetComponent<Button>().onClick.AddListener(() => testButton());
-
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject2);
-
-        //DYNAMICALLY CREATE "give gun" BUTTON, AD-HOC FOR NOW
-        GameObject myNewGameObject3 = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject3.GetComponentInChildren<Text>().text = "give gun";
-        myNewGameObject3.transform.SetParent(myGridCanvas.transform);
-        myNewGameObject3.GetComponent<Button>().onClick.AddListener(() => giftGunButton());
-
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject3);
-
-        //DYNAMICALLY CREATE "order extortion" BUTTON, AD-HOC FOR NOW
-        GameObject myNewGameObject4 = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject4.GetComponentInChildren<Text>().text = "order extortion";
-        myNewGameObject4.transform.SetParent(myGridCanvas.transform);
-        myNewGameObject4.GetComponent<Button>().onClick.AddListener(() => extortOrderButton());
-
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject4);
-        */
-
-
-
-
+        makeButton("regular work", this.testButton);
+        
+        makeButton("give gun", this.giftGunButton);
+        
+        makeButton("order extortion", this.extortOrderButton);
+        
     }
 
     public void createStoreMenu()
     {
-        //all buttons should be added to "currentGridButtons"
-        //so that they are easy to delete etc. later
 
-        //DYNAMICALLY CREATE BUYFOOD BUTTON, AD-HOC FOR NOW
-        GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject.transform.SetParent(myGridCanvas.transform);
+        makeButton("buy food", this.tradeButton);
 
-        myNewGameObject.GetComponentInChildren<Text>().text = "buy food";
-        myNewGameObject.GetComponent<Button>().onClick.AddListener(() => tradeButton());
+        makeButton("buy gun", this.buyGunButton);
 
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject);
-
-
-        //now for BUY GUN:
-        GameObject myNewGameObject2 = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject2.transform.SetParent(myGridCanvas.transform);
-
-        myNewGameObject2.GetComponentInChildren<Text>().text = "buy gun";
-        myNewGameObject2.GetComponent<Button>().onClick.AddListener(() => buyGunButton());
-
-        //add the button to a list, so I can elswhere delete it:
-        currentGridButtons.Add(myNewGameObject2);
+        
     }
 
     public void destroyObjectListItems(List<GameObject> theList)
@@ -300,7 +234,7 @@ public class playerClickInteraction : MonoBehaviour
         //I pass in an "Action", C# delegate nonsense, but notice here I have to add brackets after it:
         myNewGameObject.GetComponent<Button>().onClick.AddListener(() => function());
 
-        //add the button to a list, so I can elswhere delete it:
+        //add the button to a list, so I can elswhere easily delete it:
         currentGridButtons.Add(myNewGameObject);
     }
 

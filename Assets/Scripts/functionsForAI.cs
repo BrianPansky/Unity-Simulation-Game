@@ -652,9 +652,19 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject dumpAction(GameObject target)
     {
+        
         //when action is done, remove the action from the plan, and set target to null
         target = null;
         thisAI.toDoList.RemoveAt(0);
+
+        //maybe check if plan is complete.
+        //if so, should ALSO blank out "planList"
+        //because those plans were made on the assumption that the stuff of this current plan were not complete
+        if(thisAI.toDoList.Count == 0)
+        {
+            //blank out the planList:
+            thisAI.planList.Clear();
+        }
 
         return target;
     }
