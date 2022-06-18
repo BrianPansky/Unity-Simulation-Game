@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class myTagging1 : MonoBehaviour
 {
+    //this script is just my quick way to add a few tags to an object
+    //I should really rename this script, the meaning of the name isn't clear
+
+
     public taggedWith thisIsTaggedWith;
 
 

@@ -155,17 +155,27 @@ public class AI1 : MonoBehaviour
             //theFunctions.printPlan(planList[0]);
             //print("state AFTER imagination:");
 
-            
+
             //theFunctions.printState(state);
-            //ad hoc for now
+
+            /////////////////////////////////////////////////
+            //          POST-PLANNING PHASE
+            /////////////////////////////////////////////////
+
+            //now to rank the plans by cost:
+            //(first check we have any palns)
             if (planList.Count > 0)
             {
-                //print("plan found");
+
+                //now to rank the plans by cost:
+                planList = theFunctions.planRanker(planList);
+
+                //now, choose first one:
                 toDoList = planList[0];
 
                 //am I generating impossible plans???
-                int Z;
-                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+                //int Z;
+                //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
 
                 
 

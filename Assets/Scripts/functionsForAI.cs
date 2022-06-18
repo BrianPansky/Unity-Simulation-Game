@@ -30,6 +30,7 @@ public class functionsForAI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
 
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
@@ -54,6 +55,35 @@ public class functionsForAI : MonoBehaviour
     //handles ALL sensing:
     public void sensing(action nextAction, GameObject target, Dictionary<string, List<stateItem>> state)
     {
+        
+        if (areAllForbiddenZonesClear() == false)
+        {
+            //print("yo");
+
+            //so, sensed someone in the forbiddenZone
+            //need to update threatState with threat1:
+            //soooo, how to do that...
+            //THIS WILL ADD THEM AN INFINIE NUMBER OF TIMES, NEED TO ONLY ADD IT IF IT IS ABSENT!
+            //state["threatState"].Add(premadeStuff.threat1);
+            //print("in sensing phase:  " + target.name);
+
+            //ok, so found a threat in a forbiddenZone
+            //but before we record that threat, first check if we ALREADY have that threat recorded:
+            if(isStateAccomplished(premadeStuff.threat1, state) == false)
+            {
+                //ok, now we know we won't be adding a duplicate, here we go:
+                state["threatState"].Add(premadeStuff.threat1);
+
+
+
+                //print("yo");
+            }
+        }
+
+
+
+
+        /*
         if(nextAction.name == "workAsCashier" || nextAction.name == "hireSomeone")
         {
             //characters doing htese actions must check the "forbiddenZone" of the store they are working at
@@ -75,17 +105,17 @@ public class functionsForAI : MonoBehaviour
                 //soooo, how to do that...
                 //THIS WILL ADD THEM AN INFINIE NUMBER OF TIMES, NEED TO ONLY ADD IT IF IT IS ABSENT!
                 state["threatState"].Add(premadeStuff.threat1);
-                print("in sensing phase:  " + target.name);
+                //print("in sensing phase:  " + target.name);
             }
-
             
         }
-        
-        
+        */
+
+
     }
-    
-    
-    
+
+
+
 
     ////////////////////////////////////////////////
     //                  ACTIONS
@@ -394,16 +424,10 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "handleSecurityMild")
             {
                 //print("yoooooooo");
-
-
-                //just TEST for now:
-                print("in enactment phase:  " + target.name);
-                GameObject mapZoneToCheck = getMapZoneOfForbiddenZone(target);
-
-                //then, need to check if ANYONE is in that zone:
-                listOfTouchingNPCs listOfAnyone = mapZoneToCheck.GetComponent<listOfTouchingNPCs>();
-                if (listOfAnyone.theList.Count == 0)
+                
+                if (areAllForbiddenZonesClear() == true)
                 {
+                    print("yoooooooo");
                     state = implementALLEffects(nextAction, state);
                     target = dumpAction(target);
                 }
@@ -603,6 +627,46 @@ public class functionsForAI : MonoBehaviour
     }
 
     
+    //pretty ad-hoc
+
+    public bool areAllForbiddenZonesClear()
+    {
+        //check all forbiddenZones in senseZone, return true or false
+
+        //ALSO USED IN "SENSING" MAYBE!!!
+
+        //first gett he senseZone:
+        GameObject thisSenseZone = namedChild(this.gameObject, "senseZone");
+
+        //then get the script on the senseZone:
+        senseZoneScript thisSenseZoneScript = thisSenseZone.GetComponent<senseZoneScript>();
+
+        //if(thisSenseZoneScript.listOfForbiddenZones.Count > 0)
+
+
+        //check each forbiddenZone:
+        foreach (GameObject thisForbiddenZone in thisSenseZoneScript.listOfForbiddenZones)
+        {
+            //now need to check the "listOfTouchingNPCs" script on the "mapZone" object that is the CHILD of this forbiddenZone...
+
+            //get the mapZone that is the child of this forbiddenZone
+            GameObject thismapZone = namedChild(thisForbiddenZone, "mapZone");
+
+            //get the "listOfTouchingNPCs" script that is attached to the mapZone:
+            listOfTouchingNPCs thisListOfTouchingNPCs = thismapZone.GetComponent<listOfTouchingNPCs>();
+
+            //whew!
+
+            //now, check if ANYONE is in that map zone:
+            if (thisListOfTouchingNPCs.theList.Count > 0)
+            {
+                return false;
+            }
+        }
+
+        //if that didn't find anyhting, then it's clear.  Return true:
+        return true;
+    }
 
     ////////////////////////////////////////////////
     //                TARGETING
@@ -1186,8 +1250,161 @@ public class functionsForAI : MonoBehaviour
     }
 
 
+    ////////////////////////////////////////////////
+    //             POST-PLANNING PHASE
+    ////////////////////////////////////////////////
+
+    public List<List<action>> planRanker(List<List<action>> unsortedPlans)
+    {
+        //takes a list of unsorted plans
+        //evaluates the "cost" of each plan
+        //organizes the plans from cheapest to most costly
+
+        List<List<action>> rankedPlans = new List<List<action>>();
+
+        List<int> unsortedCosts = new List<int>();
+
+        foreach (List<action> thisPlan in unsortedPlans)
+        {
+            //calculate the cost of this plan
+
+            int cost = costFinder(thisPlan);
+            unsortedCosts.Add(cost);
+        }
+
+        //now I have two lists (unsortedPlans and unsortedCosts)
+        //they are unsorted but in the SAME order
+        //how to sort them?
+        //make a function that creates a NEW list, a list of index integers in the correct order
+        //then go through each item in THAT list, use it to call indexed items from
+        //the unsorted plans list, add them in correct order to a new list
+
+        List<int> sortedIndexes = findIndexOrder(unsortedCosts);
+
+        //now just add the PLANS to the sorted list ("rankedPlans"), called by index from unsortedPlans, in order of the sortedIndexes:
+        foreach (int thisIndexToCall in sortedIndexes)
+        {
+            rankedPlans.Add(unsortedPlans[thisIndexToCall]);
+        }
 
 
+        return rankedPlans;
+    }
+
+
+    public List<int> findIndexOrder(List<int> unsortedCosts)
+    {
+        //given unsorted list of costs
+        //find out the sequence they SHOULD be in
+        //return a list of indexes in that order
+
+        List<int> unsortedListOfIndexes = new List<int>();
+        List<int> sortedListOfIndexes = new List<int>();
+
+        Dictionary<int, int> indexAligner = new Dictionary<int, int>();
+
+        //make this list of indexes the 
+
+        //"deep copy" of the unsorted costs:
+        List<int> copyCosts = new List<int>();
+        foreach(int thisCost in unsortedCosts)
+        {
+            copyCosts.Add(thisCost);
+        }
+
+        //just sorting the costs, not fancy for now:
+        copyCosts.Sort();
+
+        //NOW FOR THE TRICKY PART
+
+        //add the indexes as a value in a dictionary wher the keys are in order, 1 2 3 4 etc.
+        foreach(int thisCost in copyCosts)
+        {
+            //so, adding this to the dictionary will be done in order
+            //so we'll have a counter so I always know the key to give the 
+            int thisIndex = unsortedCosts.IndexOf(thisCost);
+
+            //need to check if this is duplicate
+            while (sortedListOfIndexes.Contains(thisIndex))
+            {
+                //ok, need to find NEXT instance of thisCost
+                int offset = thisIndex + 1;
+                thisIndex = unsortedCosts.IndexOf(thisCost, offset);
+            }
+
+            sortedListOfIndexes.Add(thisIndex);
+
+        }
+
+
+
+        /*
+        //now, create the sorted list of indexes:
+        foreach (int thisCost in copyCosts)
+        {
+            //check which index it is in the UNsorted list
+            //then add that index to the sorted list of indexes
+
+            int thisIndex = unsortedCosts.IndexOf(thisCost);
+
+            //try adding
+
+            //but there might be duplicates, so... 
+            while ()
+            if(sortedListOfIndexes.Contains()
+
+            sortedListOfIndexes.Add();
+        }
+        */
+
+        return sortedListOfIndexes;
+    }
+
+    public int costFinder(List<action> plan)
+    {
+        //finds the cost of a plan
+        //plan is input, integer cost is output
+
+        int cost = 0;
+
+        foreach(action thisAction in plan)
+        {
+            cost += thisAction.cost;
+        }
+
+        return cost;
+    }
+
+
+
+
+
+
+    ////////////////////////////////////////////////
+    //                  TESTS
+    ////////////////////////////////////////////////
+
+    public void testIndexListSortedThing()
+    {
+        //create my test list
+        //print results of my function
+        //then I can check if it matches the example(s) I did by hand
+
+        //test list:
+        List<int> testList = new List<int>();
+        testList.Add(8);
+        testList.Add(3);
+        testList.Add(3);
+        testList.Add(3);
+        testList.Add(5);
+        testList.Add(6);
+
+        List<int> testResult = findIndexOrder(testList);
+        printNumberList(testResult);
+
+    }
+
+    
 
     ////////////////////////////////////////////////
     //         Misc diagnostic functions
@@ -1763,6 +1980,9 @@ public class functionsForAI : MonoBehaviour
         {
             if (eachStateItem.name == thisStateItem.name)
             {
+                //*****EVENTUALLY might want to check MORE than just the name
+                //because I might need multiple stateItems with same name, but differences in other fields?
+
                 state[thisStateItem.stateCategory].Remove(eachStateItem);
                 break;
             }

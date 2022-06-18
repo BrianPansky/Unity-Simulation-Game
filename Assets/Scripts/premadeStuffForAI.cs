@@ -164,7 +164,7 @@ public class premadeStuffForAI : MonoBehaviour
             buyHome = actionCreator("buyHome", "buyThisProperty", createListOfStateItems(), createListOfStateItems(homeOwnership1), 1, anyHome1);
 
 
-            handleSecurityMild = actionCreator("handleSecurityMild", "security", createListOfStateItems(), createListOfStateItems(threat0), 1, hiringZone1);
+            handleSecurityMild = actionCreator("handleSecurityMild", "security", createListOfStateItems(), createListOfStateItems(threat0), 1);
 
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
