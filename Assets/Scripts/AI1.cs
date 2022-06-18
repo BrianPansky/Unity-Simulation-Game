@@ -157,7 +157,9 @@ public class AI1 : MonoBehaviour
             {
                 //this "else" means the "toDoList" is of zero length, so we need a plan:
                 getPlan();
+
                 
+
             }
             
             //doing the to-do list (checks if it's not zero length):
@@ -280,6 +282,9 @@ public class AI1 : MonoBehaviour
             //need to make planList:
             
             planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
+
+            
+
             planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
 
             //now to rank the plans by cost:
@@ -293,10 +298,9 @@ public class AI1 : MonoBehaviour
             clearIneffectiveActions();
 
         }
-
-
-
         
+
+
         //now, pick top-ranked plan (if there are any)
         if (planList != null && planList.Count > 0)
         {

@@ -54,7 +54,7 @@ public class premadeStuffForAI : MonoBehaviour
     //               ACTIONS
     ////////////////////////////////////////////////
 
-    public action buyFood = new action();
+    //public action buyFood = new action();
     //public action sellFood = new action();
     public action doTheWork = new action();
     public action eat = new action();
@@ -148,7 +148,7 @@ public class premadeStuffForAI : MonoBehaviour
             //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
             eat = actionCreator("eat", "use", wantedPrereqsLister(food, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry, food), 1, home);
             //eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
-            buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
+            //buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
             
             doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 4, workPlace);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
@@ -280,7 +280,7 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(handleSecurityEscalationOne);
 
         knownActions.Add(eat);
-        knownActions.Add(buyFood);
+        //knownActions.Add(buyFood);
         
 
 
@@ -313,7 +313,7 @@ public class premadeStuffForAI : MonoBehaviour
         
 
         knownActions.Add(eat);
-        knownActions.Add(buyFood);
+        //knownActions.Add(buyFood);
         knownActions.Add(buyHome);
 
         knownActions.Add(doTheWork);
@@ -342,7 +342,7 @@ public class premadeStuffForAI : MonoBehaviour
     //  Functions for making actions and StateItems
     ////////////////////////////////////////////////////
 
-    action actionCreator(string name, string type, List<stateItem> wantedPrereqs, List<stateItem> UNwantedPrereqs, List<stateItem> wantedEffects, List<stateItem> UNwantedEffects, int cost, stateItem locationPrereq = null)
+    public action actionCreator(string name, string type, List<stateItem> wantedPrereqs, List<stateItem> UNwantedPrereqs, List<stateItem> wantedEffects, List<stateItem> UNwantedEffects, int cost, stateItem locationPrereq = null)
     {
         action thisAction = new action();
 

@@ -299,8 +299,19 @@ public class playerClickInteraction : MonoBehaviour
 
         if (haveMoney)
         {
+            //very ad-hoc
+            //I should instead be generataing these "buy" buttons at the store based on some INVENTORY that the store HAS.
 
-            theHub.state = theFunctions.implementALLEffects(premadeStuff.buyFood, theHub.state);
+            stateItem food1;
+            food1 = premadeStuff.stateItemCreator("food", "inventory");
+
+            //actionItem fooood;
+            //fooood = premadeStuff.convertToActionItem(food1, 1);
+
+            action buyFoooooood;
+            buyFoooooood = premadeStuff.actionCreator("buyFood", "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.money), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(food1), premadeStuff.UNwantedEffectsLister(premadeStuff.money), 1, premadeStuff.checkout);
+
+            theHub.state = theFunctions.implementALLEffects(buyFoooooood, theHub.state);
         }
         else
         {

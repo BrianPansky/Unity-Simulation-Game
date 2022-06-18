@@ -1521,11 +1521,11 @@ public class functionsForAI : MonoBehaviour
         Debug.Log(text);
     }
 
-    public void printactionItemList(List<actionItem> theList)
+    public void printStateItemList(List<stateItem> theList)
     {
         string printout = string.Empty;
 
-        foreach (actionItem item in theList)
+        foreach (stateItem item in theList)
         {
             printout += item.name + ' ';
         }
@@ -1533,9 +1533,9 @@ public class functionsForAI : MonoBehaviour
         print(printout);
     }
 
-    public void printInventory(List<actionItem> inv)
+    public void printInventory(List<stateItem> inv)
     {
-        printactionItemList(inv);
+        printStateItemList(inv);
     }
 
     public string planToText(List<action> plan)
@@ -1686,6 +1686,8 @@ public class functionsForAI : MonoBehaviour
         //and returns the set of all plans that fill the unfilled prereqs
         //each ending with that action we wanted to do in the first place
 
+        
+
         List<List<action>> planList = new List<List<action>>();
 
         //one planList for each prereq, then merge later:
@@ -1694,50 +1696,63 @@ public class functionsForAI : MonoBehaviour
         //go through ALL prereqs, need to make sure they're ALL filled:
         foreach (actionItem eachPrereq in thisAction.prereqs)
         {
+            
+            
             //only make plans to fill prereqs that aren't ALREADY filled:
             if (isStateAccomplished(eachPrereq, state) == false)
             {
+                
                 //so, found a prereq that isn't filled.  Need plans to fill it!
                 List<List<action>> plansForThisPrereq = new List<List<action>>();
 
-
-                
-                //do this if it ISN'T time to generate actions on-the-fly:
-                plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
+                //for some types of prereqs, I generate actions to fill them on-the-fly
+                //here, check if it is that type of action, fill them that way
+                //else, fill them the regular way using "problemSolver"
+                if (eachPrereq.stateCategory == "inventory" && eachPrereq.name != "money")
+                {
+                    //so we need an inventory item
+                    //and it's NOT money
+                    //so here we can generate a "buy" or "steal" or whatever type of action to fill that
+                    plansForThisPrereq = generateActionOnTheFly(eachPrereq, knownActions, state);
+                    
+                }
+                else
+                {
+                    //this "else" means we can fill this prereq the regular way (using "problemSolver")
+                    plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
+                    
+                }
                 
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
+                    
+
                     break;
                 }
                 else
                 {
                     //this "else" means we have plans...
-                    //if we have plans, good, now...what?
-                    //well, can't add those results to the planList just yet
-                    //because they only fill ONE prereq
-                    //still need to at least CHECK that other prereqs CAN be filled
-                    //and also find plans to fill thos eother prereqs
-                    //and combine the plans in the correct way
-                    //so I'm guessing that's what I'm doing here?
-
+                    //(at least for THIS prereq)
+                    //so add them to the list:
                     plansForEachPrereq.Add(plansForThisPrereq);
                     
+
                 }
                 
 
 
             }
+            
         }
         //recursionCounter -= 1
         
         
-
         //ok, now should be a simple matter of creating all combinations of plans
         //[[[[also, should be checking if things are empty or null or whatever...]]]]
         planList = mergePlanLists(planList, combinitorialMergingOfPrereqFillers(plansForEachPrereq));
         
-        //now, add thisAction to the end of ALL these plans:
+        //now, add thisAction to the end of ALL these plans (or make a plan if there are none):
         planList = addActionToEndOfAllPlans(planList, thisAction);
 
 
@@ -1827,17 +1842,66 @@ public class functionsForAI : MonoBehaviour
     
     public List<List<action>> addActionToEndOfAllPlans(List<List<action>> planList, action thisAction)
     {
-        foreach(List<action> plan in planList)
+        if (planList.Count > 0)
         {
-            plan.Add(thisAction);
+            foreach (List<action> plan in planList)
+            {
+                plan.Add(thisAction);
+            }
         }
+        else
+        {
+            //just need to MAKE one plan, add it to the planList:
+            List<action> newPlan = new List<action>();
+            newPlan.Add(thisAction);
+            planList.Add(newPlan);
+        }
+        
 
         return planList;
     }
 
+    public List<List<action>> generateActionOnTheFly(actionItem thisPrereq, List<action> knownActions, Dictionary<string, List<stateItem>> state)
+    {
+        //no, I should probably have this just in the regular "problemSolver" function...I think?
+        //sigh.
+        //actions generated HERE will ALSO have their own prereqs to fill...
+        //but I guess for those I can just call the "prereqFiller" function, and pass it this newly generated action...
+
+
+        //not sure I'll generate a whole list of plans fo rnow
+        //but that's fine, maybe someday it will get that complex
+        List<List<action>> returnList = new List<List<action>>();
+
+        //so, need to figure out what type of action to generate
+        //for now, it's just for "inventory" type prereqs
+        //so check for that, and generate appropriate action:
+        if (thisPrereq.stateCategory == "inventory")
+        {
+            //could buy or steal or ask for items for inventory
+            //for now, I'll just buy...WAIT WHAT ABOUT PICKPOCKETING???
+            //uhhh, ad-hoc check if this is the pickpocket NPC
+            //WAIT BUYING WORKS FOR FOOD, BUT NOT FOR MONEY!!!
+            //so, I should exclude money ones for now
+            action buyFood2;
+            string generatedName = "buy" + thisPrereq.name;
+            buyFood2 = premadeStuff.actionCreator(generatedName, "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.money), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(thisPrereq.item), premadeStuff.UNwantedEffectsLister(premadeStuff.money), 1, premadeStuff.checkout);
+
+
+            
+
+            //now, fill the prereqs for that:
+            returnList = prereqFiller(buyFood2, knownActions, state);
+
+            
+        }
+
+        return returnList;
+
+    }
 
     //Prereq and goal checking stuff:
-    
+
     public bool isStateAccomplished(actionItem goal, Dictionary<string, List<stateItem>> state)
     {
         //assume false, then check and change to true where needed
@@ -2039,25 +2103,32 @@ public class functionsForAI : MonoBehaviour
     {
         foreach (actionItem FIXeachEffect in currentAction.effects)
         {
-            //just have to fix this first:
-            stateItem eachEffect = FIXeachEffect.item;
-
-            if (FIXeachEffect.inStateOrNot == true)
-            {
-                if (eachEffect.stateCategory == "locationState")
-                {
-                    imaginaryState["locationState"].Clear();
-                }
-                imaginaryState[eachEffect.stateCategory].Add(eachEffect);
-            }
-            else
-            {
-                imaginaryState = removeStateItem(eachEffect, imaginaryState);
-                //imaginaryState[eachEffect.stateCategory].Remove(eachEffect);
-            }
+            imaginaryState = implementTHISEffect(FIXeachEffect, imaginaryState);
         }
         return imaginaryState;
     }
+
+    public Dictionary<string, List<stateItem>> implementTHISEffect(actionItem FIXeachEffect, Dictionary<string, List<stateItem>> imaginaryState)
+    {
+        //just have to fix this first:
+        stateItem eachEffect = FIXeachEffect.item;
+
+        if (FIXeachEffect.inStateOrNot == true)
+        {
+            if (eachEffect.stateCategory == "locationState")
+            {
+                imaginaryState["locationState"].Clear();
+            }
+            imaginaryState[eachEffect.stateCategory].Add(eachEffect);
+        }
+        else
+        {
+            imaginaryState = removeStateItem(eachEffect, imaginaryState);
+            //imaginaryState[eachEffect.stateCategory].Remove(eachEffect);
+        }
+        return imaginaryState;
+    }
+
 
     public List<List<action>> simulatingPlansToEnsurePrereqs(List<List<action>> planList, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
