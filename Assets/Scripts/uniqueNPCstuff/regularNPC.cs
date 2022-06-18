@@ -13,7 +13,8 @@ public class regularNPC : MonoBehaviour
         stateGrabber = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
 
-        theHub.recurringGoal = stateGrabber.hungry0;
+        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.hungry, 0);
+        theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createNPCstate1();
         theHub.knownActions = stateGrabber.createKnownActions1();
         theHub.map = stateGrabber.createMap1();

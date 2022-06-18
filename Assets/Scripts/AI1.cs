@@ -29,7 +29,7 @@ public class AI1 : MonoBehaviour
     public List<action> knownActions = new List<action>();
     
     //is this not used right now?  I'm using "recurringGoal" instead?
-    public List<stateItem> goals = new List<stateItem>();
+    public List<actionItem> goals = new List<actionItem>();
 
 
     //map [UNUSED NOW???]
@@ -44,7 +44,7 @@ public class AI1 : MonoBehaviour
 
 
 
-    public stateItem recurringGoal = new stateItem();
+    public actionItem recurringGoal = new actionItem();
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
     //public stateForAI state;
@@ -338,7 +338,15 @@ public class AI1 : MonoBehaviour
     {
         if (state["feelings"].Count == 0)
         {
-            state["feelings"].Add(recurringGoal);
+            if (recurringGoal.inStateOrNot == false)
+            {
+                state["feelings"].Add(recurringGoal.item);
+            }
+            else
+            {
+                theFunctions.print("need a way to handle WANTED feeling goals, easy enough to check if actionItem goal is accomplished in state");
+            }
+            
         }
     }
                 
@@ -390,7 +398,7 @@ public class AI1 : MonoBehaviour
         tf = true;
         
 
-        foreach (stateItem effectX in thisAction.effects)
+        foreach (actionItem effectX in thisAction.effects)
         {
             
             if (theFunctions.isStateAccomplished(effectX, state) == false)

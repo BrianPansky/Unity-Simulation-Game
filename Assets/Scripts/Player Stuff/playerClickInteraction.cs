@@ -112,7 +112,7 @@ public class playerClickInteraction : MonoBehaviour
         {
             //Debug.Log("MONEY$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
-            theHub.state["inventory"].Add(premadeStuff.money1);
+            theHub.state["inventory"].Add(premadeStuff.money);
         }
 
         if (clickedOn.tag == "anNPC")

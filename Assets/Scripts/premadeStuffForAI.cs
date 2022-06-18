@@ -14,43 +14,39 @@ public class premadeStuffForAI : MonoBehaviour
     ////////////////////////////////////////////////
 
     //locations:
-    public stateItem home1 = new stateItem();
-    public stateItem store1 = new stateItem();
-    public stateItem work1 = new stateItem();
-    public stateItem checkout1 = new stateItem();
-    public stateItem cashierZone1 = new stateItem();
+    public stateItem home = new stateItem();
+    public stateItem store = new stateItem();
+    public stateItem workPlace = new stateItem();
+    public stateItem checkout = new stateItem();
+    public stateItem cashierZone = new stateItem();
 
     //inventory items:
-    public stateItem money1 = new stateItem();
-    public stateItem money0 = new stateItem();
-    public stateItem food1 = new stateItem();
-    public stateItem food0 = new stateItem();
+    public stateItem money = new stateItem();
+    public stateItem food = new stateItem();
 
-    public stateItem gun1 = new stateItem();
-    public stateItem gun0 = new stateItem();
+    public stateItem gun = new stateItem();
 
     //feelings
-    public stateItem profitMotive0 = new stateItem();
-    public stateItem hungry0 = new stateItem();
+    public stateItem profitMotive = new stateItem();
+    public stateItem hungry = new stateItem();
 
     //organizationState stuff:
-    public stateItem employee1 = new stateItem();
+    public stateItem employee = new stateItem();
 
-    public stateItem victim1 = new stateItem();
+    public stateItem victim = new stateItem();
 
-    public stateItem shopOwnership1 = new stateItem();
+    public stateItem shopOwnership = new stateItem();
 
-    public stateItem anyStore1 = new stateItem();
+    public stateItem anyStore = new stateItem();
 
-    public stateItem homeOwnership1 = new stateItem();
+    public stateItem homeOwnership = new stateItem();
 
-    public stateItem anyHome1 = new stateItem();
+    public stateItem anyHome = new stateItem();
 
-    public stateItem hiringZone1 = new stateItem();
+    public stateItem hiringZone = new stateItem();
 
 
-    public stateItem threat0 = new stateItem();
-    public stateItem threat1 = new stateItem();
+    public stateItem threat = new stateItem();
 
 
 
@@ -63,9 +59,7 @@ public class premadeStuffForAI : MonoBehaviour
     public action doTheWork = new action();
     public action eat = new action();
     public action restock = new action();
-
-    //public action findVictim = new action();
-    //public action goToVictim = new action();
+    
     public action seekVictim = new action();
     public action pickVictimsPocket = new action();
 
@@ -98,95 +92,86 @@ public class premadeStuffForAI : MonoBehaviour
     public List<stateItem> goals = new List<stateItem>();
 
 
+    //do I use this any more???
     //map
     public Dictionary<string, stateItem> map = new Dictionary<string, stateItem>();
 
 
 
 
-    // Start is called before the first frame update
+    //Start is called before the first frame update, but too late
     //Awake is used to avoid issues, it's called even earlier than Start, I think (see notes somewhere):
     void Awake()
     {
 
         //stateItems:
         {
+            
+            home = stateItemCreator("home", "locationState");
+            food = stateItemCreator("food", "inventory");
+            money = stateItemCreator("money", "inventory");
+            store = stateItemCreator("store", "locationState");
+            workPlace = stateItemCreator("workPlace", "locationState");
+            hungry = stateItemCreator("hungry", "feelings");
+            checkout = stateItemCreator("checkout", "locationState");
+            checkout.locationType = "any";
 
-            //maybe change so state items DON'T have the boolean, 
-            //I can ADD that as an extra peice when I
-            //input them as prereqs and effects in the action maker??
-            home1 = stateItemCreator("home", "locationState", 1);
-            food1 = stateItemCreator("food", "inventory", 1);
-            food0 = stateItemCreator("food", "inventory", 0);
-            money1 = stateItemCreator("money", "inventory", 1);
-            money0 = stateItemCreator("money", "inventory", 0);
-            store1 = stateItemCreator("store", "locationState", 1);
-            work1 = stateItemCreator("workPlace", "locationState", 1);
-            hungry0 = stateItemCreator("hungry", "feelings", 0);
-            checkout1 = stateItemCreator("checkout", "locationState", 1);
-            checkout1.locationType = "any";
+            profitMotive = stateItemCreator("profitMotive", "feelings");
+            cashierZone = stateItemCreator("cashierZone", "locationState");
+            cashierZone.locationType = "roleLocation";
 
-            profitMotive0 = stateItemCreator("profitMotive", "feelings", 0);
-            cashierZone1 = stateItemCreator("cashierZone", "locationState", 1);
-            cashierZone1.locationType = "roleLocation";
+            employee = stateItemCreator("employee", "organizationState");
 
-            employee1 = stateItemCreator("employee", "organizationState", 1);
+            victim = stateItemCreator("victim", "target");
+            victim.locationType = "mobile";
 
-            victim1 = stateItemCreator("victim", "target", 1);
-            victim1.locationType = "mobile";
+            shopOwnership = stateItemCreator("shopOwnership", "property");
 
-            shopOwnership1 = stateItemCreator("shopOwnership", "property", 1);
+            anyStore = stateItemCreator("anyStore", "locationState");
+            anyStore.locationType = "any";
 
-            anyStore1 = stateItemCreator("anyStore", "locationState", 1);
-            anyStore1.locationType = "any";
+            homeOwnership = stateItemCreator("homeOwnership", "property");
+            anyHome = stateItemCreator("anyHome", "locationState");
+            anyHome.locationType = "any";
 
-            homeOwnership1 = stateItemCreator("homeOwnership", "property", 1);
-            anyHome1 = stateItemCreator("anyHome", "locationState", 1);
-            anyHome1.locationType = "any";
+            hiringZone = stateItemCreator("hiringZone", "locationState");
 
-            hiringZone1 = stateItemCreator("hiringZone", "locationState", 1);
+            threat = stateItemCreator("threat", "threatState");
 
-            threat0 = stateItemCreator("threat", "threatState", 0);
-            threat1 = stateItemCreator("threat", "threatState", 1);
-
-            gun1 = stateItemCreator("gun", "inventory", 1);
-            gun0 = stateItemCreator("gun", "inventory", 0);
+            gun = stateItemCreator("gun", "inventory");
 
         }
 
         //actions:
         {
+
+            //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
+            eat = actionCreator("eat", "use", wantedPrereqsLister(food, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry, food), 1, home);
+            //eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
+            buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
             
-            
-            eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
-            buyFood = actionCreator("buyFood", "buyFromStore", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
-            
-            doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(), createListOfStateItems(money1), 4, work1);
+            doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 4, workPlace);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
-            workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(threat0), createListOfStateItems(money1), 1, cashierZone1);
-            hireSomeone = actionCreator("hireSomeone", "work", createListOfStateItems(shopOwnership1, threat0), createListOfStateItems(employee1), 1, hiringZone1);
-            beBoss = actionCreator("beBoss", "ad-hoc", createListOfStateItems(employee1, homeOwnership1), createListOfStateItems(profitMotive0), 1, home1);
+            workAsCashier = actionCreator("workAsCashier", "work", wantedPrereqsLister(), UNwantedPrereqsLister(threat), wantedEffectsLister(money), UNwantedEffectsLister(), 1, cashierZone);
+            hireSomeone = actionCreator("hireSomeone", "work", wantedPrereqsLister(shopOwnership), UNwantedPrereqsLister(threat), wantedEffectsLister(employee), UNwantedEffectsLister(), 1, hiringZone);
+            beBoss = actionCreator("beBoss", "ad-hoc", wantedPrereqsLister(employee, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(profitMotive), 1, home);
 
-            buyShop = actionCreator("buyShop", "buyThisProperty", createListOfStateItems(), createListOfStateItems(shopOwnership1), 1, anyStore1);
+            buyShop = actionCreator("buyShop", "buyThisProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 1, anyStore);
 
-            buyHome = actionCreator("buyHome", "buyThisProperty", createListOfStateItems(), createListOfStateItems(homeOwnership1), 1, anyHome1);
+            buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
 
 
-            handleSecurityMild = actionCreator("handleSecurityMild", "security", createListOfStateItems(), createListOfStateItems(threat0), 1);
-            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", createListOfStateItems(), createListOfStateItems(threat0), 4);
+            handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1);
+            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4);
+            
+            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food), UNwantedEffectsLister(), 1, victim);
 
-            //pickpocket, under construction
-            //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
-            //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
-            //seekVictim = actionCreator("seekVictim", "seek", createListOfStateItems(), createListOfStateItems(victim1), 1);
-            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", createListOfStateItems(), createListOfStateItems(money1, food1), 1, victim1);
+            buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
+            giftGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(gun), 1);
 
-            buyGun = actionCreator("buyGun", "buyFromStore", createListOfStateItems(money1), createListOfStateItems(money0, gun1), 1, checkout1);
-            giftGun = actionCreator("buyGun", "buyFromStore", createListOfStateItems(), createListOfStateItems(gun0), 1);
-
-            extort = actionCreator("extort", "crime", createListOfStateItems(gun1), createListOfStateItems(money1), 0, checkout1);
+            extort = actionCreator("extort", "crime", wantedPrereqsLister(gun), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 0, checkout);
         }
     }
 
@@ -202,8 +187,8 @@ public class premadeStuffForAI : MonoBehaviour
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
         //addToState(food1, state);
-        addToState(money1, state);
-        addToState(hungry0, state);
+        addToState(money, state);
+        addToState(hungry, state);
 
         return state;
     }
@@ -213,8 +198,8 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        addToState(food1, state);
-        addToState(profitMotive0, state);
+        addToState(food, state);
+        addToState(profitMotive, state);
 
         return state;
     }
@@ -224,7 +209,7 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        addToState(hungry0, state);
+        addToState(hungry, state);
 
         return state;
     }
@@ -361,11 +346,11 @@ public class premadeStuffForAI : MonoBehaviour
 
         Dictionary<string, stateItem> map1 = new Dictionary<string, stateItem>();
 
-        map1.Add("workPlace", work1);
-        map1.Add("store", store1);
-        map1.Add("home", home1);
-        map1.Add("checkout", checkout1);
-        map1.Add("cashierZone", cashierZone1);
+        map1.Add("workPlace", workPlace);
+        map1.Add("store", store);
+        map1.Add("home", home);
+        map1.Add("checkout", checkout);
+        map1.Add("cashierZone", cashierZone);
 
         //effect work1 = new effect();
         //w = GameObject.Find("workPlace");}
@@ -380,7 +365,36 @@ public class premadeStuffForAI : MonoBehaviour
     //  Functions for making actions and StateItems
     ////////////////////////////////////////////////////
 
-    public List<stateItem> createListOfStateItems(params stateItem[] listofStateItems)
+    action actionCreator(string name, string type, List<stateItem> wantedPrereqs, List<stateItem> UNwantedPrereqs, List<stateItem> wantedEffects, List<stateItem> UNwantedEffects, int cost, stateItem locationPrereq = null)
+    {
+        action thisAction = new action();
+
+        thisAction.name = name;
+        thisAction.type = type;
+        thisAction.cost = cost;
+        thisAction.locationPrereq = locationPrereq;
+
+
+        thisAction.prereqs = makePrereqsOrEffects(wantedPrereqs, UNwantedPrereqs);
+        thisAction.effects = makePrereqsOrEffects(wantedEffects, UNwantedEffects);
+
+
+        return thisAction;
+    }
+
+    public stateItem stateItemCreator(string name, string stateCategory)
+    {
+        stateItem thisStateItem = new stateItem();
+
+        thisStateItem.stateCategory = stateCategory;
+        thisStateItem.name = name;
+
+        return thisStateItem;
+    }
+
+    //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
+
+    public List<stateItem> wantedPrereqsLister(params stateItem[] listofStateItems)
     {
         List<stateItem> aNewList = new List<stateItem>();
 
@@ -392,57 +406,119 @@ public class premadeStuffForAI : MonoBehaviour
         return aNewList;
     }
 
-    action actionCreator(string name, string type, List<stateItem> prereqs, List<stateItem> effects, int cost, stateItem locationPrereq = null)
+    public List<stateItem> UNwantedPrereqsLister(params stateItem[] listofStateItems)
     {
-        action thisAction = new action();
+        List<stateItem> aNewList = new List<stateItem>();
 
-        thisAction.name = name;
-        thisAction.type = type;
+        foreach (stateItem x in listofStateItems)
+        {
+            aNewList.Add(x);
+        }
 
-        thisAction.locationPrereq = locationPrereq;
-        thisAction.prereqs = prereqs;
+        return aNewList;
+    }
+    
+    public List<stateItem> wantedEffectsLister(params stateItem[] listofStateItems)
+    {
+        List<stateItem> aNewList = new List<stateItem>();
 
-        thisAction.effects = effects;
-        thisAction.cost = cost;
+        foreach (stateItem x in listofStateItems)
+        {
+            aNewList.Add(x);
+        }
 
-        return thisAction;
+        return aNewList;
+    }
+    
+    public List<stateItem> UNwantedEffectsLister(params stateItem[] listofStateItems)
+    {
+        List<stateItem> aNewList = new List<stateItem>();
+
+        foreach (stateItem x in listofStateItems)
+        {
+            aNewList.Add(x);
+        }
+
+        return aNewList;
     }
 
-    public stateItem stateItemCreator(string name, string stateCategory, int inStateOrNot)
-    {
-        stateItem thisStateItem = new stateItem();
 
-        bool b;
-        if (inStateOrNot == 1)
+    public List<actionItem> makePrereqsOrEffects(List<stateItem> wantedOnes, List<stateItem> UNwantedOnes)
+    {
+        //input the wanted and unwanted stateItems
+        //returns "actionItems" in a list that capture that info
+        //used to make my lists of prereqs and effects
+
+        List<actionItem> theList = new List<actionItem>();
+        theList = convertingStateItemsToActionItems(theList, wantedOnes, 1);
+        theList = convertingStateItemsToActionItems(theList, UNwantedOnes, 0);
+
+        return theList;
+
+    }
+
+    public List<actionItem> convertingStateItemsToActionItems(List<actionItem> listToAddTo, List<stateItem> theStartList, int wantedOrNot)
+    {
+        foreach (stateItem thisStateItem in theStartList)
         {
-            b = true;
+            
+            listToAddTo.Add(convertToActionItem(thisStateItem, wantedOrNot));
+        }
+        
+        return listToAddTo;
+    }
+
+    public actionItem convertToActionItem(stateItem inputItem, int wantedOrNot)
+    {
+        actionItem newActionItem = new actionItem();
+        newActionItem.item = inputItem;
+        newActionItem.inStateOrNot = intToBool(wantedOrNot);
+
+
+        //copy from stateItem:
+        newActionItem.name = inputItem.name;
+        newActionItem.stateCategory = inputItem.stateCategory;
+        newActionItem.locationType = inputItem.locationType;
+
+        return newActionItem;
+    }
+
+    public bool intToBool(int number)
+    {
+        //takes a 1 or a 0, converts it to boolean
+        //careful to never give it any other number!  It will simply return false!
+
+        if (number == 1)
+        {
+            return true;
         }
         else
         {
-            b = false;
+            return false;
         }
-
-        thisStateItem.stateCategory = stateCategory;
-        thisStateItem.inStateOrNot = b;
-        thisStateItem.name = name;
-
-        return thisStateItem;
     }
-
 }
 
 public class stateItem
 {
-    //just the same as "prereq", just different name
+    //just the same as "prereq", just different name //[huh??? what's that comment talking about???]
     public string name;
     public string stateCategory;
-    public bool inStateOrNot;
 
     //bit ad-hoc seeming:
     public string locationType;
     //public int quantity;
-    //public float coords[3];  //gotta fix this, should be vector?  WHAT IS THIS FOR???
-    //public float valueEach;  //value for each item.  Needed for cost calcualtions.
+}
+
+public class actionItem
+{
+    public stateItem item;
+    public bool inStateOrNot;
+
+    //copy from stateItem for convenience while refactoring my code:
+    public string name;
+    public string stateCategory;
+    public string locationType;
 }
 
 public class action
@@ -450,8 +526,8 @@ public class action
     public string name;
     public string type;
 
-    public List<stateItem> prereqs = new List<stateItem>();
-    public List<stateItem> effects = new List<stateItem>();
+    public List<actionItem> prereqs = new List<actionItem>();
+    public List<actionItem> effects = new List<actionItem>();
     public stateItem locationPrereq;  //start as null?
 
     public int cost;

@@ -67,10 +67,11 @@ public class functionsForAI : MonoBehaviour
 
             //ok, so found a threat in a forbiddenZone
             //but before we record that threat, first check if we ALREADY have that threat recorded:
-            if(isStateAccomplished(premadeStuff.threat1, state) == false)
+            actionItem threatActionItem = premadeStuff.convertToActionItem(premadeStuff.threat, 1);
+            if (isStateAccomplished(threatActionItem, state) == false)
             {
                 //ok, now we know we won't be adding a duplicate, here we go:
-                state["threatState"].Add(premadeStuff.threat1);
+                state["threatState"].Add(premadeStuff.threat);
 
 
 
@@ -142,10 +143,10 @@ public class functionsForAI : MonoBehaviour
             travelToTargetObject(target);
             
 
-            //I still currently use a "stateItem", but it could perhaps
+            //I still currently use a "actionItem", but it could perhaps
             //be replaced with mere text?  The name of the location?
 
-            //travelToStateItem(nextAction.locationPrereq);
+            //travelToactionItem(nextAction.locationPrereq);
         }
 
 
@@ -242,7 +243,7 @@ public class functionsForAI : MonoBehaviour
                         //ad-hoc way to hire more than one worker for now:
                         if (workerCount > 1)
                         {
-                            //also, to easily put the "employee1" stateItem in the organizationState:
+                            //also, to easily put the "employee1" actionItem in the organizationState:
                             state = implementALLEffects(nextAction, state);
                             //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
 
@@ -503,15 +504,15 @@ public class functionsForAI : MonoBehaviour
         stateItem actionerReceives = new stateItem();
 
         //set up items to trade:
-        foreach (stateItem effect in nextAction.effects)
+        foreach (actionItem effect in nextAction.effects)
         {
             if (effect.inStateOrNot == false)
             {
-                actionerGives = effect;
+                actionerGives = effect.item;
             }
             if (effect.inStateOrNot == true)
             {
-                actionerReceives = effect;
+                actionerReceives = effect.item;
             }
         }
 
@@ -537,8 +538,9 @@ public class functionsForAI : MonoBehaviour
 
         //look to steal EACH item in the "effects" of the steal aciton
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
-        foreach (stateItem effect in nextAction.effects)
+        foreach (actionItem FIXeffect in nextAction.effects)
         {
+            stateItem effect = FIXeffect.item;
             //actionerReceives = effect;
             //actionerInventory.Add(actionerReceives);
             //inventory2.RemoveAll(y => y.name == actionerReceives.name);
@@ -579,7 +581,7 @@ public class functionsForAI : MonoBehaviour
 
         //look to gift EACH item in the "effects" of the gift action
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
-        foreach (stateItem effect in nextAction.effects)
+        foreach (actionItem effect in nextAction.effects)
         {
             
             //but must only give items if they exist in the giver's inventory!
@@ -588,7 +590,7 @@ public class functionsForAI : MonoBehaviour
                 if (itemInInventory.name == effect.name)
                 {
                     actionerGives.Add(itemInInventory);
-                    otherInventoryReceives.Add(effect);
+                    otherInventoryReceives.Add(effect.item);
                 }
             }
         }
@@ -632,7 +634,7 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public void travelToStateItem(stateItem X)
+    public void travelToactionItem(actionItem X)
     {
 
         string name1 = X.name;
@@ -779,7 +781,7 @@ public class functionsForAI : MonoBehaviour
     public GameObject chooseTarget(stateItem criteria)
     {
         //takes criteria, returns one target
-        //for now, input is a stateItem from nextAction.locationPrereq
+        //for now, input is a actionItem from nextAction.locationPrereq
         //output is a GameObject
 
 
@@ -1519,11 +1521,11 @@ public class functionsForAI : MonoBehaviour
         Debug.Log(text);
     }
 
-    public void printStateItemList(List<stateItem> theList)
+    public void printactionItemList(List<actionItem> theList)
     {
         string printout = string.Empty;
 
-        foreach (stateItem item in theList)
+        foreach (actionItem item in theList)
         {
             printout += item.name + ' ';
         }
@@ -1531,9 +1533,9 @@ public class functionsForAI : MonoBehaviour
         print(printout);
     }
 
-    public void printInventory(List<stateItem> inv)
+    public void printInventory(List<actionItem> inv)
     {
-        printStateItemList(inv);
+        printactionItemList(inv);
     }
 
     public string planToText(List<action> plan)
@@ -1626,7 +1628,7 @@ public class functionsForAI : MonoBehaviour
     //                Planning
     ////////////////////////////////////////////////
 
-    public List<List<action>> problemSolver(stateItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
+    public List<List<action>> problemSolver(actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
@@ -1641,7 +1643,7 @@ public class functionsForAI : MonoBehaviour
             foreach (action thisAction in knownActions)
             {
                 //also have to look at each of their effects individually, see if the effect is to 
-                foreach (stateItem thisEffect in thisAction.effects)
+                foreach (actionItem thisEffect in thisAction.effects)
                 {
                     //finally, check if this action effect acheives the goal:
                     if (goal.name == thisEffect.name & goal.inStateOrNot == thisEffect.inStateOrNot)
@@ -1691,7 +1693,7 @@ public class functionsForAI : MonoBehaviour
         List<List<action>> thePlansForLocationStatePrereq = new List<List<action>>();
 
         //go thoruhg ALL prereqs, need to make sure they're ALL filled:
-        foreach (stateItem eachPrereq in thisAction.prereqs)
+        foreach (actionItem eachPrereq in thisAction.prereqs)
         {
             //only make plans to fill prereqs that aren't ALREADY filled:
             if (isStateAccomplished(eachPrereq, state) == false)
@@ -1898,7 +1900,7 @@ public class functionsForAI : MonoBehaviour
 
     //Prereq and goal checking stuff:
     
-    public bool isStateAccomplished(stateItem goal, Dictionary<string, List<stateItem>> state)
+    public bool isStateAccomplished(actionItem goal, Dictionary<string, List<stateItem>> state)
     {
         //assume false, then check and change to true where needed
         bool tf;
@@ -1914,7 +1916,7 @@ public class functionsForAI : MonoBehaviour
 
 
             //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
-            //oh no this is text, "name" needs to be just a stateItem!  Or something!
+            //oh no this is text, "name" needs to be just a actionItem!  Or something!
             //print("1111111111111111111111111111111111111111");
             //print(goal.name);
             //print(stateI.name);
@@ -1946,7 +1948,7 @@ public class functionsForAI : MonoBehaviour
             //print("4:  should look through each item in list of________:");
             //print(goal.name);
             //print(goal.stateCategory);
-            foreach (stateItem stateI in state[goal.stateCategory])
+            foreach (actionItem stateI in state[goal.stateCategory])
             {
 
                 //print("222222222222222222222222222222222222222");
@@ -1972,7 +1974,7 @@ public class functionsForAI : MonoBehaviour
         bool tf;
         tf = true;
 
-        foreach (stateItem prereqX in thisAction.prereqs)
+        foreach (actionItem prereqX in thisAction.prereqs)
         {
             //print("don't count this");
             if (isStateAccomplished(prereqX, state) == false)
@@ -2070,7 +2072,7 @@ public class functionsForAI : MonoBehaviour
         return newState;
     }
 
-    public Dictionary<string, List<stateItem>> removeStateItem(stateItem thisStateItem, Dictionary<string, List<stateItem>> state)
+    public Dictionary<string, List<stateItem>> removeStateItem(stateItem thisactionItem, Dictionary<string, List<stateItem>> state)
     {
         //just because they are not quite identical enough for .Remove to work properly I don't think
 
@@ -2079,15 +2081,15 @@ public class functionsForAI : MonoBehaviour
         //inventory.RemoveAll(x => x.name == myItem.name);
 
 
-        //find the correct stateItem, then remove it
-        foreach (stateItem eachStateItem in state[thisStateItem.stateCategory])
+        //find the correct actionItem, then remove it
+        foreach (stateItem eachactionItem in state[thisactionItem.stateCategory])
         {
-            if (eachStateItem.name == thisStateItem.name)
+            if (eachactionItem.name == thisactionItem.name)
             {
                 //*****EVENTUALLY might want to check MORE than just the name
-                //because I might need multiple stateItems with same name, but differences in other fields?
+                //because I might need multiple actionItems with same name, but differences in other fields?
 
-                state[thisStateItem.stateCategory].Remove(eachStateItem);
+                state[thisactionItem.stateCategory].Remove(eachactionItem);
                 break;
             }
         }
@@ -2097,9 +2099,12 @@ public class functionsForAI : MonoBehaviour
 
     public Dictionary<string, List<stateItem>> implementALLEffects(action currentAction, Dictionary<string, List<stateItem>> imaginaryState)
     {
-        foreach (stateItem eachEffect in currentAction.effects)
+        foreach (actionItem FIXeachEffect in currentAction.effects)
         {
-            if (eachEffect.inStateOrNot == true)
+            //just have to fix this first:
+            stateItem eachEffect = FIXeachEffect.item;
+
+            if (FIXeachEffect.inStateOrNot == true)
             {
                 if (eachEffect.stateCategory == "locationState")
                 {
@@ -2151,7 +2156,7 @@ public class functionsForAI : MonoBehaviour
                 {
                     //print("yes this should happen for ''eat'':");
                     //print(currentAction.name);
-                    foreach (stateItem eachPrereq in currentAction.prereqs)
+                    foreach (actionItem eachPrereq in currentAction.prereqs)
                     {
                         if (isStateAccomplished(eachPrereq, imaginaryState) != true)
                         {
@@ -2233,7 +2238,7 @@ public class functionsForAI : MonoBehaviour
         bool tf;
         tf = true;
 
-        foreach (stateItem prereqX in thisAction.prereqs)
+        foreach (actionItem prereqX in thisAction.prereqs)
         {
             //print("don't count this");
             if (isStateAccomplished(prereqX, state) == false)

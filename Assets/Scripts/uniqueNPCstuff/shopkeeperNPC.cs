@@ -12,7 +12,8 @@ public class shopkeeperNPC : MonoBehaviour
         stateGrabber = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
 
-        theHub.recurringGoal = stateGrabber.profitMotive0;
+        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.profitMotive, 0);
+        theHub.recurringGoal = goalActionItem;
         //print(stateGrabber.profitMotive0.name);
         theHub.state = stateGrabber.createShopkeeperState();
         theHub.knownActions = stateGrabber.createShopkeeperKnownActions();
