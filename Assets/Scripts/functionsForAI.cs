@@ -14,8 +14,12 @@ public class functionsForAI : MonoBehaviour
     //probably carried over from some tutorial?  On navmesh?
     private GameObject t1;
 
+    //maybe ad-hoc for now:
     public int stopwatch;
 
+    //VERY ad-hoc for now:
+    public int workerCount;
+    List<GameObject> listOfCashiers = new List<GameObject>();
 
     public AI1 thisAI;// = GetComponent<AI1>();
     public premadeStuffForAI premadeStuff;
@@ -30,6 +34,7 @@ public class functionsForAI : MonoBehaviour
         premadeStuff = GetComponent<premadeStuffForAI>();
 
         stopwatch = 0;
+        workerCount = 0;
 
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
@@ -129,18 +134,32 @@ public class functionsForAI : MonoBehaviour
                 GameObject customer = checkForCustomer(checkoutZone);
                 if (customer != null)
                 {
-                    changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
+                    //ad-hoc wat to hire more than one employee for now:
+                    if (listOfCashiers.Contains(customer) == false)
+                    {
+                        listOfCashiers.Add(customer);
+                        changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
-                    //also, to easily put the "employee1" stateItem in the organizationState:
-                    state = implementALLEffects(nextAction, state);
+                        
 
-                    //and ad hoc strike this action off the to-do list:
-                    thisAI.toDoList.RemoveAt(0);
+                        workerCount += 1;
 
-                    
+
+                        //ad-hoc way to hire more than one worker for now:
+                        if (workerCount > 1)
+                        {
+                            //also, to easily put the "employee1" stateItem in the organizationState:
+                            state = implementALLEffects(nextAction, state);
+                            //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
+
+                            /*
+                            //and ad hoc strike this action off the to-do list:
+                            print("######################################");
+                            thisAI.toDoList.RemoveAt(0);
+                            */
+                        }
+                    }
                 }
-
-
             }
             else if (nextAction.name == "pickVictimsPocket")
             {
@@ -191,22 +210,34 @@ public class functionsForAI : MonoBehaviour
                 //very ad-hoc for now
                 //just want the worker to wait there for a while
                 //"doing their work shift"
-
-                //print("xxxxxxxxxxxxxxxxx");
-
-                stopwatch += 1;
+                
 
 
                 if (whicheverPrereqChecker(nextAction, state) == true)
                 {
-                    //print("yyyyyyyyyyyyyyyyyyyyyyyyy");
-                    if (stopwatch > 1000)
+                    //ad-hoc check if someone else is the cashier right now:
+                    GameObject thisNPC = gameObject;
+                    //GameObject theCashierZone = getLocationObject("cashierZone");
+                    //but the actual "mapZone" is a CHILD of this casheirZone object:
+                    //GameObject cashierMapZone = theCashierZone.GetChild(0).gameObject;
+                    GameObject theCashierZone = getLocationObject("cashierZone");
+                    //but the actual "mapZone" is a CHILD of this casheirZone object:
+                    GameObject cashierMapZone = getCashierMapZone(theCashierZone);
+                    
+                    GameObject currentCashier = getWhoeverIsHereFirst(cashierMapZone);
+                    if (currentCashier == thisNPC)
                     {
-                        state = implementALLEffects(nextAction, state);
-                        stopwatch = 0;
+                        stopwatch += 1;
 
-                        //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
-                        //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
+                        //ad-hoc work shift timer:
+                        if (stopwatch > 1000)
+                        {
+                            state = implementALLEffects(nextAction, state);
+                            stopwatch = 0;
+
+                            //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
+                            //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
+                        }
                     }
                 }
                 
@@ -515,6 +546,27 @@ public class functionsForAI : MonoBehaviour
         AI1 theHub = NPC.GetComponent("AI1") as AI1;
 
         return theHub;
+    }
+
+    public GameObject getWhoeverIsHereFirst(GameObject locationZone)
+    {
+        //looks at a location
+        //if someone is there, return them as a GameObject
+        //(if more than one is there, return FIRST one)
+
+        GameObject whoever;
+        whoever = null;
+
+        listOfTouchingNPCs listOfNPCs = locationZone.GetComponent<listOfTouchingNPCs>();
+        
+        //check to make sure the list isn't empty:
+        if (listOfNPCs.theList.Count > 0)
+        {
+            whoever = listOfNPCs.theList[0];
+        }
+
+
+        return whoever;
     }
 
 
