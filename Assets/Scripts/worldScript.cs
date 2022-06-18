@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class worldScript : MonoBehaviour
 {
+
+    public Dictionary<string, List<GameObject>> taggedStuff = new Dictionary<string, List<GameObject>>();
+
     // Start is called before the first frame update
     void Start()
     {

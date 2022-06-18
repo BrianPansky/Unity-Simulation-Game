@@ -30,14 +30,17 @@ public class AI1 : MonoBehaviour
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
     //public stateForAI state;
+    public taggedWith thisIsTaggedWith;
 
     // Start is called before the first frame update
     void Start()
     {
-        //this is my regular NPC, shoudl be in my AI1 file
-
+        //get some other scripts I'll need:
         theFunctions = GetComponent<functionsForAI>();
+        thisIsTaggedWith = GetComponent<taggedWith>();
 
+        //add a "person" tag to this agent:
+        thisIsTaggedWith.addTag("person");
     }
 
 

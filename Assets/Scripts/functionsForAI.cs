@@ -10,13 +10,30 @@ public class functionsForAI : MonoBehaviour
     Transform _destination;
     NavMeshAgent _navMeshAgent;
 
-
+    //I don't remember making this, why is it here instead of in the function where I use it?
+    //probably carried over from some tutorial?  On navmesh?
     private GameObject t1;
 
 
-    public AI1 theAI;// = GetComponent<AI1>();
+    public AI1 thisAI;// = GetComponent<AI1>();
+    public premadeStuffForAI premadeStuff;
 
+    public Dictionary<string, List<GameObject>> globalTags;
 
+    // Start is called before the first frame update
+    void Start()
+    {
+
+        thisAI = GetComponent<AI1>();
+        premadeStuff = GetComponent<premadeStuffForAI>();
+
+        _navMeshAgent = this.GetComponent<NavMeshAgent>();
+
+        //getting the "global" tags:
+        GameObject theWorldObject = GameObject.Find("World");
+        worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+        globalTags = theWorldScript.taggedStuff;
+    }
 
 
 
@@ -26,7 +43,7 @@ public class functionsForAI : MonoBehaviour
     ////////////////////////////////////////////////
     //                  ACTIONS
     ////////////////////////////////////////////////
-  
+
 
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
@@ -42,7 +59,8 @@ public class functionsForAI : MonoBehaviour
             travelToStateItem(nextAction.locationPrereq);
 
 
-            //NOW check if it's DONE, if so, can perform THE REST of the action:
+            //NOW check if travel is DONE, if so, can perform THE REST of the action:
+            //(note this doesn't handle the "proximity" stuff that pickpocketing uses)
             if (prereqAndLocationChecker(nextAction, state) == true)
             {
                 if (nextAction.type == "socialTrade")
@@ -66,6 +84,32 @@ public class functionsForAI : MonoBehaviour
                     //now implement trade
                     //state["inventory"].Remove(nextAction.effects[0]);
                     trade(state["inventory"], theTargetState.state["inventory"], nextAction);
+                }
+                else if(nextAction.name == "hireSomeone")
+                {
+                    //ad-hoc for now
+
+                    //find someone (and NPC, for now) to hire,
+                    //then change their knownActions, remove "doTheWork", add "workAsCashier"
+
+                    //get the cashierLocation:
+                    GameObject cashierLocation = getLocationObject("cashierZone");
+
+                    //get the checkoutZone:
+                    GameObject checkoutZone = getCheckoutMapZone(cashierLocation);
+
+                    //check for an NPC customer in the checkoutZone:
+                    GameObject customer = checkForCustomer(checkoutZone);
+                    if (customer != null)
+                    {
+                        AI1 customerAI = getHubScriptFromGameObject(customer);
+                        employAsCashier(customerAI);
+
+                        //and ad hoc strike this action off the to-do list:
+                        thisAI.toDoList.RemoveAt(0);
+                    }
+
+
                 }
                 else
                 {
@@ -96,7 +140,7 @@ public class functionsForAI : MonoBehaviour
             victim = target;
 
             //navigation
-            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
+            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, thisAI.speed * Time.deltaTime);
             Vector3 targetVector = victim.GetComponent<Transform>().position;
             _navMeshAgent.SetDestination(targetVector);
 
@@ -115,7 +159,7 @@ public class functionsForAI : MonoBehaviour
 
 
                 //ad-hoc action completion:
-                theAI.toDoList.RemoveAt(0);
+                thisAI.toDoList.RemoveAt(0);
                 target = null;
 
                 //state = implementALLEffectsForImagination(nextAction, state);
@@ -177,7 +221,7 @@ public class functionsForAI : MonoBehaviour
 
         //https://stackoverflow.com/a/605390
         List<stateItem> actionerReceives = new List<stateItem>();
-        List < stateItem > otherInventoryLoses = new List<stateItem>();
+        List<stateItem> otherInventoryLoses = new List<stateItem>();
 
         //look to steal EACH item in the "effects" of the steal aciton
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
@@ -209,6 +253,19 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
+    public void employAsCashier(AI1 NPC)
+    {
+        //print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+        //ad-hoc for now
+
+        //give the NPC the employment knownActions, and REMOVE their other work action:
+        NPC.knownActions.Add(premadeStuff.workAsCashier);
+        //NPC.knownActions.Remove(premadeStuff.doTheWork);
+        NPC.knownActions.RemoveAll(y => y.name == "doTheWork");
+
+
+    }
     //public void steal()
 
 
@@ -255,6 +312,32 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public GameObject getCheckoutMapZone(GameObject cashierLocation)
+    {
+        GameObject checkoutZone;
+        checkoutZone = null; //just in case none is found, the above won't work, trying to return it will have compile error
+        GameObject locationParent = cashierLocation.transform.parent.gameObject;
+
+        //now search for the correct "child" object:
+        //wait, doesn't Unity have a way to do this?  Haven't I done this elsewhere???
+        foreach (Transform child in locationParent.transform)
+        {
+            if (child.name == "checkout")
+            {
+                //but the actual "mapZone" is a CHILD of this checkout object:
+                checkoutZone = child.GetChild(0).gameObject;
+                return checkoutZone;
+            }
+
+        }
+
+        //should suceed in the loop and NOT execute the following code
+        //thus the following code prints an error:
+        print("checkout zone not found, perhaps it is not a child of the cashier zone's parent object");
+        return checkoutZone;
+
+    }
+
     public GameObject whoIsTrader(GameObject cashierZone)
     {
         //get the "listOfTouchingNPCs" script on the casheirZone
@@ -265,29 +348,56 @@ public class functionsForAI : MonoBehaviour
 
         listOfTouchingNPCs listOfNPCs = cashierZone.GetComponent<listOfTouchingNPCs>();
 
+        //(I might want to check to make sure the list isn't empty here first though tsometime...)
         cashier = listOfNPCs.theList[0];
 
         return cashier;
 
 
     }
-    
+
+    public GameObject checkForCustomer(GameObject checkoutZone)
+    {
+        GameObject customer;
+        customer = null; //required to compile
+        listOfTouchingNPCs listOfNPCs = checkoutZone.GetComponent<listOfTouchingNPCs>();
+
+        //check if there ARE any NPCs there at all:
+        if(listOfNPCs.theList.Count > 0)
+        {
+            customer = listOfNPCs.theList[0];
+        }
+        
+
+        return customer;
+
+    }
+
     public GameObject whoToTarget()
     {
         //ad-hoc for now, this is being used in pickpocketing action
         //should return ONE NPC GameObject as a target
 
-        //List<GameObject> allNPCs = new List<GameObject>();
-        GameObject[] allNPCsArray;
+        List<GameObject> allPotentialTargets = new List<GameObject>();
 
-        allNPCsArray = GameObject.FindGameObjectsWithTag("anNPC");
+        //now to find suitable targets using my new tagging system:
+        allPotentialTargets = globalTags["person"];
+
+        //....................................................................
+        //old way to get stuff, using old stupid Unity tag system, and stupid "Array" data type for no reason, good riddence:
+        //GameObject[] allNPCsArray;
+        //allNPCsArray = GameObject.FindGameObjectsWithTag("anNPC");
 
         //convert this stupid fucking array data type to a list:
-        List<GameObject> allNPCsList = new List<GameObject>();
+        /*
+        List<GameObject> allPotentialTargets = new List<GameObject>();
         foreach (GameObject g in allNPCsArray)
         {
-            allNPCsList.Add(g);
+            allPotentialTargets.Add(g);
         }
+        */
+        //....................................................................
+
 
         //choose one randomly
         //Random rnd = new Random();
@@ -296,16 +406,16 @@ public class functionsForAI : MonoBehaviour
         thisNPC = null;
         bool doWeHaveGoodTarget = false;
 
-        while (doWeHaveGoodTarget == false && allNPCsList.Count > 0)
+        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
         {
-            int randomIndex = Random.Range(0, allNPCsList.Count);
-            thisNPC = allNPCsList[randomIndex];
+            int randomIndex = Random.Range(0, allPotentialTargets.Count);
+            thisNPC = allPotentialTargets[randomIndex];
             //but, criteria, ad-hoc for now
             //if it's the shopkeeper, remove that item from the array (will that leave a "null" hole in array???)
             //and choose again
             if (thisNPC.name == "NPC shopkeeper")
             {
-                allNPCsList.RemoveAt(randomIndex);
+                allPotentialTargets.RemoveAt(randomIndex);
                 thisNPC = null;
             }
             else
@@ -328,7 +438,12 @@ public class functionsForAI : MonoBehaviour
         _navMeshAgent.SetDestination(targetVector);
     }
 
+    public AI1 getHubScriptFromGameObject(GameObject NPC)
+    {
+        AI1 theHub = NPC.GetComponent("AI1") as AI1;
 
+        return theHub;
+    }
 
 
     ////////////////////////////////////////////////
@@ -1002,12 +1117,6 @@ public class functionsForAI : MonoBehaviour
         return noProblem;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-        theAI = GetComponent<AI1>();
-        _navMeshAgent = this.GetComponent<NavMeshAgent>();
-    }
+    
 
 }

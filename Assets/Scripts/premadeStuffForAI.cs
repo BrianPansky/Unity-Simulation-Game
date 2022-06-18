@@ -35,15 +35,11 @@ public class premadeStuffForAI : MonoBehaviour
     ////////////////////////////////////////////////
     //               ACTIONS
     ////////////////////////////////////////////////
-    public action goToWork = new action();
-    public action goToStore = new action();
+    
     public action buyFood = new action();
-    public action sellFood = new action();
-    public action goToHome = new action();
+    //public action sellFood = new action();
     public action doTheWork = new action();
     public action eat = new action();
-    public action goToCashierZone = new action();
-    public action goToCheckout = new action();
     public action restock = new action();
 
     //public action findVictim = new action();
@@ -51,7 +47,9 @@ public class premadeStuffForAI : MonoBehaviour
     public action seekVictim = new action();
     public action pickVictimsPocket = new action();
 
-
+    public action hireSomeone = new action();
+    public action workAsCashier = new action();
+    
 
 
 
@@ -72,6 +70,7 @@ public class premadeStuffForAI : MonoBehaviour
 
 
     // Start is called before the first frame update
+    //Awake is used to avoid issues, it's called even earlier than Start, I think (see notes somewhere):
     void Awake()
     {
 
@@ -98,22 +97,17 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
-            //"goTO" actions:
-            //[I really need to automate these at least.  They are all the same.  Locaitons exist, you can go to them.]
-            //[except locaiton subsets, like goToCheckout, which require going to another locaiton first......but navMesh handles that actually]
-            goToStore = actionCreator("goToStore", "goTo", createListOfStateItems(), createListOfStateItems(store1), 1);
-            goToWork = actionCreator("goToWork", "goTo", createListOfStateItems(), createListOfStateItems(work1), 1);
-            goToHome = actionCreator("goToHome", "goTo", createListOfStateItems(), createListOfStateItems(home1), 1);
-            goToCashierZone = actionCreator("goToCashierZone", "goTo", createListOfStateItems(), createListOfStateItems(cashierZone1), 1);
-            goToCheckout = actionCreator("goToCheckout", "goTo", createListOfStateItems(store1), createListOfStateItems(checkout1), 1);
-
-            //other actions:
+            
+            
             eat = actionCreator("eat", "use", createListOfStateItems(food1), createListOfStateItems(hungry0, food0), 1, home1);
             buyFood = actionCreator("buyFood", "socialTrade", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
-            sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0, profitMotive0), 1, cashierZone1);
+            
             doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(), createListOfStateItems(money1), 4, work1);
-            restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
+            //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
+            //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
+            workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(), createListOfStateItems(money1), 1, cashierZone1);
+            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(), createListOfStateItems(profitMotive0), 1, cashierZone1);
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
             //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
@@ -212,15 +206,14 @@ public class premadeStuffForAI : MonoBehaviour
 
     public List<action> createKnownActions1()
     {
-        knownActions.Add(goToHome);
-        knownActions.Add(goToWork);
+        
         knownActions.Add(doTheWork);
 
-        knownActions.Add(goToStore);
+        
 
         knownActions.Add(eat);
         knownActions.Add(buyFood);
-        knownActions.Add(goToCheckout);
+        
 
 
         return knownActions;
@@ -228,16 +221,13 @@ public class premadeStuffForAI : MonoBehaviour
 
     public List<action> createShopkeeperKnownActions()
     {
-        knownActions.Add(goToHome);
-        //knownActions.Add(goToWork);
-        knownActions.Add(doTheWork);
+        knownActions.Add(hireSomeone);
 
-        knownActions.Add(goToStore);
-        knownActions.Add(sellFood);
+        //knownActions.Add(sellFood);
 
         knownActions.Add(eat);
         //knownActions.Add(buyFood);
-        knownActions.Add(goToCashierZone);
+        
         knownActions.Add(restock);
 
         return knownActions;
@@ -245,14 +235,11 @@ public class premadeStuffForAI : MonoBehaviour
 
     public List<action> createPickpocketKnownActions()
     {
-        knownActions.Add(goToHome);
         
-
-        knownActions.Add(goToStore);
 
         knownActions.Add(eat);
         knownActions.Add(buyFood);
-        knownActions.Add(goToCheckout);
+        
 
         //knownActions.Add(findVictim);
         //knownActions.Add(goToVictim);
@@ -263,6 +250,13 @@ public class premadeStuffForAI : MonoBehaviour
     }
     
 
+    public void addKnownAction(action theAction, List<action> listToModify)
+    {
+        //hmm, that's it?  Actually seems like this funciton is redundant
+        //takes less writing to just use its CONTENTS
+
+        listToModify.Add(theAction);
+    }
 
     ////////////////////////////////////////////////////
     //                 NPC KNOWN MAPS
