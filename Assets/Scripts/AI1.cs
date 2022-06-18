@@ -107,6 +107,9 @@ public class AI1 : MonoBehaviour
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if(ignore == false)
         {
+            //now handle the checking stuff.  like checking to pay PLAYER for work shift.  just JOB stuff for now i guess:
+            checkJobs();
+
             if (inConversation == false)
             {
 
@@ -197,6 +200,15 @@ public class AI1 : MonoBehaviour
     ////////////////////////////////////////////////////
     //       Stuff for the Update function:
     ////////////////////////////////////////////////////
+
+    public void checkJobs()
+    {
+        //helps check if PLAYER has done a job shift.
+        //probably just calls a more complex function over in functionsForAI to do it, really.
+
+        theFunctions.jobCheckFunction();
+
+    }
 
     public void getGoingAgan()
     {

@@ -137,6 +137,7 @@ public class functionsForAI : MonoBehaviour
     //handles the enactment of ALL actions:
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
     {
+        //this is the ENACTION phase.  the DOING of an aciton.
         //testSwitch();
         //alert();
 
@@ -417,8 +418,12 @@ public class functionsForAI : MonoBehaviour
 
                 //print(target.name);
             }
+
             else if (nextAction.name == "workAsCashier")
             {
+                
+                /*
+
                 //very ad-hoc for now
                 //just want the worker to wait there for a while
                 //"doing their work shift"
@@ -453,8 +458,9 @@ public class functionsForAI : MonoBehaviour
                     }
                 }
 
-
+                */
             }
+
             else if (nextAction.type == "buyThisProperty")
             {
 
@@ -645,6 +651,68 @@ public class functionsForAI : MonoBehaviour
         return target;
     }
 
+    public void jobCheckFunction()
+    {
+        //checks if jobs are done
+        //can implement some external effects here, like being paid for the job
+        //this is different from enaction phase, which is about DOING the actions
+
+        //for now JUST check the known actions in their currentJob?  i guess...
+
+        if(thisAI.currentJob != null)
+        {
+
+            //So, first get the job actions, i guess:
+            //or cycle throgh them [should be few on list, not too many]:
+            foreach (action thisAction in thisAI.currentJob.theKnownActions)
+            {
+                if (thisAction.name == "workAsCashier")
+                {
+                    //so, gotta do the whole "work shift" timer thing here
+                    //then give money if it's done
+                    //NOT SURE HOW THIS MESHES WITH COMPLETING AN ACTION FOR AN NPC
+
+                    //can use the ROLE LOCATION built into currentJob to check locations i guess!
+
+                    //ad-hoc check if someone else is the cashier right now:
+                    GameObject thisNPC = gameObject;
+                    //GameObject theCashierZone = getLocationObject("cashierZone");
+                    //but the actual "mapZone" is a CHILD of this casheirZone object:
+                    //GameObject cashierMapZone = theCashierZone.GetChild(0).gameObject;
+                    //GameObject theCashierZone = getLocationObject("cashierZone");
+
+                    //casheirZone object:
+                    //GameObject cashierMapZone = getCashierMapZone(target.transform.parent.gameObject);
+                    GameObject cashierMapZone = getCashierMapZoneOfStore(thisAI.currentJob.roleLocation);
+
+
+
+                    GameObject currentCashier = getWhoeverIsHereFirst(cashierMapZone);
+                    if (currentCashier == thisNPC)
+                    {
+                        stopwatch += 1;
+
+                        //ad-hoc work shift timer:
+                        if (stopwatch > thisAI.currentJob.duration)
+                        {
+
+                            thisAI.state = implementALLEffects(thisAction, thisAI.state);
+                            //thisAI.toDoList.RemoveAt(0);
+                            //target = dumpAction(target);
+                            if(thisAI.target != null)
+                            {
+                                thisAI.target = dumpAction(thisAI.target);
+                            }
+                            stopwatch = 0;
+
+                            //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
+                            //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     //============================================================
 
@@ -2740,7 +2808,7 @@ public class functionsForAI : MonoBehaviour
 
         //some actions need a bigger or smaller range.  Ad-hoc adding that here for now...
         //default is basically zero range:
-        float theRange = 3.5f;
+        float theRange = 3.2f;
 
         //change range for some things:
         if(thisAction.name == "shootSpree")

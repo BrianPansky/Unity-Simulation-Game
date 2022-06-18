@@ -205,11 +205,11 @@ public class premadeStuffForAI : MonoBehaviour
             //eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
             buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
             
-            doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 9, workPlace);
+            doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 99, workPlace);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
-            workAsCashier = actionCreator("workAsCashier", "work", wantedPrereqsLister(), UNwantedPrereqsLister(threat), wantedEffectsLister(money), UNwantedEffectsLister(), 1, cashierZone);
+            workAsCashier = actionCreator("workAsCashier", "work", wantedPrereqsLister(), UNwantedPrereqsLister(threat), wantedEffectsLister(money), UNwantedEffectsLister(), 35, cashierZone);
             hireSomeone = actionCreator("hireSomeone", "work", wantedPrereqsLister(shopOwnership), UNwantedPrereqsLister(threat), wantedEffectsLister(employee), UNwantedEffectsLister(), 1, hiringZone);
             beBoss = actionCreator("beBoss", "ad-hoc", wantedPrereqsLister(employee, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(profitMotive), 1, home);
 
@@ -235,7 +235,7 @@ public class premadeStuffForAI : MonoBehaviour
         //jobs:
         {
             //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
-            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 1000, 0, 1);
+            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 300, 0, 1);
             resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
             
             

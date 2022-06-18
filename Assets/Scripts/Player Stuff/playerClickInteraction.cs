@@ -213,7 +213,7 @@ public class playerClickInteraction : MonoBehaviour
         RaycastHit myHit;
         Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(myRay, out myHit, 3.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             if (myHit.transform != null)
             {
@@ -468,7 +468,7 @@ public class playerClickInteraction : MonoBehaviour
 
         makeButton("decrease trust", this.rightPoliticalSideButton);
 
-        makeButton("hire as resource gatherer", this.hireResource1GathererButton);
+        
         
 
 
@@ -498,7 +498,9 @@ public class playerClickInteraction : MonoBehaviour
 
         if (foreignTagScript.tags.Contains("playersGang"))
         {
-            makeButton("give gun", this.giftGunButton);
+            makeButton("hire as gatherer", this.hireResource1GathererButton);
+
+            
 
             //makeButton("bring me food", this.bringLeaderFoodButton);
 
@@ -508,6 +510,8 @@ public class playerClickInteraction : MonoBehaviour
                     //hmm, but commands won't always be "fetch"....whatever?  for now, ad hoc, can fix later if it's a problem...
                     makeButton("bring me " + availableCommand.effects[0].name, () => this.fetchXButton(availableCommand));
                 }
+
+            makeButton("give gun", this.giftGunButton);
         }
 
 
