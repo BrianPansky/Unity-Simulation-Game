@@ -22,6 +22,7 @@ public class AI1 : MonoBehaviour
 
     List<action> ineffectiveActions = new List<action>();
 
+    
 
 
     //wait do I use this:
@@ -38,6 +39,7 @@ public class AI1 : MonoBehaviour
 
     //ad-hoc for now:
     public bool jobSeeking;
+    public bool inConversation;
 
     public int clearanceLevel;
 
@@ -61,10 +63,12 @@ public class AI1 : MonoBehaviour
 
         //ad-hoc for now:
         jobSeeking = true;
+        inConversation = false;
 
         homeLocation = null;
 
         clearanceLevel = 0;
+        
 }
 
     
@@ -120,156 +124,190 @@ public class AI1 : MonoBehaviour
         */
 
 
-        //remove plan if it is impossible
-        //(it can become impossible if a necessary prereq that was previously met
-        //unexpectedly becomes UNMET, and if the plan doesn't fill it)
-        if (toDoList.Count > 0)
+        
+
+        
+        if(inConversation == false)
         {
-            //FIRST, do sensing:
-            if (target != null)
+            //get NPC moving again i it was stopped by conversation:
+            //but player has no navmesh agent, so need to check if it's null:
+            if(theFunctions._navMeshAgent != null)
             {
-                theFunctions.sensing(toDoList[0], target, state);
-            }
-
-
-            //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
-            //theFunctions.printPlan(toDoList);
-
-
-            //remove all plans that contain "ineffective actions":
-            //first have a list of all plans to remove, because it's bad to modify a list while iterating over it in effing C# apparently
-            List<List<action>> plansToRemove = new List<List<action>>();
-            foreach (action thisIneffectiveAction in ineffectiveActions)
-            {
-                //go through each plan
-                foreach(List<action> thisPlan in planList)
+                if (theFunctions._navMeshAgent.isStopped == true)
                 {
-                    //check each ACTION in this plan:
-                    foreach(action thisAction in thisPlan)
+                    theFunctions._navMeshAgent.isStopped = false;
+                }
+            }
+            
+
+
+
+            //remove plan if it is impossible
+            //(it can become impossible if a necessary prereq that was previously met
+            //unexpectedly becomes UNMET, and if the plan doesn't fill it)
+            if (toDoList.Count > 0)
+            {
+                //FIRST, do sensing:
+                if (target != null)
+                {
+                    theFunctions.sensing(toDoList[0], target, state);
+                }
+
+
+                //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
+                //theFunctions.printPlan(toDoList);
+
+
+                //remove all plans that contain "ineffective actions":
+                //first have a list of all plans to remove, because it's bad to modify a list while iterating over it in effing C# apparently
+                List<List<action>> plansToRemove = new List<List<action>>();
+                foreach (action thisIneffectiveAction in ineffectiveActions)
+                {
+                    //go through each plan
+                    foreach (List<action> thisPlan in planList)
                     {
-                        //checked if this is the ineffective action:
-                        if(thisAction.name == thisIneffectiveAction.name)
+                        //check each ACTION in this plan:
+                        foreach (action thisAction in thisPlan)
                         {
-                            //if so, add this plan to list of plans to remove:
-                            plansToRemove.Add(thisPlan);
-                            
+                            //checked if this is the ineffective action:
+                            if (thisAction.name == thisIneffectiveAction.name)
+                            {
+                                //if so, add this plan to list of plans to remove:
+                                plansToRemove.Add(thisPlan);
+
+                            }
                         }
                     }
                 }
+
+                //NOW can remove the plans with ineffective actions:
+                foreach (List<action> thisPlan in plansToRemove)
+                {
+                    //remove the plan from the planList
+                    planList.Remove(thisPlan);
+                }
+
+
+
+                //Now find and remove all IMPOSSIBLE plans
+                int Z;
+                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+
+                if (Z != -2)
+                {
+                    //print("says this plan is imposible:");
+                    //theFunctions.printPlan(toDoList);
+                    toDoList.RemoveRange(0, toDoList.Count);
+                    target = null;
+
+                }
+            }
+            else
+            {
+                //well, if "toDoList" is of zero length, need a plan
+
+                //choose next one from planList, unless planlist is "null" or empty:
+                //so check if it's null or empty, fill it up if so:
+                if (planList == null || planList.Count == 0)
+                {
+                    //need to make planList:
+
+
+                    //print(recurringGoal.name);
+                    planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
+                    //theFunctions.printPlan(planList[0]);
+                    //print("state before imagination:");
+                    //theFunctions.printState(state);
+                    planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
+                    //print("the plan after imagination fix:");
+                    //theFunctions.printPlan(planList[0]);
+                    //print("state AFTER imagination:");
+
+
+                    //theFunctions.printState(state);
+
+                    //now to rank the plans by cost:
+                    if (planList != null && planList.Count > 0)
+                    {
+                        planList = theFunctions.planRanker(planList);
+                    }
+
+                    //also, blank out the list of "ineffective actions":
+                    if (ineffectiveActions != null && ineffectiveActions.Count > 0)
+                    {
+                        ineffectiveActions.Clear();
+                    }
+
+                }
+
+
+
+
+                //ad-hoc adding the goal once it is completed, to create behavior loop
+                //WHY IS THIS HERE????  SHOULDN'T IT BE SOMEWHERE ELSE???  maybe at the END, or START of update???
+                if (state["feelings"].Count == 0)
+                {
+                    state["feelings"].Add(recurringGoal);
+                }
+
+
+
+
+                /////////////////////////////////////////////////
+                //          POST-PLANNING PHASE
+                /////////////////////////////////////////////////
+
+                //now to rank the plans by cost:
+                //(first check we have any palns)
+                if (planList != null && planList.Count > 0)
+                {
+
+
+
+                    //now, choose first one:
+                    toDoList = deepCopyFirstPlan(planList);
+                    //and REMOVE that first one from the planList:
+                    planList.RemoveAt(0);
+
+                    //am I generating impossible plans???
+                    //int Z;
+                    //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+                }
+
             }
 
-            //NOW can remove the plans with ineffective actions:
-            foreach(List<action> thisPlan in plansToRemove)
+            //printPlan(toDoList);
+
+
+
+
+
+
+
+            //theFunctions.print("yes hello, this is a conversation");
+            //inConversation = false;
+
+            //make sure list isn't empty AGAIN:
+            if (toDoList.Count > 0)
             {
-                //remove the plan from the planList
-                planList.Remove(thisPlan);
-            }
+
+                target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
 
 
 
-            //Now find and remove all IMPOSSIBLE plans
-            int Z;
-            Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-
-
-            if(Z != -2)
-            {
-                //print("says this plan is imposible:");
-                //theFunctions.printPlan(toDoList);
-                toDoList.RemoveRange(0, toDoList.Count);
-                target = null;
-                
             }
         }
         else
         {
-            //well, if "toDoList" is of zero length, need a plan
-
-            //choose next one from planList, unless planlist is "null" or empty:
-            //so check if it's null or empty, fill it up if so:
-            if (planList == null || planList.Count == 0)
-            {
-                //need to make planList:
-
-
-                //print(recurringGoal.name);
-                planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
-                //theFunctions.printPlan(planList[0]);
-                //print("state before imagination:");
-                //theFunctions.printState(state);
-                planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
-                //print("the plan after imagination fix:");
-                //theFunctions.printPlan(planList[0]);
-                //print("state AFTER imagination:");
-
-
-                //theFunctions.printState(state);
-
-                //now to rank the plans by cost:
-                if (planList != null && planList.Count > 0)
-                {
-                    planList = theFunctions.planRanker(planList);
-                }
-
-                //also, blank out the list of "ineffective actions":
-                if(ineffectiveActions != null && ineffectiveActions.Count > 0)
-                {
-                    ineffectiveActions.Clear();
-                }
-                    
-            }
-
-            
-            
-
-            //ad-hoc adding the goal once it is completed, to create behavior loop
-            //WHY IS THIS HERE????  SHOULDN'T IT BE SOMEWHERE ELSE???  maybe at the END, or START of update???
-            if (state["feelings"].Count == 0)
-            {
-                state["feelings"].Add(recurringGoal);
-            }
-            
-            
-            
-
-            /////////////////////////////////////////////////
-            //          POST-PLANNING PHASE
-            /////////////////////////////////////////////////
-
-            //now to rank the plans by cost:
-            //(first check we have any palns)
-            if (planList != null && planList.Count > 0)
-            {
-
-
-
-                //now, choose first one:
-                toDoList = deepCopyFirstPlan(planList);
-                //and REMOVE that first one from the planList:
-                planList.RemoveAt(0);
-
-                //am I generating impossible plans???
-                //int Z;
-                //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-                
-            }
+            //in conversation, need to stop:
+            theFunctions._navMeshAgent.isStopped = true;
+            //UnityEngine.AI.NavMeshAgent.Stop();
             
         }
-
-        //printPlan(toDoList);
 
         
-
-
-        //make sure list isn't empty AGAIN:
-        if (toDoList.Count > 0)
-        {
-            
-            target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
-
-            
-            
-        }
         //theFunctions.printState(state);
 
         /*

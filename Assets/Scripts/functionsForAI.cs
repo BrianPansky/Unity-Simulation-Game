@@ -8,7 +8,7 @@ public class functionsForAI : MonoBehaviour
 {
     [SerializeField]
     Transform _destination;
-    NavMeshAgent _navMeshAgent;
+    public NavMeshAgent _navMeshAgent;
 
     //I don't remember making this, why is it here instead of in the function where I use it?
     //probably carried over from some tutorial?  On navmesh?

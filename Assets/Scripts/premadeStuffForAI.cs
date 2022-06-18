@@ -157,7 +157,7 @@ public class premadeStuffForAI : MonoBehaviour
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
             workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(threat0), createListOfStateItems(money1), 1, cashierZone1);
-            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(shopOwnership1, threat0), createListOfStateItems(employee1), 1, hiringZone1);
+            hireSomeone = actionCreator("hireSomeone", "work", createListOfStateItems(shopOwnership1, threat0), createListOfStateItems(employee1), 1, hiringZone1);
             beBoss = actionCreator("beBoss", "ad-hoc", createListOfStateItems(employee1, homeOwnership1), createListOfStateItems(profitMotive0), 1, home1);
 
             buyShop = actionCreator("buyShop", "buyThisProperty", createListOfStateItems(), createListOfStateItems(shopOwnership1), 1, anyStore1);
