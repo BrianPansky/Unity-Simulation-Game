@@ -71,6 +71,7 @@ public class functionsForAI : MonoBehaviour
             }
             if (target == null)
             {
+                print("the chooseTarget function returned null, for the following action:");
                 print(nextAction.name);
             }
             travelToTargetObject(target);
@@ -83,6 +84,7 @@ public class functionsForAI : MonoBehaviour
         }
 
 
+
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (whicheverprereqStateChecker(nextAction, state, target) == true)
         {
@@ -90,39 +92,7 @@ public class functionsForAI : MonoBehaviour
             //if(gameObject.name == "NPC")
 
 
-            if (nextAction.type == "socialTrade")
-            {
-                //currently unused?  I use "buyFromStore" type instead....
-
-                //print(nextAction.name);
-                //GameObject theTarget = GameObject.Find("NPC shopkeeper");
-                //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
-                //print(theTargetState.state["locationState"][0].name);
-                GameObject customerLocation = getLocationObject(state["locationState"][0].name);
-
-                //print("yoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
-                //print(target);
-                GameObject cashierMapZone = getCashierMapZone(customerLocation);
-                //print(casheirMapZone.name);
-
-                //print(locationRoot.name);
-
-                GameObject cashier = whoIsTrader(cashierMapZone);
-
-                //but that cashier variable might come back null (if no one is there), check:
-                if(cashier != null)
-                {
-                    AI1 theTargetState = cashier.GetComponent("AI1") as AI1;
-
-                    //now implement trade
-                    //state["inventory"].Remove(nextAction.effects[0]);
-                    trade(state["inventory"], theTargetState.state["inventory"], nextAction);
-
-                    //thisAI.toDoList.RemoveAt(0);
-                    target = dumpAction(target);
-                }
-                
-            }
+            
             if (nextAction.type == "buyFromStore")
             {
                 //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
@@ -185,7 +155,10 @@ public class functionsForAI : MonoBehaviour
                         //print(workerCount);
 
                         //need the worker to show up at the correct store for their shift:
-                        customerAI.roleLocation = thisAI.roleLocation;
+                        //customerAI.roleLocation = thisAI.roleLocation;
+                        string ownershipTag = "owned by " + this.name;
+                        //need cashierZone of the owned store:
+                        customerAI.roleLocation = randomTaggedWithMultiple("shop", ownershipTag);
 
 
                         //ad-hoc way to hire more than one worker for now:
@@ -305,7 +278,7 @@ public class functionsForAI : MonoBehaviour
                 
                 
             }
-            else if (nextAction.name == "buyShop")
+            else if (nextAction.type == "buyThisProperty")
             {
                 
                 //kinda ad-hoc
@@ -336,7 +309,7 @@ public class functionsForAI : MonoBehaviour
 
                     //need to remember in the future WHICH store is theirs
                     //so they ca go to it, and sned their employees there:
-                    thisAI.roleLocation = target;
+                    //thisAI.roleLocation = target;
 
                     //ad-hoc action completion:
                     //thisAI.toDoList.RemoveAt(0);
@@ -371,73 +344,7 @@ public class functionsForAI : MonoBehaviour
 
 
             }
-            else if (nextAction.name == "buyHome")
-            {
-
-                //kinda ad-hoc
-                //"buy" the property that the NPC has arrived at
-                //can use for both buying shops, and buying homes, maybe
-
-                //get this property:
-                GameObject thisProperty;
-                thisProperty = null;
-                thisProperty = target;
-
-                //print("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
-
-                //check if it's for sale:
-                //get other script I need:
-                taggedWith otherIsTaggedWith = target.GetComponent<taggedWith>() as taggedWith;
-                if (otherIsTaggedWith.tags.Contains("forSale"))
-                {
-                    //ok, it's for sale, now can buy it
-
-                    //printTextList(otherIsTaggedWith.tags);
-                    //remove the "for sale" tag:
-                    otherIsTaggedWith.foreignRemoveTag("forSale", target);
-                    //printTextList(otherIsTaggedWith.tags);
-                    //add the "owned by _____" tag...:
-                    string ownershipTag = "owned by " + this.name;
-                    otherIsTaggedWith.foreignAddTag(ownershipTag, target);
-
-                    //need to remember in the future WHICH home is theirs
-                    //so they can go to it
-                    thisAI.homeLocation = target;
-
-                    //ad-hoc action completion:
-                    //thisAI.toDoList.RemoveAt(0);
-
-                    target = dumpAction(target);
-
-                    //ad-hoc update of state:
-                    state = implementALLEffects(nextAction, state);
-
-                }
-
-
-                else
-                {
-                    //well, this one is NOT for sale, so need to scrap WHOLE plan, I think...
-                    //AND make sure not to just generate the same plan infinitely, somehow.  
-                    //Not sure how...memory?  Add to list of temporarily unworkable plans?
-                    //then can use that info in the "choosing among plans" phase I don't yet have?
-
-                    //for now, just treat it as a completed action
-                    //this will simply remove the action, and next frame the AI will 
-                    //detect an impossible plan, and try again
-                    //not ideal if there were several to choose from, could end up going back to
-                    //ones that are not for sale several times
-                    //needs to LEARN?  Or prevent this with better foreknowledge.  But already has foreknowledge using tags, I think
-                    //when the plan was formed, the foreknowledge was correct.  Became incorrect on the way there.
-                    //so if tags are knowledge, they will have ALREADY "learned" due to the tag being removed.
-                    //thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
-                    target = dumpAction(target);
-                }
-
-
-
-            }
-
+            
             else
             {
                 //for actions like "eat" that currently just need a quick
@@ -780,21 +687,25 @@ public class functionsForAI : MonoBehaviour
         }
         else if (criteria.locationType == "any")
         {
+            //print("any");
             //sorta ad-hoc for now...
             if (criteria.name == "anyStore")
             {
+                //print("anyStore");
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("shop", "forSale");
             }
             else if (criteria.name == "anyHome")
             {
+                //print("anyHome");
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("home", "forSale");
             }
             else if (criteria.name == "checkout")
             {
+                //print("checkout");
                 //get any store:
                 //print("hello?????????????????????????????");
                 target = anyCheckout();
@@ -802,6 +713,7 @@ public class functionsForAI : MonoBehaviour
         }
         else if (criteria.locationType == "roleLocation")
         {
+            //print("else if (criteria.name == roleLocation)");
             //just target their role location variable?
             //target = thisAI.roleLocation;
             //no, that variable just goes to the store building
@@ -810,14 +722,32 @@ public class functionsForAI : MonoBehaviour
             target = getCashierMapZoneOfStore(thisAI.roleLocation);
 
         }
+        else if (criteria.name == "hiringZone")
+        {
+            string ownershipTag = "owned by " + this.name;
+            //need cashierZone of the owned store:
+            target = getCashierMapZoneOfStore(randomTaggedWithMultiple("shop", ownershipTag));
+        }
         else if (criteria.name == "home")
         {
-            //just target their homelocation variable
-            target = thisAI.homeLocation;
+            //print("else if (criteria.name == home)");
 
+            //dummy test:
+            //string ownershipTag = "owned by " + this.name;
+            //target = DUMMYrandomTaggedWithMultipleDUMMY(criteria.name, ownershipTag);
+
+            //just target their homelocation variable
+            //target = thisAI.homeLocation;
+
+
+            //new method based on tagging
+            //find the home they own:
+            string ownershipTag = "owned by " + this.name;
+            target = randomTaggedWithMultiple(criteria.name, ownershipTag);  //yes, using "random" is redundant here, but it's my only function right now
         }
         else
         {
+            //print("else");
             //for now, "else" should all be mapZone things we can find like this?
             target = GameObject.Find(name1);
         }
@@ -856,12 +786,24 @@ public class functionsForAI : MonoBehaviour
             return null;
         }
     }
-
+    
     public GameObject randomTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
     {
         //should return ONE random GameObject that is tagged with ALL inputted tags
         List<GameObject> allPotentialTargets = new List<GameObject>();
         allPotentialTargets = globalTags[theTag];
+
+        //BUT THAT'S A SHALLOW COPY!
+        //so I need to make a corrosponding list of indices to use, to prevent messing with it:
+        List<int> listOfIndices = new List<int>();
+        int length = 0;
+        //WILL THIS MAKE IT THE RIGHT NUMBER?  OR ONE TOO MANY?  ONE TOO FEW???
+        //I think it's correct now?
+        while (length < allPotentialTargets.Count)
+        {
+            listOfIndices.Add(length);
+            length += 1;
+        }
 
         //put the optional other tags in a list:
         List<string> otherTags = new List<string>();
@@ -875,12 +817,20 @@ public class functionsForAI : MonoBehaviour
         thisObject = null;
         bool doWeHaveGoodTarget = false;
 
+        int randomNumber;
+        int myIndex;
 
-        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
+        //print("do we have even ONE of these????");
+        //print(theTag);
+        //print(allPotentialTargets.Count);
+        while (doWeHaveGoodTarget == false && listOfIndices.Count > 0)
         {
+            //print("yes at least one");
             //grab a randomn object from the list:
-            int randomIndex = Random.Range(0, allPotentialTargets.Count);
-            thisObject = allPotentialTargets[randomIndex];
+            randomNumber = Random.Range(0, listOfIndices.Count);
+            myIndex = listOfIndices[randomNumber];
+
+            thisObject = allPotentialTargets[myIndex];
 
 
             //now, check all the other tags on that^ object
@@ -892,18 +842,30 @@ public class functionsForAI : MonoBehaviour
             //assume this object will correctly have ALL the tags
             //then falsify by checking:
             doWeHaveGoodTarget = true;
+
             
             foreach (string thisTag in otherTags)
             {
                 //make sure it's not null:
                 if (thisTag != null)
                 {
+                    
                     if (theTagScript.tags.Contains(thisTag) == false)
                     {
+                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+                        //print(thisTag);
+
                         doWeHaveGoodTarget = false;
-                        allPotentialTargets.RemoveAt(randomIndex);
+                        listOfIndices.RemoveAt(randomNumber);
                         break;
                     }
+                    /*
+                    else
+                    {
+                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+                        print(thisTag);
+                    }
+                    */
                 }
             }
 
@@ -1198,6 +1160,20 @@ public class functionsForAI : MonoBehaviour
         {
             printout += listItem + ", ";
         }
+
+        print(printout);
+    }
+
+    public void printNumberList(List<int> numberList)
+    {
+        string printout = string.Empty;
+        printout += "[";
+
+        foreach (int number in numberList)
+        {
+            printout += " " + number + " ";
+        }
+        printout += "]";
 
         print(printout);
     }
