@@ -70,5 +70,27 @@ public class playerClickInteraction : MonoBehaviour
 
             theHub.state["inventory"].Add(premadeStuff.money1);
         }
+
+        if(clickedOn.tag == "anNPC")
+        {
+            Debug.Log("heloooooooooo");
+
+            //for now ad-hoc
+            //just making any NPC into a pickpocket when you click on them
+
+            //need their AI1 script:
+            AI1 hubScript = clickedOn.GetComponent("AI1") as AI1;
+
+            //need the action to add:
+            premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
+
+
+            //now add pickpocket action, remove work action:
+            hubScript.knownActions.Add(stateGrabber.pickVictimsPocket);
+            hubScript.knownActions.RemoveAll(y => y.type == "work");
+
+
+        }
+
     }
 }

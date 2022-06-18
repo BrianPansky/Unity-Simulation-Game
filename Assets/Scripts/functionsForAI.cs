@@ -16,6 +16,7 @@ public class functionsForAI : MonoBehaviour
 
     //maybe ad-hoc for now:
     public int stopwatch;
+    public int effectivenessTimer;
 
     //VERY ad-hoc for now:
     public int workerCount;
@@ -36,6 +37,7 @@ public class functionsForAI : MonoBehaviour
         premadeStuff = GetComponent<premadeStuffForAI>();
 
         stopwatch = 0;
+        effectivenessTimer = 0;
         workerCount = 0;
 
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
@@ -61,11 +63,7 @@ public class functionsForAI : MonoBehaviour
             //print("yo");
 
             //so, sensed someone in the forbiddenZone
-            //need to update threatState with threat1:
-            //soooo, how to do that...
-            //THIS WILL ADD THEM AN INFINIE NUMBER OF TIMES, NEED TO ONLY ADD IT IF IT IS ABSENT!
-            //state["threatState"].Add(premadeStuff.threat1);
-            //print("in sensing phase:  " + target.name);
+            //but
 
             //ok, so found a threat in a forbiddenZone
             //but before we record that threat, first check if we ALREADY have that threat recorded:
@@ -122,7 +120,7 @@ public class functionsForAI : MonoBehaviour
     ////////////////////////////////////////////////
 
     //handles the enactment of ALL actions:
-    public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target)
+    public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
     {
 
         //handle the travel prereqs here:
@@ -223,7 +221,7 @@ public class functionsForAI : MonoBehaviour
                         listOfCashiers.Add(customer);
                         changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
-                        //print(customer.name);
+                        print(customer.name);
                         
 
                         workerCount += 1;
@@ -235,6 +233,10 @@ public class functionsForAI : MonoBehaviour
                         string ownershipTag = "owned by " + this.name;
                         //need cashierZone of the owned store:
                         customerAI.roleLocation = randomTaggedWithMultiple("shop", ownershipTag);
+
+                        //Increase the "clearance level" of the worker:
+                        //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
+                        customerAI.clearanceLevel = 1;
 
 
                         //ad-hoc way to hire more than one worker for now:
@@ -424,12 +426,52 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "handleSecurityMild")
             {
                 //print("yoooooooo");
-                
+                if (effectivenessTimer == 0)
+                {
+                    print("handling security mild");
+                }
+
+                //for escalation:
+                effectivenessTimer += 1;
+                if (effectivenessTimer > 200)
+                {
+                    print("INEFFECTIVE!!!");
+
+                    //mark this as an "ineffective action"
+                    ineffectiveActions.Add(nextAction);
+
+                    //then end this current plan/action:
+                    target = dumpAction(target);
+
+
+                    //MAYBE DOESN'T MAKE SENSE TO RESET THIS RIGHT AWAY?  Dunno.  But for now:
+                    effectivenessTimer = 0;
+                }
+
                 if (areAllForbiddenZonesClear() == true)
                 {
-                    print("yoooooooo");
+                    print("DONE handling mild security");
                     state = implementALLEffects(nextAction, state);
                     target = dumpAction(target);
+
+                    effectivenessTimer = 0;
+                }
+            }
+            else if (nextAction.name == "handleSecurityEscalationOne")
+            {
+                if (effectivenessTimer == 0)
+                {
+                    print("handling security ESCALATON");
+                }
+                effectivenessTimer += 1;
+
+                if (areAllForbiddenZonesClear() == true)
+                {
+                    print("escalation over...");
+                    state = implementALLEffects(nextAction, state);
+                    target = dumpAction(target);
+
+                    effectivenessTimer = 0;
                 }
             }
             else
@@ -660,11 +702,24 @@ public class functionsForAI : MonoBehaviour
             //now, check if ANYONE is in that map zone:
             if (thisListOfTouchingNPCs.theList.Count > 0)
             {
-                return false;
+                //BUT need to check if they have CLEARANCE:
+                foreach(GameObject thisListedNPC in thisListOfTouchingNPCs.theList)
+                {
+                    //need to check their clearance level...
+
+                    AI1 thisListedNPCAI = thisListedNPC.GetComponent("AI1") as AI1;
+
+                    //only detect threat if their clearance level is less than one:
+                    if (thisListedNPCAI.clearanceLevel < 1)
+                    {
+                        return false;
+                    }
+                }
+                
             }
         }
 
-        //if that didn't find anyhting, then it's clear.  Return true:
+        //if that didn't find anything, then it's clear.  Return true:
         return true;
     }
 

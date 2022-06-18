@@ -18,6 +18,13 @@ public class AI1 : MonoBehaviour
     public GameObject homeLocation;
 
     public List<action> toDoList = new List<action>();
+    public List<List<action>> planList = new List<List<action>>();
+
+    List<action> ineffectiveActions = new List<action>();
+
+
+
+    //wait do I use this:
     public List<action> knownActions = new List<action>();
     //public string locationState;
     
@@ -31,6 +38,8 @@ public class AI1 : MonoBehaviour
 
     //ad-hoc for now:
     public bool jobSeeking;
+
+    public int clearanceLevel;
 
 
 
@@ -54,6 +63,8 @@ public class AI1 : MonoBehaviour
         jobSeeking = true;
 
         homeLocation = null;
+
+        clearanceLevel = 0;
 }
 
     
@@ -61,13 +72,17 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        
+        /*
+        if (this.name == "NPC pickpocket")
+        {
+            theFunctions.print("00000000000000000  Plan List:   000000000000000000");
+            printPlanList(planList);
+        }
 
         //constantlyCheckLocationState();
         //theFunctions.printInventory(state["inventory"]);
 
-        /*
+        
         if (this.name == "NPC")
         {
             theFunctions.print("==================================================");
@@ -83,7 +98,7 @@ public class AI1 : MonoBehaviour
         */
 
         /*
-        //if (this.name == "NPC shopkeeper")
+        //if (this.name == "NPC pickpocket")
         if (this.name == "NPC shopkeeper")
         {
             theFunctions.print("==================================================");
@@ -115,12 +130,44 @@ public class AI1 : MonoBehaviour
             {
                 theFunctions.sensing(toDoList[0], target, state);
             }
-            
+
 
             //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
             //theFunctions.printPlan(toDoList);
 
 
+            //remove all plans that contain "ineffective actions":
+            //first have a list of all plans to remove, because it's bad to modify a list while iterating over it in effing C# apparently
+            List<List<action>> plansToRemove = new List<List<action>>();
+            foreach (action thisIneffectiveAction in ineffectiveActions)
+            {
+                //go through each plan
+                foreach(List<action> thisPlan in planList)
+                {
+                    //check each ACTION in this plan:
+                    foreach(action thisAction in thisPlan)
+                    {
+                        //checked if this is the ineffective action:
+                        if(thisAction.name == thisIneffectiveAction.name)
+                        {
+                            //if so, add this plan to list of plans to remove:
+                            plansToRemove.Add(thisPlan);
+                            
+                        }
+                    }
+                }
+            }
+
+            //NOW can remove the plans with ineffective actions:
+            foreach(List<action> thisPlan in plansToRemove)
+            {
+                //remove the plan from the planList
+                planList.Remove(thisPlan);
+            }
+
+
+
+            //Now find and remove all IMPOSSIBLE plans
             int Z;
             Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
 
@@ -136,27 +183,54 @@ public class AI1 : MonoBehaviour
         }
         else
         {
-            //well, if "toDoList" is of zero length, need to try to make a plan
+            //well, if "toDoList" is of zero length, need a plan
+
+            //choose next one from planList, unless planlist is "null" or empty:
+            //so check if it's null or empty, fill it up if so:
+            if (planList == null || planList.Count == 0)
+            {
+                //need to make planList:
+
+
+                //print(recurringGoal.name);
+                planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
+                //theFunctions.printPlan(planList[0]);
+                //print("state before imagination:");
+                //theFunctions.printState(state);
+                planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
+                //print("the plan after imagination fix:");
+                //theFunctions.printPlan(planList[0]);
+                //print("state AFTER imagination:");
+
+
+                //theFunctions.printState(state);
+
+                //now to rank the plans by cost:
+                if (planList != null && planList.Count > 0)
+                {
+                    planList = theFunctions.planRanker(planList);
+                }
+
+                //also, blank out the list of "ineffective actions":
+                if(ineffectiveActions != null && ineffectiveActions.Count > 0)
+                {
+                    ineffectiveActions.Clear();
+                }
+                    
+            }
+
+            
+            
 
             //ad-hoc adding the goal once it is completed, to create behavior loop
+            //WHY IS THIS HERE????  SHOULDN'T IT BE SOMEWHERE ELSE???  maybe at the END, or START of update???
             if (state["feelings"].Count == 0)
             {
                 state["feelings"].Add(recurringGoal);
             }
-            //print("need to find a plan:");
-            List<List<action>> planList = new List<List<action>>();
-            //print(recurringGoal.name);
-            planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
-            //theFunctions.printPlan(planList[0]);
-            //print("state before imagination:");
-            //theFunctions.printState(state);
-            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
-            //print("the plan after imagination fix:");
-            //theFunctions.printPlan(planList[0]);
-            //print("state AFTER imagination:");
-
-
-            //theFunctions.printState(state);
+            
+            
+            
 
             /////////////////////////////////////////////////
             //          POST-PLANNING PHASE
@@ -164,22 +238,22 @@ public class AI1 : MonoBehaviour
 
             //now to rank the plans by cost:
             //(first check we have any palns)
-            if (planList.Count > 0)
+            if (planList != null && planList.Count > 0)
             {
 
-                //now to rank the plans by cost:
-                planList = theFunctions.planRanker(planList);
+
 
                 //now, choose first one:
-                toDoList = planList[0];
+                toDoList = deepCopyFirstPlan(planList);
+                //and REMOVE that first one from the planList:
+                planList.RemoveAt(0);
 
                 //am I generating impossible plans???
                 //int Z;
                 //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-
                 
-
             }
+            
         }
 
         //printPlan(toDoList);
@@ -191,21 +265,50 @@ public class AI1 : MonoBehaviour
         if (toDoList.Count > 0)
         {
             
-            target = theFunctions.doNextAction(toDoList[0], state, target);
+            target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
 
             
             
         }
         //theFunctions.printState(state);
-        
+
         /*
         if (this.name == "NPC")
         {
             theFunctions.print("---------------------END OF UPDATE----------------------");
         }
         */
+        
     }
 
+
+
+    /////////////////////////////////////
+    
+    public void printPlanList(List<List<action>> planList)
+    {
+        if (planList == null)
+        {
+            theFunctions.print("this planList is null");
+        }
+        else
+        {
+            theFunctions.print(theFunctions.planListToText(planList));
+        }
+        
+    }
+
+    public List<action> deepCopyFirstPlan(List<List<action>> planList)
+    {
+        List<action> thisDeepCopy = new List<action>();
+
+        foreach(action thisAction in planList[0])
+        {
+            thisDeepCopy.Add(thisAction);
+        }
+
+        return thisDeepCopy;
+    }
 }
 
 

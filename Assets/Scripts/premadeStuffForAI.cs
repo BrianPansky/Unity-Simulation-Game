@@ -76,6 +76,7 @@ public class premadeStuffForAI : MonoBehaviour
 
 
     public action handleSecurityMild = new action();
+    public action handleSecurityEscalationOne = new action();
 
 
 
@@ -165,6 +166,7 @@ public class premadeStuffForAI : MonoBehaviour
 
 
             handleSecurityMild = actionCreator("handleSecurityMild", "security", createListOfStateItems(), createListOfStateItems(threat0), 1);
+            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", createListOfStateItems(), createListOfStateItems(threat0), 4);
 
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
@@ -276,6 +278,7 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(buyHome);
 
         knownActions.Add(handleSecurityMild);
+        knownActions.Add(handleSecurityEscalationOne);
 
         knownActions.Add(eat);
         knownActions.Add(buyFood);
@@ -293,6 +296,8 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(buyHome);
 
         knownActions.Add(handleSecurityMild);
+        knownActions.Add(handleSecurityEscalationOne);
+        
 
         //knownActions.Add(sellFood);
 
@@ -311,6 +316,9 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(eat);
         knownActions.Add(buyFood);
         knownActions.Add(buyHome);
+
+        knownActions.Add(doTheWork);
+        
 
         //knownActions.Add(findVictim);
         //knownActions.Add(goToVictim);
