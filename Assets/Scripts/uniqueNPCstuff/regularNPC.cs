@@ -17,7 +17,6 @@ public class regularNPC : MonoBehaviour
         theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createNPCstate1();
         theHub.knownActions = stateGrabber.createKnownActions1();
-        theHub.map = stateGrabber.createMap1();
 
     }
 

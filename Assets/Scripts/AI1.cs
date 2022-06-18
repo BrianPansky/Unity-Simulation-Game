@@ -31,9 +31,7 @@ public class AI1 : MonoBehaviour
     //is this not used right now?  I'm using "recurringGoal" instead?
     public List<actionItem> goals = new List<actionItem>();
 
-
-    //map [UNUSED NOW???]
-    public Dictionary<string, stateItem> map = new Dictionary<string, stateItem>();
+    
 
 
     //ad-hoc for now:

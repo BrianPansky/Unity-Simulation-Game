@@ -335,30 +335,7 @@ public class premadeStuffForAI : MonoBehaviour
 
         listToModify.Add(theAction);
     }
-
-    ////////////////////////////////////////////////////
-    //                 NPC KNOWN MAPS
-    ////////////////////////////////////////////////////
-
-    public Dictionary<string, stateItem> createMap1()
-    {
-        //annoyingly and-hoc/hand-crafted for now...
-
-        Dictionary<string, stateItem> map1 = new Dictionary<string, stateItem>();
-
-        map1.Add("workPlace", workPlace);
-        map1.Add("store", store);
-        map1.Add("home", home);
-        map1.Add("checkout", checkout);
-        map1.Add("cashierZone", cashierZone);
-
-        //effect work1 = new effect();
-        //w = GameObject.Find("workPlace");}
-
-        return map1;
-    }
-
-
+    
 
 
     ////////////////////////////////////////////////////

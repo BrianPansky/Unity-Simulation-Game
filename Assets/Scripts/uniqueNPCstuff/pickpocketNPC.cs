@@ -17,7 +17,6 @@ public class pickpocketNPC : MonoBehaviour
         theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createPickpocketState();
         theHub.knownActions = stateGrabber.createPickpocketKnownActions();
-        theHub.map = stateGrabber.createMap1();
 
     }
 }
