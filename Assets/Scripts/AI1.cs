@@ -23,8 +23,12 @@ public class AI1 : MonoBehaviour
     public List<stateItem> goals = new List<stateItem>();
 
 
-    //map
+    //map [UNUSED NOW???]
     public Dictionary<string, stateItem> map = new Dictionary<string, stateItem>();
+
+
+    //ad-hoc for now:
+    public bool jobSeeking;
 
 
     public stateItem recurringGoal = new stateItem();
@@ -42,48 +46,12 @@ public class AI1 : MonoBehaviour
 
         //add a "person" tag to this agent:
         thisIsTaggedWith.addTag("person");
-    }
 
+        //ad-hoc for now:
+        jobSeeking = true;
+}
 
-
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //Debug.Log("it works");
-        //Debug.Log(other);
-        if (other.gameObject.tag == "aMapZone")
-        {
-            //print("it works");
-
-
-            List<stateItem> newLocationList = new List<stateItem>();
-            //Debug.Log(f);
-            //print(this.transform.parent.name);
-            //print("------------------start printing map--------------------");
-            //mapPrinter(scriptX.map);
-            //print("------------------done printing map--------------------");
-
-            //theFunctions.print(other.gameObject.transform.parent.name);
-            newLocationList.Add(map[other.gameObject.transform.parent.name]);
-            state["locationState"] = newLocationList;
-
-            //Component theScript = other.GetComponent("Script");
-            //Debug.Log(theScript);  //returns Null, because there is no component called "script", the script is called "AI1"
-            //.locationState = this.name;
-
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.tag == "aMapZone")
-        {
-            //just blank out the locationState, I think:
-            List<stateItem> newLocationList = new List<stateItem>();
-            state["locationState"] = newLocationList;
-        }
-    }
-
+    
 
     // Update is called once per frame
     void Update()
