@@ -97,6 +97,8 @@ public class functionsForAI : MonoBehaviour
                 //print(theTargetState.state["locationState"][0].name);
                 GameObject customerLocation = getLocationObject(state["locationState"][0].name);
 
+                //print("yoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
+                //print(target);
                 GameObject cashierMapZone = getCashierMapZone(customerLocation);
                 //print(casheirMapZone.name);
 
@@ -127,8 +129,8 @@ public class functionsForAI : MonoBehaviour
                 //GameObject customerLocation = getLocationObject(state["locationState"][0].name);
                 GameObject customerLocation = target;
 
-                print("target name is:::::::::::::::::::::::::::::");
-                print(target.name);
+                //print("target name is:::::::::::::::::::::::::::::");
+                //print(target.name);
 
                 GameObject cashierMapZone = getCashierMapZone(customerLocation);
                 
@@ -172,12 +174,12 @@ public class functionsForAI : MonoBehaviour
                         listOfCashiers.Add(customer);
                         changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
-                        print(customer.name);
+                        //print(customer.name);
                         
 
                         workerCount += 1;
 
-                        print(workerCount);
+                        //print(workerCount);
 
                         //need the worker to show up at the correct store for their shift:
                         customerAI.roleLocation = thisAI.roleLocation;
@@ -535,141 +537,13 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public GameObject getCashierMapZone(GameObject customerLocation)
-    {
-        GameObject cashierMapZone;
-        cashierMapZone = null; //just in case none is found
-        GameObject locationParent = customerLocation.transform.parent.gameObject;
-
-        //now search for the correct "child" object:
-        foreach(Transform child in locationParent.transform)
-        {
-            print(child.name);
-            if(child.name == "cashierZone")
-            {
-                //but the actual "mapZone" is a CHILD of this casheirZone object:
-                cashierMapZone = child.GetChild(0).gameObject;
-                return cashierMapZone;
-            }
-
-        }
-
-        //should suceed in the loop and NOT execute the following code
-        //thus the following code prints an error:
-        print("cashierZone not found, perhaps it is not a child of the checkout zone's parent object");
-        return cashierMapZone;
-
-    }
-
-    public GameObject getCashierMapZone22222(GameObject theStore)
-    {
-        //this function just needs to know which store to look in, then finds the cashierZone in that store
-        //print(theStore.name);
-
-        GameObject cashierMapZone;
-        cashierMapZone = null; //just in case none is found
-        //GameObject locationParent = customerLocation.transform.parent.gameObject;
-
-        //now search for the correct "child" object:
-        foreach (Transform child in theStore.transform)
-        {
-            //print(child.name);
-            if (child.name == "checkoutCounter")
-            {
-                //messy ad-hoc for now, not sure it will work:
-                foreach (Transform child2 in child.transform)
-                {
-                    if (child2.name == "cashierZone")
-                    {
-                        //but the actual "mapZone" is a CHILD of this casheirZone object:
-                        cashierMapZone = child2.GetChild(0).gameObject;
-                        return cashierMapZone;
-                    }
-                }
-            }
-        }
-
-        //should suceed in the loop and NOT execute the following code
-        //thus the following code prints an error:
-        print("cashierZone not found, ...");
-        return cashierMapZone;
-
-    }
-
-
-    public GameObject getCheckoutMapZone(GameObject cashierLocation)
-    {
-        GameObject checkoutZone;
-        checkoutZone = null; //just in case none is found, the above won't work, trying to return it will have compile error
-        GameObject locationParent = cashierLocation.transform.parent.gameObject;
-
-        //now search for the correct "child" object:
-        //wait, doesn't Unity have a way to do this?  Haven't I done this elsewhere???
-        foreach (Transform child in locationParent.transform)
-        {
-            if (child.name == "checkout")
-            {
-                //but the actual "mapZone" is a CHILD of this checkout object:
-                checkoutZone = child.GetChild(0).gameObject;
-                return checkoutZone;
-            }
-
-        }
-
-        //should suceed in the loop and NOT execute the following code
-        //thus the following code prints an error:
-        print("checkout zone not found, perhaps it is not a child of the cashier zone's parent object");
-        return checkoutZone;
-
-    }
-
-    public GameObject getCheckoutMapZone22222(GameObject theStore)
-    {
-        //takes a store game object, returns the game object of the checkoutZone
-
-
-
-        GameObject checkoutZone;
-        checkoutZone = null; //just in case none is found, the above won't work, trying to return it will have compile error
-        //GameObject locationParent = cashierLocation.transform.parent.gameObject;
-
-        //now search for the correct "child" object:
-        //wait, doesn't Unity have a way to do this?  Haven't I done this elsewhere???
-        foreach (Transform child in theStore.transform)
-        {
-            //print(child.name);
-            if (child.name == "checkoutCounter")
-            {
-                //messy ad-hoc for now, not sure it will work:
-                foreach (Transform child2 in child.transform)
-                {
-                    //print(child2.name);
-                    if (child2.name == "checkout")
-                    {
-                        //but the actual "mapZone" is a CHILD of this cashierZone object:
-                        //why would I want mapZone though?  Don't I want checkout???
-                        checkoutZone = child2.gameObject; //.GetChild(0).gameObject;
-                        return checkoutZone;
-                    }
-                }
-            }
-        }
-
-        //should suceed in the loop and NOT execute the following code
-        //thus the following code prints an error:
-        print("checkout zone not found, ,,,,,,,,,,,");
-        return checkoutZone;
-
-    }
-
-
     public void travelToTargetObject(GameObject target)
     {
 
         Vector3 targetVector = target.GetComponent<Transform>().position;
         _navMeshAgent.SetDestination(targetVector);
     }
-    
+
     public AI1 getHubScriptFromGameObject(GameObject NPC)
     {
         AI1 theHub = NPC.GetComponent("AI1") as AI1;
@@ -687,7 +561,7 @@ public class functionsForAI : MonoBehaviour
         whoever = null;
 
         listOfTouchingNPCs listOfNPCs = locationZone.GetComponent<listOfTouchingNPCs>();
-        
+
         //check to make sure the list isn't empty:
         if (listOfNPCs.theList.Count > 0)
         {
@@ -698,6 +572,130 @@ public class functionsForAI : MonoBehaviour
         return whoever;
     }
 
+
+    //getting locations:
+
+    public GameObject getOppositeZone(GameObject target)
+    {
+        //returns the "mapZone" object on the opposite side of the counter
+        //needs to know two things:
+        //1) which store to look in
+        //2) which side of the counter are we on right now?
+        //I think the current "target" will ALWAYS be the answer to both simultaneously
+        return null;
+
+    }
+
+    public GameObject getCashierMapZone(GameObject customerLocation)
+    {
+        GameObject cashierMapZone;
+        cashierMapZone = null; //just in case none is found
+        GameObject locationParent = customerLocation.transform.parent.gameObject;
+
+
+        //gets the named object ("checkout") itself, 
+        //then uses that to get the "mapZone" that is a "child" of that checkout:
+        cashierMapZone = getMapZoneChildOfObject(namedChild(locationParent, "cashierZone"));
+
+        //check results:
+        if (cashierMapZone == null)
+        {
+            print("cashier mapZone not found, perhaps it is not a child of the customer location's parent object");
+        }
+
+        
+        return cashierMapZone;
+
+    }
+
+    public GameObject getCashierMapZoneOfStore(GameObject theStore)
+    {
+        //this function just needs to know which store to look in, then finds the cashierZone in that store
+        //print(theStore.name);
+
+        GameObject cashierMapZone;
+        cashierMapZone = null; //just in case none is found
+
+        //gets the named object ("cashierZone"):
+        //then uses that to get the "mapZone" that is a "child" of that cashierZone:
+        cashierMapZone = getMapZoneChildOfObject(namedChild(theStore, "cashierZone"));
+
+        //check results:
+        if (cashierMapZone == null)
+        {
+            print("cashierMapZone not found, ...");
+        }
+        
+        
+        return cashierMapZone;
+
+    }
+
+
+    public GameObject getCheckoutMapZone(GameObject cashierLocation)
+    {
+        GameObject checkoutZone;
+        checkoutZone = null; //just in case none is found, the above won't work, trying to return it will have compile error
+        GameObject locationParent = cashierLocation.transform.parent.gameObject;
+
+        //now search for the correct "child" object:
+        //wait, doesn't Unity have a way to do this?  Haven't I done this elsewhere???
+
+        //gets the named object ("checkout") itself, 
+        //then uses that to get the "mapZone" that is a "child" of that checkout:
+        checkoutZone = getMapZoneChildOfObject(namedChild(locationParent, "checkout"));
+
+        //check results:
+        if (checkoutZone == null)
+        {
+            print("checkout zone not found, perhaps it is not a child of the cashier zone's parent object");
+        }
+        
+        return checkoutZone;
+
+    }
+
+    
+    
+    //re-used bits for getting locations
+
+    public GameObject namedChild(GameObject theHighestParent, string nameOfChild)
+    {
+        //recursive function to simply search ALL child objects, brute force
+        //return the ONLY child with the given name (or first one found)
+
+        foreach (Transform child in theHighestParent.transform)
+        {
+            if (child.name == nameOfChild)
+            {
+                return child.gameObject;
+            }
+            else
+            {
+                //depth-first search, go recursive (AKA "deeper") immediately:
+                GameObject deeperSearch = namedChild(child.gameObject, nameOfChild);
+                if (deeperSearch != null)
+                {
+                    return deeperSearch;
+                }
+            }
+        }
+
+        //if that search hasn't returned anyting, we can only return null:
+        return null;
+    }
+
+    public GameObject getMapZoneChildOfObject(GameObject theObject)
+    {
+        if (theObject != null)
+        {
+            return theObject.transform.GetChild(0).gameObject;
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     ////////////////////////////////////////////////
     //                TARGETING
@@ -726,7 +724,8 @@ public class functionsForAI : MonoBehaviour
             if (criteria.name == "anyStore")
             {
                 //get any store:
-                target = anyStoreForSale();
+                //target = anyStoreForSale();
+                target = randomTaggedWithMultiple("shop", "forSale");
             }
             else if (criteria.name == "checkout")
             {
@@ -742,12 +741,12 @@ public class functionsForAI : MonoBehaviour
             //no, that variable just goes to the store building
             //I need them to go to the cashierZone IN that store
             //so:
-            target = getCashierMapZone22222(thisAI.roleLocation);
+            target = getCashierMapZoneOfStore(thisAI.roleLocation);
 
         }
         else
         {
-            //for now, else should all be mapZone things we can find like this?
+            //for now, "else" should all be mapZone things we can find like this?
             target = GameObject.Find(name1);
         }
         
@@ -759,6 +758,94 @@ public class functionsForAI : MonoBehaviour
 
         return target;
     }
+
+
+    //find objects using tags:
+    public GameObject randomTaggedWith(string theTag)
+    {
+        //should return ONE random GameObject that is tagged with the inputted tag
+
+        List<GameObject> allPotentialTargets = new List<GameObject>();
+
+        allPotentialTargets = globalTags[theTag];
+
+
+
+        if (allPotentialTargets.Count > 0)
+        {
+            GameObject thisObject;
+            thisObject = null;
+            int randomIndex = Random.Range(0, allPotentialTargets.Count);
+            thisObject = allPotentialTargets[randomIndex];
+            return thisObject;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public GameObject randomTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //should return ONE random GameObject that is tagged with ALL inputted tags
+        List<GameObject> allPotentialTargets = new List<GameObject>();
+        allPotentialTargets = globalTags[theTag];
+
+        //put the optional other tags in a list:
+        List<string> otherTags = new List<string>();
+        otherTags.Add(tag2);
+        otherTags.Add(tag3);
+        otherTags.Add(tag4);
+
+        
+
+        GameObject thisObject;
+        thisObject = null;
+        bool doWeHaveGoodTarget = false;
+
+
+        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
+        {
+            //grab a randomn object from the list:
+            int randomIndex = Random.Range(0, allPotentialTargets.Count);
+            thisObject = allPotentialTargets[randomIndex];
+
+
+            //now, check all the other tags on that^ object
+            //if it lacks a needed tag, remove that item from the array
+            //and choose again
+            //to do that, need to grab the tags on that object:
+            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+            //assume this object will correctly have ALL the tags
+            //then falsify by checking:
+            doWeHaveGoodTarget = true;
+            
+            foreach (string thisTag in otherTags)
+            {
+                //make sure it's not null:
+                if (thisTag != null)
+                {
+                    if (theTagScript.tags.Contains(thisTag) == false)
+                    {
+                        doWeHaveGoodTarget = false;
+                        allPotentialTargets.RemoveAt(randomIndex);
+                        break;
+                    }
+                }
+            }
+
+            //see if the object passed the test:
+            if (doWeHaveGoodTarget == true)
+            {
+                return thisObject;
+            }
+        }
+
+        //this will be null if the above loop didn't find one:
+        return thisObject;
+    }
+
 
 
 
@@ -851,73 +938,40 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject anyStore()
     {
-        //ad-hoc for now, this is being used in buyStore action (and in buy food?)
         //should return ONE random shop GameObject as a target
-
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        //now to find suitable targets using my new tagging system:
-        allPotentialTargets = globalTags["shop"];
-
+        
         GameObject thisShop;
         thisShop = null;
-        bool doWeHaveGoodTarget = false;
 
-        //don't need a while loop if ANY shop will be fine
-        //only need a while loop if I am eliminating choices that don't meet criteria
-        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
-        {
-            int randomIndex = Random.Range(0, allPotentialTargets.Count);
-            thisShop = allPotentialTargets[randomIndex];
-
-            //print(thisShop.name);
-
-            //but, criteria, ad-hoc for now
-            //if it's wrong criteria, remove that item from the array (will that leave a "null" hole in array???)
-            //and choose again
-            //check if it is for sale
-            taggedWith theTagScript = thisShop.GetComponent("taggedWith") as taggedWith;
-
-            /*
-            if (theTagScript.tags.Contains("forSale") == false)
-            {
-                allPotentialTargets.RemoveAt(randomIndex);
-                thisShop = null;
-            }
-            else
-            {
-                doWeHaveGoodTarget = true;
-            }
-            */
-            doWeHaveGoodTarget = true;
-        }
-
+        thisShop = randomTaggedWith("shop");
 
         return thisShop;
     }
 
 
+    
     public GameObject anyCheckout()
     {
         //ad-hoc for now, this is being used in buyFood action
         //should return ONE random checkoutZone GameObject as a target
 
-        //first, use anyStore() to find a store, then use getCheckoutMapZone22222
-        //to get the checkoutZone...
+        //first, use anyStore() to find a store, then use namedChild
+        //to get the checkout...
 
-        
+
         GameObject thisShop;
         thisShop = null;
         thisShop = anyStore();
 
 
         //now get the checkoutZone of that shop:
-        GameObject thisCheckoutZone;
-        thisCheckoutZone = null;
+        GameObject thisCheckout;
+        thisCheckout = null;
         //print("here, right??????????????????????????");
-        thisCheckoutZone = getCheckoutMapZone22222(thisShop);
+        thisCheckout = namedChild(thisShop, "checkout");
 
-        return thisCheckoutZone;
+
+        return thisCheckout;
     }
 
     //old targeting:
