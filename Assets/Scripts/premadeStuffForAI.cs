@@ -26,6 +26,9 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem food1 = new stateItem();
     public stateItem food0 = new stateItem();
 
+    public stateItem gun1 = new stateItem();
+    public stateItem gun0 = new stateItem();
+
     //feelings
     public stateItem profitMotive0 = new stateItem();
     public stateItem hungry0 = new stateItem();
@@ -79,7 +82,10 @@ public class premadeStuffForAI : MonoBehaviour
     public action handleSecurityEscalationOne = new action();
 
 
+    public action buyGun = new action();
+    public action giftGun = new action();
 
+    public action extort = new action();
 
 
     ////////////////////////////////////////////////
@@ -143,6 +149,9 @@ public class premadeStuffForAI : MonoBehaviour
             threat0 = stateItemCreator("threat", "threatState", 0);
             threat1 = stateItemCreator("threat", "threatState", 1);
 
+            gun1 = stateItemCreator("gun", "inventory", 1);
+            gun0 = stateItemCreator("gun", "inventory", 0);
+
         }
 
         //actions:
@@ -173,6 +182,11 @@ public class premadeStuffForAI : MonoBehaviour
             //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
             //seekVictim = actionCreator("seekVictim", "seek", createListOfStateItems(), createListOfStateItems(victim1), 1);
             pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", createListOfStateItems(), createListOfStateItems(money1, food1), 1, victim1);
+
+            buyGun = actionCreator("buyGun", "buyFromStore", createListOfStateItems(money1), createListOfStateItems(money0, gun1), 1, checkout1);
+            giftGun = actionCreator("buyGun", "buyFromStore", createListOfStateItems(), createListOfStateItems(gun0), 1);
+
+            extort = actionCreator("extort", "crime", createListOfStateItems(gun1), createListOfStateItems(money1), 0, checkout1);
         }
     }
 

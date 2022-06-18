@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,9 +27,16 @@ public class playerClickInteraction : MonoBehaviour
     public playerHUD myHUD;
     public functionsForAI theFunctions;
 
+
+    public taggedWith theTagScript;
+
     // Start is called before the first frame update
     void Start()
     {
+
+        
+
+
         premadeStuff = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
         myHUD = GetComponent<playerHUD>();
@@ -36,6 +44,13 @@ public class playerClickInteraction : MonoBehaviour
         recruitingMenu.SetActive(false);
 
         theFunctions = GetComponent<functionsForAI>();
+
+        theTagScript = GetComponent<taggedWith>();
+
+
+        //just for testing:
+        theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
+
 
     }
 
@@ -90,7 +105,7 @@ public class playerClickInteraction : MonoBehaviour
 
     public void doStuffAfterWorldClick(GameObject clickedOn)
     {
-        
+
 
         //Debug.Log(clickedOn.name);
         if (clickedOn.name == "workPlace")
@@ -100,7 +115,7 @@ public class playerClickInteraction : MonoBehaviour
             theHub.state["inventory"].Add(premadeStuff.money1);
         }
 
-        if(clickedOn.tag == "anNPC")
+        if (clickedOn.tag == "anNPC")
         {
             //switch to menu
             //Switch to recruitment menu
@@ -112,7 +127,7 @@ public class playerClickInteraction : MonoBehaviour
             selectedNPC = GameObject.Find(clickedOn.name);
             //set the "inMenu" state to "true":
             inMenu = true;
-            
+
 
 
 
@@ -127,7 +142,7 @@ public class playerClickInteraction : MonoBehaviour
             targetAI.inConversation = true;
 
             //check if they are working at the store:
-            if (targetAI.toDoList.Count > 0 && targetAI.toDoList[0].type == "work")
+            if (targetAI.toDoList.Count > 0 && (targetAI.toDoList[0].name == "workAsCashier" || targetAI.toDoList[0].name == "hireSomeone"))
             {
                 //yes, they are a cashier
                 //enable the "buy food" button
@@ -176,15 +191,30 @@ public class playerClickInteraction : MonoBehaviour
         //all buttons should be added to "currentGridButtons"
         //so that they are easy to delete etc. later
 
+        Action myDelegate = this.recruitButton;
+        makeButton("recruit to gang", myDelegate);
+
+        myDelegate = this.testButton;
+        makeButton("regular work", myDelegate);
+
+        myDelegate = this.giftGunButton;
+        makeButton("give gun", myDelegate);
+
+        myDelegate = this.extortOrderButton;
+        makeButton("order extortion", myDelegate);
+
+
+        /*
         //DYNAMICALLY CREATE RECRUIT BUTTON, AD-HOC FOR NOW
         GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
-        myNewGameObject.GetComponentInChildren<Text>().text = "pickpocket";
+        myNewGameObject.GetComponentInChildren<Text>().text = "recruit to gang";
         myNewGameObject.transform.SetParent(myGridCanvas.transform);
         myNewGameObject.GetComponent<Button>().onClick.AddListener(() => recruitButton());
         
         //add the button to a list, so I can elswhere delete it:
         currentGridButtons.Add(myNewGameObject);
 
+        
         //DYNAMICALLY CREATE TEST BUTTON, AD-HOC FOR NOW
         GameObject myNewGameObject2 = Instantiate(myPrefabButton1) as GameObject;
         myNewGameObject2.GetComponentInChildren<Text>().text = "regular work";
@@ -193,6 +223,29 @@ public class playerClickInteraction : MonoBehaviour
 
         //add the button to a list, so I can elswhere delete it:
         currentGridButtons.Add(myNewGameObject2);
+
+        //DYNAMICALLY CREATE "give gun" BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject3 = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject3.GetComponentInChildren<Text>().text = "give gun";
+        myNewGameObject3.transform.SetParent(myGridCanvas.transform);
+        myNewGameObject3.GetComponent<Button>().onClick.AddListener(() => giftGunButton());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject3);
+
+        //DYNAMICALLY CREATE "order extortion" BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject4 = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject4.GetComponentInChildren<Text>().text = "order extortion";
+        myNewGameObject4.transform.SetParent(myGridCanvas.transform);
+        myNewGameObject4.GetComponent<Button>().onClick.AddListener(() => extortOrderButton());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject4);
+        */
+
+
+
+
     }
 
     public void createStoreMenu()
@@ -209,6 +262,17 @@ public class playerClickInteraction : MonoBehaviour
 
         //add the button to a list, so I can elswhere delete it:
         currentGridButtons.Add(myNewGameObject);
+
+
+        //now for BUY GUN:
+        GameObject myNewGameObject2 = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject2.transform.SetParent(myGridCanvas.transform);
+
+        myNewGameObject2.GetComponentInChildren<Text>().text = "buy gun";
+        myNewGameObject2.GetComponent<Button>().onClick.AddListener(() => buyGunButton());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject2);
     }
 
     public void destroyObjectListItems(List<GameObject> theList)
@@ -225,6 +289,20 @@ public class playerClickInteraction : MonoBehaviour
         //unclear (no pun intended) whether any other junk data piles up elsewhere when running this, creating and deleting countless GameObjects...?
     }
 
+    public void makeButton(string name, Action function)
+    {
+        //hmm, tried to use "delegate" or "Action", not really working???
+
+        //DYNAMICALLY CREATE RECRUIT BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject.GetComponentInChildren<Text>().text = name;
+        myNewGameObject.transform.SetParent(myGridCanvas.transform);
+        //I pass in an "Action", C# delegate nonsense, but notice here I have to add brackets after it:
+        myNewGameObject.GetComponent<Button>().onClick.AddListener(() => function());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject);
+    }
 
 
     ///////////////////////////////////////////////////////////
@@ -233,21 +311,13 @@ public class playerClickInteraction : MonoBehaviour
 
     public void recruitButton()
     {
-        Debug.Log("heloooooooooo");
+        //Debug.Log("heloooooooooo");
 
         //for now ad-hoc
-        //just making any NPC into a pickpocket when you click on them
+        //just tagging an NPC with "playersGang" when you click it
+        theTagScript.foreignAddTag("playersGang", selectedNPC);
 
-        //need their AI1 script:
-        AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
-
-        //need the action to add:
-        premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
-
-
-        //now add pickpocket action, remove work action:
-        hubScript.knownActions.Add(stateGrabber.pickVictimsPocket);
-        hubScript.knownActions.RemoveAll(y => y.type == "work");
+        Debug.Log("should be recruited to gang now, by tagging");
     }
 
     public void closeRecruitmentMenu()
@@ -325,6 +395,83 @@ public class playerClickInteraction : MonoBehaviour
         hubScript.knownActions.RemoveAll(y => y.name == "pickVictimsPocket");
     }
 
+    public void recruitPickpocketButton()
+    {
+        //Debug.Log("heloooooooooo");
+
+        //for now ad-hoc
+        //just making any NPC into a pickpocket when you click on them
+
+        //need their AI1 script:
+        AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
+
+        //need the action to add:
+        premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
+
+
+        //now add pickpocket action, remove work action:
+        hubScript.knownActions.Add(stateGrabber.pickVictimsPocket);
+        hubScript.knownActions.RemoveAll(y => y.type == "work");
+    }
+
+    public void extortOrderButton()
+    {
+        //Debug.Log("heloooooooooo");
+
+        //for now ad-hoc
+        //just making any NPC go extort the shop...if they have a gun
+
+        //need their AI1 script:
+        AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
+
+        //need the action to add:
+        premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
+
+
+        //now add pickpocket action, remove work action:
+        hubScript.knownActions.Add(stateGrabber.extort);
+        hubScript.knownActions.RemoveAll(y => y.type == "work");
+    }
+
+
+    public void buyGunButton()
+    {
+        //oh right, don't want to do this for now, don't want to put anything into cashier's inventory...
+        //theFunctions.trade(theHub.state["inventory"], inventory2, premadeStuff.buyFood);
+
+        //for now:
+        //check if I have money:
+        bool haveMoney = false;
+
+        foreach (stateItem thisItem in theHub.state["inventory"])
+        {
+            if (thisItem.name == "money")
+            {
+                haveMoney = true;
+                break;
+            }
+        }
+
+        if (haveMoney)
+        {
+
+            theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
+        }
+        else
+        {
+            Debug.Log("no money!");
+        }
+    }
+
+    public void giftGunButton()
+    {
+        //need to get the NPC inventory:
+        AI1 hubOfNPC = selectedNPC.GetComponent("AI1") as AI1;
+
+        theFunctions.gift(theHub.state["inventory"], hubOfNPC.state["inventory"], premadeStuff.giftGun);
+        //theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
+        Debug.Log("gave gun?");
+    }
 
 
 }

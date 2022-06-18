@@ -565,6 +565,45 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
+    public void gift(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
+    {
+        //just like the reverse of steal
+
+        //probably ad-hoc for now
+
+        //actioner is the one doing the nextAction
+
+        //https://stackoverflow.com/a/605390
+        List<stateItem> actionerGives = new List<stateItem>();
+        List<stateItem> otherInventoryReceives = new List<stateItem>();
+
+        //look to gift EACH item in the "effects" of the gift action
+        //but only LOOK and take note, don't modify inventories YET (can lead to error)
+        foreach (stateItem effect in nextAction.effects)
+        {
+            
+            //but must only give items if they exist in the giver's inventory!
+            foreach (stateItem itemInInventory in actionerInventory)
+            {
+                if (itemInInventory.name == effect.name)
+                {
+                    actionerGives.Add(itemInInventory);
+                    otherInventoryReceives.Add(effect);
+                }
+            }
+        }
+
+        //NOW modify inventories
+        foreach (stateItem item in actionerGives)
+        {
+            actionerInventory.Remove(item);
+        }
+        foreach (stateItem item in otherInventoryReceives)
+        {
+            inventory2.Add(item);
+        }
+    }
+
     public void addKnownActionToGameObject(GameObject agent, action theAction)
     {
         //first, go from "GameObject" to it's script that has knownActions:
