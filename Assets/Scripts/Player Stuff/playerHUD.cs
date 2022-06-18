@@ -10,6 +10,7 @@ public class playerHUD : MonoBehaviour
     //can just plug these in using Unity's drag and drop, for now:
     public GameObject myCanvas;
     public GameObject myText;
+    public GameObject myToDoListText;
 
     public AI1 theHub;
 
@@ -26,6 +27,7 @@ public class playerHUD : MonoBehaviour
         //or only update one time, right after clicking?
         //well, sometimes it might change for reasons besides clicking...
         displayAllInventoryItems();
+        displayToDoList();
     }
 
     void displayAllInventoryItems()
@@ -56,5 +58,32 @@ public class playerHUD : MonoBehaviour
             myText.GetComponent<Text>().text = "[]";
         }
         
+    }
+
+    void displayToDoList()
+    {
+        //change text to be items from inventory
+
+        if (theHub.inputtedToDoList.Count > 0)
+        {
+            
+
+            //now, how to set the text to say that???
+            //myText.GetComponent<Text>().text = inventoryItem;
+            string thePrintOut = "";
+            foreach (action item in theHub.inputtedToDoList)
+            {
+                thePrintOut += "(" + item.name.ToString() + ")";
+            }
+
+
+            
+            myToDoListText.GetComponent<Text>().text = thePrintOut;
+        }
+        else
+        {
+            myToDoListText.GetComponent<Text>().text = "[]";
+        }
+
     }
 }

@@ -63,15 +63,19 @@ public class AI1 : MonoBehaviour
     //for these abnormal things, edit in in Unity side panel to be true
     //otherwise, i'll try to make it false in "start" function
     public bool ignore;
-
+    public int goalWait;
 
 
     // Start is called before the first frame update
     void Start()
     {
-
+        //should move this elsewhere?
+        if(this.name == "Player")
+        {
+            ignore = true;
+        }
         //ad-hoc
-        //this is so i can use this script on stuff like storage containers [which have an inventory] even though stuff won't work normally like AI
+        //this is so i can use this script on stuff like storage containers or PLAYER [which have an inventory] even though stuff won't work normally like AI
         //for these abnormal things, edit in in Unity side panel to be true
         //otherwise, i'll try to make it false in this "start" function
         if(ignore != true)
@@ -82,12 +86,18 @@ public class AI1 : MonoBehaviour
 
 
 
-    //get some other scripts I'll need:
-    theFunctions = GetComponent<functionsForAI>();
+        //get some other scripts I'll need:
+        theFunctions = GetComponent<functionsForAI>();
         thisIsTaggedWith = GetComponent<taggedWith>();
 
         //add a "person" tag to this agent:
-        thisIsTaggedWith.addTag("person");
+        //ad hoc way to prevent storage containters from being called people:  check for the npc tag:
+        if(this.gameObject.tag == "anNPC")
+        {
+            thisIsTaggedWith.addTag("person");
+        }
+        
+        
 
         //ad-hoc for now:
         jobSeeking = true;
@@ -96,7 +106,8 @@ public class AI1 : MonoBehaviour
         homeLocation = null;
 
         clearanceLevel = 0;
-        
+
+        goalWait = 0;
 }
 
     
@@ -174,6 +185,8 @@ public class AI1 : MonoBehaviour
 
                 //doing the to-do list (checks if it's not zero length):
                 handleAnyNextAction();
+                
+                
 
                 if (this.name == "NPC")
                 {
@@ -292,16 +305,19 @@ public class AI1 : MonoBehaviour
         {
             //remove the plan from the planList
             planList.Remove(thisPlan);
+
+            if (this.name == "NPC pickpocket")
+            {
+                //NPC shopkeeper
+                //theFunctions.print("this planList after removing ineffective plan:");
+                //printPlanListForSpecificNPC();
+
+            }
         }
 
         
 
-        if (this.name == "NPC shopkeeper")
-        {
-            //theFunctions.print("this planList after removing ineffective plan:");
-            //printPlanListForSpecificNPC();
-            
-        }
+        
     }
 
     public void blankImpossibleToDoList()
@@ -510,13 +526,22 @@ public class AI1 : MonoBehaviour
             //if it's done, remove it:
             if (checkIfEffectsAreDone(toDoList[0], state) == false)
             {
-                target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+                if (goalWait < 1)
+                {
+                    target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+                }
+                else
+                {
+                    goalWait -= 1;
+                }
+                
             }
             else
             {
                 //this "else" means the nextAction is redundant, already done.
                 //so dump the action:
                 target = theFunctions.dumpAction(target);
+                goalWait = 0; //SHOULD INCORPORATE INTO "dumpAction"????
             }
 
 
@@ -623,8 +648,9 @@ public class AI1 : MonoBehaviour
 
         //to help, encapsulating this:
 
-        if (this.name == "NPC shopkeeper")
+        if (this.name == "NPC pickpocket")
         {
+            //NPC shopkeeper
             print("00000000000000000  Plan List:   000000000000000000");
             printPlanList(planList);
         }

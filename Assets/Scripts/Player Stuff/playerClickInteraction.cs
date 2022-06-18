@@ -6,7 +6,10 @@ using UnityEngine.UI;
 
 public class playerClickInteraction : MonoBehaviour
 {
-    GameObject clickedOn;
+    //DOESN'T SEEM TO WORK AFTER """""() => this.giveXbutton(order)""""" STUFF
+    //SO INSTEAD USE "selectedNPC" WHICH WORKS FINE FOR SOME REASON???
+    //CHANGING "clickedOn" TO PUBLIC DIDN'T FIX, AND "selectedNPC" ISN'T PUBLIC EITHER...
+    public GameObject clickedOn;
 
     //ad-hoc?
     GameObject selectedNPC;
@@ -115,6 +118,9 @@ public class playerClickInteraction : MonoBehaviour
 
     public void handleAnyClick()
     {
+
+        //should just have the logic structure [if statements], and thencall other functions where the details are
+
         if (Input.GetMouseButtonDown(0))
         {
             if(buildMode == true)
@@ -324,6 +330,12 @@ public class playerClickInteraction : MonoBehaviour
                 createStoreMenu();
 
             }
+            //if they are your boss:
+            else if (theFunctions.isThisMyLeader(clickedOn))
+            {
+                //print(clickedOn.name);
+                createBossMenu();
+            }
             else
             {
                 //this is a regular free-roaming NPC
@@ -496,7 +508,7 @@ public class playerClickInteraction : MonoBehaviour
 
         foreignTagScript.printAllTags();
 
-        if (foreignTagScript.tags.Contains("playersGang"))
+        if (foreignTagScript.tags.Contains("PlayersGang"))
         {
             makeButton("hire as gatherer", this.hireResource1GathererButton);
 
@@ -526,6 +538,25 @@ public class playerClickInteraction : MonoBehaviour
 
         
     }
+
+    public void createBossMenu()
+    {
+        Debug.Log("yessssssss!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //makeButton("buy food", this.tradeButton);
+
+        //makeButton("buy gun", this.buyGunButton);
+
+        //generate command completion list:
+        //print(clickedOn.name);
+        foreach (action order in theHub.inputtedToDoList)
+        {
+            //I'm making the buttons for the player to complete mission objectives, such as delivering an item to a leader,
+            //should first Probably check pre - reqs  using a pre req checker
+            makeButton("give " + order.effects[0].name, () => this.giveXbutton(order));
+        }
+
+    }
+
 
     public void destroyObjectListItems(List<GameObject> theList)
     {
@@ -620,7 +651,10 @@ public class playerClickInteraction : MonoBehaviour
         if (theSocialScript.checkTrust(this.name) > 60)
         {
             //ok, recruitment suceeds
+            theFunctions.succeedAtRecruitment(selectedNPC);
+            /*
             Debug.Log("recruitment successful");
+
 
             //for now ad-hoc
             //just tagging an NPC with "playersGang" when you click it
@@ -639,6 +673,7 @@ public class playerClickInteraction : MonoBehaviour
             //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
             NPChubScript.target = null;
 
+            */
             refreshRecruitmentMenu();
 
             //personOfInterest = selectedNPC;
@@ -914,6 +949,10 @@ public class playerClickInteraction : MonoBehaviour
 
     public void fetchXButton(action availableCommand)
     {
+        theFunctions.commandToDoFetchXAction(availableCommand, selectedNPC);
+
+        /*
+
         //need their AI1 script:
         AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
         
@@ -923,8 +962,21 @@ public class playerClickInteraction : MonoBehaviour
         
 
         NPChubScript.inputtedToDoList.Add(availableCommand);
+        */
     }
 
+    public void giveXbutton(action theAction)
+    {
+        //print(selectedNPC.name);
+        if(theFunctions.TRYincremintInventoriesOfThisAndTargetFromEffects(selectedNPC, theAction))
+        {
+            //success
+            //now remove this action from to-do list...
+            theHub.inputtedToDoList.Remove(theAction);
+        }
+
+        
+    }
 
     public void announcePoliticalSideButton(int yourSide)
     {
@@ -1004,7 +1056,14 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-
+    ////////////////////////////////////////////////
+    //         Misc diagnostic functions
+    ////////////////////////////////////////////////
+    ///
+    public void print(string text)
+    {
+        Debug.Log(text);
+    }
 
 
 

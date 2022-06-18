@@ -28,6 +28,7 @@ public class functionsForAI : MonoBehaviour
 
     public AI1 thisAI;// = GetComponent<AI1>();
     public premadeStuffForAI premadeStuff;
+    public taggedWith theTagScript;
 
     //ad hoc test thing
     public bool testTime;
@@ -57,6 +58,7 @@ public class functionsForAI : MonoBehaviour
         GameObject theWorldObject = GameObject.Find("World");
         worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
         globalTags = theWorldScript.taggedStuff;
+        theTagScript = GetComponent<taggedWith>();
     }
 
 
@@ -418,6 +420,24 @@ public class functionsForAI : MonoBehaviour
 
                 //print(target.name);
             }
+            else if (nextAction.name == "recruit")
+            {
+                //print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                succeedAtRecruitment(target);
+                state = implementALLEffects(nextAction, state);
+                target = dumpAction(target);
+            }
+            else if (nextAction.name == "askMemberForMoney")
+            {
+                //ad hoc timer:
+                thisAI.goalWait = 1100;
+
+                //print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                commandToDoFetchXAction(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.money)), target);
+                
+                target = dumpAction(target);
+            }
+
 
             else if (nextAction.name == "workAsCashier")
             {
@@ -952,6 +972,7 @@ public class functionsForAI : MonoBehaviour
 
     public void incremintInventoriesOfThisAndTargetFromEffects(GameObject theTargetPerson, action theAction)
     {
+        //print(theTargetPerson.name);
         //just more clean and tidy than having to fetch the AI inventory and plug it in all the time!
         //make sure inputted target has an inventory script!
         //requires "state" of current person, but that's accounted for at start of this script, i think?
@@ -961,6 +982,115 @@ public class functionsForAI : MonoBehaviour
         incrementTwoInventoriesFromActionEffects(thisAI.state["inventory"], theTargetState.state["inventory"], theAction);
 
     }
+
+
+
+
+    //TRY INVENTORY MODIFICATION:
+    public bool TRYincremintInventoriesOfThisAndTargetFromEffects(GameObject theTargetPerson, action theAction)
+    {
+        //print(theTargetPerson.name);
+        //just more clean and tidy than having to fetch the AI inventory and plug it in all the time!
+        //make sure inputted target has an inventory script!
+        //requires "state" of current person, but that's accounted for at start of this script, i think?
+        //well, start gives us "thisAI", i can use that...
+        AI1 theTargetState = theTargetPerson.GetComponent("AI1") as AI1;
+
+        return TRYincrementTwoInventoriesFromActionEffects(thisAI.state["inventory"], theTargetState.state["inventory"], theAction);
+
+    }
+
+    public bool TRYincrementTwoInventoriesFromActionEffects(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
+    {
+        //so, to make it simple to work, assume:
+        //1)---any gained item (in action effect) is taken from 2nd inventory
+        //2)---any lost item is GIVEN to 2nd inventory
+        //3)---just swap the sign on the quantity if the bool is false
+
+        //actioner is the one doing the nextAction
+
+        //https://stackoverflow.com/a/605390
+        List<actionItem> deepCopyVERIFIEDeffectsList = new List<actionItem>();
+        List<actionItem> actionerGives = new List<actionItem>();
+        List<actionItem> actionerReceives = new List<actionItem>();
+
+        bool theTRY = false;
+
+        //look to gift EACH item in the "effects" of the gift action
+        //but only LOOK and take note, don't modify inventories YET (can lead to error)
+        foreach (actionItem effect in nextAction.effects)
+        {
+            //must only give items if they exist in the giver's inventory!
+            //but to get here we should assume that such prereqs are already met
+            //BUT PREREQS HAVE NOT CHECKED THE 2ND INVENTORY
+
+            //just deep copy the effects list so i can use them without messing anything up:
+            //deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+            //first, determine whose inventory to VERIFY the contents of, based on bool, and the assumptions listed at start of funciton:
+            if (effect.inStateOrNot == false)
+            {
+                //"false" means it comes out of actioner's inventory, so need to check to make sure it is IN the actioner's inventory to start with:
+                foreach (stateItem itemInInventory in actionerInventory)
+                {
+                    if (itemInInventory.name == effect.name)
+                    {
+                        //actionerGives.Add(itemInInventory);
+
+                        //need to deep copy this one so we don't modify stuff in "knownActions":
+                        //otherInventoryReceives.Add(deepStateItemCopier(effect.item));
+                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+                    }
+                }
+            }
+            if (effect.inStateOrNot == true)
+            {
+                //"true" means it comes out of the2nd inventory, so need to check to make sure it is IN the 2nd inventory to start with:
+                foreach (stateItem itemInInventory2 in inventory2)
+                {
+                    if (itemInInventory2.name == effect.name)
+                    {
+                        //actionerReceives.Add(deepStateItemCopier(effect));
+                        //otherInventoryLoses.Add(itemInInventory2);
+                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+                    }
+
+                }
+
+            }
+        }
+
+        //NOW modify inventories
+        int amount = 1;
+        //actioner inventory:
+        foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
+        {
+            theTRY = true;
+            if (effect.inStateOrNot == false)
+            {
+                amount = -1;
+            }
+            incrementItem(actionerInventory, effect.item, amount);
+        }
+        //target's inventory:
+        amount = -1;
+        foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
+        {
+            theTRY = true;
+            if (effect.inStateOrNot == false)
+            {
+                amount = 1;
+            }
+            incrementItem(inventory2, effect.item, amount);
+        }
+
+        return theTRY;
+
+
+    }
+
+
 
 
     //change knownActions and such:
@@ -1059,6 +1189,23 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
+
+    public void commandToDoFetchXAction(action theBringLeaderXAction, GameObject whoToCommand)
+    {
+        //commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
+
+        //need their AI1 script:
+        AI1 NPChubScript = whoToCommand.GetComponent("AI1") as AI1;
+
+        //going to blank out their to-do list, and fill it with test "orders":
+        //AD HOC, SHOULD NOT DO THIS?!?!?
+        NPChubScript.toDoList.Clear();
+
+
+        NPChubScript.inputtedToDoList.Add(theBringLeaderXAction);
+    }
+
+
     //other:
     public void travelToactionItem(actionItem X)
     {
@@ -1070,6 +1217,27 @@ public class functionsForAI : MonoBehaviour
         _navMeshAgent.SetDestination(targetVector);
     }
 
+    public void succeedAtRecruitment(GameObject whoIsRecruited)
+    {
+        //ok, recruitment suceeds
+        Debug.Log("recruitment successful");
+
+        //for now ad-hoc
+        //just tagging an NPC with "playersGang" when you click it
+        taggedWith foreignTagScript = whoIsRecruited.GetComponent<taggedWith>();
+        foreignTagScript.foreignAddTag(gangTag(this.gameObject), whoIsRecruited);
+
+        //Debug.Log("should be recruited to gang now, by tagging");
+
+        //but they need to be able to FIND me, their leader, to deliver money to me
+        //so, for now, fill their leader variable:
+        //need their AI1 script:
+        AI1 NPChubScript = whoIsRecruited.GetComponent("AI1") as AI1;
+        NPChubScript.leader = this.gameObject;
+
+        //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
+        NPChubScript.target = null;
+    }
     //============================================================
 
 
@@ -1267,10 +1435,18 @@ public class functionsForAI : MonoBehaviour
                 //print("hello?????????????????????????????");
                 target = anyCheckout();
             }
-            if (criteria.name == "anyLandPlot")
+            else if (criteria.name == "anyGroupMember")
+            {
+                target = randomTaggedWith(this.name + "sGang");
+            }
+            else if (criteria.name == "anyLandPlot")
             {
                 //ad hoc for now, just select self lol?
                 target = gameObject;
+            }
+            else if(criteria.name == "toRecruit")
+            {
+
             }
         }
         else if (criteria.locationType == "roleLocation")
@@ -1499,7 +1675,45 @@ public class functionsForAI : MonoBehaviour
     }
 
 
+    //misc tag stuff
+    public string generateGangName(GameObject leader)
+    {
+        //input eader object?  or string of leader's name?  object for now
+        //input leader name string "X"
+        //output string "XsGang"
 
+        return leader.name + "sGang";
+
+    }
+
+    public bool isThisMyLeader(GameObject maybeLeader)
+    {
+        //check if FOLLOWER ["me"] has faction tag of this talked-to NPC i think...
+
+        //so:
+        //-need faction tag
+        //-need to check my tags for it
+
+
+        //-need faction tag
+        //gangTag(maybeLeader)
+
+
+        //now
+        //-need to check my tags for it
+
+        if (theTagScript.tags.Contains(gangTag(maybeLeader)))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
+
+
+    }
 
     public GameObject whoIsTrader(GameObject cashierZone)
     {
@@ -1544,6 +1758,13 @@ public class functionsForAI : MonoBehaviour
         return customer;
 
     }
+
+    public string gangTag(GameObject leader)
+    {
+        string theGangTag = leader.name + "sGang";
+        return theGangTag;
+    }
+
 
 
     //ad-hoc:
@@ -1601,6 +1822,7 @@ public class functionsForAI : MonoBehaviour
 
         return thisShop;
     }
+
 
 
     //getting locations:
@@ -3254,13 +3476,13 @@ public class functionsForAI : MonoBehaviour
             //print("don't count this");
             if (isStateAccomplished(prereqX, state) == false)
             {
-                if (this.name == "NPC")
+                if (this.name == "NPC pickpocket xxxxxxxxxxx")
                 {
-                    //print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
-                    //print(thisAction.name);
-                    //print("BECAUSE of this prereq:");
-                    //print(prereqX.name);
-                    //print(gameObject.name);
+                    print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                    print(thisAction.name);
+                    print("BECAUSE of this prereq:");
+                    print(prereqX.name);
+                    print(gameObject.name);
                 }
 
 

@@ -33,8 +33,12 @@ public class premadeStuffForAI : MonoBehaviour
     //organizationState stuff:
     public stateItem employee = new stateItem();
     public stateItem rentalProperty = new stateItem();
+    public stateItem groupMember = new stateItem();
+    
 
     public stateItem victim = new stateItem();
+    public stateItem toRecruit = new stateItem();
+    
 
     public stateItem shopOwnership = new stateItem();
 
@@ -56,7 +60,9 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem anyResource1 = new stateItem();
 
     public stateItem storagePlace = new stateItem();
-    
+
+    public stateItem anyGroupMember = new stateItem();
+
 
 
 
@@ -103,11 +109,17 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action resource1Dropoff = new action();
 
+    public action recruit = new action();
+    public action askMemberForMoney = new action();
+    
+
 
 
     //jobs
     public job cashierJob = new job();
     public job resource1GatheringJob = new job();
+
+
 
 
 
@@ -160,9 +172,13 @@ public class premadeStuffForAI : MonoBehaviour
             cashierZone.locationType = "roleLocation";
 
             employee = stateItemCreator("employee", "organizationState");
+            groupMember = stateItemCreator("groupMember", "organizationState");
 
-            victim = stateItemCreator("victim", "target");
+            victim = stateItemCreator("victim", "target"); //outdated category???
             victim.locationType = "mobile";
+
+            toRecruit = stateItemCreator("toRecruit", "target");
+            toRecruit.locationType = "any";
 
             shopOwnership = stateItemCreator("shopOwnership", "property");
 
@@ -186,6 +202,9 @@ public class premadeStuffForAI : MonoBehaviour
             threat = stateItemCreator("threat", "threatState");
 
             gun = stateItemCreator("gun", "inventory");
+
+            anyGroupMember = stateItemCreator("anyGroupMember", "locationState");
+            anyGroupMember.locationType = "any";
 
         }
 
@@ -230,6 +249,11 @@ public class premadeStuffForAI : MonoBehaviour
             extort = actionCreator("extort", "crime", wantedPrereqsLister(gun), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 0, checkout);
             
             gatherResource1 = actionCreator("gatherResource1", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, anyResource1);
+
+            recruit = actionCreator("recruit", "organizing", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(groupMember), UNwantedEffectsLister(), 1, victim);
+
+            askMemberForMoney = actionCreator("askMemberForMoney", "commanding", wantedPrereqsLister(groupMember), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyGroupMember);
+
         }
 
         //jobs:
@@ -437,10 +461,11 @@ public class premadeStuffForAI : MonoBehaviour
 
         //knownActions.Add(doTheWork);
 
+        
+        //newList.Add(pickVictimsPocket);
+        newList.Add(recruit);
+        newList.Add(askMemberForMoney); 
 
-        //knownActions.Add(findVictim);
-        //knownActions.Add(goToVictim);
-        newList.Add(pickVictimsPocket);
         //knownActions.Add(shootSpree); 
 
 
