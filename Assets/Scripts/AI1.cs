@@ -12,6 +12,8 @@ public class AI1 : MonoBehaviour
     //the NPC "state":
     public Dictionary<string, List<stateItem>> state = new Dictionary<string, List<stateItem>>();
 
+    public GameObject target;
+
     public List<action> toDoList = new List<action>();
     public List<action> knownActions = new List<action>();
     //public string locationState;
@@ -100,10 +102,9 @@ public class AI1 : MonoBehaviour
             }
         }
 
-        //remove plan if prereqs that should be filled already are not filled
-        //will somehow need to tell which prereqs should already be filled
-        //probably by adding up effects (using imagination simulation of plan), basically
-        //but would be nice if it was simpler than that function...
+        //remove plan if it is impossible
+        //it can become impossible if a necessary prereq that was previously met
+        //unexpectedly becomes UNMET, and if the plan doesn't fill it
         if (toDoList.Count > 0)
         {
 
@@ -115,65 +116,14 @@ public class AI1 : MonoBehaviour
             {
                 
                 toDoList.RemoveRange(0, toDoList.Count);
-                theFunctions.printPlan(toDoList);
+                //theFunctions.printPlan(toDoList);
+                target = null;
             }
-
-
-
-            /*
-
-            while (Z != -2)
-            {
-                toDoList.RemoveAt(Z);
-                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
-            }
-
-            
-
-
-            List<List<action>> planListx = new List<List<action>>();
-            planListx.Add(toDoList);
-
-            //ad hoc for now
-            if (theFunctions.simulatingPlansToEnsurePrereqs(planListx, knownActions, state).Count > 0)
-            {
-                //this will (stil) be true basically every frame for every NPC, though...
-
-                //print("plan found");
-                toDoList = planListx[0];
-                theFunctions.print("is this a weird plan?11111111111111111111111111111111111111");
-                theFunctions.printPlan(toDoList);
-            }
-            else
-            {
-                toDoList.RemoveRange(0, toDoList.Count);
-            }
-
-            
-
-            //since "goTo" actions don't have prereqs, we need to skip past them to check if prereqs are failed:
-            int actionToCheck;
-            actionToCheck = 0;
-            while (toDoList[actionToCheck].type == "goTo")
-            {
-                actionToCheck += 1;
-            }
-
-
-            
-            //check if prereqs are failed:
-            if (theFunctions.prereqChecker(toDoList[actionToCheck], state) == false)
-            {
-                //ok but now it deletes the plan EVERY FRAME, 
-                //because the action after "goTo" ALWAYS has its prereqs unmet!
-                //Because being at a location IS ONE OF THE PREREQS!
-                //(thus, the above "if" statement is ALWAYS TRUE)
-                toDoList.RemoveRange(0, toDoList.Count);
-            }
-            */
         }
         else
         {
+            //well, if "toDoList" is of zero length, need to try to make a plan
+
             //ad-hoc adding the goal once it is completed, to create behavior loop
             if (state["feelings"].Count == 0)
             {
@@ -205,7 +155,15 @@ public class AI1 : MonoBehaviour
         //make sure list isn't empty AGAIN:
         if (toDoList.Count > 0)
         {
-            theFunctions.doNextAction(toDoList[0], state);
+            
+            target = theFunctions.doNextAction(toDoList[0], state, target);
+
+            /*
+            if (this.name == "NPC pickpocket")
+            {
+                theFunctions.print(target.name);
+            }
+            */
         }
         //theFunctions.printState(state);
 

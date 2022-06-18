@@ -28,7 +28,7 @@ public class functionsForAI : MonoBehaviour
     ////////////////////////////////////////////////
   
 
-    public void doNextAction(action nextAction, Dictionary<string, List<stateItem>> state)
+    public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
         if (nextAction.type == "goTo")
         {
@@ -72,11 +72,17 @@ public class functionsForAI : MonoBehaviour
         else if (nextAction.name == "pickVictimsPocket")
         {
             //ad hoc for now
-            //print("yuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
 
-            //zoneForPickpocket
-
-            GameObject victim = GameObject.Find("NPC");
+            
+            //if we have a target, use that one
+            //(so always blank out targets BEFORE this action happens, I guess)
+            if (target == null)
+            {
+                //print("uuuuuuuuuuuuuuuuuuuuuuhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+                target = whoToTarget();
+            }
+            GameObject victim;
+            victim = target;
 
             //navigation
             //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, theAI.speed * Time.deltaTime);
@@ -85,7 +91,8 @@ public class functionsForAI : MonoBehaviour
 
 
             //now check distance
-            GameObject thePickpocket = GameObject.Find("NPC pickpocket");
+            //GameObject thePickpocket = GameObject.Find("NPC pickpocket");
+            GameObject thePickpocket = GameObject.Find(this.name);
             float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
             if (distance < 2.0f)
             {
@@ -98,12 +105,13 @@ public class functionsForAI : MonoBehaviour
 
                 //ad-hoc action completion:
                 theAI.toDoList.RemoveAt(0);
+                target = null;
 
                 //state = implementALLEffectsForImagination(nextAction, state);
             }
 
 
-
+            //print(target.name);
         }
 
         else if (prereqChecker(nextAction, state) == true)
@@ -113,6 +121,10 @@ public class functionsForAI : MonoBehaviour
             state = implementALLEffectsForImagination(nextAction, state);
             //printState(state);
         }
+
+        //ad hoc for now:
+
+        return target;
     }
 
     public void trade(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
@@ -149,18 +161,40 @@ public class functionsForAI : MonoBehaviour
     public void steal(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
     {
         //probably ad-hoc for now
-        
+
         //actioner is the one doing the nextAction
 
-        //need to initialize:
-        stateItem actionerReceives = new stateItem();
+        //https://stackoverflow.com/a/605390
+        List<stateItem> actionerReceives = new List<stateItem>();
+        List < stateItem > otherInventoryLoses = new List<stateItem>();
 
-        //set up items to trade:
+        //look to steal EACH item in the "effects" of the steal aciton
+        //but only LOOK and take note, don't modify inventories YET (can lead to error)
         foreach (stateItem effect in nextAction.effects)
         {
-            actionerReceives = effect;
-            actionerInventory.Add(actionerReceives);
-            inventory2.RemoveAll(y => y.name == actionerReceives.name);
+            //actionerReceives = effect;
+            //actionerInventory.Add(actionerReceives);
+            //inventory2.RemoveAll(y => y.name == actionerReceives.name);
+
+            //but must only steal items if they exist in the victim's inventory!
+            foreach (stateItem itemInInventory2 in inventory2)
+            {
+                if(itemInInventory2.name == effect.name)
+                {
+                    actionerReceives.Add(effect);
+                    otherInventoryLoses.Add(itemInInventory2);
+                }
+            }
+        }
+
+        //NOW modify inventories
+        foreach (stateItem item in actionerReceives)
+        {
+            actionerInventory.Add(item);
+        }
+        foreach (stateItem item in otherInventoryLoses)
+        {
+            inventory2.Remove(item);
         }
     }
 
@@ -187,7 +221,8 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject getCashierMapZone(GameObject customerLocation)
     {
-        GameObject cashierMapZone = new GameObject();
+        GameObject cashierMapZone;
+        cashierMapZone = null; //just in case none is found
         GameObject locationParent = customerLocation.transform.parent.gameObject;
 
         //now search for the correct "child" object:
@@ -215,7 +250,7 @@ public class functionsForAI : MonoBehaviour
         //get first item on that list, it should be be the cashier
         //return that item
 
-        GameObject cashier = new GameObject();
+        GameObject cashier;
 
         listOfTouchingNPCs listOfNPCs = cashierZone.GetComponent<listOfTouchingNPCs>();
 
@@ -226,6 +261,51 @@ public class functionsForAI : MonoBehaviour
 
     }
     
+    public GameObject whoToTarget()
+    {
+        //ad-hoc for now, this is being used in pickpocketing action
+        //should return ONE NPC GameObject as a target
+
+        //List<GameObject> allNPCs = new List<GameObject>();
+        GameObject[] allNPCsArray;
+
+        allNPCsArray = GameObject.FindGameObjectsWithTag("anNPC");
+
+        //convert this stupid fucking array data type to a list:
+        List<GameObject> allNPCsList = new List<GameObject>();
+        foreach (GameObject g in allNPCsArray)
+        {
+            allNPCsList.Add(g);
+        }
+
+        //choose one randomly
+        //Random rnd = new Random();
+
+        GameObject thisNPC;
+        thisNPC = null;
+        bool doWeHaveGoodTarget = false;
+
+        while (doWeHaveGoodTarget == false && allNPCsList.Count > 0)
+        {
+            int randomIndex = Random.Range(0, allNPCsList.Count);
+            thisNPC = allNPCsList[randomIndex];
+            //but, criteria, ad-hoc for now
+            //if it's the shopkeeper, remove that item from the array (will that leave a "null" hole in array???)
+            //and choose again
+            if (thisNPC.name == "NPC shopkeeper")
+            {
+                allNPCsList.RemoveAt(randomIndex);
+                thisNPC = null;
+            }
+            else
+            {
+                doWeHaveGoodTarget = true;
+            }
+        }
+        
+
+        return thisNPC;
+    }
 
 
 
@@ -858,8 +938,8 @@ public class functionsForAI : MonoBehaviour
         {
             if (prereqChecker(currentAction, imaginaryState) != true)
             {
-                print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-                print(currentAction.name);
+                //print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                //print(currentAction.name);
                 return counter;
             }
 
