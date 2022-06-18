@@ -69,7 +69,10 @@ public class functionsForAI : MonoBehaviour
                 //need to get a target:
                 target = chooseTarget(nextAction.locationPrereq);
             }
-            
+            if (target == null)
+            {
+                print(nextAction.name);
+            }
             travelToTargetObject(target);
             
 
@@ -302,7 +305,7 @@ public class functionsForAI : MonoBehaviour
                 
                 
             }
-            else if (nextAction.type == "buyThisProperty")
+            else if (nextAction.name == "buyShop")
             {
                 
                 //kinda ad-hoc
@@ -368,6 +371,73 @@ public class functionsForAI : MonoBehaviour
 
 
             }
+            else if (nextAction.name == "buyHome")
+            {
+
+                //kinda ad-hoc
+                //"buy" the property that the NPC has arrived at
+                //can use for both buying shops, and buying homes, maybe
+
+                //get this property:
+                GameObject thisProperty;
+                thisProperty = null;
+                thisProperty = target;
+
+                //print("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+
+                //check if it's for sale:
+                //get other script I need:
+                taggedWith otherIsTaggedWith = target.GetComponent<taggedWith>() as taggedWith;
+                if (otherIsTaggedWith.tags.Contains("forSale"))
+                {
+                    //ok, it's for sale, now can buy it
+
+                    //printTextList(otherIsTaggedWith.tags);
+                    //remove the "for sale" tag:
+                    otherIsTaggedWith.foreignRemoveTag("forSale", target);
+                    //printTextList(otherIsTaggedWith.tags);
+                    //add the "owned by _____" tag...:
+                    string ownershipTag = "owned by " + this.name;
+                    otherIsTaggedWith.foreignAddTag(ownershipTag, target);
+
+                    //need to remember in the future WHICH home is theirs
+                    //so they can go to it
+                    thisAI.homeLocation = target;
+
+                    //ad-hoc action completion:
+                    //thisAI.toDoList.RemoveAt(0);
+
+                    target = dumpAction(target);
+
+                    //ad-hoc update of state:
+                    state = implementALLEffects(nextAction, state);
+
+                }
+
+
+                else
+                {
+                    //well, this one is NOT for sale, so need to scrap WHOLE plan, I think...
+                    //AND make sure not to just generate the same plan infinitely, somehow.  
+                    //Not sure how...memory?  Add to list of temporarily unworkable plans?
+                    //then can use that info in the "choosing among plans" phase I don't yet have?
+
+                    //for now, just treat it as a completed action
+                    //this will simply remove the action, and next frame the AI will 
+                    //detect an impossible plan, and try again
+                    //not ideal if there were several to choose from, could end up going back to
+                    //ones that are not for sale several times
+                    //needs to LEARN?  Or prevent this with better foreknowledge.  But already has foreknowledge using tags, I think
+                    //when the plan was formed, the foreknowledge was correct.  Became incorrect on the way there.
+                    //so if tags are knowledge, they will have ALREADY "learned" due to the tag being removed.
+                    //thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
+                    target = dumpAction(target);
+                }
+
+
+
+            }
+
             else
             {
                 //for actions like "eat" that currently just need a quick
@@ -376,17 +446,7 @@ public class functionsForAI : MonoBehaviour
                 //thisAI.toDoList.RemoveAt(0);
                 target = dumpAction(target);
             }
-
-
-            //should only print COMPLETE acitons:
-            //print("complete:    " + nextAction.name);
-
-
-            //now, the action should be DONE
-            //even if it's not, best to REMOVE both TARGET and ACTION:
-            //NOPE, SOME ACTIONS ARE OPEN TO FAIL THE FIRST FRAME BUT MAY COMPLETE IN FUTURE, such as "hireSomeone"
-            //target = null;
-            //thisAI.toDoList.RemoveAt(0);
+            
         }
         
 
@@ -720,12 +780,18 @@ public class functionsForAI : MonoBehaviour
         }
         else if (criteria.locationType == "any")
         {
-            //very ad-hoc for now...
+            //sorta ad-hoc for now...
             if (criteria.name == "anyStore")
             {
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("shop", "forSale");
+            }
+            else if (criteria.name == "anyHome")
+            {
+                //get any store:
+                //target = anyStoreForSale();
+                target = randomTaggedWithMultiple("home", "forSale");
             }
             else if (criteria.name == "checkout")
             {
@@ -736,12 +802,18 @@ public class functionsForAI : MonoBehaviour
         }
         else if (criteria.locationType == "roleLocation")
         {
-            //just target  heir role location variable?
+            //just target their role location variable?
             //target = thisAI.roleLocation;
             //no, that variable just goes to the store building
             //I need them to go to the cashierZone IN that store
             //so:
             target = getCashierMapZoneOfStore(thisAI.roleLocation);
+
+        }
+        else if (criteria.name == "home")
+        {
+            //just target their homelocation variable
+            target = thisAI.homeLocation;
 
         }
         else
@@ -1333,10 +1405,10 @@ public class functionsForAI : MonoBehaviour
 
         foreach (List<action> planForFirstPrereq in plansForFirstPrereq)
         {
-            printPlan(planForFirstPrereq);
+            //printPlan(planForFirstPrereq);
             foreach(List<action> planForAllOtherPrereqs in allPossiblePlansFromRemainingPrereqs)
             {
-                printPlan(planForAllOtherPrereqs);
+                //printPlan(planForAllOtherPrereqs);
                 allCombosPlanList.Add(appendPlanToEndOfOtherPlan(planForFirstPrereq,planForAllOtherPrereqs));
                 
             }

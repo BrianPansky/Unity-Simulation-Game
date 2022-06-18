@@ -13,7 +13,9 @@ public class AI1 : MonoBehaviour
     public Dictionary<string, List<stateItem>> state = new Dictionary<string, List<stateItem>>();
 
     public GameObject target;
+
     public GameObject roleLocation;
+    public GameObject homeLocation;
 
     public List<action> toDoList = new List<action>();
     public List<action> knownActions = new List<action>();
@@ -50,6 +52,8 @@ public class AI1 : MonoBehaviour
 
         //ad-hoc for now:
         jobSeeking = true;
+
+        homeLocation = null;
 }
 
     
