@@ -11,6 +11,8 @@ public class functionsForAI : MonoBehaviour
     Transform _destination;
     public NavMeshAgent _navMeshAgent;
 
+    public GameObject storePrefab;
+
     //I don't remember making this, why is it here instead of in the function where I use it?
     //probably carried over from some tutorial?  On navmesh?
     private GameObject t1;
@@ -56,8 +58,11 @@ public class functionsForAI : MonoBehaviour
     ////////////////////////////////////////////////
 
     //handles ALL sensing:
-    public void sensing(action nextAction, GameObject target, Dictionary<string, List<stateItem>> state)
+    public void sensing(Dictionary<string, List<stateItem>> state)
     {
+        //function used to have "action nextAction, GameObject target, " as additional inputs.
+        //that seems badly entangled, caused an error when there IS NO next action in the list of actions (index out of range error)
+        //and i can see those variables were only used in code below which has already been commented out, not used.
 
         if (areAllForbiddenZonesClear() == false)
         {
@@ -133,12 +138,7 @@ public class functionsForAI : MonoBehaviour
         //allPotentialTargets = globalTags["person"];
         //print("ya every one leofjrjfir");
         //print(allPotentialTargets.Count);
-
-
-
-
-
-
+        
 
 
         //handle the travel prereqs here:
@@ -154,8 +154,15 @@ public class functionsForAI : MonoBehaviour
             }
             if (target == null)
             {
-                print("the chooseTarget function returned null, for the following action:");
-                print(nextAction.name);
+                //print("the chooseTarget function returned null, for the following action:");
+                //print(nextAction.name);
+
+                //mark this plan as failed?
+                //i think to do that, just add to list of ineffective actions:
+                ineffectiveActions.Add(nextAction);
+
+                //dump plan:
+                target = dumpAction(target);
             }
             else
             {
@@ -179,7 +186,7 @@ public class functionsForAI : MonoBehaviour
 
             //if(gameObject.name == "NPC")
 
-
+            //I SHOULD REALLY BUNDLE THESE INSIDE THE DEFINITIONS OF THE ACTIONS?  OR HAVE THEM "LINKED" IN THERE...
 
             if (nextAction.type == "buyFromStore")
             {
@@ -239,6 +246,25 @@ public class functionsForAI : MonoBehaviour
                 //victim = target;
 
 
+
+                AI1 theTargetState = target.GetComponent("AI1") as AI1;
+                //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                gift(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                //state = implementALLEffects(nextAction, state);
+
+                target = dumpAction(target);
+
+
+
+            }
+            else if (nextAction.type == "deliverAnyXtoLeader")
+            {
+                //ad-hoc for now
+                //should generalize to be able to deliver to any target
+
+                //just "gift" the delivery item to the target
 
                 AI1 theTargetState = target.GetComponent("AI1") as AI1;
                 //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
@@ -540,6 +566,48 @@ public class functionsForAI : MonoBehaviour
 
                     effectivenessTimer = 0;
                 }
+            }
+            else if (nextAction.name == "createShop")
+            {
+                //-create store
+                //-"buy" that store
+
+                
+
+                //create store:
+                GameObject newShop = new GameObject();
+                //newShop = Instantiate(storePrefab, new Vector3(5, 0, -11), Quaternion.identity);
+
+                //---get XYZ values from gameObject.transform somehow
+                //---adjust Y value
+                //---combine XYZ values into...a 3Vector or whatever...somehow
+                //---plug into instantiate function
+                //Vector3 whereToPlace = new Vector3(gameObject.transform.x, (gameObject.transform.y - 113), gameObject.transform.z);
+
+                newShop = Instantiate(storePrefab, new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z), Quaternion.identity);
+
+
+                //now "buy" it:
+
+                //check if it's for sale:
+                //get other script I need:
+                taggedWith otherIsTaggedWith = newShop.GetComponent<taggedWith>() as taggedWith;
+                
+                string ownershipTag = "owned by " + this.name;
+                otherIsTaggedWith.foreignAddTag(ownershipTag, newShop);
+
+                //need to remember in the future WHICH store is theirs
+                //so they ca go to it, and sned their employees there:
+                //thisAI.roleLocation = target;
+
+                //ad-hoc action completion:
+                //thisAI.toDoList.RemoveAt(0);
+
+                target = dumpAction(target);
+
+                //ad-hoc update of state:
+                state = implementALLEffects(nextAction, state);
+                
             }
             else
             {
@@ -875,7 +943,7 @@ public class functionsForAI : MonoBehaviour
             //sorta ad-hoc for now...
             if (criteria.name == "anyStore")
             {
-                print("anyStore");
+                //print("anyStore");
                 //get any store:
                 //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("shop", "forSale");
@@ -891,8 +959,13 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("checkout");
                 //get any store:
-                print("hello?????????????????????????????");
+                //print("hello?????????????????????????????");
                 target = anyCheckout();
+            }
+            if (criteria.name == "anyLandPlot")
+            {
+                //ad hoc for now, just select self lol?
+                target = gameObject;
             }
         }
         else if (criteria.locationType == "roleLocation")
@@ -953,9 +1026,13 @@ public class functionsForAI : MonoBehaviour
 
         List<GameObject> allPotentialTargets = new List<GameObject>();
 
-        allPotentialTargets = globalTags[theTag];
+        if (globalTags.ContainsKey(theTag))
+        {
+            allPotentialTargets = globalTags[theTag];
+        }
+        
 
-
+        /*
         if (theTag == "shop")
         {
             print("choosing a shop...");
@@ -967,6 +1044,7 @@ public class functionsForAI : MonoBehaviour
                 print(item.transform.position);
             }
         }
+        */
 
 
         if (allPotentialTargets.Count > 0)
@@ -976,6 +1054,7 @@ public class functionsForAI : MonoBehaviour
             int randomIndex = Random.Range(0, allPotentialTargets.Count);
             thisObject = allPotentialTargets[randomIndex];
 
+            /*
             if (theTag == "shop")
             {
                 print("FOUND a shop...");
@@ -985,6 +1064,7 @@ public class functionsForAI : MonoBehaviour
                 //print coordinates?  how?
                 print(thisObject.transform.position);
             }
+            */
 
             return thisObject;
         }
@@ -998,7 +1078,11 @@ public class functionsForAI : MonoBehaviour
     {
         //should return ONE random GameObject that is tagged with ALL inputted tags
         List<GameObject> allPotentialTargets = new List<GameObject>();
-        allPotentialTargets = globalTags[theTag];
+
+        if (globalTags.ContainsKey(theTag))
+        {
+            allPotentialTargets = globalTags[theTag];
+        }
 
         //BUT THAT'S A SHALLOW COPY!
         //so I need to make a corrosponding list of indices to use, to prevent messing with it:
@@ -1206,9 +1290,9 @@ public class functionsForAI : MonoBehaviour
         GameObject thisShop;
         thisShop = null;
 
-        print("sooooooooooooooooooooooo");
+        //print("sooooooooooooooooooooooo");
         thisShop = randomTaggedWith("shop");
-        print("---------done----------");
+        //print("---------done----------");
 
         return thisShop;
     }
@@ -1304,6 +1388,12 @@ public class functionsForAI : MonoBehaviour
     {
         //recursive function to simply search ALL child objects, brute force
         //return the ONLY child with the given name (or first one found)
+
+        //make sure object isn't null:
+        if (theHighestParent == null)
+        {
+            return null;
+        }
 
         foreach (Transform child in theHighestParent.transform)
         {
@@ -1409,15 +1499,22 @@ public class functionsForAI : MonoBehaviour
         thisShop = null;
         thisShop = anyStore();
 
+        if (thisShop != null)
+        {
+            //now get the checkoutZone of that shop:
+            GameObject thisCheckout;
+            thisCheckout = null;
+            //print("here, right??????????????????????????");
+            thisCheckout = namedChild(thisShop, "checkout");
 
-        //now get the checkoutZone of that shop:
-        GameObject thisCheckout;
-        thisCheckout = null;
-        //print("here, right??????????????????????????");
-        thisCheckout = namedChild(thisShop, "checkout");
 
-
-        return thisCheckout;
+            return thisCheckout;
+        }
+        else
+        {
+            return null;
+        }
+        
     }
 
     //old targeting:

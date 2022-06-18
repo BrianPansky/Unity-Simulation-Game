@@ -112,6 +112,14 @@ public class taggedWith : MonoBehaviour
     }
 
 
+    //diagnostic:
+    public void printAllTags()
+    {
+        foreach(string item in tags)
+        {
+            Debug.Log(item);
+        }
+    }
 
 
 }

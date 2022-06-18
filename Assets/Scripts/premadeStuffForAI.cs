@@ -51,6 +51,9 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem myLeader = new stateItem();
 
+    public stateItem anyLandPlot = new stateItem();
+    
+
 
 
     ////////////////////////////////////////////////
@@ -89,6 +92,8 @@ public class premadeStuffForAI : MonoBehaviour
     public action landLording = new action();
 
     public action shootSpree = new action();
+
+    public action createShop = new action();
 
 
     ////////////////////////////////////////////////
@@ -143,6 +148,9 @@ public class premadeStuffForAI : MonoBehaviour
             anyStore = stateItemCreator("anyStore", "locationState");
             anyStore.locationType = "any";
 
+            anyLandPlot = stateItemCreator("anyLandPlot", "locationState");
+            anyLandPlot.locationType = "any";
+
             homeOwnership = stateItemCreator("homeOwnership", "property");
             anyHome = stateItemCreator("anyHome", "locationState");
             anyHome.locationType = "any";
@@ -157,6 +165,7 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
+            createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
             landLording = actionCreator("landLording", "capitalism", wantedPrereqsLister(homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(rentalProperty), UNwantedEffectsLister(homeOwnership, profitMotive), 1);
             shootSpree = actionCreator("shootSpree", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
 
@@ -313,7 +322,10 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(buyShop);
         knownActions.Add(buyHome);
         //knownActions.Add(landLording);
+        knownActions.Add(createShop);
         
+
+
 
         knownActions.Add(handleSecurityMild);
         knownActions.Add(handleSecurityEscalationOne);
@@ -496,6 +508,18 @@ public class premadeStuffForAI : MonoBehaviour
             return false;
         }
     }
+
+
+
+    //common action types to auto-generate:
+    //public action bringMeX(stateItem itemX)
+    //not handling dynamic locationprereq yet:
+    public action bringLeaderX(stateItem itemX)
+    {
+        //will generate an action to bring any item X to "myLeader":
+        return actionCreator("give" + itemX.name + "ToLeader", "deliverAnyXtoLeader", wantedPrereqsLister(itemX), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(itemX), 1, myLeader);
+
+    }
 }
 
 public class stateItem
@@ -506,7 +530,9 @@ public class stateItem
 
     //bit ad-hoc seeming:
     public string locationType;
-    //public int quantity;
+    public int quantity = 1;  //default 1 is ok?
+    //basically, how much each one is worth, AKA value per quantity:
+    public int value = 1;  //default 1 is ok?
 }
 
 public class actionItem

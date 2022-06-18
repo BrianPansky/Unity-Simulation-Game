@@ -21,6 +21,11 @@ public class AI1 : MonoBehaviour
     public List<action> toDoList = new List<action>();
     public List<List<action>> planList = new List<List<action>>();
 
+
+    public List<action> inputtedToDoList = new List<action>();
+    //eventually might want:
+    //public List<List<action>> inputtedPlanList = new List<List<action>>();
+
     List<action> ineffectiveActions = new List<action>();
 
     
@@ -89,7 +94,17 @@ public class AI1 : MonoBehaviour
             //remove all plans that contain "ineffective actions":
             removeIneffectiveActions();
 
-            if (toDoList.Count == 0)
+            if (inputtedToDoList.Count > 0)
+            {
+                //for now, do orders/favors and such first
+                planList = theFunctions.prereqFiller(inputtedToDoList[0], knownActions, state);
+
+                //....remove that action from "inputtedToDoList"?  I geuss for now
+                //but eventually want to keep it remembered UNTIL it is completed or cancelled
+                //but right now it isn't guaranteed that one of those outcomes will occurr
+                inputtedToDoList.RemoveAt(0);
+            }
+            else if (toDoList.Count == 0)
             {
                 //so we need a plan:
                 getPlan();
@@ -133,10 +148,10 @@ public class AI1 : MonoBehaviour
         //hmm, I can't do SENSING if target is null?!?!?
         //sounds like that could be a problem...why is that???
         //will have to check...see if I can fix it...
-        if (target != null)
-        {
-            theFunctions.sensing(toDoList[0], target, state);
-        }
+        //if (target != null && )
+        
+        theFunctions.sensing(state);
+        
     }
     
     public void removeIneffectiveActions()
@@ -180,6 +195,12 @@ public class AI1 : MonoBehaviour
             //remove the plan from the planList
             planList.Remove(thisPlan);
         }
+        if (this.name == "NPC shopkeeper")
+        {
+            //theFunctions.print("this planList after removing ineffective plan:");
+            //printPlanListForSpecificNPC();
+            
+        }
     }
 
     public void blankImpossibleToDoList()
@@ -197,6 +218,7 @@ public class AI1 : MonoBehaviour
         if (Z != -2)
         {
             //so, remove the ENTIRE to-do list:
+            /*
             if (this.name == "NPC shopkeeper")
             {
                 theFunctions.print("00000000000000000  to do List:   000000000000000000");
@@ -212,6 +234,7 @@ public class AI1 : MonoBehaviour
                 }
 
             }
+            */
 
             //print("says this plan is imposible:");
             //theFunctions.printPlan(toDoList);
@@ -238,11 +261,7 @@ public class AI1 : MonoBehaviour
 
             //printPlanListForSpecificNPC(planList);
 
-            //now to rank the plans by cost:
-            if (planList != null && planList.Count > 0)
-            {
-                planList = theFunctions.planRanker(planList);
-            }
+           
 
             //also, blank out the list of "ineffective actions":
             //[I think this code could/should be moved elsewhere...]
@@ -251,10 +270,26 @@ public class AI1 : MonoBehaviour
         }
 
         
-
         //now, pick top-ranked plan (if there are any)
         if (planList != null && planList.Count > 0)
         {
+            //now to rank the plans by cost:
+            //[yes, it will re-do this redundantly every time it needs to 
+            //choose a different plan from planList when toDoList is blank.  
+            //But for now, easy enough to do it here.  Can re-arrange later.  
+            //Used to have it right after generating new plans, but i want it to work
+            //even if the planList is handed over by an outside entity, like the player
+            planList = theFunctions.planRanker(planList);
+
+
+            /*
+            if (this.name == "NPC shopkeeper")
+            {
+                theFunctions.print("this planList");
+                printPlanListForSpecificNPC();
+            }
+            */
+
             //choose first one:
             toDoList = deepCopyFirstPlan(planList);
             //and REMOVE that first one from the planList:
@@ -375,7 +410,7 @@ public class AI1 : MonoBehaviour
 
         //to help, encapsulating this:
 
-        if (this.name == "NPC shopkeeper (1)")
+        if (this.name == "NPC shopkeeper")
         {
             print("00000000000000000  Plan List:   000000000000000000");
             printPlanList(planList);

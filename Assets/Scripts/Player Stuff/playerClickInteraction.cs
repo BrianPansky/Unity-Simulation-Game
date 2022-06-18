@@ -37,6 +37,11 @@ public class playerClickInteraction : MonoBehaviour
     public taggedWith theTagScript;
 
 
+    //bit ad hoc:
+    //can i use object class types from other scripts before loading in those scripts??? how to do???
+    public List<action> commandList = new List<action>();
+
+
     //definitely ad-hoc:
     public bool haveStore;
     public bool weapon;
@@ -45,6 +50,8 @@ public class playerClickInteraction : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        
 
 
         haveStore = false;
@@ -66,6 +73,11 @@ public class playerClickInteraction : MonoBehaviour
 
         //just for testing, give me a gun at start:
         //theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
+
+
+        //ad-hoc list of orders:
+        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.food));
+        commandList.Add(premadeStuff.bringLeaderX(premadeStuff.money));
 
 
     }
@@ -367,7 +379,7 @@ public class playerClickInteraction : MonoBehaviour
                 haveStore = true;
                 theFunctions.print("you got a store!");
 
-                Debug.Log(clickedOn.transform.position);
+                //Debug.Log(clickedOn.transform.position);
 
             }
 
@@ -377,7 +389,7 @@ public class playerClickInteraction : MonoBehaviour
                 //well, this one is NOT for sale, so 
                 theFunctions.print("not for sale");
 
-                Debug.Log(clickedOn.transform.position);
+                //Debug.Log(clickedOn.transform.position);
             }
 
         }
@@ -394,7 +406,7 @@ public class playerClickInteraction : MonoBehaviour
 
         makeButton("[pick their pockets]", this.pickTheirPocketsButton);
 
-        //makeButton("recruit to gang", this.recruitButton);
+        makeButton("recruit to gang", this.recruitButton);
 
         //makeButton("regular work", this.makeRegularWorkerButton);
 
@@ -404,20 +416,23 @@ public class playerClickInteraction : MonoBehaviour
 
         //makeButton("test button", this.testButton);
 
-        makeButton("Full Plan test button", this.aFullPlanTest);
+        //makeButton("Full Plan test button", this.aFullPlanTest);
 
-        makeButton("shopkeeper Plan test button", this.shopkeeperGivePlanTest);
+        //makeButton("shopkeeper Plan test button", this.shopkeeperGivePlanTest);
 
         //ad hoc, should use same function...
         //see that documentation page about having inputs?
         //need to modify the "makeButton" function, because of strong typing
         //I guess will need a "makeButton1FuncInput" function?
+        makeButton("my side", () => this.announcePoliticalSideButton(-50));
+
         makeButton("i'm left wing", this.leftPoliticalSideButton);
 
         makeButton("i'm right wing", this.rightPoliticalSideButton);
 
 
         //only if you own a store, menu will include a hiring option:
+        //this is a "GameObject"???!!!?!?
         GameObject check = theFunctions.randomTaggedWithMultiple("shop", ownershipTag);
         
         if (check != null)
@@ -427,6 +442,33 @@ public class playerClickInteraction : MonoBehaviour
             theFunctions.print(check.name);
             makeButton("hireCashier", this.hireCashierButton);
         }
+
+        //makeButton("tag with X", this.tagWithX);
+
+        //now stuff to do after you recruit someone:
+        //---gather a resource
+        //---attack enemy
+        //---recruit others
+
+        //need to check if person you are talking to is part of your faction.  simple for now, no checking for "rank" or roles...
+        taggedWith foreignTagScript = selectedNPC.GetComponent<taggedWith>();
+
+        foreignTagScript.printAllTags();
+
+        if (foreignTagScript.tags.Contains("playersGang"))
+        {
+            makeButton("give gun", this.giftGunButton);
+
+            //makeButton("bring me food", this.bringLeaderFoodButton);
+
+            //generate command list:
+            foreach (action availableCommand in commandList)
+                {
+                    //hmm, but commands won't always be "fetch"....whatever?  for now, ad hoc, can fix later if it's a problem...
+                    makeButton("bring me " + availableCommand.effects[0].name, () => this.fetchXButton(availableCommand));
+                }
+        }
+
 
     }
 
@@ -537,7 +579,9 @@ public class playerClickInteraction : MonoBehaviour
 
             //for now ad-hoc
             //just tagging an NPC with "playersGang" when you click it
-            theTagScript.foreignAddTag("playersGang", selectedNPC);
+            taggedWith foreignTagScript = selectedNPC.GetComponent<taggedWith>();
+
+            foreignTagScript.foreignAddTag("playersGang", selectedNPC);
 
             //Debug.Log("should be recruited to gang now, by tagging");
 
@@ -550,7 +594,7 @@ public class playerClickInteraction : MonoBehaviour
             //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
             NPChubScript.target = null;
 
-
+            refreshRecruitmentMenu();
 
             //personOfInterest = selectedNPC;
         }
@@ -562,6 +606,23 @@ public class playerClickInteraction : MonoBehaviour
         
 
     }
+
+    
+    public void refreshRecruitmentMenu()
+    {
+        //see if just closing and opening menu in one frame works and looks fine:
+        //closeRecruitmentMenu();
+
+        //no, that does other unwanted stuff.  just pick the stuff i need:
+        //Destroy the generated buttons:
+        destroyObjectListItems(currentGridButtons);
+
+        //now re-create menu:
+        createRecruitmentButtonGrid();
+
+        //seems to work fine :)
+    }
+
 
     public void closeRecruitmentMenu()
     {
@@ -590,6 +651,9 @@ public class playerClickInteraction : MonoBehaviour
 
     public void tradeButton()
     {
+        //this is just for food?? need to make less ad-hoc
+
+
         //oh right, don't want to do this for now, don't want to put anything into cashier's inventory...
         //theFunctions.trade(theHub.state["inventory"], inventory2, premadeStuff.buyFood);
 
@@ -713,6 +777,45 @@ public class playerClickInteraction : MonoBehaviour
         //hubScript.knownActions.RemoveAll(y => y.type == "work");
     }
 
+    public void bringLeaderFoodButton()
+    {
+        //for testing
+
+        //for now ad-hoc
+        //just making any NPC go extort the shop...if they have a gun
+
+
+        //need their AI1 script:
+        AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
+
+        //need the action to add:
+        premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
+
+
+        //going to blank out their to-do list, and fill it with test "orders":
+        //AD HOC, SHOULD NOT DO THIS?!?!?
+        NPChubScript.toDoList.Clear();
+
+        stateItem food = stateGrabber.food;
+        action generatedAction = stateGrabber.bringLeaderX(food);
+
+        NPChubScript.inputtedToDoList.Add(generatedAction);
+
+
+
+        //now generate planlist for it:
+        //need their functionsForAI script:
+        //functionsForAI NPCfunctionsForAIScript = selectedNPC.GetComponent("functionsForAI") as functionsForAI;
+        //actually no, i already have AI1 hub, which can call all the functions i need, i think:
+        //NPChubScript.planList = NPChubScript.theFunctions.prereqFiller(generatedAction, NPChubScript.knownActions, NPChubScript.state);
+        //and AI1 script will do the work of choosing the first one.
+
+        //NPChubScript.toDoList.Add(stateGrabber.extort);
+        //but.....they need to buy food first...and will need to PLAN for it...
+        //NPChubScript.toDoList.Add(bringFood);
+
+    }
+
     public void hireCashierButton()
     {
         
@@ -751,6 +854,18 @@ public class playerClickInteraction : MonoBehaviour
     }
 
 
+    public void fetchXButton(action availableCommand)
+    {
+        //need their AI1 script:
+        AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
+        
+        //going to blank out their to-do list, and fill it with test "orders":
+        //AD HOC, SHOULD NOT DO THIS?!?!?
+        NPChubScript.toDoList.Clear();
+        
+
+        NPChubScript.inputtedToDoList.Add(availableCommand);
+    }
 
 
     public void announcePoliticalSideButton(int yourSide)
@@ -913,21 +1028,6 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 }

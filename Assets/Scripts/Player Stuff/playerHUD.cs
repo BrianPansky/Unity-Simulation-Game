@@ -34,13 +34,22 @@ public class playerHUD : MonoBehaviour
         
         if(theHub.state["inventory"].Count > 0)
         {
-            string inventoryItem;
-            inventoryItem = theHub.state["inventory"][0].name;
+            //string inventoryItem;
+            //inventoryItem = theHub.state["inventory"][0].name;
 
             //Debug.Log(inventoryItem);
 
             //now, how to set the text to say that???
-            myText.GetComponent<Text>().text = inventoryItem;
+            //myText.GetComponent<Text>().text = inventoryItem;
+            string thePrintOut = "";
+            foreach(stateItem item in theHub.state["inventory"])
+            {
+                thePrintOut += "(" + item.name.ToString() + ": " + item.quantity.ToString() + ")";
+            }
+
+
+            //myText.GetComponent<Text>().text = theHub.state["inventory"][0].quantity.ToString();
+            myText.GetComponent<Text>().text = thePrintOut;
         }
         else
         {
