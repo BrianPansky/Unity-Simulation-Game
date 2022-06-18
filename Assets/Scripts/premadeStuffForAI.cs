@@ -106,7 +106,7 @@ public class premadeStuffForAI : MonoBehaviour
             
             
             eat = actionCreator("eat", "use", createListOfStateItems(food1), createListOfStateItems(hungry0, food0), 1, home1);
-            buyFood = actionCreator("buyFood", "socialTrade", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
+            buyFood = actionCreator("buyFood", "buy", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
             
             doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(), createListOfStateItems(money1), 4, work1);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
@@ -135,7 +135,7 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        addToState(food1, state);
+        //addToState(food1, state);
         addToState(money1, state);
         addToState(hungry0, state);
 

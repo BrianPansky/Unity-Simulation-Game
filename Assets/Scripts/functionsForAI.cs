@@ -14,6 +14,8 @@ public class functionsForAI : MonoBehaviour
     //probably carried over from some tutorial?  On navmesh?
     private GameObject t1;
 
+    public int stopwatch;
+
 
     public AI1 thisAI;// = GetComponent<AI1>();
     public premadeStuffForAI premadeStuff;
@@ -26,6 +28,8 @@ public class functionsForAI : MonoBehaviour
 
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
+
+        stopwatch = 0;
 
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
@@ -89,6 +93,25 @@ public class functionsForAI : MonoBehaviour
                 }
                 
             }
+            if (nextAction.type == "buy")
+            {
+                //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
+                //if casheir isn't there, shouldn't wait forever, that is unrealistic, but right now that's what will happen
+
+                GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+
+                GameObject cashierMapZone = getCashierMapZone(customerLocation);
+                
+                GameObject cashier = whoIsTrader(cashierMapZone);
+
+                //but that cashier variable might come back null (if no one is there), check:
+                if (cashier != null)
+                {
+                    //ad-hoc update of state:
+                    state = implementALLEffects(nextAction, state);
+                }
+                
+            }
             else if (nextAction.name == "hireSomeone")
             {
                 //ad-hoc for now
@@ -108,11 +131,13 @@ public class functionsForAI : MonoBehaviour
                 {
                     changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
+                    //also, to easily put the "employee1" stateItem in the organizationState:
+                    state = implementALLEffects(nextAction, state);
+
                     //and ad hoc strike this action off the to-do list:
                     thisAI.toDoList.RemoveAt(0);
 
-                    //also, to easily put the "employee1" stateItem in the organizationState:
-                    state = implementALLEffects(nextAction, state);
+                    
                 }
 
 
@@ -161,11 +186,37 @@ public class functionsForAI : MonoBehaviour
 
                 //print(target.name);
             }
+            else if (nextAction.name == "workAsCashier")
+            {
+                //very ad-hoc for now
+                //just want the worker to wait there for a while
+                //"doing their work shift"
+
+                //print("xxxxxxxxxxxxxxxxx");
+
+                stopwatch += 1;
+
+
+                if (whicheverPrereqChecker(nextAction, state) == true)
+                {
+                    //print("yyyyyyyyyyyyyyyyyyyyyyyyy");
+                    if (stopwatch > 1000)
+                    {
+                        state = implementALLEffects(nextAction, state);
+                        stopwatch = 0;
+
+                        //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
+                        //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
+                    }
+                }
+                
+            }
             else
             {
                 //for actions like "eat" that currently just need a quick
                 //ad-hoc update of state:
                 state = implementALLEffects(nextAction, state);
+                //print(nextAction.name);
             }
         }
         
@@ -392,7 +443,11 @@ public class functionsForAI : MonoBehaviour
         //check if there ARE any NPCs there at all:
         if(listOfNPCs.theList.Count > 0)
         {
-            customer = listOfNPCs.theList[0];
+            if (listOfNPCs.theList[0].name != "NPC pickpocket")
+            {
+                customer = listOfNPCs.theList[0];
+            }
+            
         }
         
 
@@ -824,8 +879,6 @@ public class functionsForAI : MonoBehaviour
 
     public bool isThisActionDone(action thisAction, Dictionary<string, List<stateItem>>  state)
     {
-        //I might eventually want to change this so that "state" is one of the inputs???
-
         //assume true, then check and change to false where needed
         bool tf;
         tf = true;

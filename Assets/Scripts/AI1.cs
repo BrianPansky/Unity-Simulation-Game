@@ -91,7 +91,12 @@ public class AI1 : MonoBehaviour
         /*
         if (this.name == "NPC")
         {
-            theFunctions.print("==============================================================");
+            theFunctions.print("==================================================");
+            theFunctions.printInventory(state["inventory"]);
+            if (toDoList.Count > 0)
+            {
+                theFunctions.print(toDoList[0].name);
+            }
         }
         */
 
@@ -105,9 +110,10 @@ public class AI1 : MonoBehaviour
             }
         }
 
+        
         //remove plan if it is impossible
-        //it can become impossible if a necessary prereq that was previously met
-        //unexpectedly becomes UNMET, and if the plan doesn't fill it
+        //(it can become impossible if a necessary prereq that was previously met
+        //unexpectedly becomes UNMET, and if the plan doesn't fill it)
         if (toDoList.Count > 0)
         {
 
@@ -155,6 +161,8 @@ public class AI1 : MonoBehaviour
         //printPlan(toDoList);
 
         
+
+
         //make sure list isn't empty AGAIN:
         if (toDoList.Count > 0)
         {
@@ -170,6 +178,8 @@ public class AI1 : MonoBehaviour
         }
         //theFunctions.printState(state);
 
+
+        
     }
 
 }
