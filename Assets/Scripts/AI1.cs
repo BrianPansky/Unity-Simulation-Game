@@ -61,6 +61,9 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        
+
         //constantlyCheckLocationState();
         //theFunctions.printInventory(state["inventory"]);
 
@@ -107,12 +110,17 @@ public class AI1 : MonoBehaviour
         //unexpectedly becomes UNMET, and if the plan doesn't fill it)
         if (toDoList.Count > 0)
         {
-
+            //FIRST, do sensing:
+            if (target != null)
+            {
+                theFunctions.sensing(toDoList[0], target, state);
+            }
+            
 
             //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
             //theFunctions.printPlan(toDoList);
 
-            
+
             int Z;
             Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
 

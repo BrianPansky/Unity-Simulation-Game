@@ -45,7 +45,11 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem hiringZone1 = new stateItem();
 
-    
+
+    public stateItem threat0 = new stateItem();
+    public stateItem threat1 = new stateItem();
+
+
 
     ////////////////////////////////////////////////
     //               ACTIONS
@@ -71,9 +75,15 @@ public class premadeStuffForAI : MonoBehaviour
     public action buyHome = new action();
 
 
+    public action handleSecurityMild = new action();
 
 
 
+
+
+    ////////////////////////////////////////////////
+    //                   LISTS
+    ////////////////////////////////////////////////
 
     public List<action> toDoList = new List<action>();
     public List<action> knownActions = new List<action>();
@@ -129,6 +139,9 @@ public class premadeStuffForAI : MonoBehaviour
 
             hiringZone1 = stateItemCreator("hiringZone", "locationState", 1);
 
+            threat0 = stateItemCreator("threat", "threatState", 0);
+            threat1 = stateItemCreator("threat", "threatState", 1);
+
         }
 
         //actions:
@@ -142,13 +155,16 @@ public class premadeStuffForAI : MonoBehaviour
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
-            workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(), createListOfStateItems(money1), 1, cashierZone1);
-            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(shopOwnership1), createListOfStateItems(employee1), 1, hiringZone1);
+            workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(threat0), createListOfStateItems(money1), 1, cashierZone1);
+            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(shopOwnership1, threat0), createListOfStateItems(employee1), 1, hiringZone1);
             beBoss = actionCreator("beBoss", "ad-hoc", createListOfStateItems(employee1, homeOwnership1), createListOfStateItems(profitMotive0), 1, home1);
 
             buyShop = actionCreator("buyShop", "buyThisProperty", createListOfStateItems(), createListOfStateItems(shopOwnership1), 1, anyStore1);
 
             buyHome = actionCreator("buyHome", "buyThisProperty", createListOfStateItems(), createListOfStateItems(homeOwnership1), 1, anyHome1);
+
+
+            handleSecurityMild = actionCreator("handleSecurityMild", "security", createListOfStateItems(), createListOfStateItems(threat0), 1, hiringZone1);
 
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
@@ -224,13 +240,16 @@ public class premadeStuffForAI : MonoBehaviour
         List<stateItem> locationState = new List<stateItem>();
         List<stateItem> organizationState = new List<stateItem>();
         List<stateItem> propertyState = new List<stateItem>();
-        
+        List<stateItem> threatState = new List<stateItem>();
+
 
         state.Add("locationState", locationState);
         state.Add("feelings", feelings);
         state.Add("inventory", inventory);
         state.Add("organizationState", organizationState);
         state.Add("property", propertyState);
+        state.Add("threatState", threatState);
+        
 
         return state;
     }
@@ -254,9 +273,9 @@ public class premadeStuffForAI : MonoBehaviour
     {
         
         knownActions.Add(doTheWork);
-        knownActions.Add(buyHome); 
+        knownActions.Add(buyHome);
 
-
+        knownActions.Add(handleSecurityMild);
 
         knownActions.Add(eat);
         knownActions.Add(buyFood);
@@ -272,6 +291,8 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(beBoss);
         knownActions.Add(buyShop);
         knownActions.Add(buyHome);
+
+        knownActions.Add(handleSecurityMild);
 
         //knownActions.Add(sellFood);
 
