@@ -188,6 +188,24 @@ public class premadeStuffForAI : MonoBehaviour
         return state2;
     }
 
+    public Dictionary<string, List<stateItem>> createPLAYERstate()
+    {
+        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
+        List<stateItem> feelings2 = new List<stateItem>();
+        List<stateItem> inventory2 = new List<stateItem>();
+        List<stateItem> locationState2 = new List<stateItem>();
+
+
+
+        feelings2.Add(hungry0);
+
+        state2.Add("locationState", locationState2);
+        state2.Add("feelings", feelings2);
+        state2.Add("inventory", inventory2);
+
+        return state2;
+    }
+
     ////////////////////////////////////////////////////
     //               NPC KNOWN ACTIONS
     ////////////////////////////////////////////////////
@@ -287,13 +305,14 @@ public class premadeStuffForAI : MonoBehaviour
         return aNewList;
     }
 
-    action actionCreator(string name, string type, List<stateItem> prereqs, List<stateItem> effects, int cost)
+    action actionCreator(string name, string type, List<stateItem> prereqs, List<stateItem> effects, int cost, stateItem locationPrereq)
     {
         action thisAction = new action();
 
         thisAction.name = name;
         thisAction.type = type;
 
+        thisAction.locationPrereq = locationPrereq;
         thisAction.prereqs = prereqs;
 
         thisAction.effects = effects;
@@ -343,6 +362,7 @@ public class action
 
     public List<stateItem> prereqs = new List<stateItem>();
     public List<stateItem> effects = new List<stateItem>();
+    public stateItem locationPrereq;  //start as null?
 
     public int cost;
 
