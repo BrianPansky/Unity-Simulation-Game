@@ -48,13 +48,15 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem threat = new stateItem();
 
+    public stateItem myLeader = new stateItem();
+
 
 
     ////////////////////////////////////////////////
     //               ACTIONS
     ////////////////////////////////////////////////
 
-    //public action buyFood = new action();
+    public action buyFood = new action();
     //public action sellFood = new action();
     public action doTheWork = new action();
     public action eat = new action();
@@ -81,6 +83,8 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action extort = new action();
 
+    public action giveMoneyToLeader = new action();
+
 
     ////////////////////////////////////////////////
     //                   LISTS
@@ -106,7 +110,9 @@ public class premadeStuffForAI : MonoBehaviour
 
         //stateItems:
         {
-            
+            myLeader = stateItemCreator("myLeader", "target");
+            myLeader.locationType = "deliverTo";
+
             home = stateItemCreator("home", "locationState");
             food = stateItemCreator("food", "inventory");
             money = stateItemCreator("money", "inventory");
@@ -144,11 +150,12 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
+            giveMoneyToLeader = actionCreator("giveMoneyToLeader", "deliver", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, myLeader);
 
             //wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 
             eat = actionCreator("eat", "use", wantedPrereqsLister(food, homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry, food), 1, home);
             //eat = actionCreator("eat", "use", createListOfStateItems(food1, homeOwnership1), createListOfStateItems(hungry0, food0), 1, home1);
-            //buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
+            buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
             
             doTheWork = actionCreator("doTheWork", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 4, workPlace);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
@@ -160,7 +167,7 @@ public class premadeStuffForAI : MonoBehaviour
 
             buyShop = actionCreator("buyShop", "buyThisProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 1, anyStore);
 
-            buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
+            buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
 
 
             handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1);
@@ -186,7 +193,7 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        //addToState(food1, state);
+        addToState(food, state);
         addToState(money, state);
         addToState(hungry, state);
 
@@ -200,6 +207,8 @@ public class premadeStuffForAI : MonoBehaviour
 
         addToState(food, state);
         addToState(profitMotive, state);
+
+        addToState(money, state);
 
         return state;
     }
@@ -276,11 +285,11 @@ public class premadeStuffForAI : MonoBehaviour
         knownActions.Add(doTheWork);
         knownActions.Add(buyHome);
 
-        knownActions.Add(handleSecurityMild);
-        knownActions.Add(handleSecurityEscalationOne);
+        //knownActions.Add(handleSecurityMild);
+        //knownActions.Add(handleSecurityEscalationOne);
 
-        knownActions.Add(eat);
-        //knownActions.Add(buyFood);
+        //knownActions.Add(eat);
+        knownActions.Add(buyFood);
         
 
 
@@ -290,7 +299,7 @@ public class premadeStuffForAI : MonoBehaviour
     public List<action> createShopkeeperKnownActions()
     {
         knownActions.Add(hireSomeone);
-        knownActions.Add(beBoss);
+        //knownActions.Add(beBoss);
         knownActions.Add(buyShop);
         knownActions.Add(buyHome);
 
@@ -300,7 +309,7 @@ public class premadeStuffForAI : MonoBehaviour
 
         //knownActions.Add(sellFood);
 
-        knownActions.Add(eat);
+        //knownActions.Add(eat);
         //knownActions.Add(buyFood);
         
         knownActions.Add(restock);

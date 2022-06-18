@@ -19,6 +19,9 @@ public class playerClickInteraction : MonoBehaviour
     public List<GameObject> currentGridButtons;
 
 
+    //for debugging:
+    public GameObject personOfInterest;
+
 
     public bool inMenu;
 
@@ -48,7 +51,7 @@ public class playerClickInteraction : MonoBehaviour
         theTagScript = GetComponent<taggedWith>();
 
 
-        //just for testing:
+        //just for testing, give me a gun at start:
         theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
 
 
@@ -73,8 +76,20 @@ public class playerClickInteraction : MonoBehaviour
                 clickedOn = null;
             }
         }
-        
-        
+
+        ///*
+        //debugging
+        if (personOfInterest != null)
+        {
+
+            AI1 NPChubScript2 = personOfInterest.GetComponent("AI1") as AI1;
+            if (NPChubScript2.toDoList.Count > 0)
+            {
+                theFunctions.printPlan(NPChubScript2.toDoList);
+            }
+            
+        }
+        //*/
     }
 
 
@@ -188,15 +203,29 @@ public class playerClickInteraction : MonoBehaviour
     
     public void createRecruitmentButtonGrid()
     {
-        
-        makeButton("recruit to gang", this.recruitButton);
-        
-        makeButton("regular work", this.testButton);
-        
-        makeButton("give gun", this.giftGunButton);
-        
-        makeButton("order extortion", this.extortOrderButton);
-        
+
+        //makeButton("recruit to gang", this.recruitButton);
+
+        //makeButton("regular work", this.makeRegularWorkerButton);
+
+        //makeButton("give gun", this.giftGunButton);
+
+        //makeButton("order extortion", this.extortOrderButton);
+
+        //makeButton("test button", this.testButton);
+
+        makeButton("Full Plan test button", this.aFullPlanTest);
+
+        makeButton("shopkeeper Plan test button", this.shopkeeperGivePlanTest);
+
+        //ad hoc, should use same function...
+        //see that documentation page about having inputs?
+        //need to modify the "makeButton" function, because of strong typing
+        //I guess will need a "makeButton1FuncInput" function?
+        makeButton("i'm left wing", this.leftPoliticalSideButton);
+
+        makeButton("i'm right wing", this.rightPoliticalSideButton);
+
     }
 
     public void createStoreMenu()
@@ -243,15 +272,82 @@ public class playerClickInteraction : MonoBehaviour
     //              Specific Button Functions
     ///////////////////////////////////////////////////////////
 
+    public void aFullPlanTest()
+    {
+        List<action> planToGive = new List<action>();
+        planToGive.Add(premadeStuff.doTheWork);
+        //planToGive.Add(premadeStuff.buyFood);  //but I generate buy actions now???
+        //planToGive.Add(premadeStuff.buyHome);
+        planToGive.Add(premadeStuff.eat);
+
+        //now tell them the plan:
+        //need to get the social script on them:
+        social theSocialScript = selectedNPC.GetComponent("social") as social;
+        theSocialScript.toldPlan(planToGive);
+
+        personOfInterest = selectedNPC;
+    }
+
+    public void shopkeeperGivePlanTest()
+    {
+        List<action> planToGive = new List<action>();
+        planToGive.Add(premadeStuff.buyShop);
+        //planToGive.Add(premadeStuff.buyFood);  //but I generate buy actions now???
+        //planToGive.Add(premadeStuff.buyHome);
+        planToGive.Add(premadeStuff.hireSomeone);
+        planToGive.Add(premadeStuff.beBoss);
+        
+
+        //now tell them the plan:
+        //need to get the social script on them:
+        social theSocialScript = selectedNPC.GetComponent("social") as social;
+        theSocialScript.toldPlan(planToGive);
+
+        personOfInterest = selectedNPC;
+    }
+
+
     public void recruitButton()
     {
         //Debug.Log("heloooooooooo");
 
-        //for now ad-hoc
-        //just tagging an NPC with "playersGang" when you click it
-        theTagScript.foreignAddTag("playersGang", selectedNPC);
+        //for now, they only join you if thier trust in you is over a certain amount
+        //for now, just use default.  Haven't made a "relationship" yet
 
-        Debug.Log("should be recruited to gang now, by tagging");
+        //need to get the social script on them:
+        social theSocialScript = selectedNPC.GetComponent("social") as social;
+
+        if (theSocialScript.checkTrust(this.name) > 60)
+        {
+            //ok, recruitment suceeds
+            Debug.Log("recruitment successful");
+
+            //for now ad-hoc
+            //just tagging an NPC with "playersGang" when you click it
+            theTagScript.foreignAddTag("playersGang", selectedNPC);
+
+            //Debug.Log("should be recruited to gang now, by tagging");
+
+            //but they need to be able to FIND me, their leader, to deliver money to me
+            //so, for now, fill their leader variable:
+            //need their AI1 script:
+            AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
+            NPChubScript.leader = this.gameObject;
+
+            //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
+            NPChubScript.target = null;
+
+
+
+            //personOfInterest = selectedNPC;
+        }
+        else
+        {
+            Debug.Log("I guess they don't trust you enough");
+        }
+
+        
+
     }
 
     public void closeRecruitmentMenu()
@@ -261,7 +357,7 @@ public class playerClickInteraction : MonoBehaviour
         AI1 targetAI = selectedNPC.GetComponent("AI1") as AI1;
         targetAI.inConversation = false;
 
-        Debug.Log(targetAI.inConversation);
+        //Debug.Log(targetAI.inConversation);
 
         //Close recruitment menu
         //lock mouse:
@@ -328,6 +424,20 @@ public class playerClickInteraction : MonoBehaviour
         //give them the "workPLace" job instead
         //like hiring them to work at the tall "workPlace"
 
+
+        //now add work action, remove pickpocket action:
+        //hubScript.knownActions.Add(stateGrabber.doTheWork);
+        //hubScript.knownActions.RemoveAll(y => y.name == "pickVictimsPocket");
+    }
+
+    public void makeRegularWorkerButton()
+    {
+        Debug.Log("well, THIS button works");
+        //for now ad-hoc
+        //just making any NPC into a NON-pickpocket when you click on them
+        //give them the "workPLace" job instead
+        //like hiring them to work at the tall "workPlace"
+
         //need their AI1 script:
         AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
 
@@ -365,17 +475,54 @@ public class playerClickInteraction : MonoBehaviour
 
         //for now ad-hoc
         //just making any NPC go extort the shop...if they have a gun
+        
 
         //need their AI1 script:
-        AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
+        AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
 
         //need the action to add:
         premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
 
 
+        //going to blank out their to-do list, and fill it with test "orders":
+        NPChubScript.toDoList.Clear();
+
+        NPChubScript.toDoList.Add(stateGrabber.extort);
+        NPChubScript.toDoList.Add(stateGrabber.giveMoneyToLeader);
+        //NPChubScript.toDoList.Add(stateGrabber.doTheWork);
+        //NPChubScript.toDoList.Add(stateGrabber.pickVictimsPocket);
+        //NPChubScript.toDoList.Add(stateGrabber.handleSecurityMild);
+        //NPChubScript.toDoList.Add(stateGrabber.handleSecurityEscalationOne);
+
+
         //now add pickpocket action, remove work action:
-        hubScript.knownActions.Add(stateGrabber.extort);
-        hubScript.knownActions.RemoveAll(y => y.type == "work");
+        //hubScript.knownActions.Add(stateGrabber.extort);
+        //hubScript.knownActions.RemoveAll(y => y.type == "work");
+    }
+
+    
+    public void announcePoliticalSideButton(int yourSide)
+    {
+        //ad hoc
+        //for now modify default trust
+
+        //need to get the social script on them:
+        social theSocialScript = selectedNPC.GetComponent("social") as social;
+
+        //check if you match and all that:
+        theSocialScript.trustBySide(this.name, yourSide);
+    }
+    
+
+    public void leftPoliticalSideButton()
+    {
+        announcePoliticalSideButton(-50);
+    }
+
+    public void rightPoliticalSideButton()
+    {
+        //ad hoc
+        announcePoliticalSideButton(50);
     }
 
 
@@ -416,6 +563,18 @@ public class playerClickInteraction : MonoBehaviour
         theFunctions.gift(theHub.state["inventory"], hubOfNPC.state["inventory"], premadeStuff.giftGun);
         //theHub.state = theFunctions.implementALLEffects(premadeStuff.buyGun, theHub.state);
         Debug.Log("gave gun?");
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    //          Grabbing and using foreign scripts
+    ///////////////////////////////////////////////////////////
+
+
+    public social grabSocialScript()
+    {
+        social theSocialScript = selectedNPC.GetComponent("social") as social;
+        return theSocialScript;
     }
 
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
 
 
 public class functionsForAI : MonoBehaviour
@@ -31,7 +32,7 @@ public class functionsForAI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
 
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
@@ -57,7 +58,7 @@ public class functionsForAI : MonoBehaviour
     //handles ALL sensing:
     public void sensing(action nextAction, GameObject target, Dictionary<string, List<stateItem>> state)
     {
-        
+
         if (areAllForbiddenZonesClear() == false)
         {
             //print("yo");
@@ -141,7 +142,7 @@ public class functionsForAI : MonoBehaviour
                 print(nextAction.name);
             }
             travelToTargetObject(target);
-            
+
 
             //I still currently use a "actionItem", but it could perhaps
             //be replaced with mere text?  The name of the location?
@@ -158,7 +159,7 @@ public class functionsForAI : MonoBehaviour
             //if(gameObject.name == "NPC")
 
 
-            
+
             if (nextAction.type == "buyFromStore")
             {
                 //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
@@ -172,7 +173,7 @@ public class functionsForAI : MonoBehaviour
                 //print(target.name);
 
                 GameObject cashierMapZone = getCashierMapZone(customerLocation);
-                
+
                 GameObject cashier = whoIsTrader(cashierMapZone);
 
                 //but that cashier variable might come back null (if no one is there), check:
@@ -184,7 +185,30 @@ public class functionsForAI : MonoBehaviour
                     //thisAI.toDoList.RemoveAt(0);
                     target = dumpAction(target);
                 }
-                
+
+            }
+            else if (nextAction.name == "giveMoneyToLeader")
+            {
+                //ad-hoc fo rnow
+                //should generalize to a "delivery" type action
+
+                //just "gift" the delivery item to the target
+                //GameObject victim;
+                //victim = target;
+
+
+
+                AI1 theTargetState = target.GetComponent("AI1") as AI1;
+                //steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                gift(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                //state = implementALLEffects(nextAction, state);
+
+                target = dumpAction(target);
+
+
+
             }
             else if (nextAction.name == "hireSomeone")
             {
@@ -223,7 +247,7 @@ public class functionsForAI : MonoBehaviour
                         changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
                         print(customer.name);
-                        
+
 
                         workerCount += 1;
 
@@ -247,7 +271,7 @@ public class functionsForAI : MonoBehaviour
                             state = implementALLEffects(nextAction, state);
                             //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
 
-                            
+
                             //and ad hoc strike this action off the to-do list:
                             //thisAI.toDoList.RemoveAt(0);
 
@@ -272,7 +296,7 @@ public class functionsForAI : MonoBehaviour
                 victim = target;
 
 
-                
+
                 //now do the pickpocketing
                 AI1 theTargetState = victim.GetComponent("AI1") as AI1;
                 steal(state["inventory"], theTargetState.state["inventory"], nextAction);
@@ -325,9 +349,9 @@ public class functionsForAI : MonoBehaviour
                 //very ad-hoc for now
                 //just want the worker to wait there for a while
                 //"doing their work shift"
-                
 
-                
+
+
                 //ad-hoc check if someone else is the cashier right now:
                 GameObject thisNPC = gameObject;
                 //GameObject theCashierZone = getLocationObject("cashierZone");
@@ -337,7 +361,7 @@ public class functionsForAI : MonoBehaviour
                 //but the actual "mapZone" is a CHILD of this casheirZone object:
                 GameObject cashierMapZone = getCashierMapZone(target.transform.parent.gameObject);
 
-                    
+
                 GameObject currentCashier = getWhoeverIsHereFirst(cashierMapZone);
                 if (currentCashier == thisNPC)
                 {
@@ -355,12 +379,12 @@ public class functionsForAI : MonoBehaviour
                         //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
                     }
                 }
-                
-                
+
+
             }
             else if (nextAction.type == "buyThisProperty")
             {
-                
+
                 //kinda ad-hoc
                 //"buy" the property that the NPC has arrived at
                 //can use for both buying shops, and buying homes, maybe
@@ -400,8 +424,8 @@ public class functionsForAI : MonoBehaviour
                     state = implementALLEffects(nextAction, state);
 
                 }
-                
-                
+
+
                 else
                 {
                     //well, this one is NOT for sale, so need to scrap WHOLE plan, I think...
@@ -420,7 +444,7 @@ public class functionsForAI : MonoBehaviour
                     //thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
                     target = dumpAction(target);
                 }
-                
+
 
 
             }
@@ -483,9 +507,9 @@ public class functionsForAI : MonoBehaviour
                 //thisAI.toDoList.RemoveAt(0);
                 target = dumpAction(target);
             }
-            
+
         }
-        
+
 
         //ad hoc for now:
         return target;
@@ -548,7 +572,7 @@ public class functionsForAI : MonoBehaviour
             //but must only steal items if they exist in the victim's inventory!
             foreach (stateItem itemInInventory2 in inventory2)
             {
-                if(itemInInventory2.name == effect.name)
+                if (itemInInventory2.name == effect.name)
                 {
                     actionerReceives.Add(effect);
                     otherInventoryLoses.Add(itemInInventory2);
@@ -583,7 +607,7 @@ public class functionsForAI : MonoBehaviour
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
         foreach (actionItem effect in nextAction.effects)
         {
-            
+
             //but must only give items if they exist in the giver's inventory!
             foreach (stateItem itemInInventory in actionerInventory)
             {
@@ -654,7 +678,7 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject dumpAction(GameObject target)
     {
-        
+
         //when action is done, remove the action from the plan, and set target to null
         target = null;
         thisAI.toDoList.RemoveAt(0);
@@ -662,7 +686,7 @@ public class functionsForAI : MonoBehaviour
         //maybe check if plan is complete.
         //if so, should ALSO blank out "planList"
         //because those plans were made on the assumption that the stuff of this current plan were not complete
-        if(thisAI.toDoList.Count == 0)
+        if (thisAI.toDoList.Count == 0)
         {
             //blank out the planList:
             thisAI.planList.Clear();
@@ -670,7 +694,7 @@ public class functionsForAI : MonoBehaviour
 
         return target;
     }
-    
+
     public GameObject getLocationObject(string nameOfLocation)
     {
         //is this redundant?  Whatever.  I might change how it works later...
@@ -719,7 +743,7 @@ public class functionsForAI : MonoBehaviour
         return whoever;
     }
 
-    
+
     //pretty ad-hoc
 
     public bool areAllForbiddenZonesClear()
@@ -754,7 +778,7 @@ public class functionsForAI : MonoBehaviour
             if (thisListOfTouchingNPCs.theList.Count > 0)
             {
                 //BUT need to check if they have CLEARANCE:
-                foreach(GameObject thisListedNPC in thisListOfTouchingNPCs.theList)
+                foreach (GameObject thisListedNPC in thisListOfTouchingNPCs.theList)
                 {
                     //need to check their clearance level...
 
@@ -766,7 +790,7 @@ public class functionsForAI : MonoBehaviour
                         return false;
                     }
                 }
-                
+
             }
         }
 
@@ -794,6 +818,12 @@ public class functionsForAI : MonoBehaviour
             //for now, just the pickpocket action?  Move that stuff here...
             target = whoToTarget();
 
+        }
+        else if (criteria.locationType == "deliverTo")
+        {
+            //for now ad hoc, just deliver to me, the leader
+            //should have a "deliveryTarget" variable?  But could have multiple...need it embedded in the "deliver" action...
+            target = thisAI.leader;
         }
         else if (criteria.locationType == "any")
         {
@@ -861,7 +891,7 @@ public class functionsForAI : MonoBehaviour
             //for now, "else" should all be mapZone things we can find like this?
             target = GameObject.Find(name1);
         }
-        
+
 
         //stuff to get the target...
 
@@ -896,7 +926,7 @@ public class functionsForAI : MonoBehaviour
             return null;
         }
     }
-    
+
     public GameObject randomTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
     {
         //should return ONE random GameObject that is tagged with ALL inputted tags
@@ -921,7 +951,7 @@ public class functionsForAI : MonoBehaviour
         otherTags.Add(tag3);
         otherTags.Add(tag4);
 
-        
+
 
         GameObject thisObject;
         thisObject = null;
@@ -953,13 +983,13 @@ public class functionsForAI : MonoBehaviour
             //then falsify by checking:
             doWeHaveGoodTarget = true;
 
-            
+
             foreach (string thisTag in otherTags)
             {
                 //make sure it's not null:
                 if (thisTag != null)
                 {
-                    
+
                     if (theTagScript.tags.Contains(thisTag) == false)
                     {
                         //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
@@ -1083,7 +1113,7 @@ public class functionsForAI : MonoBehaviour
     public GameObject anyStore()
     {
         //should return ONE random shop GameObject as a target
-        
+
         GameObject thisShop;
         thisShop = null;
 
@@ -1262,7 +1292,7 @@ public class functionsForAI : MonoBehaviour
                 //didn't find it, go up one in object tree
                 ladderClimb = ladderClimb.transform.parent.gameObject;
             }
-            
+
         }
 
         //second, find the child object called "forbiddenZone":
@@ -1413,7 +1443,7 @@ public class functionsForAI : MonoBehaviour
 
         //"deep copy" of the unsorted costs:
         List<int> copyCosts = new List<int>();
-        foreach(int thisCost in unsortedCosts)
+        foreach (int thisCost in unsortedCosts)
         {
             copyCosts.Add(thisCost);
         }
@@ -1424,7 +1454,7 @@ public class functionsForAI : MonoBehaviour
         //NOW FOR THE TRICKY PART
 
         //add the indexes as a value in a dictionary wher the keys are in order, 1 2 3 4 etc.
-        foreach(int thisCost in copyCosts)
+        foreach (int thisCost in copyCosts)
         {
             //so, adding this to the dictionary will be done in order
             //so we'll have a counter so I always know the key to give the 
@@ -1473,7 +1503,7 @@ public class functionsForAI : MonoBehaviour
 
         int cost = 0;
 
-        foreach(action thisAction in plan)
+        foreach (action thisAction in plan)
         {
             cost += thisAction.cost;
         }
@@ -1510,7 +1540,7 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    
+
 
     ////////////////////////////////////////////////
     //         Misc diagnostic functions
@@ -1554,7 +1584,7 @@ public class functionsForAI : MonoBehaviour
     {
         string printout = string.Empty;
 
-        foreach(List<action> list in planList)
+        foreach (List<action> list in planList)
         {
             printout += "[ " + planToText(list) + " ] ";
         }
@@ -1566,7 +1596,7 @@ public class functionsForAI : MonoBehaviour
     {
         string printout = string.Empty;
 
-        foreach(List<List<action>> planList in listofPlanLists)
+        foreach (List<List<action>> planList in listofPlanLists)
         {
             printout += "[ " + planListToText(planList) + " ] ";
         }
@@ -1622,7 +1652,123 @@ public class functionsForAI : MonoBehaviour
         print(printout);
     }
 
+    public void printPlanList(List<List<action>> planList)
+    {
+        if (planList == null)
+        {
+            print("this planList is null");
+        }
+        else
+        {
+            print(planListToText(planList));
+        }
 
+    }
+
+
+    public void printPlanListForSpecificNPC(List<List<action>> planList)
+    {
+        //List<List<action>>
+
+
+        //to help, encapsulating this:
+
+        if (this.name == "NPC 4")
+        {
+            print("00000000000000000  Plan List:   000000000000000000");
+            printPlanList(planList);
+        }
+
+
+        /*
+            if (this.name == "NPC pickpocket")
+            {
+                theFunctions.print("00000000000000000  Plan List:   000000000000000000");
+                printPlanList(planList);
+            }
+
+            //constantlyCheckLocationState();
+            //theFunctions.printInventory(state["inventory"]);
+
+
+            if (this.name == "NPC")
+            {
+                theFunctions.print("==================================================");
+                theFunctions.printInventory(state["inventory"]);
+
+
+                if (toDoList.Count > 0)
+                {
+                    theFunctions.print(toDoList[0].name);
+                }
+
+            }
+            */
+
+        /*
+        //if (this.name == "NPC pickpocket")
+        if (this.name == "NPC shopkeeper")
+        {
+            theFunctions.print("==================================================");
+            theFunctions.printPlan(toDoList);
+        }
+        */
+
+
+        /*
+        //make sure list isn't empty, remove completed action:
+        if (toDoList.Count > 0)
+        {
+            //ad hoc for now, remove action if it is done
+            if (theFunctions.isThisActionDone(toDoList[0], state))
+            {
+                toDoList.Remove(toDoList[0]);
+            }
+        }
+        */
+
+        //theFunctions.printState(state);
+        //printPlan(toDoList);
+        /*
+        if (this.name == "NPC")
+        {
+            theFunctions.print("---------------------END OF UPDATE----------------------");
+        }
+        */
+    }
+
+    public void printActionForSpecificNPC(action x)
+    {
+        //List<List<action>>
+
+
+        //to help, encapsulating this:
+
+        if (this.name == "NPC 4")
+        {
+            print("00000000000000000  Action:   000000000000000000");
+            print(x.name);
+        }
+
+        
+    }
+
+    public void printNumberForSpecificNPC(int x)
+    {
+        if (this.name == "NPC 4")
+        {
+            print(x);
+        }
+        
+    }
+
+    public void printForSpecificNPC(string x)
+    {
+        if (this.name == "NPC 4")
+        {
+            print(x);
+        }
+    }
 
     ////////////////////////////////////////////////
     //                Planning
@@ -1633,7 +1779,6 @@ public class functionsForAI : MonoBehaviour
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
         List<List<action>> planList = new List<List<action>>();
-
         
 
         //first just make sure we need a plan at all (could remove this?):
@@ -1660,6 +1805,7 @@ public class functionsForAI : MonoBehaviour
                         }
                         else
                         {
+                            
                             //So no, we don't have the prereqs for this action
                             //so we'll see if we can FILL the prereqs!
 
@@ -1710,23 +1856,27 @@ public class functionsForAI : MonoBehaviour
                 //else, fill them the regular way using "problemSolver"
                 if (eachPrereq.stateCategory == "inventory" && eachPrereq.name != "money")
                 {
+                    //printNumberForSpecificNPC(1);
                     //so we need an inventory item
                     //and it's NOT money
                     //so here we can generate a "buy" or "steal" or whatever type of action to fill that
                     plansForThisPrereq = generateActionOnTheFly(eachPrereq, knownActions, state);
-                    
+
+                    //printNumberForSpecificNPC(2);
                 }
                 else
                 {
+                    //printNumberForSpecificNPC(3);
                     //this "else" means we can fill this prereq the regular way (using "problemSolver")
                     plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
-                    
+
+                    //printNumberForSpecificNPC(4);
                 }
                 
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
-                    
+                    printNumberForSpecificNPC(5);
 
                     break;
                 }
@@ -1736,8 +1886,9 @@ public class functionsForAI : MonoBehaviour
                     //(at least for THIS prereq)
                     //so add them to the list:
                     plansForEachPrereq.Add(plansForThisPrereq);
-                    
 
+                    //printPlanListForSpecificNPC(plansForEachPrereq[0]);
+                    //printNumberForSpecificNPC(6);
                 }
                 
 
@@ -1755,6 +1906,9 @@ public class functionsForAI : MonoBehaviour
         //now, add thisAction to the end of ALL these plans (or make a plan if there are none):
         planList = addActionToEndOfAllPlans(planList, thisAction);
 
+        //printForSpecificNPC("jjjjjjjjjjjjjjjjjjjjjjj");
+        //printPlanListForSpecificNPC(planList);
+        //printForSpecificNPC("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
 
         return planList;
     }
@@ -1767,6 +1921,18 @@ public class functionsForAI : MonoBehaviour
         }
 
         return list1;
+    }
+
+    public List<action> mergePlans(List<action> plan1, List<action> plan2)
+    {
+        //should add "plan2" on to the END of "plan1"
+
+        foreach (action thisAction in plan2)
+        {
+            plan1.Add(thisAction);
+        }
+
+        return plan1;
     }
 
     public List<List<action>> combinitorialMergingOfPrereqFillers(List<List<List<action>>> plansForEachRegularPrereq)
@@ -2129,82 +2295,169 @@ public class functionsForAI : MonoBehaviour
         return imaginaryState;
     }
 
+    public List<action> deepCopyPlan(List<action> thisPlan)
+    {
+        List<action> copyPlan = new List<action>();
+
+        foreach(action thisAction in thisPlan)
+        {
+            copyPlan.Add(thisAction);
+        }
+
+        return copyPlan;
+    }
+
 
     public List<List<action>> simulatingPlansToEnsurePrereqs(List<List<action>> planList, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
+        //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible acitons
+        //keep working on all impossible plans until they are fixed...or give up and discard them
+
+
+        List<List<action>> fixedPlanList = new List<List<action>>();
         //print("111111111111111111111111111111111111111");
         foreach (List<action> eachPlan in planList)
         {
-            Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
-            imaginaryState = stateCopyer(realState);
-            //print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            //printState(realState);
-            //imaginaryState.Clear();
-            //Debug.Log(realState["inventory"]);
-            //imaginaryState["inventory"].Remove(money1);
-            //printState(imaginaryState);
-            //print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
-            int counter;
-            int halt;
+            //yes, to fix ONE plan, might need to have a whole LIST of plans
+            //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
+            //it's still only one plan that was fixed
+            List<List<action>> fixedPlan = new List<List<action>>();
+            fixedPlan = simulateOnePlanFillPrereqs(eachPlan, knownActions, realState);
 
-            counter = 0;
-            halt = 0;
-            //print("222222222222222222222222222222222222222222222");
-            while ((counter + 1) <= eachPlan.Count)
+            if(fixedPlan != null && fixedPlan.Count() > 0)
             {
-                halt += 1;
-                if (halt > 20)
+                fixedPlanList = mergePlanLists(fixedPlanList, fixedPlan);
+            }
+        }
+
+        return fixedPlanList;
+    }
+
+    public List<List<action>> simulateOnePlanFillPrereqs(List<action> thisPlan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
+    {
+        //yes, to fix ONE plan, might need to have a whole LIST of plans
+        //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
+        //it's still only one plan that was fixed
+
+        //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible acitons
+        //keep working on all impossible plans until they are fixed...or give up and discard them
+
+
+        List<List<action>> constructingFixedPlansToReturn = new List<List<action>>();
+
+        
+
+
+        Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
+        imaginaryState = stateCopyer(realState);
+
+        List<action> staticIteratorPlan = new List<action>();
+        staticIteratorPlan = deepCopyPlan(thisPlan);
+        
+        
+        foreach (action currentAction in staticIteratorPlan)
+        {
+            if (prereqStateChecker(currentAction, imaginaryState) != true)
+            {
+                //so prereqs are NOT met.  
+                //so, need to try to find a plan to meet them,
+                //and that's literally the job of "prereqFiller", right?
+                //function returns plans that INCLUDE this current action
+                List<List<action>> waysToFillPrereqs;
+                waysToFillPrereqs = prereqFiller(currentAction, knownActions, imaginaryState);
+
+                
+                if (waysToFillPrereqs.Count > 0)
                 {
-                    break;
+                    //now need to make all plans
+                    //one for each way to fix current action
+
+                    constructingFixedPlansToReturn = multiplyPlansByAddingFixes(constructingFixedPlansToReturn, waysToFillPrereqs);
+
+                    //printNumberForSpecificNPC(1);
                 }
-                action currentAction;
-                currentAction = eachPlan[counter];
-                //print("333333333333333333333333333333333333333333333");
-                //print(currentAction.name);
-                if (prereqStateChecker(currentAction, imaginaryState) != true)
+            }
+            else
+            {
+                //this "else" means this action is fine
+                //add it to ALL plans
+
+                //first make sure there's at least one plan:
+                if (constructingFixedPlansToReturn.Count == 0)
                 {
-                    //print("yes this should happen for ''eat'':");
-                    //print(currentAction.name);
-                    foreach (actionItem eachPrereq in currentAction.prereqs)
+                    List<action> dummyPlan = new List<action>();
+                    constructingFixedPlansToReturn.Add(dummyPlan);
+                }
+
+                foreach (List<action> planInProgress in constructingFixedPlansToReturn)
+                {
+                    planInProgress.Add(currentAction);
+                }
+                //printNumberForSpecificNPC(2);
+                //print(currentAction.name);
+                //printPlan(planInProgress);
+            }
+
+            imaginaryState = implementALLEffects(currentAction, imaginaryState);
+        }
+
+
+        return constructingFixedPlansToReturn;
+
+
+        /*
+        //print("222222222222222222222222222222222222222222222");
+        while ((counter + 1) <= thisPlan.Count)
+        {
+            halt += 1;
+            if (halt > 20)
+            {
+                break;
+            }
+            action currentAction;
+            currentAction = thisPlan[counter];
+            //print("333333333333333333333333333333333333333333333");
+            //print(currentAction.name);
+            if (prereqStateChecker(currentAction, imaginaryState) != true)
+            {
+                //print("yes this should happen for ''eat'':");
+                //print(currentAction.name);
+                foreach (actionItem eachPrereq in currentAction.prereqs)
+                {
+                    if (isStateAccomplished(eachPrereq, imaginaryState) != true)
                     {
-                        if (isStateAccomplished(eachPrereq, imaginaryState) != true)
+                        //print("and this should happen for ''home''");
+                        //print(eachPrereq.name);
+                        List<List<action>> prereqFillerList;
+                        prereqFillerList = problemSolver(eachPrereq, knownActions, imaginaryState);
+                        //print("should have found this plan to fill the prereq:");
+                        //printPlan(prereqFillerList[0]);
+
+
+                        if (prereqFillerList.Count > 0)
                         {
-                            //print("and this should happen for ''home''");
-                            //print(eachPrereq.name);
-                            List<List<action>> prereqFillerList;
-                            prereqFillerList = problemSolver(eachPrereq, knownActions, imaginaryState);
-                            //print("should have found this plan to fill the prereq:");
-                            //printPlan(prereqFillerList[0]);
-
-
-                            if (prereqFillerList.Count > 0)
+                            //see python code for why this part is unfinished code
+                            foreach (action eachAction in prereqFillerList[0])
                             {
-                                //see python code for why this part is unfinished code
-                                foreach (action eachAction in prereqFillerList[0])
-                                {
-                                    eachPlan.Insert(counter, eachAction);
-                                }
-                                counter += 1;
+                                thisPlan.Insert(counter, eachAction);
                             }
-                            else
-                            {
-                                counter += 1;
-                                planList.Remove(eachPlan);
+                            counter += 1;
+                        }
+                        else
+                        {
+                            counter += 1;
+                            planList.Remove(thisPlan);
 
-                            }
                         }
                     }
                 }
-
-                imaginaryState = implementALLEffects(currentAction, imaginaryState);
-                counter += 1;
             }
 
+            imaginaryState = implementALLEffects(currentAction, imaginaryState);
+            counter += 1;
         }
-        //print("xxxxxxxxxxxxxxxxxxxxxTHE MOMENT OF TRUTHxxxxxxxxxxxxxxxxxxxxxxxxx");
-        //printState(realState);
-        //print("xxxxxxxxxxxxxxxxxxxxxvvvvvvvvvvvvvvvvvvvvvvvvvvvvxxxxxxxxxxxxxxxxxxxxxxxx");
-        return planList;
+        */
+
     }
 
     public int findFirstImpossibleAction(List<action> plan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
@@ -2266,6 +2519,50 @@ public class functionsForAI : MonoBehaviour
 
         return tf;
     }
+
+
+    public List<List<action>> multiplyPlansByAddingFixes(List<List<action>> oldPlanList, List<List<action>> theFixes)
+    {
+        //must not input an empty or null "theFixes"!
+
+        //-if my "fixedPlansToReturn" is EMPTY and I have fixes, just add one EMPTY plan to it
+        //-for each plan in ""fixedPlansToReturn", multiply them by making each version of each of them.
+
+        //so, how to do that "multiply" step ?
+        //-make all versions of it
+        //-add all versions to a new planList
+        //-return that NEW planList
+
+        List<List<action>> constructingNewPlanList = new List<List<action>>();
+
+        //first make sure there's at least one plan:
+        if (oldPlanList.Count == 0)
+        {
+            List<action> dummyPlan = new List<action>();
+            oldPlanList.Add(dummyPlan);
+        }
+
+        //now, multiply each plan on the oldPlanList:
+        foreach(List<action> oldPlan in oldPlanList)
+        {
+            
+            //now multiply, make every combination of this old plan and the new fixes to add:
+            foreach(List<action> fix in theFixes)
+            {
+                List<action> constructingOneNewPlan = new List<action>();
+
+                //fill this plan with the old plan thus far:
+                constructingOneNewPlan = deepCopyPlan(oldPlan);
+
+                constructingOneNewPlan = mergePlans(constructingOneNewPlan, fix);
+                constructingNewPlanList.Add(constructingOneNewPlan);
+            }
+
+        }
+
+        return constructingNewPlanList;
+    }
+
 
 
 }

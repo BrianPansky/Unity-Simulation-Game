@@ -16,6 +16,7 @@ public class AI1 : MonoBehaviour
 
     public GameObject roleLocation;
     public GameObject homeLocation;
+    public GameObject leader;
 
     public List<action> toDoList = new List<action>();
     public List<List<action>> planList = new List<List<action>>();
@@ -73,67 +74,7 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //diagnostic stuff I use sometimes:
-        {
-
-            /*
-            if (this.name == "NPC pickpocket")
-            {
-                theFunctions.print("00000000000000000  Plan List:   000000000000000000");
-                printPlanList(planList);
-            }
-
-            //constantlyCheckLocationState();
-            //theFunctions.printInventory(state["inventory"]);
-
-
-            if (this.name == "NPC")
-            {
-                theFunctions.print("==================================================");
-                theFunctions.printInventory(state["inventory"]);
-
-
-                if (toDoList.Count > 0)
-                {
-                    theFunctions.print(toDoList[0].name);
-                }
-
-            }
-            */
-
-            /*
-            //if (this.name == "NPC pickpocket")
-            if (this.name == "NPC shopkeeper")
-            {
-                theFunctions.print("==================================================");
-                theFunctions.printPlan(toDoList);
-            }
-            */
-
-
-            /*
-            //make sure list isn't empty, remove completed action:
-            if (toDoList.Count > 0)
-            {
-                //ad hoc for now, remove action if it is done
-                if (theFunctions.isThisActionDone(toDoList[0], state))
-                {
-                    toDoList.Remove(toDoList[0]);
-                }
-            }
-            */
-
-            //theFunctions.printState(state);
-            //printPlan(toDoList);
-            /*
-            if (this.name == "NPC")
-            {
-                theFunctions.print("---------------------END OF UPDATE----------------------");
-            }
-            */
-        }
-
-
+        
         if (inConversation == false)
         {
             //get NPC moving again if it was stopped by conversation:
@@ -148,22 +89,14 @@ public class AI1 : MonoBehaviour
             //remove all plans that contain "ineffective actions":
             removeIneffectiveActions();
 
-            if (toDoList.Count > 0)
+            if (toDoList.Count == 0)
             {
-                //blank to-do list if it is impossible:
-                blankImpossibleToDoList();
-            }
-            else
-            {
-                //this "else" means the "toDoList" is of zero length, so we need a plan:
+                //so we need a plan:
                 getPlan();
-
-                
-
             }
             
             //doing the to-do list (checks if it's not zero length):
-            doToDoList();
+            handleAnyNextAction();
         }
         else
         {
@@ -264,17 +197,33 @@ public class AI1 : MonoBehaviour
         if (Z != -2)
         {
             //so, remove the ENTIRE to-do list:
+            if (this.name == "NPC shopkeeper")
+            {
+                theFunctions.print("00000000000000000  to do List:   000000000000000000");
+                theFunctions.printPlan(toDoList);
+                if (target != null)
+                {
+                    theFunctions.print("00000000000000000  TARGET:   000000000000000000");
+                    theFunctions.print(target.name);
+                }
+                else
+                {
+                    theFunctions.print("TARGET IS NULLLLLLLLL");
+                }
+
+            }
 
             //print("says this plan is imposible:");
             //theFunctions.printPlan(toDoList);
             toDoList.RemoveRange(0, toDoList.Count);
             target = null;
-
+            
         }
     }
 
     public void getPlan()
     {
+        target = null;
         //choose next one from planList, unless planlist is "null" or empty:
         //so check if it's null or empty, fill it up if so:
         if (planList == null || planList.Count == 0)
@@ -283,9 +232,11 @@ public class AI1 : MonoBehaviour
             
             planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
 
-            
+            //printPlanListForSpecificNPC(planList);
 
             planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
+
+            //printPlanListForSpecificNPC(planList);
 
             //now to rank the plans by cost:
             if (planList != null && planList.Count > 0)
@@ -313,8 +264,11 @@ public class AI1 : MonoBehaviour
 
     }
 
-    public void doToDoList()
+    public void handleAnyNextAction()
     {
+        //first, blank toDoList if it is impossible:
+        blankImpossibleToDoList();
+
         //make sure list isn't empty AGAIN:
         if (toDoList.Count > 0)
         {
@@ -413,6 +367,82 @@ public class AI1 : MonoBehaviour
         return tf;
 
     }
+
+    public void printPlanListForSpecificNPC(List<List<action>> planList)
+    {
+        //List<List<action>>
+
+
+        //to help, encapsulating this:
+
+        if (this.name == "NPC 4")
+        {
+            print("00000000000000000  Plan List:   000000000000000000");
+            printPlanList(planList);
+        }
+
+
+        /*
+            if (this.name == "NPC pickpocket")
+            {
+                theFunctions.print("00000000000000000  Plan List:   000000000000000000");
+                printPlanList(planList);
+            }
+
+            //constantlyCheckLocationState();
+            //theFunctions.printInventory(state["inventory"]);
+
+
+            if (this.name == "NPC")
+            {
+                theFunctions.print("==================================================");
+                theFunctions.printInventory(state["inventory"]);
+
+
+                if (toDoList.Count > 0)
+                {
+                    theFunctions.print(toDoList[0].name);
+                }
+
+            }
+            */
+
+        /*
+        //if (this.name == "NPC pickpocket")
+        if (this.name == "NPC shopkeeper")
+        {
+            theFunctions.print("==================================================");
+            theFunctions.printPlan(toDoList);
+        }
+        */
+
+
+        /*
+        //make sure list isn't empty, remove completed action:
+        if (toDoList.Count > 0)
+        {
+            //ad hoc for now, remove action if it is done
+            if (theFunctions.isThisActionDone(toDoList[0], state))
+            {
+                toDoList.Remove(toDoList[0]);
+            }
+        }
+        */
+
+        //theFunctions.printState(state);
+        //printPlan(toDoList);
+        /*
+        if (this.name == "NPC")
+        {
+            theFunctions.print("---------------------END OF UPDATE----------------------");
+        }
+        */
+    }
+
+
+
+
+
 }
 
 
