@@ -19,6 +19,16 @@ public class worldScript : MonoBehaviour
     void Update()
     {
         timeIncrement();
+
+        if(taggedStuff.ContainsKey("store"))
+        {
+            foreach(GameObject item in taggedStuff["store"])
+            {
+                Debug.Log(item.name);
+            }
+        }
+
+        
     }
 
     public void timeIncrement()

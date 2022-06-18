@@ -35,6 +35,10 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem victim1 = new stateItem();
 
+    public stateItem shopOwnership1 = new stateItem();
+
+    public stateItem anyStore1 = new stateItem();
+
     ////////////////////////////////////////////////
     //               ACTIONS
     ////////////////////////////////////////////////
@@ -54,7 +58,9 @@ public class premadeStuffForAI : MonoBehaviour
     public action workAsCashier = new action();
 
     public action beBoss = new action();
-    
+
+    public action buyShop = new action();
+
 
 
 
@@ -102,6 +108,11 @@ public class premadeStuffForAI : MonoBehaviour
             victim1 = stateItemCreator("victim", "target", 1);
             victim1.locationType = "mobile";
 
+            shopOwnership1 = stateItemCreator("shopOwnership", "property", 1);
+
+            anyStore1 = stateItemCreator("anyStore", "locationState", 1);
+            anyStore1.locationType = "any";
+
         }
 
         //actions:
@@ -109,15 +120,18 @@ public class premadeStuffForAI : MonoBehaviour
             
             
             eat = actionCreator("eat", "use", createListOfStateItems(food1), createListOfStateItems(hungry0, food0), 1, home1);
-            buyFood = actionCreator("buyFood", "buy", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
+            buyFood = actionCreator("buyFood", "buyFromStore", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1, checkout1);
             
             doTheWork = actionCreator("doTheWork", "work", createListOfStateItems(), createListOfStateItems(money1), 4, work1);
             //restock = actionCreator("restock", "ad-hoc", createListOfStateItems(money1), createListOfStateItems(money0, food1), 1);
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
             workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(), createListOfStateItems(money1), 1, cashierZone1);
-            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(), createListOfStateItems(employee1), 1, cashierZone1);
+            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(shopOwnership1), createListOfStateItems(employee1), 1, cashierZone1);
             beBoss = actionCreator("beBoss", "ad-hoc", createListOfStateItems(employee1), createListOfStateItems(profitMotive0), 1, home1);
+
+            buyShop = actionCreator("buyShop", "buyThisProperty", createListOfStateItems(), createListOfStateItems(shopOwnership1), 1, anyStore1);
+
 
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
@@ -192,11 +206,14 @@ public class premadeStuffForAI : MonoBehaviour
         List<stateItem> inventory = new List<stateItem>();
         List<stateItem> locationState = new List<stateItem>();
         List<stateItem> organizationState = new List<stateItem>();
+        List<stateItem> propertyState = new List<stateItem>();
+        
 
         state.Add("locationState", locationState);
         state.Add("feelings", feelings);
         state.Add("inventory", inventory);
         state.Add("organizationState", organizationState);
+        state.Add("property", propertyState);
 
         return state;
     }
@@ -234,7 +251,9 @@ public class premadeStuffForAI : MonoBehaviour
     public List<action> createShopkeeperKnownActions()
     {
         knownActions.Add(hireSomeone);
-        knownActions.Add(beBoss); 
+        knownActions.Add(beBoss);
+        knownActions.Add(buyShop);
+        
 
         //knownActions.Add(sellFood);
 

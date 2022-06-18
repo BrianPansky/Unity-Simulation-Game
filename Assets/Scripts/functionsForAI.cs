@@ -108,7 +108,7 @@ public class functionsForAI : MonoBehaviour
                 }
                 
             }
-            if (nextAction.type == "buy")
+            if (nextAction.type == "buyFromStore")
             {
                 //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
                 //if casheir isn't there, shouldn't wait forever, that is unrealistic, but right now that's what will happen
@@ -268,6 +268,55 @@ public class functionsForAI : MonoBehaviour
                 }
                 
                 
+            }
+            else if (nextAction.type == "buyThisProperty")
+            {
+                
+                //kinda ad-hoc
+                //"buy" the property that the NPC has arrived at
+                //can use for both buying shops, and buying homes, maybe
+
+                //get this property:
+                GameObject thisProperty;
+                thisProperty = null;
+                thisProperty = target;
+
+                //print("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+
+                //check if it's for sale:
+                //get other script I need:
+                taggedWith otherIsTaggedWith = target.GetComponent<taggedWith>() as taggedWith;
+                if (otherIsTaggedWith.tags.Contains("forSale"))
+                {
+                    //ok, it's for sale, now can buy it
+
+                    printTextList(otherIsTaggedWith.tags);
+                    //remove the "for sale" tag:
+                    otherIsTaggedWith.foreignRemoveTag("forSale", target);
+                    printTextList(otherIsTaggedWith.tags);
+                    //add the "owned by _____" tag...:
+                    string ownershipTag = "owned by " + this.name;
+                    otherIsTaggedWith.foreignAddTag(ownershipTag, target);
+
+                    //ad-hoc action completion:
+                    thisAI.toDoList.RemoveAt(0);
+
+                    //ad-hoc update of state:
+                    state = implementALLEffects(nextAction, state);
+
+                }
+                else
+                {
+                    //well, this one is NOT for sale, so need to scrap WHOLE plan, I think...
+                    //AND make sure not to just generate the same plan infinitely, somehow.  
+                    //Not sure how...memory?  Add to list of temporarily unworkable plans?
+                    //then can use that info in the "choosing among plans" phase I don't yet have?
+
+                    //ad-hoc plan deleter:
+                    thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
+                }
+
+
             }
             else
             {
@@ -528,6 +577,15 @@ public class functionsForAI : MonoBehaviour
             target = whoToTarget();
 
         }
+        else if (criteria.locationType == "any")
+        {
+            //very ad-hoc for now...
+            if (criteria.name == "anyStore")
+            {
+                //get any store:
+                target = anyStore();
+            }
+        }
         else
         {
             //for now, else should all be mapZone things we can find like this?
@@ -589,6 +647,48 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+
+    //ad-hoc:
+    public GameObject anyStore()
+    {
+        //ad-hoc for now, this is being used in buyStore action (and in buy food?)
+        //should return ONE random shop GameObject as a target
+
+        List<GameObject> allPotentialTargets = new List<GameObject>();
+
+        //now to find suitable targets using my new tagging system:
+        allPotentialTargets = globalTags["shop"];
+
+        GameObject thisShop;
+        thisShop = null;
+        bool doWeHaveGoodTarget = false;
+
+        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
+        {
+            int randomIndex = Random.Range(0, allPotentialTargets.Count);
+            thisShop = allPotentialTargets[randomIndex];
+
+            //print(thisShop.name);
+
+            //but, criteria, ad-hoc for now
+            //if it's wrong criteria, remove that item from the array (will that leave a "null" hole in array???)
+            //and choose again
+            //check if it is for sale
+            taggedWith theTagScript = thisShop.GetComponent("taggedWith") as taggedWith;
+            if (theTagScript.tags.Contains("forSale") == false)
+            {
+                allPotentialTargets.RemoveAt(randomIndex);
+                thisShop = null;
+            }
+            else
+            {
+                doWeHaveGoodTarget = true;
+            }
+        }
+
+
+        return thisShop;
+    }
 
 
     //old targeting:
@@ -735,6 +835,17 @@ public class functionsForAI : MonoBehaviour
         print(text);
     }
 
+    public void printTextList(List<string> theList)
+    {
+        string printout = string.Empty;
+
+        foreach (string listItem in theList)
+        {
+            printout += listItem + ", ";
+        }
+
+        print(printout);
+    }
 
 
 
@@ -747,6 +858,8 @@ public class functionsForAI : MonoBehaviour
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
         List<List<action>> planList = new List<List<action>>();
+
+        
 
         //first just make sure we need a plan at all (could remove this?):
         if (isGoalAccomplishedFAKE(goal, state) == false)
@@ -811,11 +924,6 @@ public class functionsForAI : MonoBehaviour
             if (isGoalAccomplishedFAKE(eachPrereq, state) == false)
             {
                 //so, found a prereq that isn't filled.  Need plans to fill it!
-
-
-
-
-
                 
 
 
@@ -826,6 +934,7 @@ public class functionsForAI : MonoBehaviour
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
+                    
                     break;
                 }
 
@@ -1127,8 +1236,9 @@ public class functionsForAI : MonoBehaviour
         //print(goal.inStateOrNot);
 
         //do stuff as if "wantedInstateOrNot" == true, then can reverse it later if it's false
-        if (goal.locationType != "mobile")
+        if (goal.locationType != "mobile" && goal.name != "anyStore")
         {
+            
             foreach (stateItem stateI in state[goal.stateCategory])
             {
 
@@ -1266,6 +1376,13 @@ public class functionsForAI : MonoBehaviour
         {
             if (isGoalAccomplishedREAL(thisAction.locationPrereq, state, target) == false)
             {
+                /*
+                if (thisAction.locationPrereq.name == "anyStore")
+                {
+                    //print("xxxxxxxxxxxxxxxxxxx44444444444444444444444444444444");
+                }
+                */
+
                 return false;
             }
         }

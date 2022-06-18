@@ -62,6 +62,8 @@ public class AI1 : MonoBehaviour
             //print("------------------start printing map--------------------");
             //mapPrinter(scriptX.map);
             //print("------------------done printing map--------------------");
+
+            //theFunctions.print(other.gameObject.transform.parent.name);
             newLocationList.Add(map[other.gameObject.transform.parent.name]);
             state["locationState"] = newLocationList;
 
@@ -98,6 +100,14 @@ public class AI1 : MonoBehaviour
             {
                 theFunctions.print(toDoList[0].name);
             }
+        }
+        */
+
+        /*
+        if (this.name == "NPC shopkeeper")
+        {
+            theFunctions.print("==================================================");
+            theFunctions.printPlan(toDoList);
         }
         */
 
@@ -150,6 +160,8 @@ public class AI1 : MonoBehaviour
             //print("the plan after imagination fix:");
             //theFunctions.printPlan(planList[0]);
             //print("state AFTER imagination:");
+
+            
             //theFunctions.printState(state);
             //ad hoc for now
             if (planList.Count > 0)
@@ -170,12 +182,8 @@ public class AI1 : MonoBehaviour
             
             target = theFunctions.doNextAction(toDoList[0], state, target);
 
-            /*
-            if (this.name == "NPC pickpocket")
-            {
-                theFunctions.print(target.name);
-            }
-            */
+            
+            
         }
         //theFunctions.printState(state);
 
