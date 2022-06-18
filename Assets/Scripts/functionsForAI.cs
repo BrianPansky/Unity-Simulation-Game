@@ -82,8 +82,14 @@ public class functionsForAI : MonoBehaviour
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (whicheverPrereqChecker(nextAction, state, target) == true)
         {
+
+            //if(gameObject.name == "NPC")
+
+
             if (nextAction.type == "socialTrade")
             {
+                //currently unused?  I use "buyFromStore" type instead....
+
                 //print(nextAction.name);
                 //GameObject theTarget = GameObject.Find("NPC shopkeeper");
                 //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
@@ -105,15 +111,20 @@ public class functionsForAI : MonoBehaviour
                     //now implement trade
                     //state["inventory"].Remove(nextAction.effects[0]);
                     trade(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+                    //thisAI.toDoList.RemoveAt(0);
+                    target = dumpAction(target);
                 }
                 
             }
             if (nextAction.type == "buyFromStore")
             {
+                //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                 //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
                 //if casheir isn't there, shouldn't wait forever, that is unrealistic, but right now that's what will happen
 
-                GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+                //GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+                GameObject customerLocation = target;
 
                 GameObject cashierMapZone = getCashierMapZone(customerLocation);
                 
@@ -124,6 +135,9 @@ public class functionsForAI : MonoBehaviour
                 {
                     //ad-hoc update of state:
                     state = implementALLEffects(nextAction, state);
+
+                    //thisAI.toDoList.RemoveAt(0);
+                    target = dumpAction(target);
                 }
                 
             }
@@ -162,11 +176,11 @@ public class functionsForAI : MonoBehaviour
                             state = implementALLEffects(nextAction, state);
                             //^^^^^^^^^^that will ALSO be seen, and thus the "hire" aciton will be removed from to-do list
 
-                            /*
+                            
                             //and ad hoc strike this action off the to-do list:
-                            print("######################################");
-                            thisAI.toDoList.RemoveAt(0);
-                            */
+                            //thisAI.toDoList.RemoveAt(0);
+
+                            target = dumpAction(target);
                         }
                     }
                 }
@@ -194,8 +208,9 @@ public class functionsForAI : MonoBehaviour
 
 
                 //ad-hoc action completion:
-                thisAI.toDoList.RemoveAt(0);
-                
+                //thisAI.toDoList.RemoveAt(0);
+
+                target = dumpAction(target);
 
                 //state = implementALLEffects(nextAction, state);
 
@@ -260,6 +275,8 @@ public class functionsForAI : MonoBehaviour
                     if (stopwatch > 1000)
                     {
                         state = implementALLEffects(nextAction, state);
+                        //thisAI.toDoList.RemoveAt(0);
+                        target = dumpAction(target);
                         stopwatch = 0;
 
                         //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
@@ -299,12 +316,16 @@ public class functionsForAI : MonoBehaviour
                     otherIsTaggedWith.foreignAddTag(ownershipTag, target);
 
                     //ad-hoc action completion:
-                    thisAI.toDoList.RemoveAt(0);
+                    //thisAI.toDoList.RemoveAt(0);
+
+                    target = dumpAction(target);
 
                     //ad-hoc update of state:
                     state = implementALLEffects(nextAction, state);
 
                 }
+                
+                /*
                 else
                 {
                     //well, this one is NOT for sale, so need to scrap WHOLE plan, I think...
@@ -313,8 +334,9 @@ public class functionsForAI : MonoBehaviour
                     //then can use that info in the "choosing among plans" phase I don't yet have?
 
                     //ad-hoc plan deleter:
-                    thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
+                    //thisAI.toDoList.RemoveRange(0, thisAI.toDoList.Count);
                 }
+                */
 
 
             }
@@ -323,10 +345,20 @@ public class functionsForAI : MonoBehaviour
                 //for actions like "eat" that currently just need a quick
                 //ad-hoc update of state:
                 state = implementALLEffects(nextAction, state);
-                //print(nextAction.name);
+                //thisAI.toDoList.RemoveAt(0);
+                target = dumpAction(target);
             }
 
-            target = null;
+
+            //should only print COMPLETE acitons:
+            //print("complete:    " + nextAction.name);
+
+
+            //now, the action should be DONE
+            //even if it's not, best to REMOVE both TARGET and ACTION:
+            //NOPE, SOME ACTIONS ARE OPEN TO FAIL THE FIRST FRAME BUT MAY COMPLETE IN FUTURE, such as "hireSomeone"
+            //target = null;
+            //thisAI.toDoList.RemoveAt(0);
         }
         
 
@@ -455,7 +487,15 @@ public class functionsForAI : MonoBehaviour
     //         Misc functions for ACTIONS
     ////////////////////////////////////////////////
 
+    public GameObject dumpAction(GameObject target)
+    {
+        //when action is done, remove the action from the plan, and set target to null
+        target = null;
+        thisAI.toDoList.RemoveAt(0);
 
+        return target;
+    }
+    
     public GameObject getLocationObject(string nameOfLocation)
     {
         //is this redundant?  Whatever.  I might change how it works later...
@@ -1119,6 +1159,9 @@ public class functionsForAI : MonoBehaviour
         return planList;
     }
 
+
+    //Prereq and goal checking stuff:
+
     public bool isThisActionDone(action thisAction, Dictionary<string, List<stateItem>>  state)
     {
         //assume true, then check and change to false where needed
@@ -1256,7 +1299,13 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            //for now just copy the proximity check from pickpocket aciton?
+            //this is being copied over to whicheverPrereqChecker, to handle ALL locatin prereqs
+            //so it may be redundant here.  In fact, since I'm removing this isGoalAccomplishedREAL
+            //from being called in that other function, and I'm not sure isGoalAccomplishedREAL is
+            //ever called anywhere else, this whole function might be unused now?
+
+
+            //for now just copy the proximity check from pickpocket action?
 
             //check distance
             GameObject thePickpocket = gameObject;
@@ -1321,6 +1370,7 @@ public class functionsForAI : MonoBehaviour
             //print("don't count this");
             if (isGoalAccomplishedFAKE(prereqX, state) == false)
             {
+                
                 return false;
             }
         }
@@ -1359,6 +1409,41 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public bool justCheckLocationPrereq(GameObject target)
+    {
+        //for now just copy the proximity check from pickpocket action?
+
+        //check distance
+        GameObject thisNPC = gameObject;
+        float distance = Vector3.Distance(thisNPC.transform.position, target.transform.position);
+        //print("distance, for this target:");
+        //print(target.name);
+        //print(distance);
+        if (distance < 3.5f)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+        /*
+        if (goal.inStateOrNot == false)
+        {
+            //here I can just reverse WHATEVER result the other check gave?
+            if (tf == false)
+            {
+                tf = true;
+            }
+            else
+            {
+                tf = false;
+            }
+        }
+        */
+        }
+
     public bool whicheverPrereqChecker(action thisAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
         //this function checks whatever prereqs an action has
@@ -1368,24 +1453,20 @@ public class functionsForAI : MonoBehaviour
         //first, just check the regular prereqs using my regular prereqChecker:
         if (prereqChecker(thisAction, state) == false)
         {
+            
             return false;
         }
 
         //now, check the location Prereq, IF THERE IS ONE:
         if (thisAction.locationPrereq != null)
         {
-            if (isGoalAccomplishedREAL(thisAction.locationPrereq, state, target) == false)
+            if (justCheckLocationPrereq(target) == false)
             {
-                /*
-                if (thisAction.locationPrereq.name == "anyStore")
-                {
-                    //print("xxxxxxxxxxxxxxxxxxx44444444444444444444444444444444");
-                }
-                */
-
+                
                 return false;
             }
         }
+        //print(thisAction.name);
         
         //if the above didn't fail, return true:
         return true;
@@ -1394,7 +1475,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-
+    //"imagination" stuff:
 
     public Dictionary<string, List<stateItem>> stateCopyer(Dictionary<string, List<stateItem>> state)
     {
@@ -1536,7 +1617,7 @@ public class functionsForAI : MonoBehaviour
     public int findFirstImpossibleAction(List<action> plan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
         //imagines it's way through a plan list
-        //returns the index number of the first aciton on that list that CANNOT be completed
+        //returns the index number of the first action on that list that CANNOT be completed
         //if all actions can be completed fine, it returns negative two
 
         int noProblem;
@@ -1552,9 +1633,9 @@ public class functionsForAI : MonoBehaviour
 
         foreach(action currentAction in plan)
         {
-            if (prereqChecker(currentAction, imaginaryState) != true)
+            if (impossibleActionPrereqChecker(currentAction, imaginaryState) != true)
             {
-                //print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
                 //print(currentAction.name);
                 return counter;
             }
@@ -1567,6 +1648,31 @@ public class functionsForAI : MonoBehaviour
         return noProblem;
     }
 
-    
+    public bool impossibleActionPrereqChecker(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //assume true, then check and change to false where needed
+        bool tf;
+        tf = true;
+
+        foreach (stateItem prereqX in thisAction.prereqs)
+        {
+            //print("don't count this");
+            if (isGoalAccomplishedFAKE(prereqX, state) == false)
+            {
+                /*
+                print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                print(thisAction.name);
+                print("BECAUSE of this prereq:");
+                print(prereqX.name);
+                print(gameObject.name);
+                */
+
+                return false;
+            }
+        }
+
+        return tf;
+    }
+
 
 }

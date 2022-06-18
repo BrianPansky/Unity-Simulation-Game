@@ -96,14 +96,18 @@ public class AI1 : MonoBehaviour
         {
             theFunctions.print("==================================================");
             theFunctions.printInventory(state["inventory"]);
+
+            
             if (toDoList.Count > 0)
             {
                 theFunctions.print(toDoList[0].name);
             }
+            
         }
         */
 
         /*
+        //if (this.name == "NPC shopkeeper")
         if (this.name == "NPC shopkeeper")
         {
             theFunctions.print("==================================================");
@@ -111,6 +115,8 @@ public class AI1 : MonoBehaviour
         }
         */
 
+
+        /*
         //make sure list isn't empty, remove completed action:
         if (toDoList.Count > 0)
         {
@@ -120,24 +126,31 @@ public class AI1 : MonoBehaviour
                 toDoList.Remove(toDoList[0]);
             }
         }
+        */
 
-        
+
         //remove plan if it is impossible
         //(it can become impossible if a necessary prereq that was previously met
         //unexpectedly becomes UNMET, and if the plan doesn't fill it)
         if (toDoList.Count > 0)
         {
 
+
+            //theFunctions.print("////////////////WHAT IS IMPOSSIBLE?????????????????????");
+            //theFunctions.printPlan(toDoList);
+
+            
             int Z;
             Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
 
 
             if(Z != -2)
             {
-                
-                toDoList.RemoveRange(0, toDoList.Count);
+                //print("says this plan is imposible:");
                 //theFunctions.printPlan(toDoList);
+                toDoList.RemoveRange(0, toDoList.Count);
                 target = null;
+                
             }
         }
         else
@@ -168,6 +181,13 @@ public class AI1 : MonoBehaviour
             {
                 //print("plan found");
                 toDoList = planList[0];
+
+                //am I generating impossible plans???
+                int Z;
+                Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+                
+
             }
         }
 
@@ -186,9 +206,13 @@ public class AI1 : MonoBehaviour
             
         }
         //theFunctions.printState(state);
-
-
         
+        /*
+        if (this.name == "NPC")
+        {
+            theFunctions.print("---------------------END OF UPDATE----------------------");
+        }
+        */
     }
 
 }
