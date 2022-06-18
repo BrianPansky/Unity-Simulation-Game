@@ -6,6 +6,7 @@ TagManager:
   tags:
   - anNPC
   - aMapZone
+  - aProperty
   layers:
   - Default
   - TransparentFX
