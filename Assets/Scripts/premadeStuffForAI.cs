@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class premadeStuffForAI : MonoBehaviour
@@ -211,6 +212,10 @@ public class premadeStuffForAI : MonoBehaviour
         //actions:
         {
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
+            //createShop = actionEnactmentCreator(createShop, () => testFunc2());
+            //createShop.function = () => testFunc2();
+            createShop.function.AddListener(() => testFunc2());
+
             landLording = actionCreator("landLording", "capitalism", wantedPrereqsLister(homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(rentalProperty), UNwantedEffectsLister(homeOwnership, profitMotive), 1);
             shootSpree = actionCreator("shootSpree", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
 
@@ -625,6 +630,19 @@ public class premadeStuffForAI : MonoBehaviour
         return thisAction;
     }
 
+    public action actionEnactmentCreator(action theAction, Action function)
+    {
+        //Make sure not to mix up my lowercase action class, which is something I made myself for 
+        //the actions of the characters in my game, with the Systems class that is already made by
+        //someone else, and it is called Action with a capital a. and it is used for this deligate
+        //stuff in C sharp, where you input a function into another function or whatever. Stuff like that. 
+
+        //theAction.function = null;
+        theAction.function = () => function();
+
+        return theAction;
+    }
+
     public stateItem stateItemCreator(string name, string stateCategory)
     {
         stateItem thisStateItem = new stateItem();
@@ -825,6 +843,20 @@ public class premadeStuffForAI : MonoBehaviour
 
         return finishedJob;
     }
+
+
+
+
+    //functions??
+    public static void testFunc()
+    {
+        Debug.Log("test");
+    }
+
+    public static void testFunc2()
+    {
+        Debug.Log("test22222222222222222222222222222");
+    }
 }
 
 public class stateItem
@@ -862,11 +894,17 @@ public class action
 
     public int cost;
 
+    public Action function;// Debug.Log("test");
+    public Action defaultEnactment = () => premadeStuffForAI.testFunc();// Debug.Log("test");
+    //public Action function;
+
+
     //maybe have methods here???
     //I can fill them in somehow???
+    //pass in an "Action", C# delegate nonsense???
     public void doThisAction()
     {
-
+        function();
     }
 }
 
