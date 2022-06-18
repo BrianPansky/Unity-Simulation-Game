@@ -12,7 +12,7 @@ public class taggedWith : MonoBehaviour
     public Dictionary<string, List<GameObject>> globalTags;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         //getting the "global" tags:
         //(hopefully will allow me to modify them here

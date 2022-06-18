@@ -18,6 +18,9 @@ public class shopkeeperNPC : MonoBehaviour
         theHub.knownActions = stateGrabber.createShopkeeperKnownActions();
 
         theHub.map = stateGrabber.createMap1();
+
+        //ad-hoc make the shopkeeper "know" which store is "theirs":
+        //theHub.roleLocation = 
     }
 
 

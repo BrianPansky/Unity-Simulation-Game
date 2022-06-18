@@ -19,7 +19,7 @@ public class functionsForAI : MonoBehaviour
 
     //VERY ad-hoc for now:
     public int workerCount;
-    List<GameObject> listOfCashiers = new List<GameObject>();
+    public List<GameObject> listOfCashiers = new List<GameObject>();
 
     public AI1 thisAI;// = GetComponent<AI1>();
     public premadeStuffForAI premadeStuff;
@@ -62,15 +62,25 @@ public class functionsForAI : MonoBehaviour
         {
             //here we automatically try to fill all travel prereqs
 
+            //will go to navigationTarget, so check if we have one:  chooseTarget
+            if (target == null)
+            {
+                //need to get a target:
+                target = chooseTarget(nextAction.locationPrereq);
+            }
+            
+            travelToTargetObject(target);
+            
+
             //I still currently use a "stateItem", but it could perhaps
             //be replaced with mere text?  The name of the location?
 
-            travelToStateItem(nextAction.locationPrereq);
+            //travelToStateItem(nextAction.locationPrereq);
         }
 
 
         //actions with ALL prereqs met (including location prereq) can proceed below:
-        if (whicheverPrereqChecker(nextAction, state) == true)
+        if (whicheverPrereqChecker(nextAction, state, target) == true)
         {
             if (nextAction.type == "socialTrade")
             {
@@ -134,7 +144,7 @@ public class functionsForAI : MonoBehaviour
                 GameObject customer = checkForCustomer(checkoutZone);
                 if (customer != null)
                 {
-                    //ad-hoc wat to hire more than one employee for now:
+                    //ad-hoc way to hire more than one employee for now:
                     if (listOfCashiers.Contains(customer) == false)
                     {
                         listOfCashiers.Add(customer);
@@ -176,6 +186,24 @@ public class functionsForAI : MonoBehaviour
                 GameObject victim;
                 victim = target;
 
+
+                
+                //now do the pickpocketing
+                AI1 theTargetState = victim.GetComponent("AI1") as AI1;
+                steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+
+                //ad-hoc action completion:
+                thisAI.toDoList.RemoveAt(0);
+                
+
+                //state = implementALLEffects(nextAction, state);
+
+
+
+
+
+                /*
                 //navigation
                 //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, thisAI.speed * Time.deltaTime);
                 Vector3 targetVector = victim.GetComponent<Transform>().position;
@@ -201,6 +229,7 @@ public class functionsForAI : MonoBehaviour
 
                     //state = implementALLEffects(nextAction, state);
                 }
+                */
 
 
                 //print(target.name);
@@ -212,34 +241,32 @@ public class functionsForAI : MonoBehaviour
                 //"doing their work shift"
                 
 
-
-                if (whicheverPrereqChecker(nextAction, state) == true)
-                {
-                    //ad-hoc check if someone else is the cashier right now:
-                    GameObject thisNPC = gameObject;
-                    //GameObject theCashierZone = getLocationObject("cashierZone");
-                    //but the actual "mapZone" is a CHILD of this casheirZone object:
-                    //GameObject cashierMapZone = theCashierZone.GetChild(0).gameObject;
-                    GameObject theCashierZone = getLocationObject("cashierZone");
-                    //but the actual "mapZone" is a CHILD of this casheirZone object:
-                    GameObject cashierMapZone = getCashierMapZone(theCashierZone);
+                
+                //ad-hoc check if someone else is the cashier right now:
+                GameObject thisNPC = gameObject;
+                //GameObject theCashierZone = getLocationObject("cashierZone");
+                //but the actual "mapZone" is a CHILD of this casheirZone object:
+                //GameObject cashierMapZone = theCashierZone.GetChild(0).gameObject;
+                GameObject theCashierZone = getLocationObject("cashierZone");
+                //but the actual "mapZone" is a CHILD of this casheirZone object:
+                GameObject cashierMapZone = getCashierMapZone(theCashierZone);
                     
-                    GameObject currentCashier = getWhoeverIsHereFirst(cashierMapZone);
-                    if (currentCashier == thisNPC)
+                GameObject currentCashier = getWhoeverIsHereFirst(cashierMapZone);
+                if (currentCashier == thisNPC)
+                {
+                    stopwatch += 1;
+
+                    //ad-hoc work shift timer:
+                    if (stopwatch > 1000)
                     {
-                        stopwatch += 1;
+                        state = implementALLEffects(nextAction, state);
+                        stopwatch = 0;
 
-                        //ad-hoc work shift timer:
-                        if (stopwatch > 1000)
-                        {
-                            state = implementALLEffects(nextAction, state);
-                            stopwatch = 0;
-
-                            //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
-                            //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
-                        }
+                        //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
+                        //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
                     }
                 }
+                
                 
             }
             else
@@ -249,6 +276,8 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffects(nextAction, state);
                 //print(nextAction.name);
             }
+
+            target = null;
         }
         
 
@@ -442,6 +471,80 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public void travelToTargetObject(GameObject target)
+    {
+
+        Vector3 targetVector = target.GetComponent<Transform>().position;
+        _navMeshAgent.SetDestination(targetVector);
+    }
+    
+    public AI1 getHubScriptFromGameObject(GameObject NPC)
+    {
+        AI1 theHub = NPC.GetComponent("AI1") as AI1;
+
+        return theHub;
+    }
+
+    public GameObject getWhoeverIsHereFirst(GameObject locationZone)
+    {
+        //looks at a location
+        //if someone is there, return them as a GameObject
+        //(if more than one is there, return FIRST one)
+
+        GameObject whoever;
+        whoever = null;
+
+        listOfTouchingNPCs listOfNPCs = locationZone.GetComponent<listOfTouchingNPCs>();
+        
+        //check to make sure the list isn't empty:
+        if (listOfNPCs.theList.Count > 0)
+        {
+            whoever = listOfNPCs.theList[0];
+        }
+
+
+        return whoever;
+    }
+
+
+    ////////////////////////////////////////////////
+    //                TARGETING
+    ////////////////////////////////////////////////
+
+    public GameObject chooseTarget(stateItem criteria)
+    {
+        //takes criteria, returns one target
+        //for now, input is a stateItem from nextAction.locationPrereq
+        //output is a GameObject
+
+
+        string name1 = criteria.name;
+        GameObject target;
+        target = null;
+
+        if (criteria.locationType == "mobile")
+        {
+            //for now, just the pickpocket action?  Move that stuff here...
+            target = whoToTarget();
+
+        }
+        else
+        {
+            //for now, else should all be mapZone things we can find like this?
+            target = GameObject.Find(name1);
+        }
+        
+
+        //stuff to get the target...
+
+
+
+
+        return target;
+    }
+
+
+
     public GameObject whoIsTrader(GameObject cashierZone)
     {
         //get the "listOfTouchingNPCs" script on the casheirZone
@@ -458,7 +561,7 @@ public class functionsForAI : MonoBehaviour
         {
             cashier = listOfNPCs.theList[0];
         }
-        
+
 
         return cashier;
 
@@ -472,20 +575,23 @@ public class functionsForAI : MonoBehaviour
         listOfTouchingNPCs listOfNPCs = checkoutZone.GetComponent<listOfTouchingNPCs>();
 
         //check if there ARE any NPCs there at all:
-        if(listOfNPCs.theList.Count > 0)
+        if (listOfNPCs.theList.Count > 0)
         {
             if (listOfNPCs.theList[0].name != "NPC pickpocket")
             {
                 customer = listOfNPCs.theList[0];
             }
-            
+
         }
-        
+
 
         return customer;
 
     }
 
+
+
+    //old targeting:
     public GameObject whoToTarget()
     {
         //ad-hoc for now, this is being used in pickpocketing action
@@ -536,38 +642,13 @@ public class functionsForAI : MonoBehaviour
                 doWeHaveGoodTarget = true;
             }
         }
-        
+
 
         return thisNPC;
     }
 
-    public AI1 getHubScriptFromGameObject(GameObject NPC)
-    {
-        AI1 theHub = NPC.GetComponent("AI1") as AI1;
-
-        return theHub;
-    }
-
-    public GameObject getWhoeverIsHereFirst(GameObject locationZone)
-    {
-        //looks at a location
-        //if someone is there, return them as a GameObject
-        //(if more than one is there, return FIRST one)
-
-        GameObject whoever;
-        whoever = null;
-
-        listOfTouchingNPCs listOfNPCs = locationZone.GetComponent<listOfTouchingNPCs>();
-        
-        //check to make sure the list isn't empty:
-        if (listOfNPCs.theList.Count > 0)
-        {
-            whoever = listOfNPCs.theList[0];
-        }
 
 
-        return whoever;
-    }
 
 
     ////////////////////////////////////////////////
@@ -668,7 +749,7 @@ public class functionsForAI : MonoBehaviour
         List<List<action>> planList = new List<List<action>>();
 
         //first just make sure we need a plan at all (could remove this?):
-        if (isGoalAccomplished(goal, state) == false)
+        if (isGoalAccomplishedFAKE(goal, state) == false)
         {
             //cycle through every known action, so we can check if any accomplish the goal:
             foreach (action thisAction in knownActions)
@@ -727,7 +808,7 @@ public class functionsForAI : MonoBehaviour
         foreach (stateItem eachPrereq in thisAction.prereqs)
         {
             //only make plans to fill prereqs that aren't ALREADY filled:
-            if (isGoalAccomplished(eachPrereq, state) == false)
+            if (isGoalAccomplishedFAKE(eachPrereq, state) == false)
             {
                 //so, found a prereq that isn't filled.  Need plans to fill it!
 
@@ -949,7 +1030,7 @@ public class functionsForAI : MonoBehaviour
             //print(effectX.name);
             //print(effectX.stateCategory);
             //print(effectX.inStateOrNot);
-            if (isGoalAccomplished(effectX, state) == false)
+            if (isGoalAccomplishedFAKE(effectX, state) == false)
             {
                 //Debug.Log(effectX.name);
                 //print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
@@ -962,7 +1043,7 @@ public class functionsForAI : MonoBehaviour
         return tf;
     }
 
-    public bool isGoalAccomplished(stateItem goal, Dictionary<string, List<stateItem>> state)
+    public bool isGoalAccomplishedFAKE(stateItem goal, Dictionary<string, List<stateItem>> state)
     {
         //assume false, then check and change to true where needed
         bool tf;
@@ -970,25 +1051,38 @@ public class functionsForAI : MonoBehaviour
         //print("3:  should see ''inStateOrNot'' == false");
         //Debug.Log(goal.name);
         //print(goal.inStateOrNot);
-        if (goal.inStateOrNot == true)
+
+        //do stuff as if "wantedInstateOrNot" == true, then can reverse it later if it's false
+        
+        foreach (stateItem stateI in state[goal.stateCategory])
         {
-            foreach (stateItem stateI in state[goal.stateCategory])
+
+
+            //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
+            //oh no this is text, "name" needs to be just a stateItem!  Or something!
+            //print("1111111111111111111111111111111111111111");
+            //print(goal.name);
+            //print(stateI.name);
+            if (stateI.name == goal.name)
             {
-
-
-                //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
-                //oh no this is text, "name" needs to be just a stateItem!  Or something!
-                //print("1111111111111111111111111111111111111111");
-                //print(goal.name);
-                //print(stateI.name);
-                if (stateI.name == goal.name)
-                {
-                    tf = true;
-                }
+                tf = true;
             }
         }
+        
+        //just reverse that result if it's not wanted
         if (goal.inStateOrNot == false)
         {
+            //here I can just reverse WHATEVER result the other check gave?
+            if (tf == false)
+            {
+                tf = true;
+            }
+            else
+            {
+                tf = false;
+            }
+
+            /*
             //actually here I have to reverse it?
             //assume false, then if I find it, change to true?
             //ya I had to do that in my C++ code too
@@ -1011,9 +1105,100 @@ public class functionsForAI : MonoBehaviour
                     tf = false;
                 }
             }
+            */
+        }
+
+        return tf;
+    }
+
+    public bool isGoalAccomplishedREAL(stateItem goal, Dictionary<string, List<stateItem>> state, GameObject target)
+    {
+        //wait is this the one I need ot use?  Or do I need ot use "whicheverPrereqChecker"?
+        //looks like this ONLY gets called in whicheverPrereqChecker, and
+        //whicheverPrereqChecker ONLY gets called in real game
+
+
+
+        //assume false, then check and change to true where needed
+        bool tf;
+        tf = false;
+        //print("3:  should see ''inStateOrNot'' == false");
+        //Debug.Log(goal.name);
+        //print(goal.inStateOrNot);
+
+        //do stuff as if "wantedInstateOrNot" == true, then can reverse it later if it's false
+        if (goal.locationType != "mobile")
+        {
+            foreach (stateItem stateI in state[goal.stateCategory])
+            {
+
+
+                //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
+                //oh no this is text, "name" needs to be just a stateItem!  Or something!
+                //print("1111111111111111111111111111111111111111");
+                //print(goal.name);
+                //print(stateI.name);
+                if (stateI.name == goal.name)
+                {
+                    tf = true;
+                }
+            }
+        }
+        else
+        {
+            //for now just copy the proximity check from pickpocket aciton?
+
+            //check distance
+            GameObject thePickpocket = gameObject;
+            GameObject victim = target;
+            float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
+            if (distance < 2.0f)
+            {
+                tf = true;
+            }
+
+        }
+
+        if (goal.inStateOrNot == false)
+        {
+            //here I can just reverse WHATEVER result the other check gave?
+            if (tf == false)
+            {
+                tf = true;
+            }
+            else
+            {
+                tf = false;
+            }
+
+            /*
+            //actually here I have to reverse it?
+            //assume false, then if I find it, change to true?
+            //ya I had to do that in my C++ code too
+            tf = true;
+
+            //print("4:  should look through each item in list of________:");
+            //print(goal.name);
+            //print(goal.stateCategory);
+            foreach (stateItem stateI in state[goal.stateCategory])
+            {
+
+                //print("222222222222222222222222222222222222222");
+                //print(goal.name);
+                //print(stateI.name);
+                if (stateI.name == goal.name)
+                {
+                    //print("whaaaaaat>>>>>>>>>>>>>>>>");
+                    //print(stateI.name);
+                    //print(goal.name);
+                    tf = false;
+                }
+            }
+            */
         }
         return tf;
     }
+
 
     public bool prereqChecker(action thisAction, Dictionary<string, List<stateItem>> state)
     {
@@ -1024,7 +1209,7 @@ public class functionsForAI : MonoBehaviour
         foreach (stateItem prereqX in thisAction.prereqs)
         {
             //print("don't count this");
-            if (isGoalAccomplished(prereqX, state) == false)
+            if (isGoalAccomplishedFAKE(prereqX, state) == false)
             {
                 return false;
             }
@@ -1048,7 +1233,7 @@ public class functionsForAI : MonoBehaviour
         //(to be safe, check that it's not null, print error if it is)
         if (thisAction.locationPrereq != null)
         {
-            if (isGoalAccomplished(thisAction.locationPrereq, state) == false)
+            if (isGoalAccomplishedFAKE(thisAction.locationPrereq, state) == false)
             {
                 return false;
             }
@@ -1064,9 +1249,9 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public bool whicheverPrereqChecker(action thisAction, Dictionary<string, List<stateItem>> state)
+    public bool whicheverPrereqChecker(action thisAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
-        //this funciton checks whatever prereqs an action has
+        //this function checks whatever prereqs an action has
         //doesn't matter if the action has a locationPrereq or not
         //it can handle both types of action
 
@@ -1079,7 +1264,7 @@ public class functionsForAI : MonoBehaviour
         //now, check the location Prereq, IF THERE IS ONE:
         if (thisAction.locationPrereq != null)
         {
-            if (isGoalAccomplished(thisAction.locationPrereq, state) == false)
+            if (isGoalAccomplishedREAL(thisAction.locationPrereq, state, target) == false)
             {
                 return false;
             }
@@ -1191,7 +1376,7 @@ public class functionsForAI : MonoBehaviour
                     //print(currentAction.name);
                     foreach (stateItem eachPrereq in currentAction.prereqs)
                     {
-                        if (isGoalAccomplished(eachPrereq, imaginaryState) != true)
+                        if (isGoalAccomplishedFAKE(eachPrereq, imaginaryState) != true)
                         {
                             //print("and this should happen for ''home''");
                             //print(eachPrereq.name);

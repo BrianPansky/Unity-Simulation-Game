@@ -33,7 +33,7 @@ public class premadeStuffForAI : MonoBehaviour
     //organizationState stuff:
     public stateItem employee1 = new stateItem();
 
-
+    public stateItem victim1 = new stateItem();
 
     ////////////////////////////////////////////////
     //               ACTIONS
@@ -99,6 +99,9 @@ public class premadeStuffForAI : MonoBehaviour
 
             employee1 = stateItemCreator("employee", "organizationState", 1);
 
+            victim1 = stateItemCreator("victim", "target", 1);
+            victim1.locationType = "mobile";
+
         }
 
         //actions:
@@ -120,7 +123,7 @@ public class premadeStuffForAI : MonoBehaviour
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
             //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
             //seekVictim = actionCreator("seekVictim", "seek", createListOfStateItems(), createListOfStateItems(victim1), 1);
-            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", createListOfStateItems(), createListOfStateItems(money1, food1), 1);
+            pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", createListOfStateItems(), createListOfStateItems(money1, food1), 1, victim1);
         }
     }
 
@@ -354,6 +357,9 @@ public class stateItem
     public string name;
     public string stateCategory;
     public bool inStateOrNot;
+
+    //bit ad-hoc seeming:
+    public string locationType;
     //public int quantity;
     //public float coords[3];  //gotta fix this, should be vector?  WHAT IS THIS FOR???
     //public float valueEach;  //value for each item.  Needed for cost calcualtions.
