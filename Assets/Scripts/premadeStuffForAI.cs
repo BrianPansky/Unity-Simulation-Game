@@ -442,4 +442,10 @@ public class action
 
     public int cost;
 
+    //maybe have methods here???
+    //I can fill them in somehow???
+    public void doThisAction()
+    {
+
+    }
 }

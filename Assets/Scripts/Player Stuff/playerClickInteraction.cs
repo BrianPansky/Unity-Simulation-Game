@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class playerClickInteraction : MonoBehaviour
 {
@@ -11,8 +12,12 @@ public class playerClickInteraction : MonoBehaviour
 
     //plug-in menu objects:
     public GameObject recruitingMenu;
-    public GameObject recruitmentButton;
-    public GameObject buyFoodButton;
+
+    public GameObject myPrefabButton1;
+    public GameObject myGridCanvas;
+    public List<GameObject> currentGridButtons;
+
+
 
     public bool inMenu;
 
@@ -86,6 +91,7 @@ public class playerClickInteraction : MonoBehaviour
     public void doStuffAfterWorldClick(GameObject clickedOn)
     {
         
+
         //Debug.Log(clickedOn.name);
         if (clickedOn.name == "workPlace")
         {
@@ -106,6 +112,8 @@ public class playerClickInteraction : MonoBehaviour
             selectedNPC = GameObject.Find(clickedOn.name);
             //set the "inMenu" state to "true":
             inMenu = true;
+            
+
 
 
             //ad-hoc for now
@@ -124,17 +132,15 @@ public class playerClickInteraction : MonoBehaviour
                 //yes, they are a cashier
                 //enable the "buy food" button
                 Debug.Log("worker");
-                recruitmentButton.SetActive(false);
-                buyFoodButton.SetActive(true);
+                createStoreMenu();
 
             }
             else
             {
                 //this is a regular free-roaming NPC
                 //disable the "buy food" button
+                createRecruitmentButtonGrid();
                 Debug.Log("regular free-roaming NPC");
-                buyFoodButton.SetActive(false);
-                recruitmentButton.SetActive(true);
             }
 
             
@@ -158,6 +164,72 @@ public class playerClickInteraction : MonoBehaviour
         }
 
     }
+
+    
+
+    ///////////////////////////////////////////////////////////
+    //         Dynamic Menu Button Creation/Deletion
+    ///////////////////////////////////////////////////////////
+    
+    public void createRecruitmentButtonGrid()
+    {
+        //all buttons should be added to "currentGridButtons"
+        //so that they are easy to delete etc. later
+
+        //DYNAMICALLY CREATE RECRUIT BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject.GetComponentInChildren<Text>().text = "pickpocket";
+        myNewGameObject.transform.SetParent(myGridCanvas.transform);
+        myNewGameObject.GetComponent<Button>().onClick.AddListener(() => recruitButton());
+        
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject);
+
+        //DYNAMICALLY CREATE TEST BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject2 = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject2.GetComponentInChildren<Text>().text = "regular work";
+        myNewGameObject2.transform.SetParent(myGridCanvas.transform);
+        myNewGameObject2.GetComponent<Button>().onClick.AddListener(() => testButton());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject2);
+    }
+
+    public void createStoreMenu()
+    {
+        //all buttons should be added to "currentGridButtons"
+        //so that they are easy to delete etc. later
+
+        //DYNAMICALLY CREATE BUYFOOD BUTTON, AD-HOC FOR NOW
+        GameObject myNewGameObject = Instantiate(myPrefabButton1) as GameObject;
+        myNewGameObject.transform.SetParent(myGridCanvas.transform);
+
+        myNewGameObject.GetComponentInChildren<Text>().text = "buy food";
+        myNewGameObject.GetComponent<Button>().onClick.AddListener(() => tradeButton());
+
+        //add the button to a list, so I can elswhere delete it:
+        currentGridButtons.Add(myNewGameObject);
+    }
+
+    public void destroyObjectListItems(List<GameObject> theList)
+    {
+        //destroys each of the game objects that are on a particular list of GameObjects
+
+        foreach(GameObject thisObject in theList)
+        {
+            Destroy(thisObject);
+        }
+
+        //will still have some kind of empty itmes occupying space in the list, have to clear:
+        theList.Clear();
+        //unclear (no pun intended) whether any other junk data piles up elsewhere when running this, creating and deleting countless GameObjects...?
+    }
+
+
+
+    ///////////////////////////////////////////////////////////
+    //              Specific Button Functions
+    ///////////////////////////////////////////////////////////
 
     public void recruitButton()
     {
@@ -194,10 +266,13 @@ public class playerClickInteraction : MonoBehaviour
         recruitingMenu.SetActive(false);
         //de-select NPC:
         selectedNPC = null;
-        //set the "inMenu" state to "true":
+        //set the "inMenu" state to "false":
         inMenu = false;
+        //Destroy the generated buttons:
+        destroyObjectListItems(currentGridButtons);
+        //Debug.Log(currentGridButtons.Count);
 
-        
+
     }
 
     public void tradeButton()
@@ -209,9 +284,9 @@ public class playerClickInteraction : MonoBehaviour
         //check if I have money:
         bool haveMoney = false;
 
-        foreach(stateItem thisItem in theHub.state["inventory"])
+        foreach (stateItem thisItem in theHub.state["inventory"])
         {
-            if(thisItem.name == "money")
+            if (thisItem.name == "money")
             {
                 haveMoney = true;
                 break;
@@ -229,5 +304,27 @@ public class playerClickInteraction : MonoBehaviour
         }
 
     }
+
+    public void testButton()
+    {
+        Debug.Log("well, THIS button works");
+        //for now ad-hoc
+        //just making any NPC into a NON-pickpocket when you click on them
+        //give them the "workPLace" job instead
+        //like hiring them to work at the tall "workPlace"
+
+        //need their AI1 script:
+        AI1 hubScript = selectedNPC.GetComponent("AI1") as AI1;
+
+        //need the action to add:
+        premadeStuffForAI stateGrabber = GetComponent<premadeStuffForAI>();
+
+
+        //now add work action, remove pickpocket action:
+        hubScript.knownActions.Add(stateGrabber.doTheWork);
+        hubScript.knownActions.RemoveAll(y => y.name == "pickVictimsPocket");
+    }
+
+
 
 }
