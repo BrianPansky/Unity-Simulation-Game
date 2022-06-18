@@ -30,12 +30,15 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem profitMotive0 = new stateItem();
     public stateItem hungry0 = new stateItem();
 
+    //organizationState stuff:
+    public stateItem employee1 = new stateItem();
+
 
 
     ////////////////////////////////////////////////
     //               ACTIONS
     ////////////////////////////////////////////////
-    
+
     public action buyFood = new action();
     //public action sellFood = new action();
     public action doTheWork = new action();
@@ -49,8 +52,9 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action hireSomeone = new action();
     public action workAsCashier = new action();
-    
 
+    public action beBoss = new action();
+    
 
 
 
@@ -93,6 +97,8 @@ public class premadeStuffForAI : MonoBehaviour
             profitMotive0 = stateItemCreator("profitMotive", "feelings", 0);
             cashierZone1 = stateItemCreator("cashierZone", "locationState", 1);
 
+            employee1 = stateItemCreator("employee", "organizationState", 1);
+
         }
 
         //actions:
@@ -107,7 +113,9 @@ public class premadeStuffForAI : MonoBehaviour
 
             //sellFood = actionCreator("sellFood", "work", createListOfStateItems(food1), createListOfStateItems(money1, food0), 1, cashierZone1);
             workAsCashier = actionCreator("workAsCashier", "work", createListOfStateItems(), createListOfStateItems(money1), 1, cashierZone1);
-            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(), createListOfStateItems(profitMotive0), 1, cashierZone1);
+            hireSomeone = actionCreator("hireSomeone", "ad-hoc", createListOfStateItems(), createListOfStateItems(employee1), 1, cashierZone1);
+            beBoss = actionCreator("beBoss", "ad-hoc", createListOfStateItems(employee1), createListOfStateItems(profitMotive0), 1, home1);
+
             //pickpocket, under construction
             //findVictim = actionCreator("findVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
             //goToVictim = actionCreator("goToVictim", "ad-hoc", createListOfStateItems(), createListOfStateItems(money0, food1), 1);
@@ -121,84 +129,85 @@ public class premadeStuffForAI : MonoBehaviour
     ////////////////////////////////////////////////////
     //              Pre-Made NPC STATES
     ////////////////////////////////////////////////////
-
+    
     //regular default NPC:
     public Dictionary<string, List<stateItem>> createNPCstate1()
     {
-        Dictionary<string, List<stateItem>> state1 = new Dictionary<string, List<stateItem>>();
-        List<stateItem> feelings1 = new List<stateItem>();
-        List<stateItem> inventory1 = new List<stateItem>();
-        List<stateItem> locationState1 = new List<stateItem>();
+        Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        inventory1.Add(food1);
-        inventory1.Add(money1);
+        addToState(food1, state);
+        addToState(money1, state);
+        addToState(hungry0, state);
 
-        feelings1.Add(hungry0);
-
-        state1.Add("locationState", locationState1);
-        state1.Add("feelings", feelings1);
-        state1.Add("inventory", inventory1);
-
-
-        return state1;
+        return state;
     }
 
     //shopkeeper:
     public Dictionary<string, List<stateItem>> createShopkeeperState()
     {
-        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
-        List<stateItem> feelings2 = new List<stateItem>();
-        List<stateItem> inventory2 = new List<stateItem>();
-        List<stateItem> locationState2 = new List<stateItem>();
+        Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        inventory2.Add(food1);
-        //inventory2.Add();
+        addToState(food1, state);
+        addToState(profitMotive0, state);
 
-        feelings2.Add(profitMotive0);
-
-        state2.Add("locationState", locationState2);
-        state2.Add("feelings", feelings2);
-        state2.Add("inventory", inventory2);
-
-        return state2;
+        return state;
     }
 
     //pickpocket:
     public Dictionary<string, List<stateItem>> createPickpocketState()
     {
-        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
-        List<stateItem> feelings2 = new List<stateItem>();
-        List<stateItem> inventory2 = new List<stateItem>();
-        List<stateItem> locationState2 = new List<stateItem>();
+        Dictionary<string, List<stateItem>> state = createEmptyState();
 
-        
+        addToState(hungry0, state);
 
-        feelings2.Add(hungry0);
-
-        state2.Add("locationState", locationState2);
-        state2.Add("feelings", feelings2);
-        state2.Add("inventory", inventory2);
-
-        return state2;
+        return state;
     }
 
+    //player:
     public Dictionary<string, List<stateItem>> createPLAYERstate()
     {
-        Dictionary<string, List<stateItem>> state2 = new Dictionary<string, List<stateItem>>();
-        List<stateItem> feelings2 = new List<stateItem>();
-        List<stateItem> inventory2 = new List<stateItem>();
-        List<stateItem> locationState2 = new List<stateItem>();
+        Dictionary<string, List<stateItem>> state = createEmptyState();
 
-
-
-        feelings2.Add(hungry0);
-
-        state2.Add("locationState", locationState2);
-        state2.Add("feelings", feelings2);
-        state2.Add("inventory", inventory2);
-
-        return state2;
+        //addToState(hungry0, state);
+        
+        return state;
     }
+
+
+
+
+
+
+    //empty state, all others will call this first, then fill it
+    //could I just move this up to "start"?
+    //whatever, it seems more organized if it's here, 
+    //very little (if any) additional computation cost
+    public Dictionary<string, List<stateItem>> createEmptyState()
+    {
+        Dictionary<string, List<stateItem>> state = new Dictionary<string, List<stateItem>>();
+        List<stateItem> feelings = new List<stateItem>();
+        List<stateItem> inventory = new List<stateItem>();
+        List<stateItem> locationState = new List<stateItem>();
+        List<stateItem> organizationState = new List<stateItem>();
+
+        state.Add("locationState", locationState);
+        state.Add("feelings", feelings);
+        state.Add("inventory", inventory);
+        state.Add("organizationState", organizationState);
+
+        return state;
+    }
+
+    public Dictionary<string, List<stateItem>> addToState(stateItem item, Dictionary<string, List<stateItem>> state)
+    {
+        //simply adds item:
+        state[item.stateCategory].Add(item);
+
+        return state;
+    }
+
+
+
 
     ////////////////////////////////////////////////////
     //               NPC KNOWN ACTIONS
@@ -222,6 +231,7 @@ public class premadeStuffForAI : MonoBehaviour
     public List<action> createShopkeeperKnownActions()
     {
         knownActions.Add(hireSomeone);
+        knownActions.Add(beBoss); 
 
         //knownActions.Add(sellFood);
 

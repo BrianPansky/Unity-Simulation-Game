@@ -44,143 +44,139 @@ public class functionsForAI : MonoBehaviour
     //                  ACTIONS
     ////////////////////////////////////////////////
 
-
+    //handles the enactment of ALL actions:
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target)
     {
 
-        //handle actions with travel prereqs here:
+        //handle the travel prereqs here:
         if (nextAction.locationPrereq != null)
         {
-            //here we FIRST automatically try to fill all travel prereqs
+            //here we automatically try to fill all travel prereqs
 
             //I still currently use a "stateItem", but it could perhaps
             //be replaced with mere text?  The name of the location?
 
             travelToStateItem(nextAction.locationPrereq);
+        }
 
 
-            //NOW check if travel is DONE, if so, can perform THE REST of the action:
-            //(note this doesn't handle the "proximity" stuff that pickpocketing uses)
-            if (prereqAndLocationChecker(nextAction, state) == true)
+        //actions with ALL prereqs met (including location prereq) can proceed below:
+        if (whicheverPrereqChecker(nextAction, state) == true)
+        {
+            if (nextAction.type == "socialTrade")
             {
-                if (nextAction.type == "socialTrade")
+                //print(nextAction.name);
+                //GameObject theTarget = GameObject.Find("NPC shopkeeper");
+                //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
+                //print(theTargetState.state["locationState"][0].name);
+                GameObject customerLocation = getLocationObject(state["locationState"][0].name);
+
+                GameObject cashierMapZone = getCashierMapZone(customerLocation);
+                //print(casheirMapZone.name);
+
+                //print(locationRoot.name);
+
+                GameObject cashier = whoIsTrader(cashierMapZone);
+
+                //but that cashier variable might come back null (if no one is there), check:
+                if(cashier != null)
                 {
-                    //print(nextAction.name);
-                    //GameObject theTarget = GameObject.Find("NPC shopkeeper");
-                    //AI1 theTargetState = theTarget.GetComponent("AI1") as AI1;
-                    //print(theTargetState.state["locationState"][0].name);
-                    GameObject customerLocation = getLocationObject(state["locationState"][0].name);
-
-                    GameObject cashierMapZone = getCashierMapZone(customerLocation);
-                    //print(casheirMapZone.name);
-
-                    //print(locationRoot.name);
-
-                    GameObject cashier = whoIsTrader(cashierMapZone);
-
-
                     AI1 theTargetState = cashier.GetComponent("AI1") as AI1;
 
                     //now implement trade
                     //state["inventory"].Remove(nextAction.effects[0]);
                     trade(state["inventory"], theTargetState.state["inventory"], nextAction);
                 }
-                else if(nextAction.name == "hireSomeone")
-                {
-                    //ad-hoc for now
-
-                    //find someone (and NPC, for now) to hire,
-                    //then change their knownActions, remove "doTheWork", add "workAsCashier"
-
-                    //get the cashierLocation:
-                    GameObject cashierLocation = getLocationObject("cashierZone");
-
-                    //get the checkoutZone:
-                    GameObject checkoutZone = getCheckoutMapZone(cashierLocation);
-
-                    //check for an NPC customer in the checkoutZone:
-                    GameObject customer = checkForCustomer(checkoutZone);
-                    if (customer != null)
-                    {
-                        AI1 customerAI = getHubScriptFromGameObject(customer);
-                        employAsCashier(customerAI);
-
-                        //and ad hoc strike this action off the to-do list:
-                        thisAI.toDoList.RemoveAt(0);
-                    }
-
-
-                }
-                else
-                {
-                    //for actions like "eat" that currently just need a quick
-                    //ad-hoc update of state:
-                    state = implementALLEffectsForImagination(nextAction, state);
-                }
-
-            }
-
-        }
-
-
-        //handle actions WITHOUT travel prereqs below:
-        else if (nextAction.name == "pickVictimsPocket")
-        {
-            //ad hoc for now
-
-            
-            //if we have a target, use that one
-            //(so always blank out targets BEFORE this action happens, I guess)
-            if (target == null)
-            {
-                //print("uuuuuuuuuuuuuuuuuuuuuuhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-                target = whoToTarget();
-            }
-            GameObject victim;
-            victim = target;
-
-            //navigation
-            //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, thisAI.speed * Time.deltaTime);
-            Vector3 targetVector = victim.GetComponent<Transform>().position;
-            _navMeshAgent.SetDestination(targetVector);
-
-
-            //now check distance
-            //GameObject thePickpocket = GameObject.Find("NPC pickpocket");
-            GameObject thePickpocket = GameObject.Find(this.name);
-            float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
-            if (distance < 2.0f)
-            {
                 
-
-                //now do the pickpocketing
-                AI1 theTargetState = victim.GetComponent("AI1") as AI1;
-                steal(state["inventory"], theTargetState.state["inventory"], nextAction);
-
-
-                //ad-hoc action completion:
-                thisAI.toDoList.RemoveAt(0);
-                target = null;
-
-                //state = implementALLEffectsForImagination(nextAction, state);
             }
+            else if (nextAction.name == "hireSomeone")
+            {
+                //ad-hoc for now
+
+                //find someone (and NPC, for now) to hire,
+                //then change their knownActions, remove "doTheWork", add "workAsCashier"
+
+                //get the cashierLocation:
+                GameObject cashierLocation = getLocationObject("cashierZone");
+
+                //get the checkoutZone:
+                GameObject checkoutZone = getCheckoutMapZone(cashierLocation);
+
+                //check for an NPC customer in the checkoutZone:
+                GameObject customer = checkForCustomer(checkoutZone);
+                if (customer != null)
+                {
+                    changeRoles(customer, premadeStuff.workAsCashier, premadeStuff.doTheWork);
+
+                    //and ad hoc strike this action off the to-do list:
+                    thisAI.toDoList.RemoveAt(0);
+
+                    //also, to easily put the "employee1" stateItem in the organizationState:
+                    state = implementALLEffects(nextAction, state);
+                }
 
 
-            //print(target.name);
+            }
+            else if (nextAction.name == "pickVictimsPocket")
+            {
+                //ad hoc for now
+
+
+                //if we have a target, use that one
+                //(so always blank out targets BEFORE this action happens, I guess)
+                if (target == null)
+                {
+                    //print("uuuuuuuuuuuuuuuuuuuuuuhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+                    target = whoToTarget();
+                }
+                GameObject victim;
+                victim = target;
+
+                //navigation
+                //transform.position = Vector3.MoveTowards(transform.position, t1.GetComponent<Transform>().position, thisAI.speed * Time.deltaTime);
+                Vector3 targetVector = victim.GetComponent<Transform>().position;
+                _navMeshAgent.SetDestination(targetVector);
+
+
+                //now check distance
+                //GameObject thePickpocket = GameObject.Find("NPC pickpocket");
+                GameObject thePickpocket = GameObject.Find(this.name);
+                float distance = Vector3.Distance(thePickpocket.transform.position, victim.transform.position);
+                if (distance < 2.0f)
+                {
+
+
+                    //now do the pickpocketing
+                    AI1 theTargetState = victim.GetComponent("AI1") as AI1;
+                    steal(state["inventory"], theTargetState.state["inventory"], nextAction);
+
+
+                    //ad-hoc action completion:
+                    thisAI.toDoList.RemoveAt(0);
+                    target = null;
+
+                    //state = implementALLEffects(nextAction, state);
+                }
+
+
+                //print(target.name);
+            }
+            else
+            {
+                //for actions like "eat" that currently just need a quick
+                //ad-hoc update of state:
+                state = implementALLEffects(nextAction, state);
+            }
         }
-
-        else if (prereqChecker(nextAction, state) == true)
-        {
-            //Debug.Log("cccccccccccccccccccccc");
-            //printState(state);
-            state = implementALLEffectsForImagination(nextAction, state);
-            //printState(state);
-        }
+        
 
         //ad hoc for now:
-
         return target;
     }
+
+
+    //..................................................................
+    //functions to handle important finishing steps of specific actions:
 
     public void trade(List<stateItem> actionerInventory, List<stateItem> inventory2, action nextAction)
     {
@@ -253,20 +249,46 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
-    public void employAsCashier(AI1 NPC)
+    public void addKnownActionToGameObject(GameObject agent, action theAction)
     {
-        //print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //first, go from "GameObject" to it's script that has knownActions:
+        AI1 hubScript = getHubScriptFromGameObject(agent);
 
-        //ad-hoc for now
+        //now add the knownAction:
+        hubScript.knownActions.Add(theAction);
+    }
 
-        //give the NPC the employment knownActions, and REMOVE their other work action:
-        NPC.knownActions.Add(premadeStuff.workAsCashier);
-        //NPC.knownActions.Remove(premadeStuff.doTheWork);
-        NPC.knownActions.RemoveAll(y => y.name == "doTheWork");
+    public void removeKnownActionFromGameObject(GameObject agent, action theAction)
+    {
+        //first, go from "GameObject" to it's script that has knownActions:
+        AI1 hubScript = getHubScriptFromGameObject(agent);
 
+        //now add the knownAction:
+        hubScript.knownActions.RemoveAll(y => y.name == theAction.name);
+    }
+
+    public void changeRoles(GameObject agent, action roleToAdd, action roleToRemove)
+    {
+        //maybe in future the inputs can be some role class object
+        //for now, it's just a quick way to add one action and remove another
+
+        addKnownActionToGameObject(agent, roleToAdd);
+        removeKnownActionFromGameObject(agent, roleToRemove);
 
     }
-    //public void steal()
+
+    public void travelToStateItem(stateItem X)
+    {
+
+        string name1 = X.name;
+        t1 = GameObject.Find(name1);
+
+        Vector3 targetVector = t1.GetComponent<Transform>().position;
+        _navMeshAgent.SetDestination(targetVector);
+    }
+
+    //..................................................................
+
 
 
     ////////////////////////////////////////////////
@@ -345,11 +367,16 @@ public class functionsForAI : MonoBehaviour
         //return that item
 
         GameObject cashier;
+        cashier = null;
 
         listOfTouchingNPCs listOfNPCs = cashierZone.GetComponent<listOfTouchingNPCs>();
 
-        //(I might want to check to make sure the list isn't empty here first though tsometime...)
-        cashier = listOfNPCs.theList[0];
+        //check to make sure the list isn't empty:
+        if (listOfNPCs.theList.Count > 0)
+        {
+            cashier = listOfNPCs.theList[0];
+        }
+        
 
         return cashier;
 
@@ -426,16 +453,6 @@ public class functionsForAI : MonoBehaviour
         
 
         return thisNPC;
-    }
-
-    public void travelToStateItem(stateItem X)
-    {
-        
-        string name1 = X.name;
-        t1 = GameObject.Find(name1);
-        
-        Vector3 targetVector = t1.GetComponent<Transform>().position;
-        _navMeshAgent.SetDestination(targetVector);
     }
 
     public AI1 getHubScriptFromGameObject(GameObject NPC)
@@ -916,7 +933,7 @@ public class functionsForAI : MonoBehaviour
         //since location is now a separate prereq, and is not always checked,
         //this funciton checks both regular prereqs AND the location one
 
-        //first, jus tcheck the regular prereqs using my regular prereqChecker:
+        //first, just check the regular prereqs using my regular prereqChecker:
         if (prereqChecker(thisAction, state) == false)
         {
             return false;
@@ -937,6 +954,32 @@ public class functionsForAI : MonoBehaviour
             print("hmm, the locationPrereq is null, but it's being checked, is that an error?");
         }
 
+        //if the above didn't fail, return true:
+        return true;
+
+    }
+
+    public bool whicheverPrereqChecker(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //this funciton checks whatever prereqs an action has
+        //doesn't matter if the action has a locationPrereq or not
+        //it can handle both types of action
+
+        //first, just check the regular prereqs using my regular prereqChecker:
+        if (prereqChecker(thisAction, state) == false)
+        {
+            return false;
+        }
+
+        //now, check the location Prereq, IF THERE IS ONE:
+        if (thisAction.locationPrereq != null)
+        {
+            if (isGoalAccomplished(thisAction.locationPrereq, state) == false)
+            {
+                return false;
+            }
+        }
+        
         //if the above didn't fail, return true:
         return true;
 
@@ -985,7 +1028,7 @@ public class functionsForAI : MonoBehaviour
         return state;
     }
 
-    public Dictionary<string, List<stateItem>> implementALLEffectsForImagination(action currentAction, Dictionary<string, List<stateItem>> imaginaryState)
+    public Dictionary<string, List<stateItem>> implementALLEffects(action currentAction, Dictionary<string, List<stateItem>> imaginaryState)
     {
         foreach (stateItem eachEffect in currentAction.effects)
         {
@@ -1072,7 +1115,7 @@ public class functionsForAI : MonoBehaviour
                     }
                 }
 
-                imaginaryState = implementALLEffectsForImagination(currentAction, imaginaryState);
+                imaginaryState = implementALLEffects(currentAction, imaginaryState);
                 counter += 1;
             }
 
@@ -1109,7 +1152,7 @@ public class functionsForAI : MonoBehaviour
                 return counter;
             }
 
-            imaginaryState = implementALLEffectsForImagination(currentAction, imaginaryState);
+            imaginaryState = implementALLEffects(currentAction, imaginaryState);
             counter += 1;
         }
 
