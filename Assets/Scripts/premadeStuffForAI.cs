@@ -269,7 +269,7 @@ public class premadeStuffForAI : MonoBehaviour
         //jobs:
         {
             //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
-            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 300, 0, 1);
+            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 1000, 0, 1);
             resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
             
             
@@ -338,6 +338,7 @@ public class premadeStuffForAI : MonoBehaviour
         Dictionary<string, List<stateItem>> state = createEmptyState();
         
         theFunctions.incrementItem(state["inventory"], money, 72);
+        theFunctions.incrementItem(state["inventory"], food, 72);
 
         return state;
     }

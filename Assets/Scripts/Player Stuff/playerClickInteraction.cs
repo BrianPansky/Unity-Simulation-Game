@@ -734,6 +734,58 @@ public class playerClickInteraction : MonoBehaviour
         //this is just for food?? need to make less ad-hoc
 
 
+        //GameObject customerLocation = target;
+        
+        //print("target name is:::::::::::::::::::::::::::::");
+        //print(target.name);
+
+        //GameObject cashierMapZone = getCashierMapZone(customerLocation);
+
+        //GameObject cashier = whoIsTrader(cashierMapZone);
+
+
+
+        //ad-hoc update of state:
+        //state = implementALLEffects(nextAction, state);
+
+        AI1 theHubOfNPC = selectedNPC.GetComponent("AI1") as AI1;
+        //print("location:========================================");
+        //print(theHubOfNPC.currentJob.roleLocation.name);  //gives name of whole/base/parent part of store
+        //SO,theFunctions.getShopInventory(theFunctions.getCashierMapZoneOfStore(theHubOfNPC.currentJob.roleLocation));
+
+        GameObject shopInventory = theFunctions.getShopInventory(theFunctions.getCashierMapZoneOfStore(theHubOfNPC.currentJob.roleLocation));
+
+
+        //very ad-hoc
+        //I should instead be generataing these "buy" buttons at the store based on some INVENTORY that the store HAS.
+
+        //WHY AM I CREATING A STATEITEM FROM SCRATCH??
+        //oh well, at elast it's not shallow copied???
+        stateItem food1;
+        food1 = premadeStuff.stateItemCreator("food", "inventory");
+
+        //actionItem fooood;
+        //fooood = premadeStuff.convertToActionItem(food1, 1);
+
+        action buyFoooooood;
+        buyFoooooood = premadeStuff.actionCreator("buyFood", "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.deepStateItemCopier(premadeStuff.money)), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(premadeStuff.deepStateItemCopier(food1)), premadeStuff.UNwantedEffectsLister(premadeStuff.deepStateItemCopier(premadeStuff.money)), 1, premadeStuff.checkout);
+
+
+
+        //lol
+        if (theFunctions.TRYincremintInventoriesOfThisAndTargetFromEffects(shopInventory, buyFoooooood))
+        {
+            print("purchased food");
+
+        }
+        else
+        {
+            //lol
+            Debug.Log("can't buy!");
+        }
+
+
+        /*
         //oh right, don't want to do this for now, don't want to put anything into cashier's inventory...
         //theFunctions.trade(theHub.state["inventory"], inventory2, premadeStuff.buyFood);
 
@@ -772,6 +824,8 @@ public class playerClickInteraction : MonoBehaviour
         {
             Debug.Log("no money!");
         }
+
+        */
 
     }
 

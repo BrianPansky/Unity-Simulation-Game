@@ -250,6 +250,10 @@ GameObject:
   - component: {fileID: 6396609487873966982}
   - component: {fileID: 6396609487873966981}
   - component: {fileID: 6396609487873966976}
+  - component: {fileID: 8821572172471830828}
+  - component: {fileID: 5104974037104700857}
+  - component: {fileID: 8929584233736456500}
+  - component: {fileID: 3532690907872922197}
   m_Layer: 9
   m_Name: checkoutCounter
   m_TagString: Untagged
@@ -348,6 +352,79 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!114 &8821572172471830828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396609487873967003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c64c7d0e81b470c40ad75f58cb11f2b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  roleLocation: {fileID: 0}
+  homeLocation: {fileID: 0}
+  leader: {fileID: 0}
+  jobSeeking: 0
+  inConversation: 0
+  clearanceLevel: 0
+  theFunctions: {fileID: 0}
+  thisIsTaggedWith: {fileID: 0}
+  ignore: 1
+  goalWait: 0
+--- !u!114 &5104974037104700857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396609487873967003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeaedef2de2a8cb4fa56698e39af8546, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _destination: {fileID: 0}
+  _navMeshAgent: {fileID: 0}
+  storePrefab: {fileID: 6396609487247316962}
+  stopwatch: 0
+  effectivenessTimer: 0
+  workerCount: 0
+  listOfCashiers: []
+  thisAI: {fileID: 0}
+  premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
+  testTime: 0
+--- !u!114 &8929584233736456500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396609487873967003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f30aba113307f604ca755f01fa1f7245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stateGrabber: {fileID: 0}
+  theHub: {fileID: 0}
+--- !u!114 &3532690907872922197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396609487873967003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  theFunctions: {fileID: 0}
 --- !u!1 &6396609488209690021
 GameObject:
   m_ObjectHideFlags: 0

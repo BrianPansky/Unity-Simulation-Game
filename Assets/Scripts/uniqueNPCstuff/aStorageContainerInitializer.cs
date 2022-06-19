@@ -22,7 +22,6 @@ public class aStorageContainerInitializer : MonoBehaviour
 
         //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.hungry), 0);
         //theHub.recurringGoal = goalActionItem;
-
         //theHub.state = stateGrabber.createEmptyState();
         theHub.state = stateGrabber.createMoneyStockpileState();
 

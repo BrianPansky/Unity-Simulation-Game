@@ -219,15 +219,33 @@ public class functionsForAI : MonoBehaviour
 
                 GameObject cashier = whoIsTrader(cashierMapZone);
 
+                
+
                 //but that cashier variable might come back null (if no one is there), check:
                 if (cashier != null)
                 {
 
                     //ad-hoc update of state:
-                    state = implementALLEffects(nextAction, state);
+                    //state = implementALLEffects(nextAction, state);
+
+                    GameObject shopInventory = getShopInventory(cashierMapZone);
+
+
+                    //lol
+                    if(TRYincremintInventoriesOfThisAndTargetFromEffects(shopInventory, nextAction))
+                    {
+                        target = dumpAction(target);
+
+                    }
+                    else
+                    {
+                        //lol
+                        target = dumpAction(target);
+                    }
+                    
 
                     //thisAI.toDoList.RemoveAt(0);
-                    target = dumpAction(target);
+                    
 
                     //alert();
                     //print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
@@ -991,7 +1009,7 @@ public class functionsForAI : MonoBehaviour
         //requires "state" of current person, but that's accounted for at start of this script, i think?
         //well, start gives us "thisAI", i can use that...
         AI1 theTargetState = theTargetPerson.GetComponent("AI1") as AI1;
-
+        
         incrementTwoInventoriesFromActionEffects(thisAI.state["inventory"], theTargetState.state["inventory"], theAction);
 
     }
@@ -1040,6 +1058,9 @@ public class functionsForAI : MonoBehaviour
             //just deep copy the effects list so i can use them without messing anything up:
             //deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
 
+            //bool to return if inventories don't have proper contents [assuming effects mean SWAP, any listed effect comes OUT of ONE inventory]:
+            bool found = false;
+
             //first, determine whose inventory to VERIFY the contents of, based on bool, and the assumptions listed at start of funciton:
             if (effect.inStateOrNot == false)
             {
@@ -1053,6 +1074,8 @@ public class functionsForAI : MonoBehaviour
                         //need to deep copy this one so we don't modify stuff in "knownActions":
                         //otherInventoryReceives.Add(deepStateItemCopier(effect.item));
                         deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+                        found = true;
                     }
                 }
             }
@@ -1067,10 +1090,18 @@ public class functionsForAI : MonoBehaviour
                         //otherInventoryLoses.Add(itemInInventory2);
                         deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
 
+                        found = true;
                     }
 
                 }
 
+            }
+
+            if(found == false)
+            {
+                //means one item is not found, so no swap can take place,!
+
+                return false;
             }
         }
 
@@ -1932,6 +1963,14 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public GameObject getShopInventory(GameObject cashierMapZone)
+    {
+        //FROM CASHIER MAP ZONE
+        //YOU CAN USE getCashierMapZoneOfStore TO GET IT FROM STORE
+        //For now, just getting the cashier inventory by grabbing the parent object of the cashier map Zone. 
+
+        return cashierMapZone.transform.parent.gameObject.transform.parent.gameObject;
+    }
 
 
     //re-used bits for getting locations
