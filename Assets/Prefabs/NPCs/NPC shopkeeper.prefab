@@ -149,6 +149,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
   _navMeshAgent: {fileID: 0}
+  storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
+    type: 3}
   stopwatch: 0
   effectivenessTimer: 0
   workerCount: 0
@@ -215,6 +217,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6953b2bcb18ab64baa17503ca0ad7d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  politicalSide: 0
+  defaultTrust: 0
+  theFunctions: {fileID: 0}
+  theHub: {fileID: 0}
 --- !u!1001 &5152848537423361885
 PrefabInstance:
   m_ObjectHideFlags: 0

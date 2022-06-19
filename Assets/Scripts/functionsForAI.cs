@@ -237,6 +237,19 @@ public class functionsForAI : MonoBehaviour
                 testSwitch();
 
             }
+            else if (nextAction.name == "hireResourceGatherer")
+            {
+                if (hiring(target, premadeStuff.resource1GatheringJob, "storage"))
+                {
+                    Debug.Log("hired..........");
+                }
+                else
+                {
+                    Debug.Log("FAILED TO HIRE");
+                }
+
+                target = dumpAction(target);
+            }
             else if (nextAction.name == "resource1Dropoff")
             {
 
@@ -1162,6 +1175,7 @@ public class functionsForAI : MonoBehaviour
             {
                 print(roleLocation);
                 targetAI.jobSeeking = false;
+                targetAI.leader = this.gameObject;
 
                 //Increase the "clearance level" of the worker:
                 //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
@@ -1394,7 +1408,7 @@ public class functionsForAI : MonoBehaviour
 
             if(criteria.name == "storagePlace")
             {
-                target = GameObject.Find("storage");
+                target = randomTaggedWithMultiple("storage", thisLeadersOwnerTag());
             }
             else
             {
@@ -1686,6 +1700,12 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public string gangTag(GameObject leader)
+    {
+        string theGangTag = leader.name + "sGang";
+        return theGangTag;
+    }
+
     public bool isThisMyLeader(GameObject maybeLeader)
     {
         //check if FOLLOWER ["me"] has faction tag of this talked-to NPC i think...
@@ -1759,10 +1779,15 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public string gangTag(GameObject leader)
+    public string thisLeadersOwnerTag()
     {
-        string theGangTag = leader.name + "sGang";
-        return theGangTag;
+        return leadersOwnerTag(thisAI.leader);
+    }
+
+
+    public string leadersOwnerTag(GameObject leader)
+    {
+        return "owned by " + leader.name;
     }
 
 
