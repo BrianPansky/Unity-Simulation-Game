@@ -129,10 +129,10 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
-        npcx = "NPC pickpocket";
+        npcx = "NPC";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = true;
+        masterPrintControl = false;
 
 
         //i think this should work?
@@ -150,11 +150,14 @@ public class AI1 : MonoBehaviour
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
         {
+            
             //now handle the checking stuff.  like checking to pay PLAYER for work shift.  just JOB stuff for now i guess:
             checkJobs();
 
             if (inConversation == false)
             {
+
+                theFunctions.print("TESTTTTTTTTTTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!");
 
                 //get NPC moving again if it was stopped by conversation:
                 getGoingAgan();
@@ -170,20 +173,28 @@ public class AI1 : MonoBehaviour
                 //remove all plans that contain "ineffective actions":
                 removeIneffectiveActions();
 
+                theFunctions.print("TESTTTTTTTTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!");
+
                 if (inputtedToDoList.Count > 0)
                 {
-                    //theFunctions.print("is it this????????????????????????????");
                     //for now, do orders/favors and such first
-                    planList = theFunctions.prereqFiller(inputtedToDoList[0], knownActions, state);
+                    theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
 
-                    //....remove that action from "inputtedToDoList"?  I geuss for now
-                    //but eventually want to keep it remembered UNTIL it is completed or cancelled
-                    //but right now it isn't guaranteed that one of those outcomes will occurr
-                    inputtedToDoList.RemoveAt(0);
+                    //NEED TO BLANK TARGET!
+                    target = null;
+
+                    getPlanToObeyOrders();
+
+                    //printPlanList(planList);
+
+                    //now, pick top-ranked plan (if there are any)
+                    makeFirstPlanTheToDoList();
+
+                    //printToDoList(toDoList);
                 }
                 else if (toDoList.Count == 0)
                 {
-                    
+                    theFunctions.print("TESTTTTTTTTTT!!!!!!55555555555555555555555555555555555555555!!!");
                     //so we need a plan:
                     getPlan();
 
@@ -201,26 +212,41 @@ public class AI1 : MonoBehaviour
                         //theFunctions.printState(state);
 
                     }
-                    //printPlanListForSpecificNPC();
+                    printPlanListForSpecificNPC();
                     //printToDoListForSpecificNPC();
+
+
+                    //now, pick top-ranked plan (if there are any)
+                    makeFirstPlanTheToDoList();
+
+                    printToDoList(toDoList);
+
                 }
 
-                
+                //printToDoList(toDoList);
+
 
                 //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
-                handleAnyNextAction();
-                
-                
 
+                theFunctions.print("TESTTTTTTTTTT before handle action");
+                handleAnyNextAction();
+
+
+                theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
+                masterPrintControl = false;
             }
             else
             {
                 //this "else" means we are in conversation, need to stop:
                 theFunctions._navMeshAgent.isStopped = true;
                 //UnityEngine.AI.NavMeshAgent.Stop();
+                
 
             }
+
+            //theFunctions.print("TESTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            //masterPrintControl = false;
         }
         
 
@@ -394,8 +420,8 @@ public class AI1 : MonoBehaviour
             }
             */
 
-            //theFunctions.print("says this plan is imposible:");
-            //theFunctions.printPlan(toDoList);
+            theFunctions.print("says this plan is imposible:");
+            theFunctions.printPlan(toDoList);
             toDoList.RemoveRange(0, toDoList.Count);
             target = null;
             
@@ -434,10 +460,11 @@ public class AI1 : MonoBehaviour
             printPlanListForSpecificNPC();
             //theFunctions.printState(state);
             //sometimes at this moment, there are zero plans?  but not always?
+            masterPrintControl = false;
 
             //masterPrintControl = true;
             //printPlanListForSpecificNPC();
-            masterPrintControl = false;
+            //masterPrintControl = false;
 
             planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, planningState, 20);
 
@@ -451,12 +478,41 @@ public class AI1 : MonoBehaviour
             clearIneffectiveActions();
             //printPlanListForSpecificNPC();
 
+            //why is this HERE??!?!?!?
             atWork = false;
 
         }
-
+        else
+        {
+            theFunctions.print("so, no to-do-list for some reason, but nonzero planlist");
+        }
         
-        //now, pick top-ranked plan (if there are any)
+
+    }
+
+    public void getPlanToObeyOrders()
+    {
+
+
+        //theFunctions.print("is it this????????????????????????????");
+
+        List<List<action>> newPlanList1 = new List<List<action>>();
+
+        //should really check if output is null?  or does it do something else if it fails?  give blank?
+        planList = theFunctions.simulateOnePlanFillPrereqs(inputtedToDoList, knownActions, planningState, 200);
+        
+
+
+        //....remove that action from "inputtedToDoList"?  I geuss for now
+        //but eventually want to keep it remembered UNTIL it is completed or cancelled
+        //but right now it isn't guaranteed that one of those outcomes will occurr
+        inputtedToDoList.RemoveAt(0);
+        //print("so, this is broken???");
+        //printPlanList(planList);
+    }
+
+    public void makeFirstPlanTheToDoList()
+    {
         if (planList != null && planList.Count > 0)
         {
             //now to rank the plans by cost:
@@ -468,21 +524,15 @@ public class AI1 : MonoBehaviour
             planList = theFunctions.planRanker(planList);
 
 
-            /*
-            if (this.name == npcx)
-            {
-                theFunctions.print("this planList");
-                printPlanListForSpecificNPC();
-            }
-            */
+            theFunctions.print("this planList");
+            printPlanListForSpecificNPC();
 
             //choose first one:
             toDoList = deepCopyFirstPlan(planList);
             //and REMOVE that first one from the planList:
             planList.RemoveAt(0);
-            
-        }
 
+        }
     }
 
     public void handleAnyNextAction()

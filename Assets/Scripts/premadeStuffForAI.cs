@@ -275,8 +275,8 @@ public class premadeStuffForAI : MonoBehaviour
             buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
 
             //need target/location??
-            handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1);
-            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4);
+            handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1, workPlace);
+            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4, workPlace);
             
             pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food, resource1), UNwantedEffectsLister(), 1, victim);
             
@@ -307,8 +307,10 @@ public class premadeStuffForAI : MonoBehaviour
 
         //jobs:
         {
+
             //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
-            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 1000, 0, 1);
+            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild, handleSecurityEscalationOne), 10, 0, 1);
+            //cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 10, 0, 1);
             resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
             
             
@@ -451,7 +453,7 @@ public class premadeStuffForAI : MonoBehaviour
         List<action> newList = new List<action>();
 
 
-        //newList.Add(gatherResource1);
+        newList.Add(gatherResource1);
         //newList.Add(resource1Dropoff);
 
 

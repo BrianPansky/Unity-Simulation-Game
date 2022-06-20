@@ -96,7 +96,7 @@ public class functionsForAI : MonoBehaviour
             }
         }
 
-
+        
 
 
         /*
@@ -194,15 +194,6 @@ public class functionsForAI : MonoBehaviour
 
 
 
-
-        if (nextAction.name == "orderAttack")
-        {
-            thisAI.masterPrintControl = true;
-            print("??????????????????????????????????");
-            thisAI.masterPrintControl = false;
-        }
-        
-
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
         {
@@ -295,9 +286,7 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "orderAttack")
             {
 
-                thisAI.masterPrintControl = true;
-                print("aha, yes");
-                thisAI.masterPrintControl = false;
+                target = dumpAction(target);
             }
             else if (nextAction.name == "hireResourceGatherer")
             {
@@ -401,6 +390,23 @@ public class functionsForAI : MonoBehaviour
                 //print("===============================surely here START=============================");
                 //printState(state);
                 //printKnownActionsDeeply(thisAI.knownActions);
+                if(state["inventory"] == null)
+                {
+                    print("state inv = null");
+                }
+                if (theTargetState == null)
+                {
+                    print("theTargetState hub = null");
+                    print(target.gameObject.name);
+                }
+                if (theTargetState.state["inventory"] == null)
+                {
+                    print("target inv = null");
+                }
+                if (nextAction == null)
+                {
+                    print("state inv = null");
+                }
 
                 incrementTwoInventoriesFromActionEffects(state["inventory"], theTargetState.state["inventory"], nextAction);
 
@@ -526,6 +532,9 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "workAsCashier")
             {
+                //THIS HAS BEEN MOVED TO:  "jobCheckFunction"
+
+
 
                 /*
 
@@ -633,6 +642,8 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "handleSecurityMild")
             {
+                thisAI.masterPrintControl = true;
+
                 //print("yoooooooo");
                 if (effectivenessTimer == 0)
                 {
@@ -664,6 +675,9 @@ public class functionsForAI : MonoBehaviour
 
                     effectivenessTimer = 0;
                 }
+
+                
+                thisAI.masterPrintControl = false;
             }
             else if (nextAction.name == "handleSecurityEscalationOne")
             {
@@ -787,11 +801,13 @@ public class functionsForAI : MonoBehaviour
                             //target = dumpAction(target);
                             if(thisAI.target != null)
                             {
+                                //printAlways("dddddddddddddddddddddddddddddddddddddddddddddd");
                                 thisAI.target = dumpAction(thisAI.target);
                             }
                             stopwatch = 0;
 
                             //ya this doesn't work because my check in AI1 still sees ...prereqs are done?
+                            //printAlways("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
                             //print("ggggggggggggggggggggggggggggggggggggggggggggggggggggg");
                         }
                     }
@@ -1505,7 +1521,7 @@ public class functionsForAI : MonoBehaviour
 
         //get inventory of container
         //get factionState inventory
-        //....dep copy contents of container?
+        //....deep copy contents of container?
         //paste into faction....
 
 
@@ -2967,11 +2983,18 @@ public class functionsForAI : MonoBehaviour
             //[what if a goal involves more than one quantity?  is that ever possible?  ex:  need both apples AND oranges?  dunno...]
             //[both of these modified versions must be DEEP COPIES]
 
-            
 
 
 
+            print("/////////////////////////////////////////////////////////////////////");
+            print("/////////////////////////////////////////////////////////////////////");
+            print("/////////////////////////////////////////////////////////////////////");
+            print("/////////////////////// STARTING INVESTIGATION ///////////////////////");
+            print("/////////////////////////////////////////////////////////////////////");
+            print("/////////////////////////////////////////////////////////////////////");
+            print("/////////////////////////////////////////////////////////////////////");
 
+            //printState(state);
 
             //so, first find how much of the desired quantity is in "state"
             //only do deep copies etc. if it is greater than zero.
@@ -2988,7 +3011,21 @@ public class functionsForAI : MonoBehaviour
 
             //wait i'm gonna do all that in the function:
 
-            return problemSolver(goal2, knownActions, state2);
+
+            List<List<action>> planList = new List<List<action>>();
+            planList = problemSolver(goal2, knownActions, state2);
+
+            if (planList == null)
+            {
+                //maybe should return null, but for now, imagination step (after this) works fine with returning blanks, i think.  
+                //so just return a blank
+                List<List<action>> blank = new List<List<action>>();
+                return blank;
+            }
+            else
+            {
+                return planList;
+            }
         }
         else
         {
@@ -3012,8 +3049,12 @@ public class functionsForAI : MonoBehaviour
         
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
+        //one list for each of phases 2 and 3.  then stitch together into final list later.
+        //should initialize as null for my failure handling system???
         List<List<action>> planList = new List<List<action>>();
-        
+        List<List<action>> prereqsPlanList = new List<List<action>>();
+        List<List<action>> quantsPlanList = new List<List<action>>();
+
         //eventually needs to be an action LIST:
         List<action> actionOptions = new List<action>();
         //for now, ad-hoc, need an action
@@ -3036,28 +3077,45 @@ public class functionsForAI : MonoBehaviour
         //first phase, find an action:
         //[currently only finds first useful action?  not ALL useful actions?]
         newAction = actionFindingPhase(goal, knownActions, state);
-
-
-        //so if we have an action, we can do 2nd phase:  quantities:
-        if (newAction != null)
+        //return null if previous phase failed:
+        if (newAction == null)
         {
-            planList = quantitiesPhase(newAction, goal, knownActions, state);
+            return null;
         }
 
-
-
-        //so quantities should be handled, now for final step [prereqs]
-        //should make sure it's not empty??? [only if quantity step was done.  otherwise, will ALWAYS be zero]
-        //if (planList.Count > 0)
-        //or do we sometimes have empty plan list because this is the end, just one action is needed?
-        //NOTE WE MAY ALREADY HAVE A PLANLIST FROM QUANTITIES PHASE, HENCE WE NEED TO INPUT IT HERE
-        if (newAction != null)
-        {
-            planList = thePrereqPhase(newAction, knownActions, state, planList);
-        }
-            
-
+        //print("before 2nd phase, prereqs:");
         //printPlanList(planList);
+        //print(actionToTextDeep(newAction));
+
+        //so if we have an action, we can do 2nd phase:  prereqs:
+        prereqsPlanList = thePrereqPhase(newAction, knownActions, state, prereqsPlanList); 
+        //return null if previous phase failed:
+        if (prereqsPlanList == null)
+        {
+            return null;
+        }
+
+        //print("AFTER 2nd phase, prereqs, and BEFORE 3rd phase, quantities:");
+        //printPlanList(prereqsPlanList);
+
+
+        //so prereqs should be handled, now for 3rd step [quantities]
+        quantsPlanList = quantitiesPhase(newAction, goal, knownActions, state);
+        //return null if previous phase failed:
+        if (quantsPlanList == null)
+        {
+            return null;
+        }
+
+
+
+        //print("AFTER 3rd phase, quantities:");
+        //printPlanList(quantsPlanList);
+
+        //so, now 4th phase, MERGING
+        planList = mergingPhase(newAction, planList, prereqsPlanList, quantsPlanList);
+        
+        //should be no way for 4th phase to fail.
 
         return planList;
     }
@@ -3084,6 +3142,8 @@ public class functionsForAI : MonoBehaviour
             //so here we can generate a "buy" or "steal" or whatever type of action to fill that
 
             newAction = generateActionOnTheFly(goal, knownActions, state);
+
+            //print(actionToTextDeep(newAction));
 
             //BUT NEED TO DEEP COPY NEW ACTION BEFORE FEEDING IT IN???  BECAUSE OF STATE ZEROING???
             //AND WAHT ABOUT THE WAY IT MODIFIES STATE AS WELL?  DOES THAT NEED TO BE DEEP COPIED OR
@@ -3116,7 +3176,7 @@ public class functionsForAI : MonoBehaviour
                         //what if we can't fill the prereqs??????????
                         newAction = thisAction;
 
-
+                        //print(actionToTextDeep(newAction));
 
                     }
                     else
@@ -3142,6 +3202,17 @@ public class functionsForAI : MonoBehaviour
 
     public List<List<action>> quantitiesPhase(action newAction, actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
+        //should return a plan to fill the LEFTOVER quantities.
+        //in other words, this plan, combined with the newAction, will together 
+        //fulfill the quantity requirement
+        //the plan will be complete [including all prereqs it needs for its own completion]
+        //but this plan will not fill the prereqs for the newAction, that is done in a separate phase
+        //and the newAction will not be on the plan.
+        //thus, this phase really does only take care of the "leftover" quantities
+
+        //what if plan is NEEDED, but no plan can be found?  should really signal to the problemSolver function that 
+        //entire planning needs to be scrapped? probably, eventually...
+
 
         //should feed empty one in???
         List<List<action>> planList = new List<List<action>>();
@@ -3166,10 +3237,12 @@ public class functionsForAI : MonoBehaviour
             }
         }
 
+        //printState(state);
+
         //so now we have an action
         //handle quantities here???  but kinda tangled with needing to also fill prereqs...
         quant = quantityToReach(goal, newAction);
-        //print(newAction.name + " " + goal.name + " " + quant);
+        print(newAction.name + " " + goal.name + " " + quant);
 
         //set the quant check to be >1, instead of >0 [seems wrong though][see journal]
         //AHAH! quantityToReach SHOULD TAKE STATE INTO ACCOUNT!  DUH!
@@ -3184,13 +3257,14 @@ public class functionsForAI : MonoBehaviour
             //create the leftover goal:
             actionItem newGoal = newLeftoverGoal(goal, quant);
             //print(newGoal.name + newGoal.item.quantity);
+            //printPlanList(planList);
             
             //List<List<action>> planListToFillQuantity = new List<List<action>>();
             //should give us everything finished for the remaining quantity?
             //what if it doesn't?
             planList = problemSolver(newGoal, knownActions, state);
 
-
+            //printPlanList(planList);
 
 
         }
@@ -3198,49 +3272,111 @@ public class functionsForAI : MonoBehaviour
         return planList;
     }
 
-    public List<List<action>> thePrereqPhase(action thisAction, List<action> knownActions, Dictionary<string, List<stateItem>> state, List<List<action>> planList)
+    public List<List<action>> thePrereqPhase(action thisAction, List<action> knownActions, Dictionary<string, List<stateItem>> state, List<List<action>> prereqsPlanList)
     {
         //take an action that we want to do, and consider its prereqs
         //try to fill them if needed
         //mostly just uses prereqFiller
+        //ADDS THE ACTION TO THE PLANS IT RETURNS
 
         //what if we can't fill the prereqs??????????
 
-        //print(actionToTextDeep(thisAction));
+        print(actionToTextDeep(thisAction));
         //printState(state);
         //printInventoryDeep(state["inventory"]);
 
         //ok cool, we have an action that would acheive the goal
         //but do we have a prereq to DO that action?  Have to check:
-        if (prereqStateChecker(thisAction, state))
+        if (prereqStateChecker(thisAction, state) != true)
         {
-            //print("11111111111111111111111111111111111111111111111");
-            //yup!  we can do this action and acheive the goal!
-            //so our entire "plan" is just this one action:
-            //List<action> shortPlan = new List<action>();
-            //shortPlan.Add(thisAction);
-
-            //planList.Add(shortPlan);
-            planList = addActionToEndOfAllPlans(planList, thisAction);
-        }
-        else
-        {
-
             //So no, we don't have the prereqs for this action
             //so we'll see if we can FILL the prereqs!
 
             //print("2222222222222222222222222222222222222222222222222");
+            //printPlanList(planList);
 
-            //so, I think we get a bunch of COMPLETE plans from the prereq filling funciton
+
+            //so, I think we get a bunch of COMPLETE plans from the prereq filling function [below]
             //and they should be totally finished and ready to simply add to the planList:
             //[...but what if not?  what if they are empty?  should NOT merge?...sigh....]
             //[wait, ADD to the planList??????  as in, the planList already has plans on it
             //that DON'T fill the prereqs?  shouldn't we REPLACE the planList????]
+            //so...check planList.  if it's NOT empty, print a warning:
+            
+            //maybe it shouldn't always be empty?  then need the combinatorial merging step, too.  that's all.  
+            //but....make sure i know what's going on here first...except:  what level of planList is this?
+            //will it already have a plan of quantities or something?  do i need to know?
             List<List<action>> completedPlans = new List<List<action>>();
-            completedPlans = prereqFiller(thisAction, knownActions, state);
-            planList = mergePlanLists(planList, completedPlans);
+            prereqsPlanList = prereqFiller(thisAction, knownActions, state);
+
+
+            //print("the planList itself before merging");
+            //printPlanList(planList);
+
+            //print("'''''completedPlans''''':");
+            //printPlanList(completedPlans);
+
+            //combinitorialMergingOfPrereqFillers;
+            //planList = mergePlanLists(planList, completedPlans);
+
+            //print("merged:");
+            //printPlanList(planList);
 
         }
+
+        return prereqsPlanList;
+    }
+
+    public List<List<action>> mergingPhase(action thisAction, List<List<action>> planList, List<List<action>> prereqsPlanList, List<List<action>> quantsPlanList)
+    {
+        //create a plan with the new action [there will always be one at this point]
+        //if prereq plan(s) exists[use "foreach" to handle "if not"], add them to the start of the plan(s)
+        //if a quantities plan(s) exists[use "foreach" to handle "if not"], add it to the start of the plan(s)
+        //return result
+
+        //does quantities last, which adds them to START of plan, which ensures if it's a series of duplicate actions, 
+        //they can be done all together.  this is more efficient than goign back and forth between different actions.
+
+
+
+        //create initial plan from new action:
+        List<action> initialPlan = new List<action>();
+        initialPlan.Add(thisAction);
+        planList.Add(initialPlan);
+
+        //foreach(List<action> wayToFillPrereqs in prereqsPlanList)
+
+        //append initial plan to end of each plan:
+        //wayToFillPrereqs = appendPlanToEndOfOtherPlan(wayToFillPrereqs, initialPlan);
+
+
+
+        //print("===================================START OF MERGING=======[action, quant filler, then prereq filler]======================");
+        //printPlanList(planList);
+        //printPlanList(quantsPlanList);
+        //printPlanList(prereqsPlanList);
+
+
+        //if a quantities plan(s) exists [use "foreach" to handle "if not"], add it to the start of the plan(s)
+        if (quantsPlanList.Count() > 0)
+        {
+            //append each plan in planslist to end of each quantities plan:
+            planList = combinatorialPlanMerging(quantsPlanList, planList);
+        }
+
+
+        //if prereq plan(s) exists [use "foreach" to handle "if not"], add them to the start of the plan(s)
+        if (prereqsPlanList.Count() > 0)
+        {
+            //append initial plan to end of each prereq plan:
+            planList = combinatorialPlanMerging(prereqsPlanList, planList);
+        }
+
+
+        //printPlanList(planList);
+        //print("===================================END OF MERGING====================================");
+        
+
 
         return planList;
     }
@@ -3281,7 +3417,8 @@ public class functionsForAI : MonoBehaviour
     {
         //this function takes an action with at least some unfilled prereqs
         //and returns the set of all plans that fill the unfilled prereqs
-        //each ending with that action we wanted to do in the first place
+        //each ending with that action we wanted to do in the first place  NO NOT ANY MORE!
+        //THESE PLANS WILL NOT CONTAIN "thisAction"!
 
         //what if we can't fill the prereqs??????????  seems to handle that, returns blank.
 
@@ -3305,19 +3442,16 @@ public class functionsForAI : MonoBehaviour
                 List<List<action>> plansForThisPrereq = new List<List<action>>();
 
                 plansForThisPrereq = problemSolver(premadeStuff.deepActionItemCopier(eachPrereq), knownActions, state);
-                
-                
-                
-
-                //if we've found zero plans, we've failed, just stop now:
-                if (plansForThisPrereq.Count == 0)
+                //if this ever fails, it will be null.  that means we've failed, just stop now:
+                if (plansForThisPrereq == null)
                 {
                     //printNumberForSpecificNPC(5);
                     //what is goal??????
                     //print("goal (eachPrereq.name) was:");
                     //print(eachPrereq.name);
 
-                    break;
+                    //break;
+                    return null;
                 }
                 else
                 {
@@ -3329,8 +3463,12 @@ public class functionsForAI : MonoBehaviour
                     //printPlanListForSpecificNPC(plansForEachPrereq[0]);
                     //printNumberForSpecificNPC(6);
                 }
-                
-                
+
+
+                //if we've found zero plans, we've failed, just stop now:
+
+
+
 
 
             }
@@ -3344,7 +3482,7 @@ public class functionsForAI : MonoBehaviour
         planList = combinitorialMergingOfPrereqFillers(plansForEachPrereq);
         
         //now, add thisAction to the end of ALL these plans (or make a plan if there are none):
-        planList = addActionToEndOfAllPlans(planList, thisAction);
+        //planList = addActionToEndOfAllPlans(planList, thisAction);
 
         //printForSpecificNPC("jjjjjjjjjjjjjjjjjjjjjjj");
         //printPlanListForSpecificNPC(planList);
@@ -3355,6 +3493,8 @@ public class functionsForAI : MonoBehaviour
 
     public List<List<action>> mergePlanLists(List<List<action>> list1, List<List<action>> list2)
     {
+        //merges plan LISTS.  leaves the plans themselves unchanged!
+
         foreach(List<action> plan in list2)
         {
             //was debugging:
@@ -3442,6 +3582,38 @@ public class functionsForAI : MonoBehaviour
                 //printPlan(planForAllOtherPrereqs);
                 allCombosPlanList.Add(appendPlanToEndOfOtherPlan(planForFirstPrereq,planForAllOtherPrereqs));
                 
+            }
+        }
+
+        return allCombosPlanList;
+    }
+
+    public List<List<action>> combinatorialPlanMerging(List<List<action>> startingPlans, List<List<action>> endingPlans)
+    {
+        //ya this should be easier than the othe rcombinatorial function because we KNOW there are only TWO lists to combine.
+
+        //create [blank] final list
+        //so, really, just 2 for loops.
+        //	for list 1
+        //		for list 2
+        //			create new plan
+        //			add one to the other
+        //			add to final list
+        //return final list
+
+        //create [blank] final list
+        List<List<action>> allCombosPlanList = new List<List<action>>();
+
+        foreach(List<action> startHalfOfPlan in startingPlans)
+        {
+            foreach (List<action> endHalfOfPlan in endingPlans)
+            {
+                //create new plan
+                //add one to the other
+                //add to final list
+                List<action> thisFullPlan = new List<action>();
+                thisFullPlan = mergePlans(startHalfOfPlan,endHalfOfPlan);
+                allCombosPlanList.Add(thisFullPlan);
             }
         }
 
@@ -3971,9 +4143,9 @@ public class functionsForAI : MonoBehaviour
         //keep working on all impossible plans until they are fixed...or give up and discard them
         
 
-        //print("================================START simulation main function====================================");
-        //printPlanList(planList);
-        //printInt(countdown);
+        print("================================START simulation main function====================================");
+        printPlanList(planList);
+        printInt(countdown);
         //print(countdown);
 
 
@@ -3988,10 +4160,10 @@ public class functionsForAI : MonoBehaviour
             return fixedPlanList;
         }
 
-
+        printPlanList(planList);
         foreach (List<action> eachPlan in planList)
         {
-            //print("LLLLLLLLLLLLL   1111111  LLLLLLLLLLLLLL");
+            print("LLLLLLLLLLLLL   1111111  LLLLLLLLLLLLLL");
 
             //yes, to fix ONE plan, might need to have a whole LIST of plans
             //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
@@ -3999,11 +4171,15 @@ public class functionsForAI : MonoBehaviour
             List<List<action>> fixedPlan = new List<List<action>>();
             fixedPlan = simulateOnePlanFillPrereqs(eachPlan, knownActions, realState, countdown);
 
-            //print("/////////////// done here ////////////////");
+            print("/////////////// done here 1 ////////////////");
 
             if(fixedPlan != null && fixedPlan.Count() > 0)
             {
+                print("/////////////// done here 2 ////////////////");
+                
                 fixedPlanList = mergePlanLists(fixedPlanList, fixedPlan);
+
+                printPlanList(fixedPlanList);
             }
         }
         
@@ -4020,10 +4196,10 @@ public class functionsForAI : MonoBehaviour
         //keep working on all impossible plans until they are fixed...or give up and discard them
 
 
-        //print("---------------------starting individual plan simulation----------------------");
-        //printPlan(thisPlan);
+        print("---------------------starting individual plan simulation----------------------");
+        printPlan(thisPlan);
         //print(countdown);
-        //printInt(countdown);
+        printInt(countdown);
 
 
 
@@ -4048,13 +4224,14 @@ public class functionsForAI : MonoBehaviour
         staticIteratorPlan = deepCopyPlan(thisPlan);
 
 
+        //setup done, now for the actual simulation etc.
         foreach (action currentAction in staticIteratorPlan)
         {
             if(soFarSoGood == true)
             {
                 if (prereqStateChecker(currentAction, imaginaryState) == true)
                 {
-                    //print("an action is fine..................");
+                    print("an action is fine..................");
                     //so this action is fine
 
                     //add it to plan
@@ -4062,11 +4239,13 @@ public class functionsForAI : MonoBehaviour
                     //multiple plans only happen after a problem
                     //which causes bool to never come here again]
                     //[but it's a list, so this is still easiest way to add it]:
+                    //SHOULD JUST REPLACE THIS WITH "addActionToEndOfAllPlans", but simplify that function so it's jus this simple, no if check, no creating blank list
                     foreach (List<action> planInProgress in constructingFixedPlansToReturn)
                     {
                         planInProgress.Add(currentAction);
                     }
 
+                    
 
                     //now implement effects before moving on to next action:
                     imaginaryState = implementALLEffects(currentAction, imaginaryState);
@@ -4083,11 +4262,25 @@ public class functionsForAI : MonoBehaviour
 
                     //print("prereqs are NOT met.............");
                     //print("here is current action:");
-                    //printActionForSpecificNPC(currentAction);
+                    //print(actionToTextDeep(currentAction));
+                    //actionToTextDeep(currentAction);
+                    //print("here is current imaginaryState:");
+                    //printState(imaginaryState);
 
                     waysToFillPrereqs = prereqFiller(currentAction, knownActions, deepStateCopyer(imaginaryState));
+                    
                     //print("here is waysToFillPrereqs:");
                     //printPlanList(waysToFillPrereqs);
+                    //print("here is current imaginaryState:");
+                    //printState(imaginaryState);
+
+                    if (waysToFillPrereqs == null)
+                    {
+                        //maybe should return null, but for now, imagination step works fine with returning blanks, i think.  
+                        //so just return a blank
+                        List<List<action>> blank = new List<List<action>>();
+                        return blank;
+                    }
 
                     //will there ever be an "else"?
                     if (waysToFillPrereqs.Count > 0)
@@ -4095,20 +4288,25 @@ public class functionsForAI : MonoBehaviour
                         //now need to make all plans
                         //one for each way to fix current action
 
-                        //print("here is constructingFixedPlansToReturn:");
-                        //printPlanList(constructingFixedPlansToReturn);
+                        print("here is constructingFixedPlansToReturn:");
+                        printPlanList(constructingFixedPlansToReturn);
+
+                        //first just add current action here i guess:
+                        waysToFillPrereqs = addActionToEndOfAllPlans(waysToFillPrereqs, currentAction);
 
                         //hmm, multipying with "constructingFixedPlansToReturn"?  but we aren't done contrsucting it, shouldn't we
                         //wait until the end or something?  or else restart right after this?  sorta do with recursion
                         constructingFixedPlansToReturn = multiplyPlansByAddingFixes(constructingFixedPlansToReturn, waysToFillPrereqs);
 
-                        //print("here is constructingFixedPlansToReturn AGAIN:");
-                        //printPlanList(constructingFixedPlansToReturn);
+                        print("here is constructingFixedPlansToReturn AGAIN:");
+                        printPlanList(constructingFixedPlansToReturn);
 
                         
                     }
                     else
                     {
+                        print("this ever happen?");
+
                         //does this mean the plan is impossible?  return...blank???
                         List<List<action>> failPlanList = new List<List<action>>();
                         return failPlanList;
@@ -4119,6 +4317,7 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
+                print("this else");
                 //just add it to ALL plans [do not implement effects]
                 //this needs to be inside the else so that we don't add the action twice if we filled prereqs
                 //the plan-fixing branch already includes that action
@@ -4133,6 +4332,7 @@ public class functionsForAI : MonoBehaviour
 
         if(soFarSoGood == false)
         {
+            print("THIS SEEMS DUPLICATE SHOULD THIS EVER HAPPEN?!?!?!?!?!? oh right, does need to do recursion i think");
             //do recursion
             constructingFixedPlansToReturn = simulatingPlansToEnsurePrereqs(constructingFixedPlansToReturn, knownActions, realState, countdown);
 
@@ -4140,7 +4340,8 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            //pretty sure this "else" means original plan should be fine
+            print("fine i guess?");
+            //this "else" means ORIGINAL  plan should be fine
             //return thisPlan;
             //but, we need to return a LIST data structure, so easiest for now:
             return constructingFixedPlansToReturn;
@@ -4172,17 +4373,16 @@ public class functionsForAI : MonoBehaviour
         {
             if (impossibleActionprereqStateChecker(currentAction, imaginaryState) != true)
             {
-                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
-                //print(currentAction.name);
+                print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+                print(currentAction.name);
                     
                 return counter;
             }
 
             //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb here??");
             //print("--------------imaginaryState at START of implementALLEffects");
-            //printPlanListForSpecificNPC();
+            //printPlan(plan);
             //printState(imaginaryState);
-            //pr
 
             imaginaryState = implementALLEffects(currentAction, imaginaryState);
             //print("is this not updating state???");
@@ -4192,8 +4392,7 @@ public class functionsForAI : MonoBehaviour
             //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb end");
             //print("--------------imaginaryState at START of implementALLEffects");
             //printState(imaginaryState);
-            //printPlanListForSpecificNPC();
-            //pr
+            //printPlan(plan);
         }
 
 
@@ -4212,13 +4411,13 @@ public class functionsForAI : MonoBehaviour
             if (isStateAccomplished(prereqX, state) == false)
             {
                 
-                //print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
-                //print(thisAction.name);
-                //print("BECAUSE of this prereq:");
-                //print(prereqX.name);
-                //printState(state);
-                //printState(thisAI.planningState);
-                //print(gameObject.name);
+                print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                print(thisAction.name);
+                print("BECAUSE of this prereq:");
+                print(prereqX.name);
+                printState(state);
+                printState(thisAI.planningState);
+                print(gameObject.name);
 
 
 

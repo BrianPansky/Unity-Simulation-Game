@@ -40,6 +40,7 @@ public class taggedWith : MonoBehaviour
 
     void Start()
     {
+        //this tag1 tag2 stuff is just my quick way to add a few tags to an object
 
         //add all tags to the tag list:
         tagsToAdd.Add(tag1);

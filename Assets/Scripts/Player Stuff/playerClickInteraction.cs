@@ -324,6 +324,29 @@ public class playerClickInteraction : MonoBehaviour
             //(ad-hoc for now)
             targetAI.inConversation = true;
 
+            //FOR INVESTIGATING/TESTING:
+            //targetAI.masterPrintControl = true;
+            //targetAI.npcx = targetAI.gameObject.name;
+            //Debug.Log("updated ''npcx''");
+
+            //targetAI.state["threatState"].Add(premadeStuff.threat);
+            //targetAI.planningState["threatState"].Add(premadeStuff.threat);
+            if (targetAI.toDoList.Count > 0)
+            {
+                //Debug.Log(targetAI.toDoList[0].name);
+            }
+            else
+            {
+                Debug.Log("they have no items on their toDoList");
+            }
+
+            //targetAI.theFunctions.printState(targetAI.state);
+            //targetAI.theFunctions.printState(targetAI.planningState);
+
+            
+
+            //targetAI.masterPrintControl = false;
+
             //check if they are working at the store:
             if (targetAI.toDoList.Count > 0 && (targetAI.toDoList[0].name == "workAsCashier" || targetAI.toDoList[0].name == "hireSomeone"))
             {
@@ -520,7 +543,7 @@ public class playerClickInteraction : MonoBehaviour
         //need to check if person you are talking to is part of your faction.  simple for now, no checking for "rank" or roles...
         taggedWith foreignTagScript = selectedNPC.GetComponent<taggedWith>();
 
-        foreignTagScript.printAllTags();
+        //foreignTagScript.printAllTags();
 
         if (foreignTagScript.tags.Contains("PlayersGang"))
         {
@@ -661,6 +684,7 @@ public class playerClickInteraction : MonoBehaviour
         AI1 theTargetState = selectedNPC.GetComponent("AI1") as AI1;
         //note the "premadeStuff.pickVictimsPocket" input, this function is clunky like that for now...
         theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], theTargetState.state["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
+        theFunctions.incrementTwoInventoriesFromActionEffects(theHub.state["inventory"], theTargetState.planningState["inventory"], premadeStuff.deepActionCopier(premadeStuff.pickVictimsPocket));
 
 
     }
