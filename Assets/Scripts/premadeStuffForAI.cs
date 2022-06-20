@@ -44,6 +44,8 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem shopOwnership = new stateItem();
 
+    public stateItem storageOwnership = new stateItem();
+
     public stateItem anyStore = new stateItem();
 
     public stateItem homeOwnership = new stateItem();
@@ -114,6 +116,9 @@ public class premadeStuffForAI : MonoBehaviour
     public action recruit = new action();
     public action askMemberForMoney = new action();
     public action hireResourceGatherer = new action();
+
+
+    public action createStorage = new action();
     
 
 
@@ -152,6 +157,10 @@ public class premadeStuffForAI : MonoBehaviour
         {
             rentalProperty = stateItemCreator("rentalProperty", "property");
 
+
+            shopOwnership = stateItemCreator("shopOwnership", "property");
+            storageOwnership = stateItemCreator("storageOwnership", "property");
+
             myLeader = stateItemCreator("myLeader", "target");
             myLeader.locationType = "deliverTo";
 
@@ -182,7 +191,6 @@ public class premadeStuffForAI : MonoBehaviour
             toRecruit = stateItemCreator("toRecruit", "target");
             toRecruit.locationType = "any";
 
-            shopOwnership = stateItemCreator("shopOwnership", "property");
 
             anyStore = stateItemCreator("anyStore", "locationState");
             anyStore.locationType = "any";
@@ -213,6 +221,9 @@ public class premadeStuffForAI : MonoBehaviour
         //actions:
         {
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
+            createStorage = actionCreator("createStorage", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(storageOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
+
+
             landLording = actionCreator("landLording", "capitalism", wantedPrereqsLister(homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(rentalProperty), UNwantedEffectsLister(homeOwnership, profitMotive), 1);
             shootSpree = actionCreator("shootSpree", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
 
@@ -257,7 +268,7 @@ public class premadeStuffForAI : MonoBehaviour
             //SHOULD OBVIOUSLY BE AUTOMATICALLY GENERATED:
             askMemberForMoney = actionCreator("askMemberForMoney", "commanding", wantedPrereqsLister(groupMember), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyGroupMember);
             hireSomeone = actionCreator("hireSomeone", "work", wantedPrereqsLister(shopOwnership), UNwantedPrereqsLister(threat), wantedEffectsLister(employee), UNwantedEffectsLister(), 1, hiringZone);
-            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
+            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
 
             //done automating these?????  can delete????????
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
@@ -476,9 +487,10 @@ public class premadeStuffForAI : MonoBehaviour
 
         
         //newList.Add(pickVictimsPocket);
-        newList.Add(recruit);
+        //newList.Add(recruit);
         //newList.Add(askMemberForMoney);
         newList.Add(hireResourceGatherer);
+        newList.Add(createStorage);
         
 
         //knownActions.Add(shootSpree); 
