@@ -6,6 +6,14 @@ public class premadeStuffForAI : MonoBehaviour
 {
     public GameObject storagePrefab;
 
+    //HMMM, INSTED OF GENERATING EVERYTHING, SHOULD JUST HAVE "ITEM" AND "TARGET" AND STUFF???
+    //THEN ***FILL*** IT WITH ALL RELEVANT NEEDED INFO???
+    //would still have to do steps to fill them with different info, but would be LESS work, i think
+    //i dunno.  seems similar to uhhh whatever that class object way of doing things is
+    //where you have....like, sub-species of the class.  
+    //and the issues that can have if something doesn't fit the speciation tree....
+    //but better than EVERYTHING had done????
+
     //here I define the actions for the AI
 
     //initializing:
@@ -36,7 +44,9 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem employee = new stateItem();
     public stateItem rentalProperty = new stateItem();
     public stateItem groupMember = new stateItem();
+    public stateItem soldier = new stateItem();
     
+
 
     public stateItem victim = new stateItem();
     public stateItem toRecruit = new stateItem();
@@ -188,6 +198,7 @@ public class premadeStuffForAI : MonoBehaviour
 
             employee = stateItemCreator("employee", "organizationState");
             groupMember = stateItemCreator("groupMember", "organizationState");
+            soldier = stateItemCreator("soldier", "organizationState");
 
             victim = stateItemCreator("victim", "target"); //outdated category???
             victim.locationType = "mobile";
@@ -224,7 +235,8 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
-            createSoldier = actionCreator("createSoldier", "ad-hoc", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry), 1, victim);
+            //NOTE AD-HOC TARGET RIGHT NOW IS "anyLandPlot"!!!!!!!!!!!!!!!
+            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(resource1), 1, anyLandPlot);
 
 
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
@@ -339,6 +351,9 @@ public class premadeStuffForAI : MonoBehaviour
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
         addToState(deepStateItemCopier(hungry), state);
+
+        //AD-HOC while leader cannot plan with faction inventory, needs the inventory in their pocket:
+        theFunctions.incrementItem(state["inventory"], money, 555);
 
         return state;
     }
@@ -497,11 +512,11 @@ public class premadeStuffForAI : MonoBehaviour
 
         
         //newList.Add(pickVictimsPocket);
-        //newList.Add(recruit);
+        newList.Add(recruit);
         //newList.Add(askMemberForMoney);
-        //newList.Add(hireResourceGatherer);
-        //newList.Add(createStorage);
-        //newList.Add(createSoldier);
+        newList.Add(hireResourceGatherer);
+        newList.Add(createStorage);
+        newList.Add(createSoldier);
         
 
 

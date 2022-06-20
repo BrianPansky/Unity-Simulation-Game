@@ -11,6 +11,8 @@ public class AI1 : MonoBehaviour
     
     //the NPC "state":
     public Dictionary<string, List<stateItem>> state = new Dictionary<string, List<stateItem>>();
+    public Dictionary<string, List<stateItem>> planningState = new Dictionary<string, List<stateItem>>();
+    public Dictionary<string, List<stateItem>> factionState = new Dictionary<string, List<stateItem>>();
 
     public GameObject target;
 
@@ -49,6 +51,7 @@ public class AI1 : MonoBehaviour
     //ad-hoc for now:
     public bool jobSeeking;
     public bool inConversation;
+    public bool atWork;
 
     public int clearanceLevel;
 
@@ -89,7 +92,10 @@ public class AI1 : MonoBehaviour
             ignore = false;
         }
 
+        atWork = false;
 
+        //need to initialize, don't want faction inventory etc. to be null/non-existent
+        factionState = createEmptyFactionState();
 
 
         //get some other scripts I'll need:
@@ -118,9 +124,14 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
+        //npcx = "NPC pickpocket";
         npcx = "NPC";
         //diagnostic
         masterPrintControl = true;
+
+
+        //i think this should work?
+        planningState = theFunctions.deepStateCopyer(state);
 }
 
     
@@ -128,8 +139,11 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        
+
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
-        if(ignore == false)
+        if (ignore == false)
         {
             //now handle the checking stuff.  like checking to pay PLAYER for work shift.  just JOB stuff for now i guess:
             checkJobs();
@@ -186,6 +200,7 @@ public class AI1 : MonoBehaviour
                     //printToDoListForSpecificNPC();
                 }
 
+                
 
                 //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
@@ -374,7 +389,7 @@ public class AI1 : MonoBehaviour
             }
             */
 
-            //print("says this plan is imposible:");
+            //theFunctions.print("says this plan is imposible:");
             //theFunctions.printPlan(toDoList);
             toDoList.RemoveRange(0, toDoList.Count);
             target = null;
@@ -399,27 +414,39 @@ public class AI1 : MonoBehaviour
         //so check if it's null or empty, fill it up if so:
         if (planList == null || planList.Count == 0)
         {
+
+            //theFunctions.printInventoryDeep(state["inventory"]);
+            //theFunctions.printInventoryDeep(planningState["inventory"]);
+
+            //masterPrintControl = false;
+
+
             //need to make planList:
-            
-            planList = theFunctions.planningPhase(recurringGoal, knownActions, state);
+            planList = theFunctions.planningPhase(recurringGoal, knownActions, planningState);
+
+            //masterPrintControl = false;
 
             printPlanListForSpecificNPC();
             //theFunctions.printState(state);
             //sometimes at this moment, there are zero plans?  but not always?
 
+            //masterPrintControl = true;
+            //printPlanListForSpecificNPC();
             masterPrintControl = false;
 
-            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state, 20);
+            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, planningState, 20);
 
-            masterPrintControl = true;
-            printPlanListForSpecificNPC();
-            masterPrintControl = false;
+            //masterPrintControl = true;
+            //printPlanListForSpecificNPC();
+            //masterPrintControl = false;
 
 
             //also, blank out the list of "ineffective actions":
             //[I think this code could/should be moved elsewhere...]
             clearIneffectiveActions();
             //printPlanListForSpecificNPC();
+
+            atWork = false;
 
         }
 
@@ -496,7 +523,7 @@ public class AI1 : MonoBehaviour
             {
                 //this "else" means the nextAction is redundant, already done.
                 //so dump the action:
-                print("dddddddddddddddduuuuuuuuuuuuuuummmmmmmmmmmmmmmmmmmmpppppppppppppp");
+                //print("dddddddddddddddduuuuuuuuuuuuuuummmmmmmmmmmmmmmmmmmmpppppppppppppp");
                 target = theFunctions.dumpAction(target);
                 goalWait = 0; //SHOULD INCORPORATE INTO "dumpAction"????
             }
@@ -512,7 +539,10 @@ public class AI1 : MonoBehaviour
         {
             if (recurringGoal.inStateOrNot == false)
             {
+                //maybe use a less ad-hoc function here so it is modified correctly any time i modify normal state changer functions
+                //should use a REAL "incrementItem" thing...???
                 state["feelings"].Add(theFunctions.deepStateItemCopier(recurringGoal.item));
+                planningState["feelings"].Add(theFunctions.deepStateItemCopier(recurringGoal.item));
             }
             else
             {
@@ -748,10 +778,59 @@ public class AI1 : MonoBehaviour
     }
 
 
+    public void stateDiagnosis(Dictionary<string, List<stateItem>> state)
+    {
+        //checks for a specified item and quantity in a state dictionary
+        //eventually make the item/quantity into an input?
+        //for now, manually...
+
+        string theItemName = "money";
+        int quant = -3;
+
+        if(this.name == npcx)
+        {
+
+            //theFunctions.printState(planningState);
+            //print("...1111111111111111111");
+            //theFunctions.printStateItemList(state["inventory"]);
+            //print("...22222222222222222222");
+
+            foreach (stateItem item in state["inventory"])
+            {
+                if (item.name == theItemName && item.quantity == quant)
+                {
+                    theFunctions.print("now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    masterPrintControl = false;
+                }
+            }
+        }
+
+    }
+
+
+    public Dictionary<string, List<stateItem>> createEmptyFactionState()
+    {
+        Dictionary<string, List<stateItem>> newFactionState = new Dictionary<string, List<stateItem>>();
+        //List<stateItem> feelings = new List<stateItem>();
+        List<stateItem> inventory = new List<stateItem>();
+        //List<stateItem> locationState = new List<stateItem>();
+        //List<stateItem> organizationState = new List<stateItem>();
+        List<stateItem> unitState = new List<stateItem>();
+        List<stateItem> propertyState = new List<stateItem>();
+        List<stateItem> threatState = new List<stateItem>();
+
+
+        //newFactionState.Add("locationState", locationState);
+        //newFactionState.Add("feelings", feelings);
+        newFactionState.Add("inventory", inventory);
+        //newFactionState.Add("organizationState", organizationState);
+        newFactionState.Add("unitState", unitState);
+        newFactionState.Add("property", propertyState);
+        newFactionState.Add("threatState", threatState);
+
+
+
+        return newFactionState;
+    }
 
 }
-
-
-
-
-

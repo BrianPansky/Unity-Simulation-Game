@@ -807,7 +807,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //lol
-        if (theFunctions.TRYincremintInventoriesOfThisAndTargetFromEffects(shopInventory, buyFoooooood))
+        if (theFunctions.TRYincrementInventoriesOfThisAndTargetFromEffects(shopInventory, buyFoooooood))
         {
             print("purchased food");
 
@@ -1056,7 +1056,7 @@ public class playerClickInteraction : MonoBehaviour
     public void giveXbutton(action theAction)
     {
         //print(selectedNPC.name);
-        if(theFunctions.TRYincremintInventoriesOfThisAndTargetFromEffects(selectedNPC, theAction))
+        if(theFunctions.TRYincrementInventoriesOfThisAndTargetFromEffects(selectedNPC, theAction))
         {
             //success
             //now remove this action from to-do list...

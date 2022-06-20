@@ -12,12 +12,20 @@ public class playerHUD : MonoBehaviour
     public GameObject myText;
     public GameObject myToDoListText;
 
+    public GameObject playerFakeGameReadout;
+    public GameObject NPC0FakeGameReadout;
+    public GameObject NPC0printout2;
+    public GameObject NPC0GameObject;
+    public AI1 theNPC0Hub;
+
     public AI1 theHub;
 
     // Start is called before the first frame update
     void Start()
     {
         theHub = GetComponent<AI1>();
+        theNPC0Hub = NPC0GameObject.GetComponent<AI1>();
+        //AI1 theTargetState = target.GetComponent("AI1") as AI1;
     }
 
     // Update is called once per frame
@@ -28,6 +36,9 @@ public class playerHUD : MonoBehaviour
         //well, sometimes it might change for reasons besides clicking...
         displayAllInventoryItems();
         displayToDoList();
+        displayPlayerFakeGameReadout();
+        displayNPC0FakeGameReadout();
+        displayNPC0Inventory();
     }
 
     void displayAllInventoryItems()
@@ -85,5 +96,65 @@ public class playerHUD : MonoBehaviour
             myToDoListText.GetComponent<Text>().text = "[]";
         }
 
+    }
+
+    void displayPlayerFakeGameReadout()
+    {
+        displayXFakeGameReadout(theHub, playerFakeGameReadout);
+    }
+
+    void displayNPC0FakeGameReadout()
+    {
+        displayXFakeGameReadout(theNPC0Hub, NPC0FakeGameReadout);
+    }
+
+    void displayXFakeGameReadout(AI1 hub, GameObject textBox)
+    {
+        string thePrintOut = "";
+
+        thePrintOut += "[";
+
+        foreach (string categoryName in hub.factionState.Keys)
+        {
+            thePrintOut += "[";
+            foreach (stateItem item in hub.factionState[categoryName])
+            {
+                thePrintOut += "(" + item.name.ToString() + ": " + item.quantity.ToString() + ")";
+            }
+            thePrintOut += "] ";
+        }
+        
+        thePrintOut += "]";
+
+        textBox.GetComponent<Text>().text = thePrintOut;
+    }
+
+    void displayNPC0Inventory()
+    {
+        
+
+        if (theNPC0Hub.state["inventory"].Count > 0)
+        {
+            //string inventoryItem;
+            //inventoryItem = theHub.state["inventory"][0].name;
+
+            //Debug.Log(inventoryItem);
+
+            //now, how to set the text to say that???
+            //myText.GetComponent<Text>().text = inventoryItem;
+            string thePrintOut = "";
+            foreach (stateItem item in theNPC0Hub.state["inventory"])
+            {
+                thePrintOut += "(" + item.name.ToString() + ": " + item.quantity.ToString() + ")";
+            }
+
+
+            //myText.GetComponent<Text>().text = theHub.state["inventory"][0].quantity.ToString();
+            NPC0printout2.GetComponent<Text>().text = thePrintOut;
+        }
+        else
+        {
+            NPC0printout2.GetComponent<Text>().text = "[]";
+        }
     }
 }
