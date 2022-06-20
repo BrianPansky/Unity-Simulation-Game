@@ -407,13 +407,14 @@ public class AI1 : MonoBehaviour
             //theFunctions.printState(state);
             //sometimes at this moment, there are zero plans?  but not always?
 
-
+            masterPrintControl = false;
 
             planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state, 20);
 
+            masterPrintControl = true;
             printPlanListForSpecificNPC();
-
             masterPrintControl = false;
+
 
             //also, blank out the list of "ineffective actions":
             //[I think this code could/should be moved elsewhere...]

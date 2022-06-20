@@ -312,7 +312,8 @@ public class premadeStuffForAI : MonoBehaviour
         
         //addToState(deepStateItemCopier(food), state);
         addToState(deepStateItemCopier(money), state);
-        
+        addToState(deepStateItemCopier(money), state);
+
 
         addToState(deepStateItemCopier(hungry), state);
 
@@ -398,13 +399,10 @@ public class premadeStuffForAI : MonoBehaviour
 
     public Dictionary<string, List<stateItem>> addToState(stateItem item, Dictionary<string, List<stateItem>> state)
     {
-        //simply adds item:
-        //  SHOULD I MODIFY THIS TO BE DEEP COPIES???
-        //DUNNO, RIGHT NOW DEEP COPY STATE ISN'T CHANGING BEHAVIOR...
-        //state[item.stateCategory].Add(item);
+        //state[item.stateCategory].Add(deepStateItemCopier(item));
 
-        //yes, now deep copy:
-        state[item.stateCategory].Add(deepStateItemCopier(item));
+        //is that correct?  the quantity in the item doesn't matter, just the integer we input???
+        theFunctions.incrementItem(state[item.stateCategory], item, 1);
 
         return state;
     }
