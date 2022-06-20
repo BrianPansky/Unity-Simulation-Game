@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 6128988794682438767}
   - component: {fileID: 310021312455318196}
   - component: {fileID: 7378499042799406245}
+  - component: {fileID: 7866370346245095191}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -319,11 +320,16 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
+  npcx: 
+  ignore: 0
+  goalWait: 0
 --- !u!114 &8055269175595927325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +342,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
+  theFunctions: {fileID: 0}
 --- !u!114 &661275133982823319
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,12 +358,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
   _navMeshAgent: {fileID: 0}
+  storePrefab: {fileID: 0}
   stopwatch: 0
   effectivenessTimer: 0
   workerCount: 0
   listOfCashiers: []
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
+  testTime: 0
 --- !u!114 &3217855257292685481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,17 +393,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de6e5efdc6c81948aaf829ee8556b68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickedOn: {fileID: 0}
+  ownershipTag: 
   recruitingMenu: {fileID: 0}
   myPrefabButton1: {fileID: 0}
   myGridCanvas: {fileID: 0}
   currentGridButtons: []
   personOfInterest: {fileID: 0}
   inMenu: 0
+  buildMode: 0
   premadeStuff: {fileID: 0}
   theHub: {fileID: 0}
   myHUD: {fileID: 0}
   theFunctions: {fileID: 0}
   theTagScript: {fileID: 0}
+  haveStore: 0
+  weapon: 0
+  myPrefab: {fileID: 0}
+  currentPrefab: {fileID: 0}
+  swapDirection: 0
 --- !u!114 &310021312455318196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +426,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myCanvas: {fileID: 0}
   myText: {fileID: 0}
+  myToDoListText: {fileID: 0}
+  playerFakeGameReadout: {fileID: 0}
+  NPC0FakeGameReadout: {fileID: 0}
+  NPC0printout2: {fileID: 0}
+  NPC0GameObject: {fileID: 0}
+  theNPC0Hub: {fileID: 0}
   theHub: {fileID: 0}
 --- !u!114 &7378499042799406245
 MonoBehaviour:
@@ -420,6 +445,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6953b2bcb18ab64baa17503ca0ad7d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  politicalSide: 0
+  defaultTrust: 0
+  theFunctions: {fileID: 0}
+  theHub: {fileID: 0}
+--- !u!114 &7866370346245095191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8239240193439217715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisIsTaggedWith: {fileID: 0}
+  tag1: 
+  tag2: 
+  tag3: 
+  tag4: 
 --- !u!1001 &2208505812413378550
 PrefabInstance:
   m_ObjectHideFlags: 0

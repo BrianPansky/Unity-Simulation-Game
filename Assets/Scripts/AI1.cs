@@ -74,6 +74,16 @@ public class AI1 : MonoBehaviour
     public bool ignore;
     public int goalWait;
 
+    void Awake()
+    {
+
+        //get some other scripts I'll need:
+        theFunctions = GetComponent<functionsForAI>();
+        thisIsTaggedWith = GetComponent<taggedWith>();
+
+        //need to initialize, don't want faction inventory etc. to be null/non-existent
+        factionState = createEmptyFactionState();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -94,13 +104,8 @@ public class AI1 : MonoBehaviour
 
         atWork = false;
 
-        //need to initialize, don't want faction inventory etc. to be null/non-existent
-        factionState = createEmptyFactionState();
 
 
-        //get some other scripts I'll need:
-        theFunctions = GetComponent<functionsForAI>();
-        thisIsTaggedWith = GetComponent<taggedWith>();
 
         //add a "person" tag to this agent:
         //ad hoc way to prevent storage containters from being called people:  check for the npc tag:
@@ -124,8 +129,8 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
-        //npcx = "NPC pickpocket";
-        npcx = "NPC";
+        npcx = "NPC pickpocket";
+        //npcx = "NPC";
         //diagnostic
         masterPrintControl = true;
 

@@ -108,6 +108,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
+  tag1: 
+  tag2: 
+  tag3: 
+  tag4: 
 --- !u!114 &2705463388160509701
 MonoBehaviour:
   m_ObjectHideFlags: 0

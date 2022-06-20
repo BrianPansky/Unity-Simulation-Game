@@ -17,5 +17,8 @@ public class PlayerInitializing : MonoBehaviour
         theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createPLAYERstate();
 
+        //ad-hoc, [see 395478]:
+        theHub.theFunctions.incrementItem(theHub.factionState["unitState"], stateGrabber.soldier, 555);
+
     }
 }

@@ -10,6 +10,18 @@ public class taggedWith : MonoBehaviour
 
     //public GameObject theWorldObject;
 
+
+
+    //kind of ad-hoc, but hopefully good enough most of the time:
+    public string tag1;
+    public string tag2;
+    public string tag3;
+    public string tag4;
+
+    List<string> tagsToAdd = new List<string>();
+
+
+
     public Dictionary<string, List<GameObject>> globalTags;
 
     // Start is called before the first frame update
@@ -21,6 +33,30 @@ public class taggedWith : MonoBehaviour
         GameObject theWorldObject = GameObject.Find("World");
         worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
         globalTags = theWorldScript.taggedStuff;
+
+
+
+    }
+
+    void Start()
+    {
+
+        //add all tags to the tag list:
+        tagsToAdd.Add(tag1);
+        tagsToAdd.Add(tag2);
+        tagsToAdd.Add(tag3);
+        tagsToAdd.Add(tag4);
+
+
+        //add all tags to this GameObject:
+        foreach (string thisTag in tagsToAdd)
+        {
+            //make sure it's not null:
+            if (thisTag != null)
+            {
+                addTag(thisTag);
+            }
+        }
     }
 
     

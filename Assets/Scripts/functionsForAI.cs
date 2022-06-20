@@ -192,10 +192,16 @@ public class functionsForAI : MonoBehaviour
         }
 
 
+
+
+
+        if (nextAction.name == "orderAttack")
+        {
+            thisAI.masterPrintControl = true;
+            print("??????????????????????????????????");
+            thisAI.masterPrintControl = false;
+        }
         
-
-
-
 
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
@@ -240,10 +246,10 @@ public class functionsForAI : MonoBehaviour
                     testSwitch();
                     //print(actionToTextDeep(nextAction));
                     //lol
-                    
+
                     if (TRYincrementInventoriesOfThisAndTargetFromEffects(shopInventory, nextAction))
                     {
-                        
+
                         target = dumpAction(target);
 
                         //print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
@@ -263,23 +269,35 @@ public class functionsForAI : MonoBehaviour
 
 
                     //alert();
-                    
+
                 }
 
                 //endTest();
                 testSwitch();
-                
+
 
             }
             else if (nextAction.name == "createSoldier")
             {
                 //eventually do "hiring", i guess.  but for now:
-                incrementItem(thisAI.factionState["unitState"], premadeStuff.soldier, 1);
+                incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
                 incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
+
+                //maybe ad-hoc [see 3456819]:
+                incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
 
                 //NOTE THAT "TARGET" IS NOT BEING USED AS AN INPUT FOR NOW!!!!! BECAUSE I AM USING AN AD-HOC TARGET!!!
                 //incrementInventoriesOfThisAndTargetFromEffects(thisAI., nextAction);
 
+                target = dumpAction(target);
+
+            }
+            else if (nextAction.name == "orderAttack")
+            {
+
+                thisAI.masterPrintControl = true;
+                print("aha, yes");
+                thisAI.masterPrintControl = false;
             }
             else if (nextAction.name == "hireResourceGatherer")
             {

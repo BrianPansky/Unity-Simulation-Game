@@ -77,7 +77,9 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem anyGroupMember = new stateItem();
 
+    public stateItem placeHolderFactionGoal = new stateItem();
 
+    
 
 
     ////////////////////////////////////////////////
@@ -128,9 +130,12 @@ public class premadeStuffForAI : MonoBehaviour
     public action hireResourceGatherer = new action();
 
     public action createSoldier = new action();
+    public action orderAttack = new action();
 
     public action createStorage = new action();
+
     
+
 
 
     //jobs
@@ -168,6 +173,7 @@ public class premadeStuffForAI : MonoBehaviour
         {
             rentalProperty = stateItemCreator("rentalProperty", "property");
 
+            placeHolderFactionGoal = stateItemCreator("placeHolderFactionGoal", "organizationState");
 
             shopOwnership = stateItemCreator("shopOwnership", "property");
             storageOwnership = stateItemCreator("storageOwnership", "property");
@@ -198,7 +204,7 @@ public class premadeStuffForAI : MonoBehaviour
 
             employee = stateItemCreator("employee", "organizationState");
             groupMember = stateItemCreator("groupMember", "organizationState");
-            soldier = stateItemCreator("soldier", "organizationState");
+            soldier = stateItemCreator("soldier", "unitState");
 
             victim = stateItemCreator("victim", "target"); //outdated category???
             victim.locationType = "mobile";
@@ -237,6 +243,7 @@ public class premadeStuffForAI : MonoBehaviour
         {
             //NOTE AD-HOC TARGET RIGHT NOW IS "anyLandPlot"!!!!!!!!!!!!!!!
             createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(resource1), 1, anyLandPlot);
+            orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(soldier), 1, anyLandPlot);
 
 
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
@@ -364,7 +371,10 @@ public class premadeStuffForAI : MonoBehaviour
         Dictionary<string, List<stateItem>> state = createEmptyState();
 
         //addToState(hungry0, state);
-        
+
+        //ad-hoc, [see 395478]:
+        theFunctions.incrementItem(state["unitState"], soldier, 555);
+
         return state;
     }
 
@@ -400,6 +410,8 @@ public class premadeStuffForAI : MonoBehaviour
         List<stateItem> propertyState = new List<stateItem>();
         List<stateItem> threatState = new List<stateItem>();
 
+        //maybe ad-hoc [see 3456819]:
+        List<stateItem> unitState = new List<stateItem>();
 
         state.Add("locationState", locationState);
         state.Add("feelings", feelings);
@@ -407,7 +419,12 @@ public class premadeStuffForAI : MonoBehaviour
         state.Add("organizationState", organizationState);
         state.Add("property", propertyState);
         state.Add("threatState", threatState);
+
+        //maybe ad-hoc [see 3456819]:
+        state.Add("unitState", unitState);
         
+
+
 
         return state;
     }
@@ -517,7 +534,10 @@ public class premadeStuffForAI : MonoBehaviour
         newList.Add(hireResourceGatherer);
         newList.Add(createStorage);
         newList.Add(createSoldier);
+
+        newList.Add(orderAttack);
         
+
 
 
         //knownActions.Add(shootSpree); 
