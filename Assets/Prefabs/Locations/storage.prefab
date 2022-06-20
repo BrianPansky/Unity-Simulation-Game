@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 1735645508166885674}
   - component: {fileID: 6366921939145982729}
   - component: {fileID: 3193435990910126662}
-  - component: {fileID: 4446786858997845474}
   m_Layer: 0
   m_Name: storage
   m_TagString: container
@@ -110,6 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!114 &1456625314252528577
 MonoBehaviour:
@@ -147,6 +147,7 @@ MonoBehaviour:
   listOfCashiers: []
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
   testTime: 0
 --- !u!114 &6366921939145982729
 MonoBehaviour:
@@ -164,12 +165,16 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
+  npcx: 
   ignore: 1
+  goalWait: 0
 --- !u!114 &3193435990910126662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,19 +188,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
---- !u!114 &4446786858997845474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7463281720568149513}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  thisIsTaggedWith: {fileID: 0}
   tag1: storage
   tag2: 
   tag3: 

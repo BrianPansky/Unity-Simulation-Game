@@ -53,6 +53,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
+  tag1: shop
+  tag2: 
+  tag3: 
+  tag4: 
 --- !u!114 &5178492963302058644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66,7 +70,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisIsTaggedWith: {fileID: 0}
-  tag1: shop
+  tag1: 
   tag2: 
   tag3: 
   tag4: 
@@ -368,11 +372,14 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
+  npcx: 
   ignore: 1
   goalWait: 0
 --- !u!114 &5104974037104700857
@@ -424,6 +431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!1 &6396609488209690021
 GameObject:

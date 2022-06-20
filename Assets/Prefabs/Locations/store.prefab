@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6396609487247316963}
   - component: {fileID: 4732739198663505401}
-  - component: {fileID: 5178492963302058644}
   - component: {fileID: 6396609487247316974}
   - component: {fileID: 6396609487247316973}
   - component: {fileID: 6396609487247316972}
@@ -53,19 +52,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
---- !u!114 &5178492963302058644
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6396609487247316962}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  thisIsTaggedWith: {fileID: 0}
   tag1: shop
   tag2: forSale
   tag3: 
@@ -368,11 +354,14 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
+  npcx: 
   ignore: 1
   goalWait: 0
 --- !u!114 &1116645813363670745
@@ -401,6 +390,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!114 &7387717508630645786
 MonoBehaviour:

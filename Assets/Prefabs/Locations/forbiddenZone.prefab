@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 6388674455745479686}
   - component: {fileID: 4647913700049949387}
   - component: {fileID: 4492545811175374105}
-  - component: {fileID: 2705463388160509701}
   m_Layer: 0
   m_Name: forbiddenZone
   m_TagString: Untagged
@@ -109,23 +108,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tags: []
   tag1: forbidden zone
-  tag2: 
-  tag3: 
-  tag4: 
---- !u!114 &2705463388160509701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3038389740418852488}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  thisIsTaggedWith: {fileID: 0}
-  tag1: 
   tag2: 
   tag3: 
   tag4: 

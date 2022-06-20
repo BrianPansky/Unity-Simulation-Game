@@ -17,9 +17,8 @@ GameObject:
   - component: {fileID: 3340885695876105948}
   - component: {fileID: 7931028571116217599}
   - component: {fileID: 1880860526876978608}
-  - component: {fileID: 863948565953260052}
   m_Layer: 0
-  m_Name: storage 1
+  m_Name: storageToCreate
   m_TagString: container
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -110,6 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!114 &2485297271306337335
 MonoBehaviour:
@@ -165,11 +165,14 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   thisIsTaggedWith: {fileID: 0}
+  npcx: 
   ignore: 1
   goalWait: 0
 --- !u!114 &1880860526876978608
@@ -185,19 +188,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
---- !u!114 &863948565953260052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5897906389598753279}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  thisIsTaggedWith: {fileID: 0}
   tag1: storage
   tag2: owned by Player
   tag3: 
