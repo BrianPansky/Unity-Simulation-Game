@@ -140,8 +140,8 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-            //only interact with world if we are NOT in menu:
-            if (inMenu == false)
+            //only interact with world if we are NOT in menu [and not in build mode]:
+            else if (inMenu == false)
             {
                 if (weapon == false)
                 {

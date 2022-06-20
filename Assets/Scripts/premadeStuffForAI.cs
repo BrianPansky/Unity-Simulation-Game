@@ -117,6 +117,7 @@ public class premadeStuffForAI : MonoBehaviour
     public action askMemberForMoney = new action();
     public action hireResourceGatherer = new action();
 
+    public action createSoldier = new action();
 
     public action createStorage = new action();
     
@@ -220,10 +221,13 @@ public class premadeStuffForAI : MonoBehaviour
 
         //actions:
         {
+            createSoldier = actionCreator("createSoldier", "ad-hoc", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(hungry), 1, victim);
+
+
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
             createStorage = actionCreator("createStorage", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(storageOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
 
-
+            //needs a target!  locationPrereq??!?!?!  do ALL actions need a target?  do all targets need a "LOCATION"prereq?????
             landLording = actionCreator("landLording", "capitalism", wantedPrereqsLister(homeOwnership), UNwantedPrereqsLister(), wantedEffectsLister(rentalProperty), UNwantedEffectsLister(homeOwnership, profitMotive), 1);
             shootSpree = actionCreator("shootSpree", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
 
@@ -248,14 +252,14 @@ public class premadeStuffForAI : MonoBehaviour
 
             buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
 
-
+            //need target/location??
             handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1);
             handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4);
             
             pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food, resource1), UNwantedEffectsLister(), 1, victim);
             
 
-            
+            //target??????? location????
             giftGun = actionCreator("giftGun", "........", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(gun), 1);
 
             extort = actionCreator("extort", "crime", wantedPrereqsLister(gun), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 0, checkout);
@@ -268,7 +272,7 @@ public class premadeStuffForAI : MonoBehaviour
             //SHOULD OBVIOUSLY BE AUTOMATICALLY GENERATED:
             askMemberForMoney = actionCreator("askMemberForMoney", "commanding", wantedPrereqsLister(groupMember), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyGroupMember);
             hireSomeone = actionCreator("hireSomeone", "work", wantedPrereqsLister(shopOwnership), UNwantedPrereqsLister(threat), wantedEffectsLister(employee), UNwantedEffectsLister(), 1, hiringZone);
-            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, victim);
+            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, victim);
 
             //done automating these?????  can delete????????
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
@@ -491,7 +495,9 @@ public class premadeStuffForAI : MonoBehaviour
         //newList.Add(askMemberForMoney);
         newList.Add(hireResourceGatherer);
         newList.Add(createStorage);
+        newList.Add(createSoldier);
         
+
 
         //knownActions.Add(shootSpree); 
 

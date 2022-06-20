@@ -255,11 +255,17 @@ public class functionsForAI : MonoBehaviour
                 testSwitch();
 
             }
+            else if (nextAction.name == "createSoldier")
+            {
+                print("soldier hiring/creation action activated!!!!!!!!!!!!!!");
+            }
             else if (nextAction.name == "hireResourceGatherer")
             {
                 if (hiring(target, premadeStuff.resource1GatheringJob, "storage"))
                 {
                     Debug.Log("hired..........");
+                    //ad-hoc update of state:
+                    state = implementALLEffects(nextAction, state);
                 }
                 else
                 {
