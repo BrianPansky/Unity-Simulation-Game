@@ -235,9 +235,10 @@ public class AI1 : MonoBehaviour
                 //doing the to-do list (checks if it's not zero length):
 
                 //theFunctions.print("TESTTTTTTTTTT before handle action");
+                //printToDoList(toDoList);
                 handleAnyNextAction();
+                //printToDoList(toDoList);
 
-                
                 //theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
                 //masterPrintControl = false;
             }
@@ -385,21 +386,22 @@ public class AI1 : MonoBehaviour
         //why am I doing it this way?  What if there's MORE THAN ONE impossible action?
         //very weird, need to re-write this somehow...
         int Z;
+        //returns the index number of the first action on that list that CANNOT be completed
         Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+        //if all actions can be completed fine, it returns negative two
 
+        //theFunctions.print(Z.ToString());
         
         if (Z != -2)
         {
             if (this.name == npcx)
             {
-                //theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
+                theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
 
                 //printPlanListForSpecificNPC();
                 //printPlanList(planList);
                 //printToDoList(toDoList);
-
-                //theFunctions.print(thisIneffectiveAction.name);
-                //theFunctions.print(recurringGoal.name);
+                
 
 
             }
@@ -594,13 +596,14 @@ public class AI1 : MonoBehaviour
             {
                 //this "else" means the nextAction is redundant, already done.
                 //so dump the action:
-                //print("dddddddddddddddduuuuuuuuuuuuuuummmmmmmmmmmmmmmmmmmmpppppppppppppp");
+                print("dddddddddddddddduuuuuuuuuuuuuuummmmmmmmmmmmmmmmmmmmpppppppppppppp");
                 target = theFunctions.dumpAction(target);
                 goalWait = 0; //SHOULD INCORPORATE INTO "dumpAction"????
             }
 
 
 
+            //masterPrintControl = false;
         }
     }
             
@@ -706,6 +709,9 @@ public class AI1 : MonoBehaviour
 
     public bool checkIfActionIsNeeded(action thisAction, Dictionary<string, List<stateItem>> state)
     {
+        //NOT A PROPER TEST OF FULL PLAN
+        //ALSO NOT A PROPER TEST IF THERE IS ONLY ONE ACTION
+        //[SEE DEVJOURNAL "why don't NPCs dump ''redundant'' orders by plyer"
         //ASSUMES THE ACTION IS THE FIRST ACTION IN THE "toDoList" VARIABLE!
         //used to check if an action is redundant, if it's done already.
         //this is similar to the funciton that checks prereqs.  Could probably use that fact to cut down on duplicate code...
@@ -737,6 +743,7 @@ public class AI1 : MonoBehaviour
                 tf = false;  //"true" means "meeded", false means redundant.
             }
         }
+
 
         return tf;
 

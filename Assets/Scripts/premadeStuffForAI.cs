@@ -82,7 +82,7 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem anyNONGroupMember = new stateItem();
 
     public stateItem placeHolderFactionGoal = new stateItem();
-
+    
 
 
 
@@ -91,6 +91,7 @@ public class premadeStuffForAI : MonoBehaviour
     //public action buyFood = new action();
     //public action sellFood = new action();
     public action doTheWork = new action();
+    public action doJobGeneric = new action();
     public action eat = new action();
     public action restock = new action();
     
@@ -253,11 +254,12 @@ public class premadeStuffForAI : MonoBehaviour
         //actions:
         {
             //NOTE AD-HOC TARGET RIGHT NOW IS "anyLandPlot"!!!!!!!!!!!!!!!
-            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(resource1), 1, anyNONGroupMember);
+            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(), 1, anyNONGroupMember);
             orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(soldier), 1, anyLandPlot);
             //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
             attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyUnderling);
-
+            
+            doJobGeneric = actionCreator("doJobGeneric", "genericJob", wantedPrereqsLister(placeHolderFactionGoal), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, anyEnemyUnderling);
 
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
             createStorage = actionCreator("createStorage", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(storageOwnership), UNwantedEffectsLister(), 7, anyLandPlot);

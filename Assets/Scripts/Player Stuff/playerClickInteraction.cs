@@ -325,9 +325,9 @@ public class playerClickInteraction : MonoBehaviour
             targetAI.inConversation = true;
 
             //FOR INVESTIGATING/TESTING:
-            //targetAI.masterPrintControl = true;
-            //targetAI.npcx = targetAI.gameObject.name;
-            //Debug.Log("updated ''npcx''");
+            targetAI.masterPrintControl = true;
+            targetAI.npcx = targetAI.gameObject.name;
+            Debug.Log("updated ''npcx''");
 
             //targetAI.state["threatState"].Add(premadeStuff.threat);
             //targetAI.planningState["threatState"].Add(premadeStuff.threat);

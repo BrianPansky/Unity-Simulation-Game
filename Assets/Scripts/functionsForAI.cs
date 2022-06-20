@@ -184,6 +184,8 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
+                //print("should have a target");
+                //print(target.name);
                 //the following shoudl only happen if target is NOT null, right?
                 travelToTargetObject(target);
             }
@@ -201,7 +203,8 @@ public class functionsForAI : MonoBehaviour
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
         {
-            
+
+            //print("prereqs met");
             //if(gameObject.name == "NPC")
 
             //I SHOULD REALLY BUNDLE THESE INSIDE THE DEFINITIONS OF THE ACTIONS?  OR HAVE THEM "LINKED" IN THERE...
@@ -274,7 +277,7 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "createSoldier")
             {
-                Debug.Log("trying to hire SOLDIER ....");
+                //Debug.Log("trying to hire SOLDIER ....");
                 if (hiring(target, premadeStuff.soldierJob, "storage"))
                 {
                     Debug.Log("hired soldier!");
@@ -306,10 +309,13 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "orderAttack")
             {
                 testOn();
+
+                thisAI.goalWait = 1100;
+
                 //ad-hoc, do targeting of ALL soldiers HERE for now:
                 List<GameObject> listOfSoldiers = ALLTaggedWithMultiple(gangTag(this.gameObject), "soldier");
 
-                printAlways("******************************giving order to attack...*********************************");
+                //printAlways("******************************giving order to attack...*********************************");
                 //print(thisAI.gameObject.name);
                 //printPlan(thisAI.toDoList);
                 //if (thisAI.currentJob != null)
@@ -1374,14 +1380,14 @@ public class functionsForAI : MonoBehaviour
     {
         //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
         //Has to return bool to show if it worked or no.  clunky, but oh well?
-
+        print("hello??????????????????????????????????");
 
         //ad-hoc way to hire more than one employee for now:
         //if (listOfCashiers.Contains(customer) == false)
         AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
         if (targetAI.jobSeeking == true)
         {
-            
+            print("no problem");
 
             //listOfCashiers.Add(customer);
             //changeRoles(whotoHire, premadeStuff.workAsCashier, premadeStuff.doTheWork);
@@ -1407,6 +1413,7 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
+                print("no problem, shoudl fuckign be successful");
                 doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
 
@@ -1418,6 +1425,7 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
+            print("not job seeking");
             return false;
         }
     }
@@ -1504,7 +1512,9 @@ public class functionsForAI : MonoBehaviour
         //going to blank out their to-do list, and fill it with test "orders":
         //AD HOC, SHOULD NOT DO THIS?!?!?
         NPChubScript.toDoList.Clear();
-
+        //or this one.  hopefully this stops the orders from piling up infinitely...for now.
+        //AD-HOC.  in future, shoudl be able to queue up orders!!!
+        NPChubScript.inputtedToDoList.Clear();
 
 
         //print(thisAI.gameObject.name);
@@ -1529,6 +1539,12 @@ public class functionsForAI : MonoBehaviour
         foreach(GameObject person in whoToCommand)
         {
             commandToDoXAction(theXAction, person);
+
+            //FOR INVESTIGATING/TESTING:
+            AI1 targetAI = person.GetComponent("AI1") as AI1;
+            targetAI.masterPrintControl = true;
+            targetAI.npcx = targetAI.gameObject.name;
+            //Debug.Log("updated ''npcx''");
         }
     }
 
@@ -1636,11 +1652,11 @@ public class functionsForAI : MonoBehaviour
 
     public GameObject dumpAction(GameObject target)
     {
-        print(thisAI.gameObject.name);
-        printPlan(thisAI.toDoList);
+        //print(thisAI.gameObject.name);
+        //printPlan(thisAI.toDoList);
         if (thisAI.currentJob != null)
         {
-            print(thisAI.currentJob.name);
+            //print(thisAI.currentJob.name);
         }
 
         //when action is done, remove the action from the plan, and set target to null
@@ -1750,8 +1766,8 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            //print("you are shot!");
-            whoToKill = null;
+            print("you are shot!");
+            //whoToKill = null;
         }
     }
 
@@ -2001,7 +2017,7 @@ public class functionsForAI : MonoBehaviour
             else if (criteria.name == "anyEnemyUnderling")
             {
                 social socialScriptOfLeader = thisAI.leader.GetComponent<social>();
-                target = randomTaggedWithMIX(ALLTaggedWithMultiple(randomStringFromList(socialScriptOfLeader.enemyFactionList)), gangTag(thisAI.leader));
+                target = randomTaggedWithMIX(ALLTaggedWithMultiple(randomStringFromList(socialScriptOfLeader.enemyFactionList)), "factionLeader");
 
                 if(target != null)
                 {
@@ -5092,6 +5108,7 @@ public class functionsForAI : MonoBehaviour
         //imagines it's way through a plan list
         //returns the index number of the first action on that list that CANNOT be completed
         //if all actions can be completed fine, it returns negative two
+        //[or, i suppose, if there are no other actions on the list]
 
         int noProblem;
         noProblem = -2;
