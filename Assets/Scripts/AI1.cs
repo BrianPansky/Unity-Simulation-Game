@@ -129,15 +129,17 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
-        npcx = "NPC";
+        npcx = "NPC shopkeeper (1)";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = false;
+        masterPrintControl = true;
 
 
         //i think this should work?
         planningState = theFunctions.deepStateCopyer(state);
-}
+
+        //theFunctions.printKnownActionsDeeply(knownActions);
+    }
 
     
 
@@ -145,19 +147,18 @@ public class AI1 : MonoBehaviour
     void Update()
     {
         
-        
+        //theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
 
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
         {
-            
             //now handle the checking stuff.  like checking to pay PLAYER for work shift.  just JOB stuff for now i guess:
             checkJobs();
 
             if (inConversation == false)
             {
 
-                theFunctions.print("TESTTTTTTTTTTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!");
+                //theFunctions.print("TESTTTTTTTTTTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!");
 
                 //get NPC moving again if it was stopped by conversation:
                 getGoingAgan();
@@ -169,16 +170,15 @@ public class AI1 : MonoBehaviour
 
                 //fine time to do sensing, I guess...
                 doSensing();
-
                 //remove all plans that contain "ineffective actions":
                 removeIneffectiveActions();
 
-                theFunctions.print("TESTTTTTTTTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!");
+                //theFunctions.print("TESTTTTTTTTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!");
 
                 if (inputtedToDoList.Count > 0)
                 {
                     //for now, do orders/favors and such first
-                    theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
+                    //theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
 
                     //NEED TO BLANK TARGET!
                     target = null;
@@ -189,12 +189,11 @@ public class AI1 : MonoBehaviour
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-
                     //printToDoList(toDoList);
                 }
                 else if (toDoList.Count == 0)
                 {
-                    theFunctions.print("TESTTTTTTTTTT!!!!!!55555555555555555555555555555555555555555!!!");
+                    //theFunctions.print("TESTTTTTTTTTT!!!!!!55555555555555555555555555555555555555555!!!");
                     //so we need a plan:
                     getPlan();
 
@@ -212,29 +211,27 @@ public class AI1 : MonoBehaviour
                         //theFunctions.printState(state);
 
                     }
-                    printPlanListForSpecificNPC();
+                    //printPlanListForSpecificNPC();
                     //printToDoListForSpecificNPC();
 
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-
-                    printToDoList(toDoList);
+                    //printToDoList(toDoList);
 
                 }
 
                 //printToDoList(toDoList);
 
-
                 //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
 
-                theFunctions.print("TESTTTTTTTTTT before handle action");
+                //theFunctions.print("TESTTTTTTTTTT before handle action");
                 handleAnyNextAction();
 
-
-                theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
-                masterPrintControl = false;
+                
+                //theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
+                //masterPrintControl = false;
             }
             else
             {
@@ -248,9 +245,9 @@ public class AI1 : MonoBehaviour
             //theFunctions.print("TESTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!");
             //masterPrintControl = false;
         }
-        
 
-        
+
+        //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
     }
 
     ////////////////////////////////////////////////////
@@ -457,10 +454,10 @@ public class AI1 : MonoBehaviour
 
             //masterPrintControl = false;
 
-            printPlanListForSpecificNPC();
+            //printPlanListForSpecificNPC();
             //theFunctions.printState(state);
             //sometimes at this moment, there are zero plans?  but not always?
-            masterPrintControl = false;
+            //masterPrintControl = false;
 
             //masterPrintControl = true;
             //printPlanListForSpecificNPC();
@@ -524,19 +521,22 @@ public class AI1 : MonoBehaviour
             planList = theFunctions.planRanker(planList);
 
 
-            theFunctions.print("this planList");
-            printPlanListForSpecificNPC();
+            //theFunctions.print("this planList, after ranking plans");
+            //printPlanListForSpecificNPC();
 
             //choose first one:
             toDoList = deepCopyFirstPlan(planList);
             //and REMOVE that first one from the planList:
             planList.RemoveAt(0);
 
+            //printToDoListForSpecificNPC();
+
         }
     }
 
     public void handleAnyNextAction()
     {
+        //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         if (this.name == npcx)
         {
             //theFunctions.print("11111111111111111111111111111111111111");
@@ -546,8 +546,10 @@ public class AI1 : MonoBehaviour
 
 
         }
+        //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         //first, blank toDoList if it is impossible:
         blankImpossibleToDoList();
+        //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         if (this.name == npcx)
         {
             //theFunctions.print("22222222222222222222222222222222222222222");
@@ -566,7 +568,12 @@ public class AI1 : MonoBehaviour
             {
                 if (goalWait < 1)
                 {
+                    //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
+                    //theFunctions.printKnownActionsDeeply(knownActions);
+                    //theFunctions.print(theFunctions.actionToTextDeep(toDoList[0]));
                     target = theFunctions.doNextAction(toDoList[0], state, target, ineffectiveActions);
+                    //theFunctions.printKnownActionsDeeply(knownActions);
+                    //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
                 }
                 else
                 {

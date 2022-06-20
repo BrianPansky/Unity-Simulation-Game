@@ -275,8 +275,8 @@ public class premadeStuffForAI : MonoBehaviour
             buyHome = actionCreator("buyHome", "buyThisProperty", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(homeOwnership), UNwantedEffectsLister(), 1, anyHome);
 
             //need target/location??
-            handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1, workPlace);
-            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4, workPlace);
+            handleSecurityMild = actionCreator("handleSecurityMild", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 1, anyLandPlot);
+            handleSecurityEscalationOne = actionCreator("handleSecurityEscalationOne", "security", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(threat), 4, anyLandPlot);
             
             pickVictimsPocket = actionCreator("pickVictimsPocket", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money, food, resource1), UNwantedEffectsLister(), 1, victim);
             
@@ -309,7 +309,8 @@ public class premadeStuffForAI : MonoBehaviour
         {
 
             //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
-            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild, handleSecurityEscalationOne), 10, 0, 1);
+            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild, handleSecurityEscalationOne), 200, 0, 1);
+            //cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild), 200, 0, 1);
             //cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 10, 0, 1);
             resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
             
@@ -504,8 +505,8 @@ public class premadeStuffForAI : MonoBehaviour
 
 
 
-        knownActions.Add(handleSecurityMild);
-        knownActions.Add(handleSecurityEscalationOne);
+        //knownActions.Add(handleSecurityMild);
+        //knownActions.Add(handleSecurityEscalationOne);
         
 
         //knownActions.Add(sellFood);
@@ -889,14 +890,16 @@ public class premadeStuffForAI : MonoBehaviour
 
     public List<action> actionListCreator(params action[] listofActions)
     {
+        //should deep copy as well i think!
+
         List<action> aNewList = new List<action>();
 
         foreach (action x in listofActions)
         {
             aNewList.Add(x);
         }
-
-        return aNewList;
+        
+        return deepCopyActionList(aNewList);
     }
 
     public job jobDeepCopier(job theJob)

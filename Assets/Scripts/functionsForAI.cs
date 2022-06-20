@@ -74,6 +74,9 @@ public class functionsForAI : MonoBehaviour
         //that seems badly entangled, caused an error when there IS NO next action in the list of actions (index out of range error)
         //and i can see those variables were only used in code below which has already been commented out, not used.
 
+        
+
+
         if (areAllForbiddenZonesClear() == false)
         {
             //print("yo");
@@ -83,20 +86,24 @@ public class functionsForAI : MonoBehaviour
 
             //ok, so found a threat in a forbiddenZone
             //but before we record that threat, first check if we ALREADY have that threat recorded:
-            actionItem threatActionItem = premadeStuff.convertToActionItem(premadeStuff.threat, 1);
+            //SEEMS GARBAGE AND AD HOC AND HAD A SHALLOW COPY ERROR
+            //deep copy just in case
+            actionItem threatActionItem = premadeStuff.deepActionItemCopier(premadeStuff.convertToActionItem(premadeStuff.threat, 1));
             if (isStateAccomplished(threatActionItem, state) == false)
             {
+                //SEEMS GARBAGE AND AD HOC AND HAD A SHALLOW COPY ERROR
+                //DEFINITELY need to deep copy these ones!
                 //ok, now we know we won't be adding a duplicate, here we go:
-                state["threatState"].Add(premadeStuff.threat);
-                thisAI.planningState["threatState"].Add(premadeStuff.threat);
+                state["threatState"].Add(deepStateItemCopier(premadeStuff.threat));
+                thisAI.planningState["threatState"].Add(deepStateItemCopier(premadeStuff.threat));
                 //"incrementItem"??????????
-
+                
 
                 //print("yo");
             }
         }
 
-        
+
 
 
         /*
@@ -127,6 +134,7 @@ public class functionsForAI : MonoBehaviour
         }
         */
 
+        
 
     }
 
@@ -151,6 +159,7 @@ public class functionsForAI : MonoBehaviour
         //allPotentialTargets = globalTags["person"];
         //print("ya every one leofjrjfir");
         //print(allPotentialTargets.Count);
+        
 
 
 
@@ -190,14 +199,13 @@ public class functionsForAI : MonoBehaviour
 
             //travelToactionItem(nextAction.locationPrereq);
         }
-
-
+        
 
 
         //actions with ALL prereqs met (including location prereq) can proceed below:
         if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
         {
-
+            
             //if(gameObject.name == "NPC")
 
             //I SHOULD REALLY BUNDLE THESE INSIDE THE DEFINITIONS OF THE ACTIONS?  OR HAVE THEM "LINKED" IN THERE...
@@ -447,6 +455,8 @@ public class functionsForAI : MonoBehaviour
                 //**********UMMMMM, how does this know WHICH STORE???  Is it wrong???*****************
 
 
+
+
                 //get the checkoutZone:
                 GameObject checkoutZone = getCheckoutMapZone(target.transform.parent.gameObject);
                 //print("3) " + checkoutZone.name);
@@ -463,10 +473,23 @@ public class functionsForAI : MonoBehaviour
                     //print(customer.name);
 
 
+
+
+
+                    //FOR INVESTIGATING/TESTING:
+                    AI1 targetAI = customer.GetComponent("AI1") as AI1;
+                    targetAI.masterPrintControl = true;
+                    targetAI.npcx = targetAI.gameObject.name;
+                    Debug.Log("updated ''npcx''");
+
+
+
+
+
                     workerCount += 1;
                     
                     //ad-hoc way to hire more than one worker for now:
-                    if (workerCount > 1)
+                    if (workerCount > 0)
                     {
                         //also, to easily put the "employee1" actionItem in the organizationState:
                         state = implementALLEffectsREAL(nextAction, state);
@@ -642,7 +665,9 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "handleSecurityMild")
             {
-                thisAI.masterPrintControl = true;
+                //thisAI.masterPrintControl = true;
+
+                printAlways("SECURITY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
                 //print("yoooooooo");
                 if (effectivenessTimer == 0)
@@ -677,30 +702,47 @@ public class functionsForAI : MonoBehaviour
                 }
 
                 
-                thisAI.masterPrintControl = false;
+                //thisAI.masterPrintControl = false;
             }
             else if (nextAction.name == "handleSecurityEscalationOne")
             {
+                //printAlways("SECURITY22222!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                //printAlways(actionToTextDeep(nextAction));
+                
+
                 if (effectivenessTimer == 0)
                 {
                     print("handling security ESCALATON");
+                    printAlways(this.gameObject.name);
                 }
                 effectivenessTimer += 1;
 
                 if (areAllForbiddenZonesClear() == true)
                 {
-                    print("escalation over...");
+                    
                     state = implementALLEffectsREAL(nextAction, state);
                     target = dumpAction(target);
 
                     effectivenessTimer = 0;
+
+                    print("escalation over...");
                 }
+
+                //printAlways(actionToTextDeep(nextAction));
+
             }
             else if (nextAction.name == "createShop")
             {
+                //print(actionToTextDeep(newAction));
+                //printKnownActionsDeeply(knownActions);
+
                 createBuildingX(storePrefab);
-                
+
+                //printKnownActionsDeeply(knownActions);
+
                 target = dumpAction(target);
+
+                //printKnownActionsDeeply(knownActions);
 
                 //ad-hoc update of state:
                 state = implementALLEffectsREAL(nextAction, state);
@@ -743,8 +785,8 @@ public class functionsForAI : MonoBehaviour
                 //alert();
             }
 
+            
         }
-
 
         //ad hoc for now:
         //testSwitch();
@@ -848,9 +890,9 @@ public class functionsForAI : MonoBehaviour
 
             }
         }
-        
 
         
+
         if (foundItem == false)
         {
             if (this.name == "NPC")
@@ -885,26 +927,23 @@ public class functionsForAI : MonoBehaviour
             //print(newItem.quantity);  //this should be JUST EQUAL TO "amount", no more, no less
 
             inventory.Add(newItem);
-
-
+            
 
         }
         else
         {
             
-
             //startTest();
 
             //just add, don't need to zero it out:
             itemToIncrement.quantity += amount;
-
-
+            
 
 
             //endTest();
 
             //alert();
-            
+
 
             //if there are zero left in inventory, due to subtraction, completely remove the stateItem:
             //if (itemToIncrement.quantity == 0)
@@ -916,7 +955,6 @@ public class functionsForAI : MonoBehaviour
                 //  SHOULD THIS BE "ITEM TO INCREMENT", NOT "THEITEM"????????
                 //removeInventoryItem(theItem, inventory);
                 removeInventoryItem(itemToIncrement, inventory);
-
                 
             }
             if (itemToIncrement.quantity < 0)
@@ -940,8 +978,7 @@ public class functionsForAI : MonoBehaviour
                 //  SHOULD THIS BE "ITEM TO INCREMENT", NOT "THEITEM"????????
                 //removeInventoryItem(theItem, inventory);
                 //removeInventoryItem(itemToIncrement, inventory);
-
-
+                
             }
 
 
@@ -1179,12 +1216,12 @@ public class functionsForAI : MonoBehaviour
         //actioner is the one doing the nextAction
 
 
-        print(actionToTextDeep(nextAction));
-        printInventoryDeep(actionerInventory);
-        printInventoryDeep(inventory2);
-        printInventoryDeep(thisAI.planningState["inventory"]);
+        //print(actionToTextDeep(nextAction));
+        //printInventoryDeep(actionerInventory);
+        //printInventoryDeep(inventory2);
+        //printInventoryDeep(thisAI.planningState["inventory"]);
 
-        print("..................");
+        //print("..................");
 
         //NOW modify inventories
         //WHY DO I HAVE TWO FOR LOOPS, TWO DIFFERENT "AMOUNMTS" AND I STILL 
@@ -1217,10 +1254,10 @@ public class functionsForAI : MonoBehaviour
         }
 
 
-        printInventoryDeep(actionerInventory);
-        printInventoryDeep(inventory2);
-        printInventoryDeep(thisAI.planningState["inventory"]);
-        thisAI.stateDiagnosis(thisAI.planningState);
+        //printInventoryDeep(actionerInventory);
+        //printInventoryDeep(inventory2);
+        //printInventoryDeep(thisAI.planningState["inventory"]);
+        //thisAI.stateDiagnosis(thisAI.planningState);
 
         return theTRY;
 
@@ -1395,6 +1432,10 @@ public class functionsForAI : MonoBehaviour
 
 
         //make this NPC self employed, so i will have role-location for buying from them...bit ad-hoc...
+        //SHOULD MOVE THIS TO "CREATE STORE" ENACTION, BUT
+        //REQUIRES THE "NEWBUILDING" GAME OBJECT, NOT JUST THE PREFAB!
+        //so, should RETURN this generated building object, to be used further
+        //[or have OTHER way to "find" it for use]
         if(buildingX.name == "storeToCreate")
         {
             doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
@@ -2986,13 +3027,13 @@ public class functionsForAI : MonoBehaviour
 
 
 
-            print("/////////////////////////////////////////////////////////////////////");
-            print("/////////////////////////////////////////////////////////////////////");
-            print("/////////////////////////////////////////////////////////////////////");
-            print("/////////////////////// STARTING INVESTIGATION ///////////////////////");
-            print("/////////////////////////////////////////////////////////////////////");
-            print("/////////////////////////////////////////////////////////////////////");
-            print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////// STARTING INVESTIGATION ///////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
+            //print("/////////////////////////////////////////////////////////////////////");
 
             //printState(state);
 
@@ -3159,7 +3200,8 @@ public class functionsForAI : MonoBehaviour
             //cycle through every known action, so we can check if any accomplish the goal:
             foreach (action thisAction in knownActions)
             {
-                //print("fffffffffffffffffffffffffffffffffffffffffffffffffff");
+                print("fffffffffffffffffffffffffffffffffffffffffffffffffff");
+                print(actionToTextDeep(thisAction));
                 //also have to look at each of their effects individually, see if the effect is to 
                 foreach (actionItem thisEffect in thisAction.effects)
                 {
@@ -3176,12 +3218,12 @@ public class functionsForAI : MonoBehaviour
                         //what if we can't fill the prereqs??????????
                         newAction = thisAction;
 
-                        //print(actionToTextDeep(newAction));
-
+                        print(actionToTextDeep(newAction));
+                        //printKnownActionsDeeply(knownActions);
                     }
                     else
                     {
-                        //print("^^^^^^not a match");
+                        print("^^^^^^not a match");
                     }
                 }
             }
@@ -3242,7 +3284,7 @@ public class functionsForAI : MonoBehaviour
         //so now we have an action
         //handle quantities here???  but kinda tangled with needing to also fill prereqs...
         quant = quantityToReach(goal, newAction);
-        print(newAction.name + " " + goal.name + " " + quant);
+        //print(newAction.name + " " + goal.name + " " + quant);
 
         //set the quant check to be >1, instead of >0 [seems wrong though][see journal]
         //AHAH! quantityToReach SHOULD TAKE STATE INTO ACCOUNT!  DUH!
@@ -3281,7 +3323,7 @@ public class functionsForAI : MonoBehaviour
 
         //what if we can't fill the prereqs??????????
 
-        print(actionToTextDeep(thisAction));
+        //print(actionToTextDeep(thisAction));
         //printState(state);
         //printInventoryDeep(state["inventory"]);
 
@@ -3351,7 +3393,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-        //print("===================================START OF MERGING=======[action, quant filler, then prereq filler]======================");
+        print("===================================START OF MERGING=======[action, quant filler, then prereq filler]======================");
         //printPlanList(planList);
         //printPlanList(quantsPlanList);
         //printPlanList(prereqsPlanList);
@@ -3373,8 +3415,8 @@ public class functionsForAI : MonoBehaviour
         }
 
 
-        //printPlanList(planList);
-        //print("===================================END OF MERGING====================================");
+        printPlanList(planList);
+        print("===================================END OF MERGING====================================");
         
 
 
@@ -4143,9 +4185,9 @@ public class functionsForAI : MonoBehaviour
         //keep working on all impossible plans until they are fixed...or give up and discard them
         
 
-        print("================================START simulation main function====================================");
-        printPlanList(planList);
-        printInt(countdown);
+        //print("================================START simulation main function====================================");
+        //printPlanList(planList);
+        //printInt(countdown);
         //print(countdown);
 
 
@@ -4160,10 +4202,10 @@ public class functionsForAI : MonoBehaviour
             return fixedPlanList;
         }
 
-        printPlanList(planList);
+        //printPlanList(planList);
         foreach (List<action> eachPlan in planList)
         {
-            print("LLLLLLLLLLLLL   1111111  LLLLLLLLLLLLLL");
+            //print("LLLLLLLLLLLLL   1111111  LLLLLLLLLLLLLL");
 
             //yes, to fix ONE plan, might need to have a whole LIST of plans
             //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
@@ -4171,15 +4213,15 @@ public class functionsForAI : MonoBehaviour
             List<List<action>> fixedPlan = new List<List<action>>();
             fixedPlan = simulateOnePlanFillPrereqs(eachPlan, knownActions, realState, countdown);
 
-            print("/////////////// done here 1 ////////////////");
+            //print("/////////////// done here 1 ////////////////");
 
             if(fixedPlan != null && fixedPlan.Count() > 0)
             {
-                print("/////////////// done here 2 ////////////////");
+                //print("/////////////// done here 2 ////////////////");
                 
                 fixedPlanList = mergePlanLists(fixedPlanList, fixedPlan);
 
-                printPlanList(fixedPlanList);
+                //printPlanList(fixedPlanList);
             }
         }
         
@@ -4196,10 +4238,10 @@ public class functionsForAI : MonoBehaviour
         //keep working on all impossible plans until they are fixed...or give up and discard them
 
 
-        print("---------------------starting individual plan simulation----------------------");
-        printPlan(thisPlan);
+        //print("---------------------starting individual plan simulation----------------------");
+        //printPlan(thisPlan);
         //print(countdown);
-        printInt(countdown);
+        //printInt(countdown);
 
 
 
@@ -4231,7 +4273,7 @@ public class functionsForAI : MonoBehaviour
             {
                 if (prereqStateChecker(currentAction, imaginaryState) == true)
                 {
-                    print("an action is fine..................");
+                    //print("an action is fine..................");
                     //so this action is fine
 
                     //add it to plan
@@ -4288,8 +4330,8 @@ public class functionsForAI : MonoBehaviour
                         //now need to make all plans
                         //one for each way to fix current action
 
-                        print("here is constructingFixedPlansToReturn:");
-                        printPlanList(constructingFixedPlansToReturn);
+                        //print("here is constructingFixedPlansToReturn:");
+                        //printPlanList(constructingFixedPlansToReturn);
 
                         //first just add current action here i guess:
                         waysToFillPrereqs = addActionToEndOfAllPlans(waysToFillPrereqs, currentAction);
@@ -4298,8 +4340,8 @@ public class functionsForAI : MonoBehaviour
                         //wait until the end or something?  or else restart right after this?  sorta do with recursion
                         constructingFixedPlansToReturn = multiplyPlansByAddingFixes(constructingFixedPlansToReturn, waysToFillPrereqs);
 
-                        print("here is constructingFixedPlansToReturn AGAIN:");
-                        printPlanList(constructingFixedPlansToReturn);
+                        //print("here is constructingFixedPlansToReturn AGAIN:");
+                        //printPlanList(constructingFixedPlansToReturn);
 
                         
                     }
@@ -4317,7 +4359,7 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
-                print("this else");
+                //print("this else");
                 //just add it to ALL plans [do not implement effects]
                 //this needs to be inside the else so that we don't add the action twice if we filled prereqs
                 //the plan-fixing branch already includes that action
@@ -4332,7 +4374,7 @@ public class functionsForAI : MonoBehaviour
 
         if(soFarSoGood == false)
         {
-            print("THIS SEEMS DUPLICATE SHOULD THIS EVER HAPPEN?!?!?!?!?!? oh right, does need to do recursion i think");
+            //print("THIS SEEMS DUPLICATE SHOULD THIS EVER HAPPEN?!?!?!?!?!? oh right, does need to do recursion i think");
             //do recursion
             constructingFixedPlansToReturn = simulatingPlansToEnsurePrereqs(constructingFixedPlansToReturn, knownActions, realState, countdown);
 
@@ -4340,7 +4382,7 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            print("fine i guess?");
+            //print("fine i guess?");
             //this "else" means ORIGINAL  plan should be fine
             //return thisPlan;
             //but, we need to return a LIST data structure, so easiest for now:
@@ -4373,8 +4415,8 @@ public class functionsForAI : MonoBehaviour
         {
             if (impossibleActionprereqStateChecker(currentAction, imaginaryState) != true)
             {
-                print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
-                print(currentAction.name);
+                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+                //print(currentAction.name);
                     
                 return counter;
             }
@@ -4411,13 +4453,13 @@ public class functionsForAI : MonoBehaviour
             if (isStateAccomplished(prereqX, state) == false)
             {
                 
-                print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
-                print(thisAction.name);
-                print("BECAUSE of this prereq:");
-                print(prereqX.name);
-                printState(state);
-                printState(thisAI.planningState);
-                print(gameObject.name);
+                //print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                //print(thisAction.name);
+                //print("BECAUSE of this prereq:");
+                //print(prereqX.name);
+                //printState(state);
+                //printState(thisAI.planningState);
+                //print(gameObject.name);
 
 
 
