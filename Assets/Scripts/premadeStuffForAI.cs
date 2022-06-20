@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class premadeStuffForAI : MonoBehaviour
 {
+    public GameObject storagePrefab;
+
     //here I define the actions for the AI
 
     //initializing:

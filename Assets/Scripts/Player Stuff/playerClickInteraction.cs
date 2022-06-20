@@ -49,6 +49,7 @@ public class playerClickInteraction : MonoBehaviour
     public bool haveStore;
     public bool weapon;
     public GameObject myPrefab;
+    public GameObject currentPrefab;
     public bool swapDirection;
 
     // Start is called before the first frame update
@@ -129,7 +130,11 @@ public class playerClickInteraction : MonoBehaviour
                 //Instantiate(myPrefab, new Vector3(5, 0, -11), Quaternion.identity);
                 //Debug.Log("should be made");
 
-                raycastBuildingPlacement();
+                //only build if not in menu:
+                if (inMenu == false)
+                {
+                    raycastBuildingPlacement();
+                }
             }
             
 
@@ -180,6 +185,10 @@ public class playerClickInteraction : MonoBehaviour
             {
                 //Debug.Log("build mode activated");
                 buildMode = true;
+
+                //now bring up menu to select what to build
+                menuMode();
+                createBuildMenu();
             }
             else
             {
@@ -196,10 +205,10 @@ public class playerClickInteraction : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(ray, out hitInfo))
+        if (Physics.Raycast(ray, out hitInfo) && currentPrefab != null)
         {
             GameObject x = new GameObject();
-            x = Instantiate(myPrefab, hitInfo.point, Quaternion.identity);
+            x = Instantiate(currentPrefab, hitInfo.point, Quaternion.identity);
             //myPrefab.transform.position = hitInfo.point;
             //myPrefab.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
         }
@@ -298,15 +307,9 @@ public class playerClickInteraction : MonoBehaviour
         if (clickedOn.tag == "anNPC")
         {
             //switch to menu
-            //Switch to recruitment menu
-            //enable mouse:
-            Cursor.lockState = CursorLockMode.None;
-            //activate menu:
-            recruitingMenu.SetActive(true);
+            menuMode();
             //save selected NPC to operate on:
             selectedNPC = GameObject.Find(clickedOn.name);
-            //set the "inMenu" state to "true":
-            inMenu = true;
 
 
 
@@ -445,12 +448,23 @@ public class playerClickInteraction : MonoBehaviour
         }
     }
 
-    
+
 
     ///////////////////////////////////////////////////////////
     //         Dynamic Menu Button Creation/Deletion
     ///////////////////////////////////////////////////////////
-    
+
+    public void menuMode()
+    {
+        //switch to menu
+        //enable mouse:
+        Cursor.lockState = CursorLockMode.None;
+        //activate menu:
+        recruitingMenu.SetActive(true);
+        //set the "inMenu" state to "true":
+        inMenu = true;
+    }
+
     public void createRecruitmentButtonGrid()
     {
 
@@ -554,6 +568,20 @@ public class playerClickInteraction : MonoBehaviour
             //should first Probably check pre - reqs  using a pre req checker
             makeButton("give " + order.effects[0].name, () => this.giveXbutton(order));
         }
+
+    }
+
+
+    public void createBuildMenu()
+    {
+
+        //make these from a list later, ad hoc for now...
+        
+        makeButton("build " + myPrefab.name, () => this.selectWhatToBuild(myPrefab));
+
+        makeButton("build " + premadeStuff.storagePrefab.name, () => this.selectWhatToBuild(premadeStuff.storagePrefab));
+        
+
 
     }
 
@@ -706,20 +734,26 @@ public class playerClickInteraction : MonoBehaviour
 
     public void closeRecruitmentMenu()
     {
-        //set the NPC back to be able to move:
-        Debug.Log(selectedNPC.name);
-        AI1 targetAI = selectedNPC.GetComponent("AI1") as AI1;
-        targetAI.inConversation = false;
+        //if targeting an NPC [or something else?]
+        if(selectedNPC != null)
+        {
+            //set the NPC back to be able to move:
+            Debug.Log(selectedNPC.name);
+            AI1 targetAI = selectedNPC.GetComponent("AI1") as AI1;
+            targetAI.inConversation = false;
+            //de-select NPC:
+            selectedNPC = null;
 
-        //Debug.Log(targetAI.inConversation);
+            //Debug.Log(targetAI.inConversation);
+        }
+
 
         //Close recruitment menu
         //lock mouse:
         Cursor.lockState = CursorLockMode.Locked;
         //de-activate menu:
         recruitingMenu.SetActive(false);
-        //de-select NPC:
-        selectedNPC = null;
+        
         //set the "inMenu" state to "false":
         inMenu = false;
         //Destroy the generated buttons:
@@ -1096,6 +1130,10 @@ public class playerClickInteraction : MonoBehaviour
         Debug.Log("gave gun?");
     }
 
+    public void selectWhatToBuild(GameObject thisPrefab)
+    {
+        currentPrefab = thisPrefab;
+    }
 
     ///////////////////////////////////////////////////////////
     //          Grabbing and using foreign scripts
