@@ -74,7 +74,7 @@ public class premadeStuffForAI : MonoBehaviour
     //               ACTIONS
     ////////////////////////////////////////////////
 
-    public action buyFood = new action();
+    //public action buyFood = new action();
     //public action sellFood = new action();
     public action doTheWork = new action();
     public action eat = new action();
@@ -169,7 +169,10 @@ public class premadeStuffForAI : MonoBehaviour
             storagePlace.locationType = "deliverTo";
 
             home = stateItemCreator("home", "locationState");
-            food = stateItemCreator("food", "inventory");
+
+
+
+            food = stateItemCreator("food", "inventory", 5);
             money = stateItemCreator("money", "inventory");
             resource1 = stateItemCreator("resource1", "inventory");
 
@@ -276,7 +279,7 @@ public class premadeStuffForAI : MonoBehaviour
 
             //done automating these?????  can delete????????
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
-            buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
+            //buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
 
 
 
@@ -306,9 +309,11 @@ public class premadeStuffForAI : MonoBehaviour
     public Dictionary<string, List<stateItem>> createNPCstate1()
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
-
-        addToState(deepStateItemCopier(food), state);
+        
+        //addToState(deepStateItemCopier(food), state);
         addToState(deepStateItemCopier(money), state);
+        
+
         addToState(deepStateItemCopier(hungry), state);
 
         return state;
@@ -354,8 +359,10 @@ public class premadeStuffForAI : MonoBehaviour
     {
         Dictionary<string, List<stateItem>> state = createEmptyState();
         
-        theFunctions.incrementItem(state["inventory"], money, 72);
-        theFunctions.incrementItem(state["inventory"], food, 72);
+        theFunctions.incrementItem(state["inventory"], money, 555);
+
+        //also store inventory for now?
+        theFunctions.incrementItem(state["inventory"], food, 555);
 
         return state;
     }
@@ -427,7 +434,7 @@ public class premadeStuffForAI : MonoBehaviour
         //knownActions.Add(handleSecurityEscalationOne);
 
         newList.Add(eat);
-        newList.Add(buyFood);
+        //newList.Add(buyFood);
 
 
 
@@ -455,6 +462,7 @@ public class premadeStuffForAI : MonoBehaviour
     public List<action> createShopkeeperKnownActions()
     {
         knownActions.Add(hireSomeone);
+        //REMOVED FOR TEST:
         knownActions.Add(beBoss);
         knownActions.Add(buyShop);
         knownActions.Add(buyHome);
@@ -493,9 +501,9 @@ public class premadeStuffForAI : MonoBehaviour
         //newList.Add(pickVictimsPocket);
         //newList.Add(recruit);
         //newList.Add(askMemberForMoney);
-        newList.Add(hireResourceGatherer);
-        newList.Add(createStorage);
-        newList.Add(createSoldier);
+        //newList.Add(hireResourceGatherer);
+        //newList.Add(createStorage);
+        //newList.Add(createSoldier);
         
 
 
@@ -623,6 +631,9 @@ public class premadeStuffForAI : MonoBehaviour
         newItem.quantity = 0; //just zero it out first
         newItem.quantity += item.quantity;
 
+        newItem.value = 0; //just zero it out first
+        newItem.value += item.value;
+
         //Debug.Log(newItem.name);
         //Debug.Log(newItem.quantity);
 
@@ -658,12 +669,13 @@ public class premadeStuffForAI : MonoBehaviour
         return thisAction;
     }
 
-    public stateItem stateItemCreator(string name, string stateCategory)
+    public stateItem stateItemCreator(string name, string stateCategory, int price = 1)
     {
         stateItem thisStateItem = new stateItem();
 
         thisStateItem.stateCategory = stateCategory;
         thisStateItem.name = name;
+        thisStateItem.value = price;
 
         return thisStateItem;
     }
@@ -759,6 +771,21 @@ public class premadeStuffForAI : MonoBehaviour
         return newActionItem;
     }
 
+    public actionItem convertToActionItemBoolVersion(stateItem inputItem, bool wantedOrNot)
+    {
+        actionItem newActionItem = new actionItem();
+        newActionItem.item = inputItem;
+        newActionItem.inStateOrNot = wantedOrNot;
+
+
+        //copy from stateItem:
+        newActionItem.name = inputItem.name;
+        newActionItem.stateCategory = inputItem.stateCategory;
+        newActionItem.locationType = inputItem.locationType;
+
+        return newActionItem;
+    }
+
     public bool intToBool(int number)
     {
         //takes a 1 or a 0, converts it to boolean
@@ -775,6 +802,25 @@ public class premadeStuffForAI : MonoBehaviour
     }
 
 
+    public stateItem quantityOfItemGenerator(stateItem item, int quantity)
+    {
+        //deepcopies item, modifies quantity
+        stateItem thisStateItem = new stateItem();
+
+        thisStateItem = deepStateItemCopier(item);
+        thisStateItem.quantity = quantity;
+
+        return thisStateItem;
+    }
+
+    public stateItem moneyFromItem(stateItem item)
+    {
+        //gives amount of money based on value of item
+        //seems to translate "value" of item into "quantity" of money?
+        //Debug.Log(item.name);
+        //Debug.Log(item.value);
+        return quantityOfItemGenerator(money, item.value);
+    }
 
     //common action types to auto-generate:
     //public action bringMeX(stateItem itemX)

@@ -40,6 +40,9 @@ public class AI1 : MonoBehaviour
     //is this not used right now?  I'm using "recurringGoal" instead?
     public List<actionItem> goals = new List<actionItem>();
 
+
+    //diagnostic
+    public bool masterPrintControl;
     
 
 
@@ -56,6 +59,9 @@ public class AI1 : MonoBehaviour
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
     //public stateForAI state;
     public taggedWith thisIsTaggedWith;
+
+    //for easy debug printing
+    public string npcx;
 
 
     //ad-hoc
@@ -108,6 +114,13 @@ public class AI1 : MonoBehaviour
         clearanceLevel = 0;
 
         goalWait = 0;
+
+
+
+        //for easy debug printing
+        npcx = "NPC";
+        //diagnostic
+        masterPrintControl = true;
 }
 
     
@@ -126,6 +139,8 @@ public class AI1 : MonoBehaviour
 
                 //get NPC moving again if it was stopped by conversation:
                 getGoingAgan();
+
+                //printPlanListForSpecificNPC();
 
                 //fine time to re-fill goals, I guess...
                 refillGoals();
@@ -149,17 +164,11 @@ public class AI1 : MonoBehaviour
                 }
                 else if (toDoList.Count == 0)
                 {
-
-                    if (this.name == "NPC")
-                    {
-                        //theFunctions.print("state before getting plan:");
-                        //printPlanListForSpecificNPC();
-                        //theFunctions.printState(state);
-                    }
+                    
                     //so we need a plan:
                     getPlan();
 
-                    if (this.name == "NPC")
+                    if (this.name == npcx)
                     {
                         //theFunctions.print("here are plans:");
                         //printPlanListForSpecificNPC();
@@ -173,28 +182,16 @@ public class AI1 : MonoBehaviour
                         //theFunctions.printState(state);
 
                     }
-                }
-
-                if (this.name == "NPC")
-                {
-                    //theFunctions.print("1111111111111111 is it here? 111111111111");
                     //printPlanListForSpecificNPC();
-                    //theFunctions.printState(state);
-                    //theFunctions.printKnownActionsDeeply(knownActions);
+                    //printToDoListForSpecificNPC();
                 }
 
+
+                //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
                 handleAnyNextAction();
                 
                 
-
-                if (this.name == "NPC")
-                {
-                    //theFunctions.print("xxxxxxxxxxxxxx is it at the end? xxxxxxxxxxxxxxxxxxxx");
-                    //printPlanListForSpecificNPC();
-                    //theFunctions.printState(state);
-                    //theFunctions.printKnownActionsDeeply(knownActions);
-                }
 
             }
             else
@@ -266,7 +263,7 @@ public class AI1 : MonoBehaviour
         List<List<action>> plansToRemove = new List<List<action>>();
         foreach (action thisIneffectiveAction in ineffectiveActions)
         {
-            if (this.name == "NPC pickpocket")
+            if (this.name == npcx)
             {
                 theFunctions.print("11111111111111111there is an ineffective action to remove:");
                 //printPlanListForSpecificNPC();
@@ -306,7 +303,7 @@ public class AI1 : MonoBehaviour
             //remove the plan from the planList
             planList.Remove(thisPlan);
 
-            if (this.name == "NPC pickpocket")
+            if (this.name == npcx)
             {
                 //NPC shopkeeper
                 //theFunctions.print("this planList after removing ineffective plan:");
@@ -325,7 +322,7 @@ public class AI1 : MonoBehaviour
         //theFunctions.print("=============================START check=====================================");
         //only checks CURRENT to-do list.
         //blanks it out if it has ANY impossible action.
-        if (this.name == "NPC")
+        if (this.name == npcx)
         {
             //theFunctions.print("=============================START blankImpossibleToDoList check=====================================");
 
@@ -344,7 +341,7 @@ public class AI1 : MonoBehaviour
         
         if (Z != -2)
         {
-            if (this.name == "NPC pickpocket")
+            if (this.name == npcx)
             {
                 //theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
 
@@ -360,7 +357,7 @@ public class AI1 : MonoBehaviour
 
             //so, remove the ENTIRE to-do list:
             /*
-            if (this.name == "NPC shopkeeper")
+            if (this.name npcx)
             {
                 theFunctions.print("00000000000000000  to do List:   000000000000000000");
                 theFunctions.printPlan(toDoList);
@@ -383,7 +380,7 @@ public class AI1 : MonoBehaviour
             target = null;
             
         }
-        if (this.name == "NPC")
+        if (this.name == npcx)
         {
             //theFunctions.print("========================================END blankImpossibleToDoList check=============================");
 
@@ -403,68 +400,26 @@ public class AI1 : MonoBehaviour
         if (planList == null || planList.Count == 0)
         {
             //need to make planList:
+            
+            planList = theFunctions.planningPhase(recurringGoal, knownActions, state);
 
-            if (this.name == "NPC")
-            {
-                //theFunctions.print("--------------hewwo?------------------");
-                //theFunctions.print("------------------known actions BEFORE planning---------------------");
-
-                //theFunctions.print(thisIneffectiveAction.name);
-                //theFunctions.printKnownActionsDeeply(knownActions);
-
-
-            }
-
-            planList = theFunctions.problemSolver(recurringGoal, knownActions, state);
-
-            //printPlanListForSpecificNPC();
+            printPlanListForSpecificNPC();
+            //theFunctions.printState(state);
             //sometimes at this moment, there are zero plans?  but not always?
 
-            
-            if (this.name == "NPC" && planList.Count > 0)
-            {
-                //theFunctions.printPlanWithQuantities(planList[0]);
 
 
-            }
-            if (this.name == "NPC" && planList.Count == 0)
-            {
-                //theFunctions.print("---noooooooooooooo plans---------");
+            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state, 20);
 
+            printPlanListForSpecificNPC();
 
-            }
-
-            if (this.name == "NPC")
-            {
-                //theFunctions.print("/////////////////////////START simulatingPlansToEnsurePrereqs check//////////////////////////////////////");
-                //theFunctions.printKnownActionsDeeply(knownActions);
-                //theFunctions.print(thisIneffectiveAction.name);
-                //theFunctions.print(recurringGoal.name);
-
-
-            }
-
-            planList = theFunctions.simulatingPlansToEnsurePrereqs(planList, knownActions, state);
-
-            if (this.name == "NPC")
-            {
-                //theFunctions.print("////////////////////////////////////////END simulatingPlansToEnsurePrereqs check//////////////////////");
-                //theFunctions.printKnownActionsDeeply(knownActions);
-                //theFunctions.print(thisIneffectiveAction.name);
-                //theFunctions.print(recurringGoal.name);
-
-
-            }
-
-
-            //printPlanListForSpecificNPC(planList);
-
+            masterPrintControl = false;
 
             //also, blank out the list of "ineffective actions":
             //[I think this code could/should be moved elsewhere...]
             clearIneffectiveActions();
+            //printPlanListForSpecificNPC();
 
-            
         }
 
         
@@ -481,7 +436,7 @@ public class AI1 : MonoBehaviour
 
 
             /*
-            if (this.name == "NPC shopkeeper")
+            if (this.name == npcx)
             {
                 theFunctions.print("this planList");
                 printPlanListForSpecificNPC();
@@ -499,7 +454,7 @@ public class AI1 : MonoBehaviour
 
     public void handleAnyNextAction()
     {
-        if (this.name == "NPC")
+        if (this.name == npcx)
         {
             //theFunctions.print("11111111111111111111111111111111111111");
             //theFunctions.printKnownActionsDeeply(knownActions);
@@ -510,7 +465,7 @@ public class AI1 : MonoBehaviour
         }
         //first, blank toDoList if it is impossible:
         blankImpossibleToDoList();
-        if (this.name == "NPC")
+        if (this.name == npcx)
         {
             //theFunctions.print("22222222222222222222222222222222222222222");
             //theFunctions.printKnownActionsDeeply(knownActions);
@@ -524,7 +479,7 @@ public class AI1 : MonoBehaviour
         {
             //but don't do the action if it is already done
             //if it's done, remove it:
-            if (checkIfEffectsAreDone(toDoList[0], state) == false)
+            if (checkIfActionIsNeeded(toDoList[0], state) == true)
             {
                 if (goalWait < 1)
                 {
@@ -540,6 +495,7 @@ public class AI1 : MonoBehaviour
             {
                 //this "else" means the nextAction is redundant, already done.
                 //so dump the action:
+                print("dddddddddddddddduuuuuuuuuuuuuuummmmmmmmmmmmmmmmmmmmpppppppppppppp");
                 target = theFunctions.dumpAction(target);
                 goalWait = 0; //SHOULD INCORPORATE INTO "dumpAction"????
             }
@@ -604,16 +560,21 @@ public class AI1 : MonoBehaviour
         }
     }
 
-    public List<action> deepCopyFirstPlan(List<List<action>> planList)
+    public List<action> deepCopyPlan(List<action> plan)
     {
         List<action> thisDeepCopy = new List<action>();
 
-        foreach(action thisAction in planList[0])
+        foreach (action thisAction in plan)
         {
             thisDeepCopy.Add(thisAction);
         }
 
         return thisDeepCopy;
+    }
+
+    public List<action> deepCopyFirstPlan(List<List<action>> planList)
+    {
+        return deepCopyPlan(planList[0]);
     }
 
     public bool checkIfEffectsAreDone(action thisAction, Dictionary<string, List<stateItem>> state)
@@ -641,6 +602,57 @@ public class AI1 : MonoBehaviour
 
     }
 
+    public bool checkIfActionIsNeeded(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //ASSUMES THE ACTION IS THE FIRST ACTION IN THE "toDoList" VARIABLE!
+        //used to check if an action is redundant, if it's done already.
+        //this is similar to the funciton that checks prereqs.  Could probably use that fact to cut down on duplicate code...
+
+
+        //assume true, then check and change to false where needed
+        bool tf;
+        tf = true;  //"true" means "meeded", false means redundant.
+
+        if(checkIfEffectsAreDone(thisAction, state) == true)
+        {
+            //action SEEMS done, but if it's still necessary
+            //[such as if a quantity greater than 1 is needed]
+            //it might still not be redundant
+            //so, check if removing it causes plan to be impossible
+
+            //copy plan
+            //remove 1st action
+            //if this new plan is impossible, then the action MAY NOT be considered redundant
+            //(full unmodified plan gets checked for impossibility elsewhere)
+            List<action> thisDeepCopy = new List<action>();
+            thisDeepCopy = deepCopyPlan(toDoList);
+            thisDeepCopy.RemoveAt(0);
+
+            if(theFunctions.findFirstImpossibleAction(thisDeepCopy, knownActions, state) == -2)
+            {
+                //thus, no problem with this shorter plan
+                //thus, the longer plan is redundant
+                tf = false;  //"true" means "meeded", false means redundant.
+            }
+        }
+
+        return tf;
+
+    }
+
+
+    public void printThisInventory()
+    {
+
+        if (this.name == npcx)
+        {
+            theFunctions.print("==================================================");
+            theFunctions.printInventory(state["inventory"]);
+
+            
+        }
+    }
+
     public void printPlanListForSpecificNPC()
     {
         //List<List<action>>
@@ -648,10 +660,10 @@ public class AI1 : MonoBehaviour
 
         //to help, encapsulating this:
 
-        if (this.name == "NPC pickpocket")
+        if (this.name == npcx)
         {
             //NPC shopkeeper
-            print("00000000000000000  Plan List:   000000000000000000");
+            theFunctions.print("00000000000000000  Plan List:   000000000000000000");
             printPlanList(planList);
         }
 
@@ -659,7 +671,7 @@ public class AI1 : MonoBehaviour
 
 
         /*
-            if (this.name == "NPC pickpocket")
+            if (this.name == npcx)
             {
                 theFunctions.print("00000000000000000  Plan List:   000000000000000000");
                 printPlanList(planList);
@@ -669,7 +681,7 @@ public class AI1 : MonoBehaviour
             //theFunctions.printInventory(state["inventory"]);
 
 
-            if (this.name == "NPC")
+            if (this.name == npcx)
             {
                 theFunctions.print("==================================================");
                 theFunctions.printInventory(state["inventory"]);
@@ -684,8 +696,8 @@ public class AI1 : MonoBehaviour
             */
 
         /*
-        //if (this.name == "NPC pickpocket")
-        if (this.name == "NPC shopkeeper")
+        //if (this.name npcx)
+        if (this.name npcx)
         {
             theFunctions.print("==================================================");
             theFunctions.printPlan(toDoList);
@@ -708,14 +720,31 @@ public class AI1 : MonoBehaviour
         //theFunctions.printState(state);
         //printPlan(toDoList);
         /*
-        if (this.name == "NPC")
+        if (this.name npcx)
         {
             theFunctions.print("---------------------END OF UPDATE----------------------");
         }
         */
     }
 
-
+    public void printToDoListForSpecificNPC()
+    {
+        //theFunctions.printKnownActionsDeeply(knownActions);
+        //theFunctions.printPlanWithQuantities(planList[0]);
+        if (this.name == npcx)
+        {
+            if (toDoList == null)
+            {
+                theFunctions.print("this toDoList is null");
+            }
+            else
+            {
+                theFunctions.print("this should be the toDoList:");
+                theFunctions.print(theFunctions.planToText(toDoList));
+            }
+        }
+        
+    }
 
 
 

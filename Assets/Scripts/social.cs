@@ -82,7 +82,7 @@ public class social : MonoBehaviour
         List<List<action>> planListFormat = new List<List<action>>();
         planListFormat.Add(thePlan);
 
-        planListFormat = theFunctions.simulatingPlansToEnsurePrereqs(planListFormat, theHub.knownActions, theHub.state);
+        planListFormat = theFunctions.simulatingPlansToEnsurePrereqs(planListFormat, theHub.knownActions, theHub.state, 20);
 
         theHub.planList = planListFormat;
     }

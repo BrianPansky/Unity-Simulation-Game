@@ -204,8 +204,10 @@ public class functionsForAI : MonoBehaviour
             {
                 testSwitch();
                 //startTest();
+                print("ssssssssssssssssss action should have prereqs met in state ssssssssssssssssssssssssssss");
+                printState(state);
+                print(actionToTextDeep(nextAction));
 
-                //print("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
                 //need this stuff to check if cashier is there.  Otherwise, can't buy anything.
                 //if casheir isn't there, shouldn't wait forever, that is unrealistic, but right now that's what will happen
 
@@ -219,7 +221,7 @@ public class functionsForAI : MonoBehaviour
 
                 GameObject cashier = whoIsTrader(cashierMapZone);
 
-                
+                //printState(state);
 
                 //but that cashier variable might come back null (if no one is there), check:
                 if (cashier != null)
@@ -230,25 +232,31 @@ public class functionsForAI : MonoBehaviour
 
                     GameObject shopInventory = getShopInventory(cashierMapZone);
 
-
+                    testSwitch();
+                    //print(actionToTextDeep(nextAction));
                     //lol
-                    if(TRYincremintInventoriesOfThisAndTargetFromEffects(shopInventory, nextAction))
+                    if (TRYincremintInventoriesOfThisAndTargetFromEffects(shopInventory, nextAction))
                     {
                         target = dumpAction(target);
+
+                        print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
+                        //printState(state);
 
                     }
                     else
                     {
                         //lol
                         target = dumpAction(target);
+                        print("FAILED TO GET FOOD !!!!!!!!!!!!!!!!!!!////////////////////////////////////////////////////////////////////////////////////////////////////////");
+                        //printState(state);
                     }
-                    
 
+                    testSwitch();
                     //thisAI.toDoList.RemoveAt(0);
-                    
+
 
                     //alert();
-                    //print("got fooooooooooooooooooooooooooooooood////////////////////////////////////////////////////////////////////////////////////////////////////////");
+                    
                 }
 
                 //endTest();
@@ -876,13 +884,13 @@ public class functionsForAI : MonoBehaviour
                 //---check after incrementing.  if ANYWEHRE BELOW 1, count as zero, remove item from state.  yes this "wastes" all those extra food increments.  could maybe just subtract whatever was needed, have "leftovers" of food.
                 print("!!!!>>>  Increment went BELOW ZERO!  should this EVER happen?? how to handle???");
 
-                print(this.name);
+                //print(this.name);
 
                 //print(itemToIncrement.quantity);
-                print(itemToIncrement.name);
+                //print(itemToIncrement.name);
                 //print(theItem.quantity);
-                printState(thisAI.state);
-                printKnownActionsDeeply(thisAI.knownActions);
+                //printState(thisAI.state);
+                //printKnownActionsDeeply(thisAI.knownActions);
 
                 //imaginaryState = removeStateItem(eachEffect, imaginaryState);
 
@@ -1018,7 +1026,7 @@ public class functionsForAI : MonoBehaviour
         //so, to make it simple to work, assume:
         //1)---any gained item (in action effect) is taken from 2nd inventory
         //2)---any lost item is GIVEN to 2nd inventory
-        //3)---just swap the sign on the quantity if the bool is false
+        //3)---just swap the sign on the quantity if the "inStateOrNot" bool is false
 
         //actioner is the one doing the nextAction
 
@@ -1034,13 +1042,15 @@ public class functionsForAI : MonoBehaviour
         foreach (actionItem effect in nextAction.effects)
         {
             //must only give items if they exist in the giver's inventory!
-            //but to get here we should assume that such prereqs are already met
+            //but to get here we should assume that such prereqs are already met?
             //BUT PREREQS HAVE NOT CHECKED THE 2ND INVENTORY
+            //also check quantities
 
             //just deep copy the effects list so i can use them without messing anything up:
             //deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
 
             //bool to return if inventories don't have proper contents [assuming effects mean SWAP, any listed effect comes OUT of ONE inventory]:
+            //will also use this to track whether there is enough QUANTITY
             bool found = false;
 
             //first, determine whose inventory to VERIFY the contents of, based on bool, and the assumptions listed at start of funciton:
@@ -1051,13 +1061,28 @@ public class functionsForAI : MonoBehaviour
                 {
                     if (itemInInventory.name == effect.name)
                     {
-                        //actionerGives.Add(itemInInventory);
+                        //item found, but is there enough QUANTITY?
 
-                        //need to deep copy this one so we don't modify stuff in "knownActions":
-                        //otherInventoryReceives.Add(deepStateItemCopier(effect.item));
-                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+                        if(itemInInventory.quantity < effect.item.quantity)
+                        {
+                            //not enough quantity
+                            found = false;
+                        }
+                        else
+                        {
+                            //there is enough quantity
 
-                        found = true;
+                            //actionerGives.Add(itemInInventory);
+
+                            //need to deep copy this one so we don't modify stuff in "knownActions":
+                            //otherInventoryReceives.Add(deepStateItemCopier(effect.item));
+                            deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+                            found = true;
+                        }
+                            
+
+                        
                     }
                 }
             }
@@ -1068,11 +1093,25 @@ public class functionsForAI : MonoBehaviour
                 {
                     if (itemInInventory2.name == effect.name)
                     {
-                        //actionerReceives.Add(deepStateItemCopier(effect));
-                        //otherInventoryLoses.Add(itemInInventory2);
-                        deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+                        //item found, but is there enough QUANTITY?
 
-                        found = true;
+                        if (itemInInventory2.quantity < effect.item.quantity)
+                        {
+                            //not enough quantity
+                            found = false;
+                        }
+                        else
+                        {
+                            //there is enough quantity
+
+                            //actionerReceives.Add(deepStateItemCopier(effect));
+                            //otherInventoryLoses.Add(itemInInventory2);
+                            deepCopyVERIFIEDeffectsList.Add(premadeStuff.deepActionItemCopier(effect));
+
+                            found = true;
+                        }
+
+                        
                     }
 
                 }
@@ -1087,6 +1126,15 @@ public class functionsForAI : MonoBehaviour
             }
         }
 
+
+        //remember, to make it simple to work, assume:
+        //1)---any gained item (in action effect) is taken from 2nd inventory
+        //2)---any lost item is GIVEN to 2nd inventory
+        //3)---just swap the sign on the quantity if the "inStateOrNot" bool is false
+
+        //actioner is the one doing the nextAction
+
+
         //NOW modify inventories
         int amount = 1;
         //actioner inventory:
@@ -1095,7 +1143,7 @@ public class functionsForAI : MonoBehaviour
             theTRY = true;
             if (effect.inStateOrNot == false)
             {
-                amount = -1;
+                amount = (effect.item.quantity)*(-1);
             }
             incrementItem(actionerInventory, effect.item, amount);
         }
@@ -1106,7 +1154,7 @@ public class functionsForAI : MonoBehaviour
             theTRY = true;
             if (effect.inStateOrNot == false)
             {
-                amount = 1;
+                amount = effect.item.quantity;
             }
             incrementItem(inventory2, effect.item, amount);
         }
@@ -2371,6 +2419,28 @@ public class functionsForAI : MonoBehaviour
 
     public void print(string text)
     {
+        
+        if (this.name == "NPC" && thisAI.masterPrintControl != false)
+        {
+            Debug.Log(text);
+        }
+        
+    }
+
+    public void printInt(int number)
+    {
+
+        if (this.name == "NPC" && thisAI.masterPrintControl != false)
+        {
+            Debug.Log(number);
+        }
+
+    }
+
+    public void printAlways(string text)
+    {
+        //or "printAnyone"
+
         Debug.Log(text);
     }
 
@@ -2579,7 +2649,7 @@ public class functionsForAI : MonoBehaviour
 
         //to help, encapsulating this:
 
-        if (this.name == "NPC 4")
+        if (this.name == "NPC")
         {
             print("00000000000000000  Action:   000000000000000000");
             print(x.name);
@@ -2631,6 +2701,18 @@ public class functionsForAI : MonoBehaviour
 
         printout += thisAction.name + ": ";
 
+        printout += "(PREREQS: ";
+        foreach (actionItem effect in thisAction.prereqs)
+        {
+            //printout += "( ";
+            //printout += effect.name + ": " + effect.item.quantity;
+            //printout += ")";
+            printout += actionItemToTextDeep(effect);
+            printout += ", ";
+        }
+        printout += "), ";
+
+        printout += "(EFFECTS: ";
         foreach (actionItem effect in thisAction.effects)
         {
             //printout += "( ";
@@ -2639,6 +2721,7 @@ public class functionsForAI : MonoBehaviour
             printout += actionItemToTextDeep(effect);
             printout += ", ";
         }
+        printout += ")";
 
         return printout;
     }
@@ -2647,8 +2730,17 @@ public class functionsForAI : MonoBehaviour
     {
         string printout = string.Empty;
 
+        
         printout += "( ";
-        printout += thisActionItem.name + ": " + thisActionItem.item.quantity;
+        if (thisActionItem.inStateOrNot == true)
+        {
+            printout += thisActionItem.name + ": +" + thisActionItem.item.quantity;
+        }
+        else
+        {
+            printout += thisActionItem.name + ": -" + thisActionItem.item.quantity;
+        }
+        //printout += thisActionItem.name + ": " + thisActionItem.item.quantity;
         printout += ")";
 
         return printout;
@@ -2667,58 +2759,306 @@ public class functionsForAI : MonoBehaviour
     //                Planning
     ////////////////////////////////////////////////
 
+    public List<List<action>> planningPhase(actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
+    {
+        //full planning phase
+        //NO ITERATION of this function
+        //able to modify inputs to problemSolver
+
+        //so
+        //first check if goal is accomplished in state
+        //if it's accomplished, we don't need a plan [we should discard this goal from AI1, but i think it should not give this function 
+        //goals that are finished.  but still this can be a useful place to check
+        if(isStateAccomplished(goal, state) == false)
+        {
+            //good, now to handle PARTIAL completion of quantities.
+            //if state has part of the goal quantity, "expend" that state quantity to zero, and subtract it from the goal
+            //[what if a goal involves more than one quantity?  is that ever possible?  ex:  need both apples AND oranges?  dunno...]
+            //[both of these modified versions must be DEEP COPIES]
+
+
+
+            if (this.name == "NPC shopkeeper")
+            {
+                //print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
+                //print(currentAction.name);
+                //print(actionItemToTextDeep(goal));
+                //printState(state);
+
+            }
+
+
+
+
+
+
+
+            //so, first find how much of the desired quantity is in "state"
+            //only do deep copies etc. if it is greater than zero.
+            //kinda a repeat.  should do this BEFORE checking if state is accomplished.  this is duplicating code.
+
+            //first, create deep copies here:
+            actionItem goal2 = premadeStuff.deepActionItemCopier(goal);
+            Dictionary<string, List<stateItem>> state2 = deepStateCopyer(state);
+
+            //now, find item in state, 
+            //record its quantity in another variable [or subtract from goal immediately]
+            //set it to zero in state
+            //subtract quantity from goal
+
+            //wait i'm gonna do all that in the function:
+
+            return problemSolver(goal2, knownActions, state2);
+        }
+        else
+        {
+            //so, goal is already accomplished.  i don't think this should ever happen
+            print("goal is already accomplished here, i don't think this should happen");
+            //return a blank list
+            List<List<action>> blankList = new List<List<action>>();
+            return blankList;
+        }
+
+        
+    }
+    
     public List<List<action>> problemSolver(actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
+        //AKA:  planMapper
+        //problem solver MUST be fed deep copies [of state AND goal] the first time it is called
+        //this is because of the state-zeroing step that modifies state and goal
+
+        //print("======================problem solver start========================");
+        //printState(state);
+        //print(actionItemToTextDeep(goal));
+        //print(goal.name);
+        //print("....................");
+
+        //state-zeroing step
+        //would be nice to only do this when it's needed, not every function call.  but, ad-hoc for now
+        //now:
+        //find item in state, 
+        //record its quantity in another variable [or subtract from goal immediately]
+        //set it to zero in state
+        //subtract quantity from goal
+        foreach (stateItem stateI in state[goal.stateCategory])
+        {
+            if (stateI.name == goal.name)
+            {
+                //found the item in state
+                //now, modify the quantities:
+                goal.item.quantity -= stateI.quantity;  //do i need to deep copy here?
+                stateI.quantity = 0;
+
+            }
+        }
+
+        //printState(state);
+        //print(actionItemToTextDeep(goal));
+
         alert();
         //need a LIST of plans because there can be all kinds of different ways to acheive a goal
         //in fact, every single step of one plan can be absent from another plan
         List<List<action>> planList = new List<List<action>>();
-        
+
 
         //first just make sure we need a plan at all (could remove this?):
+        //indeed, for state-zeroing to work, and not go negative, this should be handled either
+        //outside, or earlier, or simultaneously with state-zeroing
         if (isStateAccomplished(goal, state) == false)
         {
-            //cycle through every known action, so we can check if any accomplish the goal:
-            foreach (action thisAction in knownActions)
-            {
-                //also have to look at each of their effects individually, see if the effect is to 
-                foreach (actionItem thisEffect in thisAction.effects)
-                {
-                    //finally, check if this action effect acheives the goal:
-                    if (goal.name == thisEffect.name & goal.inStateOrNot == thisEffect.inStateOrNot)
-                    {
-                        //ok cool, we have an action that would acheive the goal
-                        //but do we have a prereq to DO that aciton?  Have to check:
-                        if (prereqStateChecker(thisAction, state))
-                        {
-                            //yup!  we can do this action and acheive the goal!
-                            //so our entire "plan" is just this one action:
-                            List<action> shortPlan = new List<action>();
-                            shortPlan.Add(thisAction);
-                            planList.Add(shortPlan);
-                        }
-                        else
-                        {
-                            
-                            //So no, we don't have the prereqs for this action
-                            //so we'll see if we can FILL the prereqs!
+            //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            //ok need an action
+            action newAction = null;
 
-                            //so, I think we get a bunch of COMPLETE plans from the prereq filling funciton
-                            //and they should be totally finished and ready to simply add to the planList:
-                            planList = mergePlanLists(planList, prereqFiller(thisAction, knownActions, state));
+            
+
+
+            //first phase, find an action:
+            //first check if it's a type we can just quickly generate, rather than searching for:
+            if (goal.stateCategory == "inventory" && goal.name != "money" && goal.name != "resource1")
+            {
+                //printNumberForSpecificNPC(1);
+                //so we need an inventory item
+                //and it's NOT money
+                //so here we can generate a "buy" or "steal" or whatever type of action to fill that
+                
+                newAction = generateActionOnTheFly(goal, knownActions, state);
+
+                //BUT NEED TO DEEP COPY NEW ACTION BEFORE FEEDING IT IN???  BECAUSE OF STATE ZEROING???
+                //AND WAHT ABOUT THE WAY IT MODIFIES STATE AS WELL?  DOES THAT NEED TO BE DEEP COPIED OR
+                //IS IT GOOD TO KEEP THAT CHANGE FOR FUTURE PLANNING???
+                //!!!!!!!!!!!!WHY IS THIS HERE???  SHOULDN'T IT BE IN THE "so if we have an action, we can do the final step" BIT BELOW?????????
+                //planList = problemSolverFinalStep(premadeStuff.deepActionCopier(newAction), knownActions, state, planList);
+
+                //printNumberForSpecificNPC(2);
+            }
+            else
+            {
+                //ok, can't generate action, have to look for it in knownActions:
+                //cycle through every known action, so we can check if any accomplish the goal:
+                foreach (action thisAction in knownActions)
+                {
+                    //also have to look at each of their effects individually, see if the effect is to 
+                    foreach (actionItem thisEffect in thisAction.effects)
+                    {
+                        //finally, check if this action effect acheives the goal:
+                        if (goal.name == thisEffect.name & goal.inStateOrNot == thisEffect.inStateOrNot)
+                        {
+                            //ADD QUANTITY CHECK HERE?!?!
+
+                            //ok cool, we have an action that would acheive the goal
+                            //but do we have a prereq to DO that aciton?  Have to check/try:
+
+                            //what if we can't fill the prereqs??????????
+                            newAction = thisAction;
+
+                            
 
                         }
                     }
                 }
+
             }
+
+            //printState(state);
+            //so if we have an action, we can do the final step:
+            //print("do we have an action?");
+            if (newAction != null)
+            {
+                //print(newAction.name);
+                //print(actionToTextDeep(newAction));
+                //so now we have an action
+                //handle quantities here???  but kinda tangled with needing to also fill prereqs...
+                int quant = quantityToReach(goal, newAction);
+                //print(newAction.name + " " + goal.name + " " + quant);
+                
+                //set the quant check to be >1, instead of >0 [seems wrong though][see journal]
+                //AHAH! quantityToReach SHOULD TAKE STATE INTO ACCOUNT!  DUH!
+                if (quant > 1)
+                {
+                    //need more action to fill goal quantity
+
+                    //print("DOES THIS EVER HAPPEN??????????");
+                    //printState(state);
+                    //create the leftover goal:
+                    actionItem newGoal = newLeftoverGoal(goal, quant);
+                    //print(newGoal.name + newGoal.item.quantity);
+
+                    //testOn();
+                    //startTest();
+                    //List<List<action>> planListToFillQuantity = new List<List<action>>();
+                    //should give us everything finished for the remaining quantity?
+                    //what if it doesn't?
+                    planList = problemSolver(newGoal, knownActions, state);
+                    //printPlanList(planList);
+
+                    //testOff();
+                    //should make sure it's not empty???
+                    if (planList.Count > 0)
+                    {
+                        //print("DOES THIS EVER WORRRRRRKKKKKKKKKKK??????????");
+                        //printPlanList(planList);
+                        planList = problemSolverFinalStep(newAction, knownActions, state, planList);
+                        //planList = problemSolverFinalStep(newAction, knownActions, state, planList);
+                    }
+                    
+
+                }
+                else
+                {
+
+
+                    planList = problemSolverFinalStep(newAction, knownActions, state, planList);
+                    //planList = problemSolverFinalStep(newAction, knownActions, state, planList);
+                    //endTest();
+                }
+                
+                //WHY DID I PUT THIS DUPLICATE HERE??!!?!?!
+                //planList = problemSolverFinalStep(newAction, knownActions, state, planList);
+            }
+        }
+
+        //printPlanList(planList);
+
+        return planList;
+    }
+    
+    public List<List<action>> problemSolverFinalStep(action thisAction, List<action> knownActions, Dictionary<string, List<stateItem>> state, List<List<action>> planList)
+    {
+        //take an action that we want to do, and consider its prereqs
+        //try to fill them if needed
+
+        //what if we can't fill the prereqs??????????
+
+        //ok cool, we have an action that would acheive the goal
+        //but do we have a prereq to DO that action?  Have to check:
+        if (prereqStateChecker(thisAction, state))
+        {
+            //yup!  we can do this action and acheive the goal!
+            //so our entire "plan" is just this one action:
+            //List<action> shortPlan = new List<action>();
+            //shortPlan.Add(thisAction);
+
+            //planList.Add(shortPlan);
+            planList = addActionToEndOfAllPlans(planList, thisAction);
+        }
+        else
+        {
+
+            //So no, we don't have the prereqs for this action
+            //so we'll see if we can FILL the prereqs!
+
+            //so, I think we get a bunch of COMPLETE plans from the prereq filling funciton
+            //and they should be totally finished and ready to simply add to the planList:
+            List<List<action>> completedPlans = new List<List<action>>();
+            completedPlans = prereqFiller(thisAction, knownActions, state);
+            planList = mergePlanLists(planList, completedPlans);
+
         }
 
         return planList;
     }
 
+    public int quantityToReach(actionItem goal, action thisAction)
+    {
+        //take goal/prereq and an action [effect?]
+        //output how much is left of goal AFTER doing that action
+        //.....AND after taking state into account...sorta [not fully simulated, so...could be issue...]
+        //[or, don't modify state here???]
 
-    
+        int amount = 0;
 
+        foreach (actionItem thisEffect in thisAction.effects)
+        {
+            //find correct effect
+            if (goal.name == thisEffect.name & goal.inStateOrNot == thisEffect.inStateOrNot)
+            {
+
+                amount = goal.item.quantity - thisEffect.item.quantity;
+
+
+            }
+        }
+        /*
+        if(amount == null)
+        {
+            print("action does not match this goal");
+        }
+        */
+        return amount;
+    }
+
+    public actionItem newLeftoverGoal(actionItem oldGoal, int amount)
+    {
+        //given how much of the old goal IS LEFT OVER,
+        //create a new goal to meet that quantity
+        //this should sorta be like a "deep copy", right?  the original input is not modified???
+
+        actionItem newGoal = premadeStuff.convertToActionItemBoolVersion(premadeStuff.quantityOfItemGenerator(oldGoal.item, amount), oldGoal.inStateOrNot);
+
+        return newGoal;
+    }
 
     public List<List<action>> prereqFiller(action thisAction, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
@@ -2726,7 +3066,8 @@ public class functionsForAI : MonoBehaviour
         //and returns the set of all plans that fill the unfilled prereqs
         //each ending with that action we wanted to do in the first place
 
-        
+        //what if we can't fill the prereqs??????????  seems to handle that, returns blank.
+
 
         List<List<action>> planList = new List<List<action>>();
 
@@ -2734,6 +3075,7 @@ public class functionsForAI : MonoBehaviour
         List<List<List<action>>> plansForEachPrereq = new List<List<List<action>>>();
 
         //go through ALL prereqs, need to make sure they're ALL filled:
+        //BUT DEEP COPY
         foreach (actionItem eachPrereq in thisAction.prereqs)
         {
             
@@ -2745,16 +3087,37 @@ public class functionsForAI : MonoBehaviour
                 //so, found a prereq that isn't filled.  Need plans to fill it!
                 List<List<action>> plansForThisPrereq = new List<List<action>>();
 
+                plansForThisPrereq = problemSolver(premadeStuff.deepActionItemCopier(eachPrereq), knownActions, state);
+                
+
+                //plansForThisPrereq = problemSolver(eachPrereq, knownActions, state);
+
+
+                //THE FOLLOWING JUST DUPLICATES A PART THAT "PROBLEMSOLVER" ALREADY DOES!  POINTLESS!
+                /*
                 //for some types of prereqs, I generate actions to fill them on-the-fly
                 //here, check if it is that type of action, fill them that way
                 //else, fill them the regular way using "problemSolver"
+                //uhh, problem solver ALREADY generates these actions on the fly.  just call problemsolver?
                 if (eachPrereq.stateCategory == "inventory" && eachPrereq.name != "money" && eachPrereq.name != "resource1")
                 {
                     //printNumberForSpecificNPC(1);
                     //so we need an inventory item
                     //and it's NOT money
                     //so here we can generate a "buy" or "steal" or whatever type of action to fill that
-                    plansForThisPrereq = generateActionOnTheFly(eachPrereq, knownActions, state);
+                    action newAction;
+                    newAction = generateActionOnTheFly(eachPrereq, knownActions, state);
+
+                    print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ");
+                    print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ");
+                    print(actionToTextDeep(newAction));
+
+
+                    //ad-hoc mess fix, need to deep-copy because problem-solver is eventually called, 
+                    //and it does a "zeroing" phase which modifies stuff...
+                    //or i should fix mess now?
+
+                    plansForThisPrereq = problemSolverFinalStep(newAction, knownActions, state, planList);
 
                     //printNumberForSpecificNPC(2);
                 }
@@ -2766,7 +3129,16 @@ public class functionsForAI : MonoBehaviour
 
                     //printNumberForSpecificNPC(4);
                 }
+                */
+
+
+
+
+
+
                 
+
+
                 //if we've found zero plans, we've failed, just stop now:
                 if (plansForThisPrereq.Count == 0)
                 {
@@ -2790,6 +3162,9 @@ public class functionsForAI : MonoBehaviour
                 
 
 
+
+
+
             }
             
         }
@@ -2798,7 +3173,7 @@ public class functionsForAI : MonoBehaviour
         
         //ok, now should be a simple matter of creating all combinations of plans
         //[[[[also, should be checking if things are empty or null or whatever...]]]]
-        planList = mergePlanLists(planList, combinitorialMergingOfPrereqFillers(plansForEachPrereq));
+        planList = combinitorialMergingOfPrereqFillers(plansForEachPrereq);
         
         //now, add thisAction to the end of ALL these plans (or make a plan if there are none):
         planList = addActionToEndOfAllPlans(planList, thisAction);
@@ -2814,6 +3189,22 @@ public class functionsForAI : MonoBehaviour
     {
         foreach(List<action> plan in list2)
         {
+            //was debugging:
+            /*
+            if(list1 == list2)
+            {
+                print("saaaaaaaaaaaaaaaaaaaaameeeeeeeeeeeeeeeeeeeee");
+                Debug.Log(list1);
+                Debug.Log(list2);
+            }
+            else
+            {
+                print("nooooooooooooooooooooooope?????????????????????????????");
+                Debug.Log(list1);
+                Debug.Log(list2);
+            }
+            */
+
             list1.Add(plan);
         }
 
@@ -2924,17 +3315,14 @@ public class functionsForAI : MonoBehaviour
         return planList;
     }
 
-    public List<List<action>> generateActionOnTheFly(actionItem thisPrereq, List<action> knownActions, Dictionary<string, List<stateItem>> state)
+    public action generateActionOnTheFly(actionItem thisPrereq, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
         //no, I should probably have this just in the regular "problemSolver" function...I think?
         //sigh.
         //actions generated HERE will ALSO have their own prereqs to fill...
         //but I guess for those I can just call the "prereqFiller" function, and pass it this newly generated action...
 
-
-        //not sure I'll generate a whole list of plans fo rnow
-        //but that's fine, maybe someday it will get that complex
-        List<List<action>> returnList = new List<List<action>>();
+        action newAction = new action();
 
         //so, need to figure out what type of action to generate
         //for now, it's just for "inventory" type prereqs
@@ -2946,20 +3334,18 @@ public class functionsForAI : MonoBehaviour
             //uhhh, ad-hoc check if this is the pickpocket NPC
             //WAIT BUYING WORKS FOR FOOD, BUT NOT FOR MONEY!!!
             //so, I should exclude money ones for now
-            action buyFood2;
+
             string generatedName = "buy" + thisPrereq.name;
-            buyFood2 = premadeStuff.actionCreator(generatedName, "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.money), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(thisPrereq.item), premadeStuff.UNwantedEffectsLister(premadeStuff.money), 1, premadeStuff.checkout);
-
-
+            newAction = premadeStuff.actionCreator(generatedName, "buyFromStore", premadeStuff.wantedPrereqsLister(premadeStuff.moneyFromItem(thisPrereq.item)), premadeStuff.UNwantedPrereqsLister(), premadeStuff.wantedEffectsLister(thisPrereq.item), premadeStuff.UNwantedEffectsLister(premadeStuff.moneyFromItem(thisPrereq.item)), 1, premadeStuff.checkout);
             
-
-            //now, fill the prereqs for that:
-            returnList = prereqFiller(buyFood2, knownActions, state);
-
             
         }
+        else
+        {
+            print("failed to generate an action, code currently does not handle stateCategories of this type");
+        }
 
-        return returnList;
+        return newAction;
 
     }
 
@@ -2982,14 +3368,20 @@ public class functionsForAI : MonoBehaviour
             //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
             //print(currentAction.name);
             //printState(state);
+
+            //print("3333333333333333333333333333333333");
+            //print("need: " + goal.item.name + " = " + goal.item.quantity);
+
+            //printState(state);
         }
+        
 
 
         foreach (stateItem stateI in state[goal.stateCategory])
         {
 
 
-            //////////////here's the C# way to say "if this item is in this list"...ya, i twon't let you use the word "in" here:
+            //////////////here's the C# way to say "if this item is in this list"...ya, it won't let you use the word "in" here:
             //oh no this is text, "name" needs to be just a actionItem!  Or something!
             //print("1111111111111111111111111111111111111111");
             //print(goal.name);
@@ -2997,29 +3389,41 @@ public class functionsForAI : MonoBehaviour
             if (stateI.name == goal.name)
             {
                 tf = true;
-
-                if (this.name == "NPC")
-                {
-                    //print("1111111111111111111111");
-                    //print(currentAction.name);
-                }
-
+                
 
                 //but false if it's not enough money:
-                if (stateI.quantity < goal.item.value)
+                //"money"??? what about other items???
+                if (stateI.quantity < goal.item.quantity)
                 {
 
-                    if (this.name == "NPC")
-                    {
-                        print("2222222222222222222222222222");
-                        print("have: " + stateI.name +" = " + stateI.quantity);
-                        print("need: " + goal.item.name + " = " + goal.item.value);
-                        printState(thisAI.state);
-                        
-                    }
+                    
 
 
                     tf = false;
+                }
+                else
+                {
+                    if (this.name == "NPC")
+                    {
+                        //print("2222222222222222222222222222");
+                        //print("have: " + stateI.name + " = " + stateI.quantity);
+                        //print("need: " + goal.item.name + " = " + goal.item.quantity);
+                        //printState(state);
+
+                    }
+
+                    if (this.name == "NPC shopkeeper")
+                    {
+                        if (stateI.quantity > 2)
+                        {
+                            //print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+                            //print("have: " + stateI.name + " = " + stateI.quantity);
+                            //print("need: " + goal.item.name + " = " + goal.item.quantity);
+                            //printState(thisAI.state);
+                        }
+                        
+
+                    }
                 }
             }
         }
@@ -3063,6 +3467,9 @@ public class functionsForAI : MonoBehaviour
             */
         }
 
+        
+
+
         return tf;
     }
     
@@ -3072,9 +3479,37 @@ public class functionsForAI : MonoBehaviour
         bool tf;
         tf = true;
 
+        if (this.name == "NPC")
+        {
+            //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+            //print(currentAction.name);
+            //printState(state);
+
+            //print("5555555555555555555555555555555555555");
+            //print(actionToTextDeep(thisAction));
+
+            //print("need: " + prereqX.item.name + " = " + prereqX.item.quantity);
+            //printState(state);
+        }
+
+
+
         foreach (actionItem prereqX in thisAction.prereqs)
         {
             //print("don't count this");
+
+            if (this.name == "NPC")
+            {
+                //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+                //print(currentAction.name);
+                //printState(state);
+
+                //print("444444444444444444444444444444444444");
+                //print("need: " + prereqX.item.name + " = " + prereqX.item.quantity);
+
+                //printState(state);
+            }
+
             if (isStateAccomplished(prereqX, state) == false)
             {
                 
@@ -3090,6 +3525,20 @@ public class functionsForAI : MonoBehaviour
         //this function checks whatever prereqs an action has
         //doesn't matter if the action has a locationPrereq or not
         //it can handle both types of action
+
+        if (this.name == "NPC")
+        {
+            //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+            //print(currentAction.name);
+            //printState(state);
+
+            //print("66666666666666666666666666666666666666666666");
+            //print(actionToTextDeep(thisAction));
+
+            //print("need: " + prereqX.item.name + " = " + prereqX.item.quantity);
+            //printState(state);
+        }
+        
 
         //first [for some reason i don't recall, this one has to be first, otherwise it crashes], just check the regular prereqs using my regular prereqStateChecker:
         if (prereqStateChecker(thisAction, state) == false)
@@ -3165,7 +3614,7 @@ public class functionsForAI : MonoBehaviour
 
     //"imagination" stuff:
 
-    public Dictionary<string, List<stateItem>> stateCopyer(Dictionary<string, List<stateItem>> state)
+    public Dictionary<string, List<stateItem>> deepStateCopyer(Dictionary<string, List<stateItem>> state)
     {
         Dictionary<string, List<stateItem>> newState = new Dictionary<string, List<stateItem>>();
 
@@ -3267,6 +3716,7 @@ public class functionsForAI : MonoBehaviour
     {
         //just have to get the "stateItem" from the actionItem:
         stateItem eachEffect = FIXeachEffect.item;
+
         if (this.name == "NPC" && eachEffect.name == "money")
         {
             //print("is this money effect zero???: ");
@@ -3297,14 +3747,22 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
+            //print("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+            //print(actionItemToTextDeep(FIXeachEffect));
+            //printState(imaginaryState);
+
+
             //imaginaryState = removeStateItem(eachEffect, imaginaryState);
             //imaginaryState[eachEffect.stateCategory].Remove(eachEffect);
             incrementItem(imaginaryState[eachEffect.stateCategory], eachEffect, (-1)*eachEffect.quantity);
 
+            //print("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+            //printState(imaginaryState);
+
             //if there are zero left in inventory, completely remove the stateItem:
             //well, this should technically be handled over in "incrementItem, i think
             //if ()
-            
+
         }
 
         if (FIXeachEffect.name == "food")
@@ -3319,6 +3777,9 @@ public class functionsForAI : MonoBehaviour
 
     public List<action> deepCopyPlan(List<action> thisPlan)
     {
+        //uhhhh, is this enough to count as a "deep copy"????????
+        //hardly seems like it
+
         List<action> copyPlan = new List<action>();
 
         foreach(action thisAction in thisPlan)
@@ -3330,27 +3791,41 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    public List<List<action>> simulatingPlansToEnsurePrereqs(List<List<action>> planList, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
+    public List<List<action>> simulatingPlansToEnsurePrereqs(List<List<action>> planList, List<action> knownActions, Dictionary<string, List<stateItem>> realState, int countdown)
     {
-        //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible acitons
+        //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible actions
         //keep working on all impossible plans until they are fixed...or give up and discard them
+        
 
-        if (this.name == "NPC")
-        {
-            //print("--------------realState at START simulation step");
-            //printPlanListForSpecificNPC();
-            //printState(realState);
-        }
+        print("================================START simulation main function====================================");
+        printPlanList(planList);
+        printInt(countdown);
+        //print(countdown);
+
+
+        countdown -= 1;
+
 
         List<List<action>> fixedPlanList = new List<List<action>>();
-        //print("111111111111111111111111111111111111111");
+
+        if (countdown < 1)
+        {
+            print("xxxxxxxxxxxxxxxxxxxxxxxxx 111 end of countdown reached 111 xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            return fixedPlanList;
+        }
+
+
         foreach (List<action> eachPlan in planList)
         {
+            print("LLLLLLLLLLLLL   1111111  LLLLLLLLLLLLLL");
+
             //yes, to fix ONE plan, might need to have a whole LIST of plans
             //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
             //it's still only one plan that was fixed
             List<List<action>> fixedPlan = new List<List<action>>();
-            fixedPlan = simulateOnePlanFillPrereqs(eachPlan, knownActions, realState);
+            fixedPlan = simulateOnePlanFillPrereqs(eachPlan, knownActions, realState, countdown);
+
+            print("/////////////// done here ////////////////");
 
             if(fixedPlan != null && fixedPlan.Count() > 0)
             {
@@ -3368,7 +3843,115 @@ public class functionsForAI : MonoBehaviour
         return fixedPlanList;
     }
 
-    public List<List<action>> simulateOnePlanFillPrereqs(List<action> thisPlan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
+    public List<List<action>> simulateOnePlanFillPrereqs(List<action> thisPlan, List<action> knownActions, Dictionary<string, List<stateItem>> realState, int countdown)
+    {
+        //yes, to fix ONE plan, might need to have a whole LIST of plans
+        //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
+        //it's still only one plan that was fixed
+
+        //technically, each time I fix a plan, should have to imagine it again to be sure the fix ITSELF doesn't contain any impossible acitons
+        //keep working on all impossible plans until they are fixed...or give up and discard them
+
+
+        print("---------------------starting individual plan simulation----------------------");
+        printPlan(thisPlan);
+        //print(countdown);
+        printInt(countdown);
+
+
+
+        List<List<action>> constructingFixedPlansToReturn = new List<List<action>>();
+
+
+        countdown -= 1;
+
+        if(countdown < 1)
+        {
+            print("xxxxxxxxxxxxxxxxxxxxxxxxx 222 end of countdown reached 222 xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            return constructingFixedPlansToReturn;
+        }
+
+
+
+        Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
+        imaginaryState = deepStateCopyer(realState);
+
+        List<action> staticIteratorPlan = new List<action>();
+        staticIteratorPlan = deepCopyPlan(thisPlan);
+
+
+        foreach (action currentAction in staticIteratorPlan)
+        {
+            if (prereqStateChecker(currentAction, imaginaryState) == true)
+            {
+                print("an action is fine..................");
+                //so this action is fine
+                //add it to ALL plans
+
+                //first make sure there's at least one plan:
+                if (constructingFixedPlansToReturn.Count == 0)
+                {
+                    List<action> dummyPlan = new List<action>();
+                    constructingFixedPlansToReturn.Add(dummyPlan);
+                }
+
+                foreach (List<action> planInProgress in constructingFixedPlansToReturn)
+                {
+                    planInProgress.Add(currentAction);
+                }
+
+                //now implement effects before moving on to next action:
+                imaginaryState = implementALLEffects(currentAction, imaginaryState);
+
+            }
+            else
+            {
+                //this "else" means prereqs are NOT met.  
+                //so, need to try to find a plan to meet them,
+                //and that's literally the job of "prereqFiller", right?
+                //function returns plans that INCLUDE this current action
+                List<List<action>> waysToFillPrereqs;
+
+                print("prereqs are NOT met.............");
+                print("here is current action:");
+                printActionForSpecificNPC(currentAction);
+
+                waysToFillPrereqs = prereqFiller(currentAction, knownActions, deepStateCopyer(imaginaryState));
+
+
+                //will there ever be an "else"?
+                if (waysToFillPrereqs.Count > 0)
+                {
+                    //now need to make all plans
+                    //one for each way to fix current action
+
+                    //hmm, multipying with "constructingFixedPlansToReturn"?  but we aren't done contrsucting it, shouldn't we
+                    //wait until the end or something?  or else restart right after this?  sorta do with recursion
+                    constructingFixedPlansToReturn = multiplyPlansByAddingFixes(constructingFixedPlansToReturn, waysToFillPrereqs);
+
+
+                    constructingFixedPlansToReturn = simulatingPlansToEnsurePrereqs(constructingFixedPlansToReturn, knownActions, realState, countdown);
+
+                    return constructingFixedPlansToReturn;
+                }
+                else
+                {
+                    //does this mean the plan is impossible?  return...blank???
+                    List<List<action>> failPlanList = new List<List<action>>();
+                    return failPlanList;
+                }
+            }
+            
+            
+            
+        }
+
+
+        return constructingFixedPlansToReturn;
+
+    }
+
+    public List<List<action>> OLDsimulateOnePlanFillPrereqs(List<action> thisPlan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
         //yes, to fix ONE plan, might need to have a whole LIST of plans
         //because if it needs to be fixed, there can be MULTIPLE possible ways to fix it
@@ -3384,7 +3967,7 @@ public class functionsForAI : MonoBehaviour
 
 
         Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
-        imaginaryState = stateCopyer(realState);
+        imaginaryState = deepStateCopyer(realState);
 
         List<action> staticIteratorPlan = new List<action>();
         staticIteratorPlan = deepCopyPlan(thisPlan);
@@ -3394,21 +3977,39 @@ public class functionsForAI : MonoBehaviour
         {
             if (prereqStateChecker(currentAction, imaginaryState) != true)
             {
+
+                //print("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+                //printPlan(staticIteratorPlan);
+                //print(actionToTextDeep(currentAction));
+                //printState(imaginaryState);
+
+
                 //so prereqs are NOT met.  
                 //so, need to try to find a plan to meet them,
                 //and that's literally the job of "prereqFiller", right?
                 //function returns plans that INCLUDE this current action
                 List<List<action>> waysToFillPrereqs;
-                waysToFillPrereqs = prereqFiller(currentAction, knownActions, imaginaryState);
-
                 
+                waysToFillPrereqs = prereqFiller(currentAction, knownActions, deepStateCopyer(imaginaryState));
+
+                //printPlanList(waysToFillPrereqs);
+                
+                //will there ever be an "else"?
                 if (waysToFillPrereqs.Count > 0)
                 {
                     //now need to make all plans
                     //one for each way to fix current action
 
+                    //hmm, multipying with "constructingFixedPlansToReturn"?  but we aren't done contrsucting it, shouldn't we
+                    //wait until the end or something?  or else restart right after this?  sorta do with recursion
                     constructingFixedPlansToReturn = multiplyPlansByAddingFixes(constructingFixedPlansToReturn, waysToFillPrereqs);
 
+                    //printPlanList(constructingFixedPlansToReturn);
+
+                    //constructingFixedPlansToReturn = simulatingPlansToEnsurePrereqs(constructingFixedPlansToReturn, knownActions, realState);
+
+                    return constructingFixedPlansToReturn;
+                    
                     //printNumberForSpecificNPC(1);
                 }
             }
@@ -3432,14 +4033,25 @@ public class functionsForAI : MonoBehaviour
                 //print(currentAction.name);
                 //printPlan(planInProgress);
             }
-            if (this.name == "NPC")
-            {
-                //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa here??");
-                //print("--------------imaginaryState at START of implementALLEffects");
-                //printPlanListForSpecificNPC();
-                //printState(imaginaryState);
-            }
+            
+
+            //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa here??");
+            //print("--------------imaginaryState at START of implementALLEffects");
+            //printPlanListForSpecificNPC();
+            //printState(imaginaryState);
+            
+
+            //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            //printPlan(staticIteratorPlan);
+            //print(actionToTextDeep(currentAction));
+            //printState(imaginaryState);
+
             imaginaryState = implementALLEffects(currentAction, imaginaryState);
+
+            //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+            //printPlan(staticIteratorPlan);
+            //print(actionToTextDeep(currentAction));
+            //printState(imaginaryState);
             if (this.name == "NPC")
             {
                 //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa end");
@@ -3510,6 +4122,7 @@ public class functionsForAI : MonoBehaviour
 
     public int findFirstImpossibleAction(List<action> plan, List<action> knownActions, Dictionary<string, List<stateItem>> realState)
     {
+        //why is "knownActions" an input?  probably accidentally kept from a copy paste
         alert();
         //imagines it's way through a plan list
         //returns the index number of the first action on that list that CANNOT be completed
@@ -3522,7 +4135,7 @@ public class functionsForAI : MonoBehaviour
         counter = 0;
 
         Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
-        imaginaryState = stateCopyer(realState);
+        imaginaryState = deepStateCopyer(realState);
 
         
 
@@ -3547,6 +4160,8 @@ public class functionsForAI : MonoBehaviour
                 //pr
             }
             imaginaryState = implementALLEffects(currentAction, imaginaryState);
+            //print("is this not updating state???");
+            //printState(imaginaryState);
             counter += 1;
 
             if (this.name == "NPC")
@@ -3573,14 +4188,12 @@ public class functionsForAI : MonoBehaviour
             //print("don't count this");
             if (isStateAccomplished(prereqX, state) == false)
             {
-                if (this.name == "NPC pickpocket xxxxxxxxxxx")
-                {
-                    print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
-                    print(thisAction.name);
-                    print("BECAUSE of this prereq:");
-                    print(prereqX.name);
-                    print(gameObject.name);
-                }
+                
+                //print("mmmmmmmmmmmmmmmmmmmmmmm      this planned action is deemed impossible: ");
+                //print(thisAction.name);
+                //print("BECAUSE of this prereq:");
+                //print(prereqX.name);
+                //print(gameObject.name);
 
 
 
@@ -3721,11 +4334,12 @@ public class functionsForAI : MonoBehaviour
     public void startTest()
     {
         //NPC pickpocket
-        if (testTime == true && this.name == "NPC 5")
+        if (testTime == true && this.name == "NPC")
         {
             print("===============================surely here START=============================");
-            printState(thisAI.state);
-            printKnownActionsDeeply(thisAI.knownActions);
+            //print("??????????????????????????????????????????????");
+            //printState(thisAI.state);
+            //printKnownActionsDeeply(thisAI.knownActions);
             //print(itemToIncrement.quantity);
             //print(theItem.quantity);
         }
@@ -3734,12 +4348,12 @@ public class functionsForAI : MonoBehaviour
     public void endTest()
     {
         //NPC pickpocket
-        if (testTime == true && this.name == "NPC 5")
+        if (testTime == true && this.name == "NPC")
         {
             //print(itemToIncrement.quantity);
             //print(theItem.quantity);
-            printState(thisAI.state);
-            printKnownActionsDeeply(thisAI.knownActions);
+            //printState(thisAI.state);
+            //printKnownActionsDeeply(thisAI.knownActions);
             print("===============================surely here END=============================");
         }
     }
@@ -3755,4 +4369,16 @@ public class functionsForAI : MonoBehaviour
             testTime = false;
         }
     }
+
+
+
+    public void testOn()
+    {
+        testTime = true;
+    }
+    public void testOff()
+    {
+        testTime = false;
+    }
+
 }
