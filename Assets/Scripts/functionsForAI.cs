@@ -468,8 +468,6 @@ public class functionsForAI : MonoBehaviour
                 
                 target = dumpAction(target);
             }
-
-
             else if (nextAction.name == "workAsCashier")
             {
                 
@@ -511,7 +509,6 @@ public class functionsForAI : MonoBehaviour
 
                 */
             }
-
             else if (nextAction.type == "buyThisProperty")
             {
 
@@ -664,6 +661,11 @@ public class functionsForAI : MonoBehaviour
 
                 //ad-hoc action completion:
                 //thisAI.toDoList.RemoveAt(0);
+
+
+                //make this NPC self employed, so i will have role-location for buying from them...bit ad-hoc...
+                doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newShop);
+                
 
                 target = dumpAction(target);
 
@@ -1204,22 +1206,7 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
-                print(roleLocation);
-                targetAI.jobSeeking = false;
-                targetAI.leader = this.gameObject;
-
-                //Increase the "clearance level" of the worker:
-                //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
-                targetAI.clearanceLevel = 1;
-
-                //now...to finish and deliver "theJob" class object...
-                targetAI.currentJob = premadeStuff.jobFinisher(theJob, this.gameObject, roleLocation);
-
-                //but still have to add the known actions to their known actions!  sigh.
-                foreach (action x in theJob.theKnownActions)
-                {
-                    addKnownActionToGameObject(whoToHire, x);
-                }
+                doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
 
             
@@ -1234,6 +1221,26 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
+    public void doSuccsessfulHiring(AI1 targetAI, job theJob, GameObject roleLocation)
+    {
+        //print(roleLocation);
+        targetAI.jobSeeking = false;
+        targetAI.leader = this.gameObject;
+
+        //Increase the "clearance level" of the worker:
+        //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
+        targetAI.clearanceLevel = 1;
+
+        //now...to finish and deliver "theJob" class object...
+        targetAI.currentJob = premadeStuff.jobFinisher(theJob, this.gameObject, roleLocation);
+
+        //but still have to add the known actions to their known actions!  sigh.
+        foreach (action x in theJob.theKnownActions)
+        {
+            targetAI.knownActions.Add(premadeStuff.deepActionCopier(x));
+            //addKnownActionToGameObject(whoToHire, x);
+        }
+    }
 
     public void commandToDoFetchXAction(action theBringLeaderXAction, GameObject whoToCommand)
     {
