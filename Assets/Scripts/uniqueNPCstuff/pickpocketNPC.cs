@@ -16,7 +16,7 @@ public class pickpocketNPC : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //this is my pickpocket npc
+        //this is my pickpocket npc [or test NPC]
 
         //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.hungry), 0);
         actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.placeHolderFactionGoal), 1);

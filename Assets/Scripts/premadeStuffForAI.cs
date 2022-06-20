@@ -69,6 +69,9 @@ public class premadeStuffForAI : MonoBehaviour
 
     public stateItem myLeader = new stateItem();
 
+    public stateItem anyEnemyLeader = new stateItem();
+    public stateItem anyEnemyUnderling = new stateItem();
+
     public stateItem anyLandPlot = new stateItem();
 
     public stateItem anyResource1 = new stateItem();
@@ -76,15 +79,14 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem storagePlace = new stateItem();
 
     public stateItem anyGroupMember = new stateItem();
+    public stateItem anyNONGroupMember = new stateItem();
 
     public stateItem placeHolderFactionGoal = new stateItem();
 
-    
 
 
-    ////////////////////////////////////////////////
-    //               ACTIONS
-    ////////////////////////////////////////////////
+
+    ////////////////////////    ACTIONS    ////////////////////////
 
     //public action buyFood = new action();
     //public action sellFood = new action();
@@ -134,6 +136,7 @@ public class premadeStuffForAI : MonoBehaviour
 
     public action createStorage = new action();
 
+    public action attackRandomEnemy = new action();
     
 
 
@@ -141,15 +144,14 @@ public class premadeStuffForAI : MonoBehaviour
     //jobs
     public job cashierJob = new job();
     public job resource1GatheringJob = new job();
+    public job soldierJob = new job();
 
 
 
 
 
 
-    ////////////////////////////////////////////////
-    //                   LISTS
-    ////////////////////////////////////////////////
+    ////////////////////////    LISTS    ////////////////////////
 
     public List<action> toDoList = new List<action>();
     public List<action> knownActions = new List<action>();
@@ -180,6 +182,9 @@ public class premadeStuffForAI : MonoBehaviour
 
             myLeader = stateItemCreator("myLeader", "target");
             myLeader.locationType = "deliverTo";
+
+            anyEnemyLeader =  stateItemCreator("anyEnemyLeader", "target");
+            anyEnemyLeader.locationType = "any";
 
             storagePlace = stateItemCreator("storagePlace", "target");
             storagePlace.locationType = "deliverTo";
@@ -237,13 +242,21 @@ public class premadeStuffForAI : MonoBehaviour
             anyGroupMember = stateItemCreator("anyGroupMember", "locationState");
             anyGroupMember.locationType = "any";
 
+            anyEnemyUnderling = stateItemCreator("anyEnemyUnderling", "locationState");
+            anyEnemyUnderling.locationType = "any";
+
+            anyNONGroupMember = stateItemCreator("anyNONGroupMember", "locationState");
+            anyNONGroupMember.locationType = "any";
+
         }
 
         //actions:
         {
             //NOTE AD-HOC TARGET RIGHT NOW IS "anyLandPlot"!!!!!!!!!!!!!!!
-            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(resource1), 1, anyLandPlot);
+            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(resource1), 1, anyNONGroupMember);
             orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(soldier), 1, anyLandPlot);
+            //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
+            attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyUnderling);
 
 
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
@@ -288,13 +301,13 @@ public class premadeStuffForAI : MonoBehaviour
             
             gatherResource1 = actionCreator("gatherResource1", "work", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, anyResource1);
 
-            recruit = actionCreator("recruit", "organizing", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(groupMember), UNwantedEffectsLister(), 1, victim);
+            recruit = actionCreator("recruit", "organizing", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(groupMember), UNwantedEffectsLister(), 1, anyNONGroupMember);
 
 
             //SHOULD OBVIOUSLY BE AUTOMATICALLY GENERATED:
             askMemberForMoney = actionCreator("askMemberForMoney", "commanding", wantedPrereqsLister(groupMember), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyGroupMember);
             hireSomeone = actionCreator("hireSomeone", "work", wantedPrereqsLister(shopOwnership), UNwantedPrereqsLister(threat), wantedEffectsLister(employee), UNwantedEffectsLister(), 1, hiringZone);
-            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, victim);
+            hireResourceGatherer = actionCreator("hireResourceGatherer", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(resource1), UNwantedEffectsLister(), 1, anyNONGroupMember);
 
             //done automating these?????  can delete????????
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
@@ -309,12 +322,12 @@ public class premadeStuffForAI : MonoBehaviour
         {
 
             //hmm, so much to fill in during hiring phase...is it even worth it to make this here???
-            cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild, handleSecurityEscalationOne), 200, 0, 1);
+            cashierJob = jobCreator("cashier", null, null, actionListCreator(workAsCashier, handleSecurityMild, handleSecurityEscalationOne), 200, 0, 1);
             //cashierJob = jobCreator(null, null, actionListCreator(workAsCashier, handleSecurityMild), 200, 0, 1);
             //cashierJob = jobCreator(null, null, actionListCreator(workAsCashier), 10, 0, 1);
-            resource1GatheringJob = jobCreator(null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
-            
-            
+            resource1GatheringJob = jobCreator("resource1Gatherer", null, null, actionListCreator(gatherResource1, resource1Dropoff), 0, 3, 1);
+
+            soldierJob = jobCreator("soldier", null, null, actionListCreator(attackRandomEnemy), 0, 0, 1);
         }
     }
 
@@ -323,10 +336,8 @@ public class premadeStuffForAI : MonoBehaviour
         
     }
 
-    ////////////////////////////////////////////////////
-    //              Pre-Made NPC STATES
-    ////////////////////////////////////////////////////
-    
+    //////////////////////////    Pre-Made NPC STATES    //////////////////////////
+
     //regular default NPC:
     public Dictionary<string, List<stateItem>> createNPCstate1()
     {
@@ -445,9 +456,7 @@ public class premadeStuffForAI : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////////
-    //               NPC KNOWN ACTIONS
-    ////////////////////////////////////////////////////
+    //////////////////////////    NPC KNOWN ACTIONS    //////////////////////////
 
     public List<action> createKnownActions1()
     {
@@ -684,9 +693,7 @@ public class premadeStuffForAI : MonoBehaviour
     }
 
 
-    ////////////////////////////////////////////////////
-    //  Functions for making actions and StateItems
-    ////////////////////////////////////////////////////
+    //////////////    Functions for making actions and StateItems    //////////////
 
     public action actionCreator(string name, string type, List<stateItem> wantedPrereqs, List<stateItem> UNwantedPrereqs, List<stateItem> wantedEffects, List<stateItem> UNwantedEffects, int cost, stateItem locationPrereq = null)
     {
@@ -871,10 +878,11 @@ public class premadeStuffForAI : MonoBehaviour
 
 
     //generate JOBS:
-    public job jobCreator(GameObject boss, GameObject roleLocation, List<action> theKnownActions, int duration, int quota, int paymentQuantity = 1)
+    public job jobCreator(string name, GameObject boss, GameObject roleLocation, List<action> theKnownActions, int duration, int quota, int paymentQuantity = 1)
     {
         job thisJob = new job();
 
+        thisJob.name = name;
         thisJob.boss = boss;  //just make it null [by input] when initializing, then fill it in when actual hiring event happens?
         thisJob.roleLocation = roleLocation;  //ok to reuse this name?  gonna delete old one?
         thisJob.theKnownActions = theKnownActions;
@@ -989,6 +997,7 @@ public class action
 
 public class job
 {
+    public string name;
     public GameObject boss;
     public GameObject roleLocation;  //ok to reuse this name?  gonna delete old one?
     public List<action> theKnownActions;

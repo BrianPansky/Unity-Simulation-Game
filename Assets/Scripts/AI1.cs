@@ -61,7 +61,8 @@ public class AI1 : MonoBehaviour
 
     public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
     //public stateForAI state;
-    public taggedWith thisIsTaggedWith;
+    public taggedWith taggedWith;
+    public social social;
 
     //for easy debug printing
     public string npcx;
@@ -79,7 +80,8 @@ public class AI1 : MonoBehaviour
 
         //get some other scripts I'll need:
         theFunctions = GetComponent<functionsForAI>();
-        thisIsTaggedWith = GetComponent<taggedWith>();
+        taggedWith = GetComponent<taggedWith>();
+        social = GetComponent<social>();
 
         //need to initialize, don't want faction inventory etc. to be null/non-existent
         factionState = createEmptyFactionState();
@@ -111,7 +113,7 @@ public class AI1 : MonoBehaviour
         //ad hoc way to prevent storage containters from being called people:  check for the npc tag:
         if(this.gameObject.tag == "anNPC")
         {
-            thisIsTaggedWith.addTag("person");
+            taggedWith.addTag("person");
         }
         
         
@@ -129,19 +131,25 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
-        npcx = "NPC shopkeeper (1)";
+        npcx = "NPC pickpocket";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = true;
+        masterPrintControl = false;
 
 
         //i think this should work?
         planningState = theFunctions.deepStateCopyer(state);
 
         //theFunctions.printKnownActionsDeeply(knownActions);
+
+
+
+
+        //Debug.Log(this.gameObject.name);
+        //taggedWith.printAllTags();
     }
 
-    
+
 
     // Update is called once per frame
     void Update()
@@ -250,9 +258,7 @@ public class AI1 : MonoBehaviour
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
     }
 
-    ////////////////////////////////////////////////////
-    //       Stuff for the Update function:
-    ////////////////////////////////////////////////////
+    ////////////////    Stuff for the Update function:    ////////////////
 
     public void checkJobs()
     {
@@ -419,6 +425,9 @@ public class AI1 : MonoBehaviour
 
             theFunctions.print("says this plan is imposible:");
             theFunctions.printPlan(toDoList);
+            theFunctions.printState(state);
+            theFunctions.printState(factionState);
+            theFunctions.printState(planningState);
             toDoList.RemoveRange(0, toDoList.Count);
             target = null;
             

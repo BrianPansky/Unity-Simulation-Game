@@ -19,8 +19,9 @@ public class worldScript : MonoBehaviour
     void Update()
     {
         timeIncrement();
-        //Debug.Log("===========================================================");
+        //Debug.Log("====zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz=======");
 
+        /*
         if (taggedStuff.ContainsKey("store"))
         {
             foreach(GameObject item in taggedStuff["store"])
@@ -28,7 +29,7 @@ public class worldScript : MonoBehaviour
                 Debug.Log(item.name);
             }
         }
-
+        */
         
     }
 

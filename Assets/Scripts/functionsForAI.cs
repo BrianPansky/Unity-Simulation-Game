@@ -63,9 +63,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////
-    //                  SENSING
-    ////////////////////////////////////////////////
+    ////////////////////////    SENSING    ////////////////////////
 
     //handles ALL sensing:
     public void sensing(Dictionary<string, List<stateItem>> state)
@@ -141,9 +139,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////
-    //                  ACTIONS
-    ////////////////////////////////////////////////
+    ////////////////////////    ACTIONS    ////////////////////////
 
     //handles the enactment of ALL actions:
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
@@ -278,23 +274,83 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "createSoldier")
             {
-                //eventually do "hiring", i guess.  but for now:
-                incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
-                incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
+                Debug.Log("trying to hire SOLDIER ....");
+                if (hiring(target, premadeStuff.soldierJob, "storage"))
+                {
+                    Debug.Log("hired soldier!");
 
-                //maybe ad-hoc [see 3456819]:
-                incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
+                    state = implementALLEffectsREAL(nextAction, state);
 
-                //NOTE THAT "TARGET" IS NOT BEING USED AS AN INPUT FOR NOW!!!!! BECAUSE I AM USING AN AD-HOC TARGET!!!
-                //incrementInventoriesOfThisAndTargetFromEffects(thisAI., nextAction);
+
+                    //ad-hoc update of faction unit state stuff:
+                    incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
+                    //maybe ad-hoc [see 3456819]:
+                    incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
+
+                    //incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
+
+                    
+
+                    //NOTE THAT "TARGET" IS NOT BEING USED AS AN INPUT FOR NOW!!!!! BECAUSE I AM USING AN AD-HOC TARGET!!!
+                    //incrementInventoriesOfThisAndTargetFromEffects(thisAI., nextAction);
+                }
+                else
+                {
+                    Debug.Log("FAILED TO HIRE");
+                }
+                
 
                 target = dumpAction(target);
 
             }
             else if (nextAction.name == "orderAttack")
             {
+                testOn();
+                //ad-hoc, do targeting of ALL soldiers HERE for now:
+                List<GameObject> listOfSoldiers = ALLTaggedWithMultiple(gangTag(this.gameObject), "soldier");
+
+                printAlways("******************************giving order to attack...*********************************");
+                //print(thisAI.gameObject.name);
+                //printPlan(thisAI.toDoList);
+                //if (thisAI.currentJob != null)
+                {
+                    //print(thisAI.currentJob.name);
+                }
+
+                //foreach(GameObject soldier in listOfSoldiers)
+                {
+                    //print(soldier.name);
+
+
+                    //taggedWith soldiersTagScript = soldier.GetComponent<taggedWith>();
+                    //soldiersTagScript.printAllTags();
+
+                }
+
+
+                //DO I NEED TO DEEP COPY ACTION?  PRobably...
+                commandGROUPtoDoXAction(premadeStuff.attackRandomEnemy, listOfSoldiers);
+
+                //implementALLEffectsREAL
+                //incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
+                //incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
+
+                //AI1 targetHubScript = getHubScriptFromGameObject(target);
+                //incrementItem(targetHubScript.state["inventory"], premadeStuff.money, -1);
+
+
+                //print(thisAI.gameObject.name);
+                //printPlan(thisAI.toDoList);
+                //if (thisAI.currentJob != null)
+                {
+                    //print(thisAI.currentJob.name);
+                }
+                
 
                 target = dumpAction(target);
+
+                //printAlways("***************************//// end of attack order ////*****************************");
+                testOff();
             }
             else if (nextAction.name == "hireResourceGatherer")
             {
@@ -361,19 +417,11 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "shootSpree")
             {
                 //print("yo");
-                //don't kill player for now:
-                if(target.name != "Player")
-                {
-                    //print("a killer just shot " + target.name);
-                    //print("object to be destroyed:");
-                    //print(target);
-                    Destroy(target);
-                }
-                else
-                {
-                    //print("you are shot!");
-                    target = null;
-                }
+
+                kill(target);
+
+                state = implementALLEffectsREAL(nextAction, state);
+                target = dumpAction(target);
             }
             else if (nextAction.name == "landLording")
             {
@@ -478,9 +526,9 @@ public class functionsForAI : MonoBehaviour
 
                     //FOR INVESTIGATING/TESTING:
                     AI1 targetAI = customer.GetComponent("AI1") as AI1;
-                    targetAI.masterPrintControl = true;
-                    targetAI.npcx = targetAI.gameObject.name;
-                    Debug.Log("updated ''npcx''");
+                    //targetAI.masterPrintControl = true;
+                    //targetAI.npcx = targetAI.gameObject.name;
+                    //Debug.Log("updated ''npcx''");
 
 
 
@@ -770,6 +818,16 @@ public class functionsForAI : MonoBehaviour
 
 
             }
+            else if (nextAction.name == "attackRandomEnemy")
+            {
+                printAlways("enaction of the random attack!");
+
+                kill(target);
+
+
+                state = implementALLEffectsREAL(nextAction, state);
+                target = dumpAction(target);
+            }
 
             else
             {
@@ -858,14 +916,14 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
-    //============================================================
 
-    //functions to handle important finishing steps of specific actions:
 
     //DANGER OF MALFUNCTION IF CLASS OBJECTS ARE NOT DEEP COPIED!!!!
 
+    //functions to handle important finishing steps of specific actions:
+
     //modify state:
-    
+
     public void incrementItem(List<stateItem> inventory, stateItem theItem, int amount)
     {
         //"theItem" is actually an effect built into an action.  
@@ -1085,7 +1143,22 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public void incrementItemTHREEstates(GameObject theTargetPerson, stateItem theItem, int amount)
+    {
+        //increments state, planningState, AND factionState!  whew
+        //BUT NOT SURE THESE THREE STATES HAVE THE SAME CATEGORIES!?!?!?!?!
 
+        AI1 targetHubScript = getHubScriptFromGameObject(theTargetPerson);
+
+        printState(targetHubScript.state);
+        printState(targetHubScript.planningState);
+        printState(targetHubScript.factionState);
+
+        incrementItem(targetHubScript.state[theItem.stateCategory], theItem, amount);
+        incrementItem(targetHubScript.planningState[theItem.stateCategory], theItem, amount);
+        incrementItem(targetHubScript.factionState[theItem.stateCategory], theItem, amount);
+        
+    }
 
 
     //TRY INVENTORY MODIFICATION:
@@ -1357,9 +1430,19 @@ public class functionsForAI : MonoBehaviour
 
         //record in factionState:
         //mmm, need it to INCREMENT...
+        //NEEDS TO BE DIFFERENT DEPENDING ON WHICH JOB IS BEING HIRED FOR
+        //KINDA SEEMS LIKE IT WOULD BE NICE TO HAVE A SIMPLE DICTIONARY WITH TEXT KEYS THAT ARE JOB NAMES, AND NUMBERS FOR QUANTITY, RIGHT???
         incrementItem(thisAI.factionState["unitState"], premadeStuff.employee, 1);
         //thisAI.factionState["unitState"].Add(deepStateItemCopier(premadeStuff.employee));
-        
+
+        //need to add gang tag!
+        targetAI.taggedWith.addTag(gangTag(this.gameObject));
+
+        //color:
+        changeToFactionColor(targetAI.gameObject, this.gameObject);
+
+        //add tag of job name
+        targetAI.taggedWith.addTag(theJob.name);
 
         //Increase the "clearance level" of the worker:
         //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
@@ -1391,6 +1474,62 @@ public class functionsForAI : MonoBehaviour
 
 
         NPChubScript.inputtedToDoList.Add(theBringLeaderXAction);
+    }
+
+    public void commandToDoXAction(action theXAction, GameObject whoToCommand)
+    {
+        //commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
+
+        //need their AI1 script:
+        AI1 NPChubScript = whoToCommand.GetComponent("AI1") as AI1;
+
+
+
+        //print(thisAI.gameObject.name);
+        //print(whoToCommand.name);
+        //printPlan(thisAI.toDoList);
+        //printPlan(whoToCommand.toDoList);
+        if (thisAI.currentJob != null)
+        {
+            //print(thisAI.currentJob.name);
+        }
+        //if (whoToCommand.currentJob != null)
+        {
+            //print(whoToCommand.currentJob.name);
+        }
+
+
+
+
+        //going to blank out their to-do list, and fill it with test "orders":
+        //AD HOC, SHOULD NOT DO THIS?!?!?
+        NPChubScript.toDoList.Clear();
+
+
+
+        //print(thisAI.gameObject.name);
+        //print(whoToCommand.name);
+        //printPlan(thisAI.toDoList);
+        //printPlan(whoToCommand.toDoList);
+        if (thisAI.currentJob != null)
+        {
+            //print(thisAI.currentJob.name);
+        }
+        //if (whoToCommand.currentJob != null)
+        {
+            //print(whoToCommand.currentJob.name);
+        }
+
+
+        NPChubScript.inputtedToDoList.Add(theXAction);
+    }
+
+    public void commandGROUPtoDoXAction(action theXAction, List<GameObject> whoToCommand)
+    {
+        foreach(GameObject person in whoToCommand)
+        {
+            commandToDoXAction(theXAction, person);
+        }
     }
 
     public void createBuildingX(GameObject buildingX)
@@ -1459,11 +1598,10 @@ public class functionsForAI : MonoBehaviour
     {
         //ok, recruitment suceeds
         Debug.Log("recruitment successful");
-
-        //for now ad-hoc
-        //just tagging an NPC with "playersGang" when you click it
+        
         taggedWith foreignTagScript = whoIsRecruited.GetComponent<taggedWith>();
         foreignTagScript.foreignAddTag(gangTag(this.gameObject), whoIsRecruited);
+        changeToFactionColor(whoIsRecruited, this.gameObject);
 
         //Debug.Log("should be recruited to gang now, by tagging");
 
@@ -1476,16 +1614,34 @@ public class functionsForAI : MonoBehaviour
         //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
         NPChubScript.target = null;
     }
-    //============================================================
+    
+    public void changeToFactionColor(GameObject toColor, GameObject leader)
+    {
+        if(leader.name == "Player")
+        {
+            toColor.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
+        }
+        else if (leader.name == "NPC pickpocket")
+        {
+            toColor.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+        }
+        else
+        {
+            toColor.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
+        }
+    }
 
 
-
-    ////////////////////////////////////////////////
-    //         Misc functions for ACTIONS
-    ////////////////////////////////////////////////
+    ///////////////////////    Misc functions for ACTIONS    /////////////////////////
 
     public GameObject dumpAction(GameObject target)
     {
+        print(thisAI.gameObject.name);
+        printPlan(thisAI.toDoList);
+        if (thisAI.currentJob != null)
+        {
+            print(thisAI.currentJob.name);
+        }
 
         //when action is done, remove the action from the plan, and set target to null
         target = null;
@@ -1577,6 +1733,28 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public void kill(GameObject whoToKill)
+    {
+
+        //don't kill player for now:
+        if (whoToKill.name != "Player")
+        {
+            //NEED TO REMOVE THIS OBJECT FROM ALL LISTS BEFORE DESTROYING IT!
+            //OTHERWISE WILL GET NULL ERRORS!!!!!
+
+            thisAI.taggedWith.foreignRemoveALLtags(whoToKill);
+            //print("a killer just shot " + target.name);
+            //print("object to be destroyed:");
+            //print(target);
+            Destroy(whoToKill);
+        }
+        else
+        {
+            //print("you are shot!");
+            whoToKill = null;
+        }
+    }
+
     //pretty ad-hoc
 
     public bool areAllForbiddenZonesClear()
@@ -1635,6 +1813,10 @@ public class functionsForAI : MonoBehaviour
     {
         //this version of the funciton is different from non-"real" version because
         //it ALSO modifies "planningState"!!!!!!!!!!!!!!!
+        //BUT DOES NOT TAKE "PLANNINGSTATE" AS AN INPUT!!!
+        //USES "thisAI" INSTEAD!  THUS, WHICHEVER ai THE SCRIPT IS ATACHED TO!
+
+
         foreach (actionItem FIXeachEffect in currentAction.effects)
         {
             if (this.name == "NPC" && FIXeachEffect.name == "money")
@@ -1652,6 +1834,10 @@ public class functionsForAI : MonoBehaviour
     {
         //this version of the funciton is different from non-"real" version because
         //it ALSO modifies "planningState"
+        //BUT DOES NOT TAKE "PLANNINGSTATE" AS AN INPUT!!!
+        //USES "thisAI" INSTEAD!  THUS, WHICHEVER ai THE SCRIPT IS ATACHED TO!
+
+
         //just have to get the "stateItem" from the actionItem:
         stateItem eachEffect = FIXeachEffect.item;
 
@@ -1714,14 +1900,19 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    ////////////////////////////////////////////////
-    //                TARGETING
-    ////////////////////////////////////////////////
+
+
+
+
+
+
+
+    ////////////////////////    TARGETING    ////////////////////////
 
     public GameObject chooseTarget(stateItem criteria)
     {
         //takes criteria, returns one target
-        //for now, input is a actionItem from nextAction.locationPrereq
+        //for now, input is an actionItem from nextAction.locationPrereq
         //output is a GameObject
 
 
@@ -1783,7 +1974,9 @@ public class functionsForAI : MonoBehaviour
             }
             else if (criteria.name == "anyGroupMember")
             {
-                target = randomTaggedWith(this.name + "sGang");
+                target = randomTaggedWith(gangTag(this.gameObject));
+                //printAlways(target.name);
+                
             }
             else if (criteria.name == "anyLandPlot")
             {
@@ -1793,6 +1986,28 @@ public class functionsForAI : MonoBehaviour
             else if(criteria.name == "toRecruit")
             {
 
+            }
+            else if (criteria.name == "anyEnemyLeader")
+            {
+                target = randomTaggedWithMIX(ALLTaggedWithMultiple("factionLeader"), this.gameObject.name);
+            }
+            else if (criteria.name == "anyNONGroupMember")
+            {
+                //this should target anyone who is part of NO group/faction
+                //print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz   targeting anyNONGroupMember:   zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+                //printTextList(thisAI.social.factionList); 
+                target = randomObjectFromList(narrowingTaggedWithNoneOnList(ALLTaggedWithMultiple("person"), thisAI.social.factionList));
+            }
+            else if (criteria.name == "anyEnemyUnderling")
+            {
+                social socialScriptOfLeader = thisAI.leader.GetComponent<social>();
+                target = randomTaggedWithMIX(ALLTaggedWithMultiple(randomStringFromList(socialScriptOfLeader.enemyFactionList)), gangTag(thisAI.leader));
+
+                if(target != null)
+                {
+                    printAlways(target.name);
+                }
+                
             }
         }
         else if (criteria.locationType == "roleLocation")
@@ -1904,6 +2119,7 @@ public class functionsForAI : MonoBehaviour
     public GameObject randomTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
     {
         //should return ONE random GameObject that is tagged with ALL inputted tags
+
         List<GameObject> allPotentialTargets = new List<GameObject>();
 
         if (globalTags.ContainsKey(theTag))
@@ -2020,11 +2236,470 @@ public class functionsForAI : MonoBehaviour
         return thisObject;
     }
 
+    public List<GameObject> ALLTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //INPUTS setup
+        //STARTING place for contructing answer to return
+        List<GameObject> starterList = new List<GameObject>();
+        if (globalTags.ContainsKey(theTag))
+        {
+            starterList = globalTags[theTag];
+        }
+        
+        //put the optional other tags in a list:
+        List<string> otherTags = new List<string>();
+        otherTags.Add(tag2);
+        otherTags.Add(tag3);
+        otherTags.Add(tag4);
+
+
+        //OUTPUT initializing
+        //only add items to following list when they are CONFIRMED to fit ALL criteria:
+        List<GameObject> allThatFit = new List<GameObject>();
+
+
+        bool thisObjectFitsTheCriteria = false;
+
+
+
+        //print(theTag);
+        //print(allPotentialTargets.Count);
+        foreach (GameObject thisObject in starterList)
+        {
+
+            //now, check all the other tags on that^ object
+            //if it lacks a needed tag, don't add it to the output
+            //to do that, need to grab the tags on that object:
+            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+            //assume this object will correctly have ALL the tags
+            //then falsify by checking:
+            thisObjectFitsTheCriteria = true;
+
+
+            foreach (string thisTag in otherTags)
+            {
+                //make sure it's not null:
+                //[CAN BE NULL BECAUSE THESE ARE THE OPTIONAL INPUTS, WHICH DEFAULT TO "NULL"]
+                if (thisTag != null)
+                {
+
+                    if (theTagScript.tags.Contains(thisTag) == false)
+                    {
+                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+                        //print(thisTag);
+
+                        thisObjectFitsTheCriteria = false;
+                        
+                        break;
+                    }
+                    /*
+                    else
+                    {
+                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+                        print(thisTag);
+                    }
+                    */
+                }
+            }
+
+            //see if the object passed the test:
+            if (thisObjectFitsTheCriteria == true)
+            {
+                allThatFit.Add(thisObject);
+            }
+        }
+
+        return allThatFit;
+    }
+
+    public List<GameObject> ALLTaggedWithANY(List<string> tagList)
+    {
+        //takes a list of tags
+        //returns ALL gameObjects that have ANY of those tags
+        //difficlut part is handing DUPLICATES
+
+        List<GameObject> objectList = new List<GameObject>();
+
+        foreach(string thisTag in tagList)
+        {
+            if (globalTags.ContainsKey(thisTag))
+            {
+                foreach(GameObject thisObject in globalTags[thisTag])
+                {
+                    //only add it if we don't already have it:
+                    if(objectList.Contains(thisObject) != true)
+                    {
+                        objectList.Add(thisObject);
+                    }
+                }
+            }
+        }
+
+        return objectList;
+    }
+
+    public GameObject randomTaggedWithMIX(List<GameObject> positiveList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //"mix" of positive and negatives
+        //positive means it HAS the tag, negative means it EXCLUDES the tag
+        //the first input is everything that contains the positive tags [found using "ALLTaggedWithMultiple"]
+        //the other string inputs are optional, and they FILTER OUT tags
+
+
+        //INPUTS setup
+
+        //put all unwanted tags in a list:
+        List<string> unwantedTags = new List<string>();
+        unwantedTags.Add(tag1);
+        unwantedTags.Add(tag2);
+        unwantedTags.Add(tag3);
+        unwantedTags.Add(tag4);
+
+
+        //OUTPUT initializing
+        //only add items to following list when they are CONFIRMED to fit ALL criteria:
+        List<GameObject> allThatFit = new List<GameObject>();
+
+
+
+
+        //so I need to make a corrosponding list of indices to use, to prevent messing with it:
+        List<int> listOfIndices = new List<int>();
+        int length = 0;
+        //WILL THIS MAKE IT THE RIGHT NUMBER?  OR ONE TOO MANY?  ONE TOO FEW???
+        //I think it's correct now?
+        while (length < positiveList.Count)
+        {
+            listOfIndices.Add(length);
+            length += 1;
+        }
+
+
+
+
+
+
+        //print(theTag);
+        //print(allPotentialTargets.Count);
+
+
+        GameObject thisObject;
+        thisObject = null;
+        bool doWeHaveGoodTarget = false;
+
+        int randomNumber;
+        int myIndex;
+
+        //print("do we have even ONE of these????");
+        //print(theTag);
+        //print(allPotentialTargets.Count);
+        while (doWeHaveGoodTarget == false && listOfIndices.Count > 0)
+        {
+            //print("yes at least one");
+            //grab a randomn object from the list:
+            randomNumber = Random.Range(0, listOfIndices.Count);
+            myIndex = listOfIndices[randomNumber];
+
+            thisObject = positiveList[myIndex];
+
+
+            //now, check all the other tags on that^ object
+            //if it has unwanted tag, remove that item from the array
+            //and choose again
+            //to do that, need to grab the tags on that object:
+            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+            //assume this object will correctly have NO UNWANTED tags
+            //then falsify by checking:
+            doWeHaveGoodTarget = true;
+
+
+            foreach (string thisUnwantedTag in unwantedTags)
+            {
+                //make sure it's not null:
+                if (thisUnwantedTag != null)
+                {
+
+                    if (theTagScript.tags.Contains(thisUnwantedTag) == true)
+                    {
+                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+                        //print(thisTag);
+
+                        doWeHaveGoodTarget = false;
+                        listOfIndices.RemoveAt(randomNumber);
+
+                        //set thisObject back to null:
+                        thisObject = null;
+                        break;
+                    }
+                    /*
+                    else
+                    {
+                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+                        print(thisTag);
+                    }
+                    */
+                }
+            }
+
+            //see if the object passed the test:
+            if (doWeHaveGoodTarget == true)
+            {
+
+                return thisObject;
+            }
+        }
+
+        //this will be null if the above loop didn't find one:
+        return thisObject;
+
+
+    }
+
+    public List<GameObject> narrowingTaggedWithAll(List<GameObject> objectList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //takes a list of objects
+        //returns all objects from the list that fit a set of tags
+
+        //so, create a NEW list to return
+        //iterate through OLD list, add objects to new list if they fit criteria
+        //return new list
+
+        //INPUTS setup
+        
+
+        //OUTPUT initializing
+        //only add items to following list when they are CONFIRMED to fit ALL criteria:
+        List<GameObject> allThatFit = new List<GameObject>();
+
+        foreach(GameObject thisObject in objectList)
+        {
+            if(hasAllTags(thisObject, tag1, tag2, tag3, tag4))
+            {
+                allThatFit.Add(thisObject);
+            }
+        }
+
+        return allThatFit;
+
+    }
+
+    public GameObject randomObjectFromList(List<GameObject> objectList)
+    {
+        //but check to be sure list is not empty:
+
+        if (objectList.Count > 0)
+        {
+            int randomNumber = Random.Range(0, objectList.Count);
+            
+            return objectList[randomNumber];
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    public List<GameObject> narrowingTaggedWithNoneOnList(List<GameObject> objectList, List<string> unwantedTags)
+    {
+        //takes a list of objects, and a list of tags
+        //returns all objects from the list that have NONE of the tags
+
+        //so, create a NEW list to return
+        //iterate through OLD list, add objects to new list if they fit criteria
+        //return new list
+
+        //OUTPUT initializing
+        //only add items to following list when they are CONFIRMED to have NONE of the tags:
+        List<GameObject> allThatFit = new List<GameObject>();
+
+
+        //print("who fits??????????????????");
+
+        foreach (GameObject thisObject in objectList)
+        {
+            //we don't want it to have ANY of the tags on that list:
+            if (hasANYTagsOnList(thisObject, unwantedTags) == false)
+            {
+                //print(thisObject.name);
+                allThatFit.Add(thisObject);
+            }
+        }
+
+
+        return allThatFit;
+    }
+    
+    public bool hasAllTagsOnList(GameObject thisObject, List<string> wantedTags)
+    {
+        //should be moved to tagging script or something!
+        //returns true if this object has all tags
+
+        //need to grab the tags on that object:
+        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+        foreach (string tag in wantedTags)
+        {
+            if (theTagScript.tags.Contains(tag) == false)
+            {
+                return false;
+            }
+        }
+
+        //if we reach this point, it means the object does indeed have all the tags we want!
+        return true;
+    }
+
+    public bool hasANYTagsOnList(GameObject thisObject, List<string> wantedTags)
+    {
+        //should be moved to tagging script or something!
+        //returns true if this object has ANY tags
+        
+        //need to grab the tags on that object:
+        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+        
+        foreach (string tag in wantedTags)
+        {
+            if (theTagScript.tags.Contains(tag) == true)
+            {
+                return true;
+            }
+        }
+
+        //if we reach this point, it means the object does NOT have ANY the tags we want!
+        return false;
+    }
+
+    public bool hasAllTags(GameObject thisObject, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //should be moved to tagging script or something!
+        //returns true if this object has all tags
+
+        //put all unwanted tags in a list:
+        List<string> wantedTags = removeNullStrings(tag1, tag2, tag3, tag4);
+
+        //need to grab the tags on that object:
+        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+        foreach (string tag in wantedTags)
+        {
+            if (theTagScript.tags.Contains(tag) == false)
+            {
+                return false;
+            }
+        }
+
+        //if we reach this point, it means the object does indeed have all the tags we want!
+        return true;
+    }
+
+    public List<string> removeNullStrings(string tag1, string tag2, string tag3, string tag4)
+    {
+        //input 4 strings
+        //get backa  list of all of them that are NOT null
+
+        List<string> allStrings = new List<string>();
+        allStrings.Add(tag1);
+        allStrings.Add(tag2);
+        allStrings.Add(tag3);
+        allStrings.Add(tag4);
+
+        List<string> nonNullStrings = new List<string>();
+
+        foreach(string thisString in allStrings)
+        {
+            if(thisString != null)
+            {
+                nonNullStrings.Add(thisString);
+            }
+        }
+
+        return nonNullStrings;
+    }
+
+    //not needed???
+    public List<GameObject> ALLTaggedWithMIX(List<GameObject> positiveList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //"mix" of positive and negatives
+        //positive means it HAS the tag, negative means it EXCLUDES the tag
+        //the first input is everything that contains the positive tags [found using "ALLTaggedWithMultiple"]
+        //the other string inputs are optional, and they FILTER OUT tags
+
+
+        //INPUTS setup
+
+        //put all unwanted tags in a list:
+        List<string> otherTags = new List<string>();
+        otherTags.Add(tag1);
+        otherTags.Add(tag2);
+        otherTags.Add(tag3);
+        otherTags.Add(tag4);
+
+
+        //OUTPUT initializing
+        //only add items to following list when they are CONFIRMED to fit ALL criteria:
+        List<GameObject> allThatFit = new List<GameObject>();
+
+
+        bool thisObjectFitsTheCriteria = false;
+
+
+
+        //print(theTag);
+        //print(allPotentialTargets.Count);
+        foreach (GameObject thisObject in positiveList)
+        {
+
+            //now, check all the other tags on that^ object
+            //if it has unwanted tag, don't add it to ooutput list
+            //to do that, need to grab the tags on that object:
+            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+
+            //assume this object will correctly have ALL the tags
+            //then falsify by checking:
+            thisObjectFitsTheCriteria = true;
+
+
+            foreach (string thisTag in otherTags)
+            {
+                //make sure it's not null:
+                //[CAN BE NULL BECAUSE THESE ARE THE OPTIONAL INPUTS, WHICH DEFAULT TO "NULL"]
+                if (thisTag != null)
+                {
+
+                    if (theTagScript.tags.Contains(thisTag) == true)
+                    {
+                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+                        //print(thisTag);
+
+                        thisObjectFitsTheCriteria = false;
+
+                        break;
+                    }
+                }
+            }
+
+            //see if the object passed the test:
+            if (thisObjectFitsTheCriteria == true)
+            {
+                allThatFit.Add(thisObject);
+            }
+        }
+
+        return allThatFit;
+
+
+    }
+
+
+
+
 
     //misc tag stuff
     public string generateGangName(GameObject leader)
     {
-        //input eader object?  or string of leader's name?  object for now
+        //input leader object?  or string of leader's name?  object for now
         //input leader name string "X"
         //output string "XsGang"
 
@@ -2115,11 +2790,30 @@ public class functionsForAI : MonoBehaviour
     {
         return leadersOwnerTag(thisAI.leader);
     }
-
-
+    
     public string leadersOwnerTag(GameObject leader)
     {
         return "owned by " + leader.name;
+    }
+
+    public string randomStringFromList(List<string> theList)
+    {
+
+        string thisString;
+        thisString = null;
+
+
+        if (theList.Count > 0)
+        {
+            int randomIndex = Random.Range(0, theList.Count);
+            thisString = theList[randomIndex];
+            
+        }
+        else
+        {
+            printAlways("LIST OF STRINGS IS EMPTY!");
+        }
+        return thisString;
     }
 
 
@@ -2477,9 +3171,11 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    ////////////////////////////////////////////////
-    //             POST-PLANNING PHASE
-    ////////////////////////////////////////////////
+
+
+
+
+    ///////////////////////   POST-PLANNING PHASE   /////////////////////////
 
     public List<List<action>> planRanker(List<List<action>> unsortedPlans)
     {
@@ -2607,9 +3303,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////
-    //                  TESTS
-    ////////////////////////////////////////////////
+    ///////////////////////   TESTS   /////////////////////////
 
     public void testIndexListSortedThing()
     {
@@ -2633,9 +3327,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////
-    //         Misc diagnostic functions
-    ////////////////////////////////////////////////
+    ///////////////////////   Misc diagnostic functions   /////////////////////////
 
     public void print(string text)
     {
@@ -3003,9 +3695,10 @@ public class functionsForAI : MonoBehaviour
         print(printout);
     }
 
-    ////////////////////////////////////////////////
-    //                Planning
-    ////////////////////////////////////////////////
+
+
+
+    ///////////////////////   Planning   /////////////////////////
 
     public List<List<action>> planningPhase(actionItem goal, List<action> knownActions, Dictionary<string, List<stateItem>> state)
     {
@@ -3200,8 +3893,8 @@ public class functionsForAI : MonoBehaviour
             //cycle through every known action, so we can check if any accomplish the goal:
             foreach (action thisAction in knownActions)
             {
-                print("fffffffffffffffffffffffffffffffffffffffffffffffffff");
-                print(actionToTextDeep(thisAction));
+                //print("fffffffffffffffffffffffffffffffffffffffffffffffffff");
+                //print(actionToTextDeep(thisAction));
                 //also have to look at each of their effects individually, see if the effect is to 
                 foreach (actionItem thisEffect in thisAction.effects)
                 {
@@ -3218,12 +3911,12 @@ public class functionsForAI : MonoBehaviour
                         //what if we can't fill the prereqs??????????
                         newAction = thisAction;
 
-                        print(actionToTextDeep(newAction));
+                        //print(actionToTextDeep(newAction));
                         //printKnownActionsDeeply(knownActions);
                     }
                     else
                     {
-                        print("^^^^^^not a match");
+                        //print("^^^^^^not a match");
                     }
                 }
             }
@@ -3393,7 +4086,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-        print("===================================START OF MERGING=======[action, quant filler, then prereq filler]======================");
+        //print("===================================START OF MERGING=======[action, quant filler, then prereq filler]======================");
         //printPlanList(planList);
         //printPlanList(quantsPlanList);
         //printPlanList(prereqsPlanList);
@@ -3415,8 +4108,8 @@ public class functionsForAI : MonoBehaviour
         }
 
 
-        printPlanList(planList);
-        print("===================================END OF MERGING====================================");
+        //rintPlanList(planList);
+        //print("===================================END OF MERGING====================================");
         
 
 

@@ -48,6 +48,9 @@ public class taggedWith : MonoBehaviour
         tagsToAdd.Add(tag3);
         tagsToAdd.Add(tag4);
 
+        //add name:
+        addTag(this.gameObject.name);
+
 
         //add all tags to this GameObject:
         foreach (string thisTag in tagsToAdd)
@@ -61,7 +64,7 @@ public class taggedWith : MonoBehaviour
     }
 
     
-    //funcitons that modify current object's tags
+    //funcitons that modify current object's tags [the object this script is attached to]
     public void addTag(string tag)
     {
         //this funciton updates BOTH lists of tags
@@ -102,6 +105,18 @@ public class taggedWith : MonoBehaviour
         //update "global" tags...
         //remove the game object to the list of objects tagged with that tag:
         globalTags[tag].Remove(gameObject);
+    }
+
+    public void removeALLtags()
+    {
+        //REMOVES this object from ALL tag lists
+        //necessary when destroying objects, 
+        //otherwise there will be "null" object references on those lists!
+
+        foreach(string tag in tags)
+        {
+            removeTag(tag);
+        }
     }
 
 
@@ -148,15 +163,41 @@ public class taggedWith : MonoBehaviour
         globalTags[tag].Remove(removeFromThis);
     }
 
+    public void foreignRemoveALLtags(GameObject thisGameObject)
+    {
+
+        //REMOVES this object from ALL tag lists
+        //necessary when destroying objects, 
+        //otherwise there will be "null" object references on those lists!
+
+        //UHH, THIS IS TAG SCRIPT, NOT "SOCIAL" SCRIPT, THAT"S SOMETHING ELSE!!!
+        taggedWith thisGameObjectsSocialScript = thisGameObject.GetComponent<taggedWith>();
+
+        foreach (string tag in thisGameObjectsSocialScript.tags)
+        {
+            foreignRemoveTag(tag, thisGameObject);
+        }
+    }
 
     //diagnostic:
     public void printAllTags()
     {
-        foreach(string item in tags)
+
+
+        string printout = string.Empty;
+
+        printout += "Tags:  [ ";
+
+        foreach (string tag in tags)
         {
-            Debug.Log(item);
+            printout += tag + ", ";
         }
+
+        printout += "]";
+
+        Debug.Log(printout);
+
+        
     }
-
-
+    
 }

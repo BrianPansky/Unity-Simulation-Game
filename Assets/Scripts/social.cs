@@ -25,6 +25,14 @@ public class social : MonoBehaviour
     public functionsForAI theFunctions;
     public AI1 theHub;
 
+
+
+
+    //social hierarchy stuff, ad-hoc list of factions, for now...
+    public List<string> factionList = new List<string>();
+    public List<string> allyFactionList = new List<string>();
+    public List<string> enemyFactionList = new List<string>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,9 +46,7 @@ public class social : MonoBehaviour
     }
 
 
-    ///////////////////////////////////////////////////////////
-    //            Functions (for foreign calls)
-    ///////////////////////////////////////////////////////////
+    /////////////////    TRUST Functions (for FOREIGN calls)    /////////////////
 
     public void trustBySide(string theirName, int theirSide)
     {
@@ -88,9 +94,7 @@ public class social : MonoBehaviour
     }
 
 
-    ///////////////////////////////////////////////////////////
-    //            Functions (for local calls)
-    ///////////////////////////////////////////////////////////
+    /////////////////    TRUST Functions (for LOCAL calls)    /////////////////
 
     public void setRelationTrust(string nameOfOther, int trustAmount)
     {
@@ -117,6 +121,23 @@ public class social : MonoBehaviour
         {
             trustDict[nameOfOther] = defaultTrust;
         }
+    }
+
+
+
+
+
+
+    /////////////////    HIERARCHY Functions    /////////////////
+
+    public void addFactionToList(GameObject leader)
+    {
+        //takes a leader game object, adds their faction tag to the list of faction tags
+        //should check if it's already on the list???  is that easier with dictionaries???
+        //so maybe i should use a dictionary???
+        factionList.Add(theFunctions.gangTag(leader));
+        
+
     }
 
 }
