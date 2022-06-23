@@ -173,10 +173,15 @@ public class taggedWith : MonoBehaviour
         //UHH, THIS IS TAG SCRIPT, NOT "SOCIAL" SCRIPT, THAT"S SOMETHING ELSE!!!
         taggedWith thisGameObjectsSocialScript = thisGameObject.GetComponent<taggedWith>();
 
+        //remove object from all global tag lists:
         foreach (string tag in thisGameObjectsSocialScript.tags)
         {
             foreignRemoveTag(tag, thisGameObject);
+            //globalTags[tag].Remove(thisGameObject);
         }
+
+        //delete local tags:
+        thisGameObjectsSocialScript.tags.Clear();
     }
 
     //diagnostic:

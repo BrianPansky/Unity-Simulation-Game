@@ -249,6 +249,10 @@ public class premadeStuffForAI : MonoBehaviour
             anyNONGroupMember = stateItemCreator("anyNONGroupMember", "locationState");
             anyNONGroupMember.locationType = "any";
 
+
+
+            //theFunctions.printAlways(theFunctions.stateItemToTextDeep(food));
+
         }
 
         //actions:
@@ -314,7 +318,6 @@ public class premadeStuffForAI : MonoBehaviour
             //done automating these?????  can delete????????
             buyGun = actionCreator("buyGun", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(gun), UNwantedEffectsLister(money), 1, checkout);
             //buyFood = actionCreator("buyFood", "buyFromStore", wantedPrereqsLister(money), UNwantedPrereqsLister(), wantedEffectsLister(food), UNwantedEffectsLister(money), 1, checkout);
-
 
 
 
@@ -536,10 +539,10 @@ public class premadeStuffForAI : MonoBehaviour
 
 
         newList.Add(eat);
-        //knownActions.Add(buyFood);
+        //newList.Add(buyFood);
         newList.Add(buyHome);
 
-        //knownActions.Add(doTheWork);
+        newList.Add(doTheWork);
 
         
         //newList.Add(pickVictimsPocket);

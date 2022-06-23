@@ -59,6 +59,8 @@ public class functionsForAI : MonoBehaviour
         worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
         globalTags = theWorldScript.taggedStuff;
         theTagScript = GetComponent<taggedWith>();
+
+        //printAlways(stateItemToTextDeep(premadeStuff.food));
     }
 
 
@@ -153,10 +155,9 @@ public class functionsForAI : MonoBehaviour
         //now to find suitable targets using my new tagging system:
         //NOTE: RIGHT NOW THIS LIST WILL INCLUDE EVERYONE, EVEN THE PERSON DOING THE ACTION, SO THEY MIGHT TARGET THEMSELVES!
         //allPotentialTargets = globalTags["person"];
-        //print("ya every one leofjrjfir");
+        //print("allPotentialTargets =");
         //print(allPotentialTargets.Count);
         
-
 
 
         //handle the travel prereqs here:
@@ -172,8 +173,8 @@ public class functionsForAI : MonoBehaviour
             }
             if (target == null)
             {
-                //print("the chooseTarget function returned null, for the following action:");
-                //print(nextAction.name);
+                print("the chooseTarget function returned null, for the following action:");
+                print(nextAction.name);
 
                 //mark this plan as failed?
                 //i think to do that, just add to list of ineffective actions:
@@ -186,7 +187,7 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("should have a target");
                 //print(target.name);
-                //the following shoudl only happen if target is NOT null, right?
+                //the following should only happen if target is NOT null
                 travelToTargetObject(target);
             }
             
@@ -278,28 +279,29 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "createSoldier")
             {
                 //Debug.Log("trying to hire SOLDIER ....");
+                //printState(state);
                 if (hiring(target, premadeStuff.soldierJob, "storage"))
                 {
-                    Debug.Log("hired soldier!");
+                    //Debug.Log("hired soldier!");
+                    //printState(state);
 
                     state = implementALLEffectsREAL(nextAction, state);
-
+                    //printState(state);
 
                     //ad-hoc update of faction unit state stuff:
                     incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
-                    //maybe ad-hoc [see 3456819]:
-                    incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
+                    
 
                     //incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
 
-                    
+                    //printState(state);
 
                     //NOTE THAT "TARGET" IS NOT BEING USED AS AN INPUT FOR NOW!!!!! BECAUSE I AM USING AN AD-HOC TARGET!!!
                     //incrementInventoriesOfThisAndTargetFromEffects(thisAI., nextAction);
                 }
                 else
                 {
-                    Debug.Log("FAILED TO HIRE");
+                    //Debug.Log("FAILED TO HIRE");
                 }
                 
 
@@ -974,6 +976,7 @@ public class functionsForAI : MonoBehaviour
 
             //need to add money to inventory
             //will this deepcopy or not???  do we want to?  won't it have wrong quantities if it does deep copy, but break if it doesn't deep copy???
+            //huh?  yes we want deep copy, and a true deep copy should include those quantities, which should be the correct amounts
             stateItem newItem = deepStateItemCopier(theItem);
             //but, this money will already start with 1 quantity.  will need to subtract one so it starts at zero...
             //no, since we know in this logic branch of "if" statemetn that we are starting from ZERO
@@ -1380,14 +1383,13 @@ public class functionsForAI : MonoBehaviour
     {
         //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
         //Has to return bool to show if it worked or no.  clunky, but oh well?
-        print("hello??????????????????????????????????");
 
         //ad-hoc way to hire more than one employee for now:
         //if (listOfCashiers.Contains(customer) == false)
         AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
         if (targetAI.jobSeeking == true)
         {
-            print("no problem");
+            //print("no problem");
 
             //listOfCashiers.Add(customer);
             //changeRoles(whotoHire, premadeStuff.workAsCashier, premadeStuff.doTheWork);
@@ -1413,7 +1415,6 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
-                print("no problem, shoudl fuckign be successful");
                 doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
 
@@ -1425,7 +1426,7 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            print("not job seeking");
+            //print("not job seeking");
             return false;
         }
     }
@@ -1752,11 +1753,11 @@ public class functionsForAI : MonoBehaviour
     public void kill(GameObject whoToKill)
     {
 
-        //don't kill player for now:
+        //don't kill player for testing:
         if (whoToKill.name != "Player")
         {
             //NEED TO REMOVE THIS OBJECT FROM ALL LISTS BEFORE DESTROYING IT!
-            //OTHERWISE WILL GET NULL ERRORS!!!!!
+            //OTHERWISE WILL GET NULL/"object does not exist" ERRORS!!!!!
 
             thisAI.taggedWith.foreignRemoveALLtags(whoToKill);
             //print("a killer just shot " + target.name);
@@ -3662,7 +3663,13 @@ public class functionsForAI : MonoBehaviour
 
 
         printout += "( ";
-        printout += thisStateItem.name + ": +" + thisStateItem.quantity;
+        //printout += thisStateItem.name + ": +" + thisStateItem.quantity;
+
+        printout += "name: " + thisStateItem.name;
+        printout += ", stateCategory: " + thisStateItem.stateCategory;
+        printout += ", locationType: " + thisStateItem.locationType;
+        printout += ", quantity: " + thisStateItem.quantity;
+        printout += ", value: " + thisStateItem.value;
         printout += ")";
 
         return printout;
@@ -3779,8 +3786,10 @@ public class functionsForAI : MonoBehaviour
         }
         else
         {
-            //so, goal is already accomplished.  i don't think this should ever happen
-            print("goal is already accomplished here, i don't think this should happen");
+            //so, goal is already accomplished.  should probably only happen during testing?  
+            //because it means NPC is done their.  will never do anything ever again.
+            //unless i ever modify the system to cycle through more than one goal.
+            //print("goal is already accomplished here");
             //return a blank list
             List<List<action>> blankList = new List<List<action>>();
             return blankList;
@@ -4453,19 +4462,14 @@ public class functionsForAI : MonoBehaviour
 
         //do stuff as if "wantedInstateOrNot" == true, then can reverse it later if it's false
 
+        //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
+        //print(currentAction.name);
+        //printState(state);
 
-        if (this.name == "NPC")
-        {
-            //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
-            //print(currentAction.name);
-            //printState(state);
+        //print("3333333333333333333333333333333333");
+        //print("need: " + goal.item.name + " = " + goal.item.quantity);
 
-            //print("3333333333333333333333333333333333");
-            //print("need: " + goal.item.name + " = " + goal.item.quantity);
-
-            //printState(state);
-        }
-        
+        //printState(state);
 
 
         foreach (stateItem stateI in state[goal.stateCategory])
@@ -4494,26 +4498,16 @@ public class functionsForAI : MonoBehaviour
                 }
                 else
                 {
-                    if (this.name == "NPC")
+                    //print("2222222222222222222222222222");
+                    //print("have: " + stateI.name + " = " + stateI.quantity);
+                    //print("need: " + goal.item.name + " = " + goal.item.quantity);
+                    //printState(state);
+                    if (stateI.quantity > 2)
                     {
-                        //print("2222222222222222222222222222");
+                        //print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
                         //print("have: " + stateI.name + " = " + stateI.quantity);
                         //print("need: " + goal.item.name + " = " + goal.item.quantity);
-                        //printState(state);
-
-                    }
-
-                    if (this.name == "NPC shopkeeper")
-                    {
-                        if (stateI.quantity > 2)
-                        {
-                            //print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-                            //print("have: " + stateI.name + " = " + stateI.quantity);
-                            //print("need: " + goal.item.name + " = " + goal.item.quantity);
-                            //printState(thisAI.state);
-                        }
-                        
-
+                        //printState(thisAI.state);
                     }
                 }
             }
@@ -5181,6 +5175,49 @@ public class functionsForAI : MonoBehaviour
         return tf;
     }
 
+    public bool doesPlanAccomplishGoal(List<action> plan, actionItem goal, Dictionary<string, List<stateItem>> realState)
+    {
+        Dictionary<string, List<stateItem>> imaginaryState = new Dictionary<string, List<stateItem>>();
+        imaginaryState = deepStateCopyer(realState);
+
+        List<action> staticIteratorPlan = new List<action>();
+        staticIteratorPlan = deepCopyPlan(plan);
+
+        
+
+
+
+        //setup done, now for the actual simulation etc.
+        foreach (action currentAction in staticIteratorPlan)
+        {
+
+            //print(actionToTextDeep(currentAction));
+            if (prereqStateChecker(currentAction, imaginaryState) == true)
+            {
+                //print("this action is fine..................");
+                //so this action is fine
+
+
+                //now implement effects before moving on to next action:
+                imaginaryState = implementALLEffects(currentAction, imaginaryState);
+
+            }
+            else
+            {
+                //print("prereqs are NOT met");
+                //printState(imaginaryState);
+                //this "else" means prereqs are NOT met.  so the aciton can't be done, and the goal can't be accomplished
+                return false;
+                
+            }
+
+        }
+
+        //print("check if goal is accomplished at end");
+        //now after all that, check if GOAL is accomplished in imaginary state:
+        return isStateAccomplished(goal, imaginaryState);
+
+    }
 
     public List<List<action>> multiplyPlansByAddingFixes(List<List<action>> oldPlanList, List<List<action>> theFixes)
     {
