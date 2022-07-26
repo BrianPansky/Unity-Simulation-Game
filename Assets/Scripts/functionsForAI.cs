@@ -20,6 +20,7 @@ public class functionsForAI : MonoBehaviour
     //maybe ad-hoc for now:
     public int stopwatch;
     public int effectivenessTimer;
+    
 
     //VERY ad-hoc for now:
     public int workerCount;
@@ -39,6 +40,7 @@ public class functionsForAI : MonoBehaviour
     {
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
+        
     }
 
     // Start is called before the first frame update
@@ -367,6 +369,17 @@ public class functionsForAI : MonoBehaviour
                     //Debug.Log("hired..........");
                     //ad-hoc update of state:
                     //state = implementALLEffectsREAL(nextAction, state);
+                    addActionToPendingList(nextAction, 2500);
+
+                    //super ad-hoc update of state, see 1.2.2.1.1.1.1 no worker employees in state
+                    incrementItem(thisAI.planningState[premadeStuff.employee.stateCategory], premadeStuff.employee, 1);
+
+
+                    //printState(thisAI.state);
+                    //printState(thisAI.planningState);
+                    //printState(thisAI.factionState);
+
+
                 }
                 else
                 {
@@ -1646,6 +1659,25 @@ public class functionsForAI : MonoBehaviour
         {
             toColor.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
         }
+    }
+
+    public void addActionToPendingList(action thisAction, int amountToWait)
+    {
+        //"spagetti"/"magic" grabs variables from AI1 including
+        //"goalWait", "pendingActions"
+        //USING "pendingActionTimer" INSTEAD OF "goalWait" FOR NOW!!!
+        //just one timer for whole list for now, not individual timers for each action
+        //just adds time to the timer
+        //and modify toDoList?  can do that in "dumpAction" afterwards outide of this funciton...hmm...
+        //maybe eventually bundle them together?  will they ever need to be separate?
+
+        thisAI.pendingActions.Add(thisAction);
+        //thisAI.goalWait += amountToWait;
+        thisAI.pendingActionTimer += amountToWait;
+
+
+        
+
     }
 
 
@@ -3768,7 +3800,6 @@ public class functionsForAI : MonoBehaviour
 
             //wait i'm gonna do all that in the function:
 
-
             List<List<action>> planList = new List<List<action>>();
             planList = problemSolver(goal2, knownActions, state2);
 
@@ -4281,7 +4312,12 @@ public class functionsForAI : MonoBehaviour
 
     public List<action> mergePlans(List<action> plan1, List<action> plan2)
     {
+        //plans should be combined in the order they appear in the inputs
         //should add "plan2" on to the END of "plan1"
+        //should there be any deep copying going on here?
+        //IF PLAN1 IS EMPTY, THIS WILL RETURN NOTHING
+        //IS THAT EVER DESIRED BEHAVIOR?
+        //looks like "appendPlanToEndOfOtherPlan" doesn't have this problem
 
         foreach (action thisAction in plan2)
         {
@@ -4384,11 +4420,22 @@ public class functionsForAI : MonoBehaviour
     {
         //the second input will always end up at the end of the plan
         //maybe I don't need this function, but helps clear code I think
+        //i also have "mergePlans", but see note there about difference
 
         List<action> completedPlan = new List<action>();
         completedPlan = plan1;
 
+        //completedPlan.AddRange(plan2);
+
+
         completedPlan.AddRange(plan2);
+        //foreach (action thisAction in plan2)
+        {
+
+            //printAlways(thisAction.name);
+            //completedPlan.Append(thisAction);
+        }
+        
 
         return completedPlan;
 
@@ -5121,7 +5168,8 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("XXXXXXXXXXXX      this planned action is deemed impossible: ");
                 //print(currentAction.name);
-                    
+                //printAlways(currentAction.name);
+
                 return counter;
             }
 

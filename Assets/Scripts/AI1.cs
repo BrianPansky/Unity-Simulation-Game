@@ -33,8 +33,8 @@ public class AI1 : MonoBehaviour
 
     List<action> ineffectiveActions = new List<action>();
 
-    
-
+    public List<action> pendingActions;
+    public int pendingActionTimer;
 
     //wait do I use this:
     public List<action> knownActions = new List<action>();
@@ -77,7 +77,8 @@ public class AI1 : MonoBehaviour
 
     void Awake()
     {
-
+        pendingActionTimer = 0;
+        pendingActions = new List<action>();
         //get some other scripts I'll need:
         theFunctions = GetComponent<functionsForAI>();
         taggedWith = GetComponent<taggedWith>();
@@ -134,7 +135,7 @@ public class AI1 : MonoBehaviour
         npcx = "NPC pickpocket";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = true;
+        masterPrintControl = false;
 
 
         //i think this should work?
@@ -155,7 +156,8 @@ public class AI1 : MonoBehaviour
     void Update()
     {
         
-        //theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+        theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+        printToDoList(toDoList);
 
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
@@ -167,6 +169,7 @@ public class AI1 : MonoBehaviour
             {
 
                 //theFunctions.print("TESTTTTTTTTTTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!");
+                printToDoList(toDoList);
 
                 //get NPC moving again if it was stopped by conversation:
                 getGoingAgan();
@@ -178,10 +181,12 @@ public class AI1 : MonoBehaviour
 
                 //fine time to do sensing, I guess...
                 doSensing();
+                printToDoList(toDoList);
                 //remove all plans that contain "ineffective actions":
                 removeIneffectiveActions();
 
                 //theFunctions.print("TESTTTTTTTTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!");
+                printToDoList(toDoList);
 
                 if (inputtedToDoList.Count > 0)
                 {
@@ -202,6 +207,7 @@ public class AI1 : MonoBehaviour
                 else if (toDoList.Count == 0)
                 {
                     //theFunctions.print("TESTTTTTTTTTT!!!!!!55555555555555555555555555555555555555555!!!");
+                    printToDoList(toDoList);
                     //so we need a plan:
                     getPlan();
 
@@ -221,23 +227,24 @@ public class AI1 : MonoBehaviour
                     }
                     //printPlanListForSpecificNPC();
                     //printToDoListForSpecificNPC();
+                    printToDoList(toDoList);
 
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-                    //printToDoList(toDoList);
+                    printToDoList(toDoList);
 
                 }
 
-                //printToDoList(toDoList);
+                printToDoList(toDoList);
 
                 //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
 
                 //theFunctions.print("TESTTTTTTTTTT before handle action");
-                //printToDoList(toDoList);
+                printToDoList(toDoList);
                 handleAnyNextAction();
-                //printToDoList(toDoList);
+                printToDoList(toDoList);
 
                 //theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
                 //masterPrintControl = false;
@@ -256,6 +263,22 @@ public class AI1 : MonoBehaviour
         }
 
 
+        //not sure where to put this:
+        if (pendingActionTimer == 1)
+        {
+            //this is so that i can do stuff when the countdown reaches "zero"
+            //but don't do it when it's ACTUALLY zero.  i don't want this code to
+            //be executed every frame!
+
+            theFunctions.print("clearing pendingActions");
+
+            //is this ad hoc?  just clear for now:
+            pendingActions.Clear();
+        }
+        if (pendingActionTimer > 0)
+        {
+            pendingActionTimer -= 1;
+        }
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
     }
 
@@ -370,6 +393,7 @@ public class AI1 : MonoBehaviour
     public void blankImpossibleToDoList()
     {
         //theFunctions.print("=============================START check=====================================");
+        //theFunctions.printAlways("=============================START check=====================================");
         //only checks CURRENT to-do list.
         //blanks it out if it has ANY impossible action.
         if (this.name == npcx)
@@ -381,26 +405,65 @@ public class AI1 : MonoBehaviour
             //theFunctions.printPlanWithQuantities(toDoList);
 
         }
+
+        List<action> thisDeepCopy = new List<action>();
+        thisDeepCopy = deepCopyPlan(toDoList);
+
+
+
+        //theFunctions.print("current to do list:");
+        //theFunctions.printPlan(toDoList);
+        //theFunctions.print("test to do list with first action removed:");
+        //theFunctions.printPlan(thisDeepCopy);
+        //theFunctions.print(theFunctions.actionItemToTextDeep(recurringGoal));
+        //theFunctions.printState(state);
+        //theFunctions.printState(planningState);
+        //theFunctions.printState(factionState);
+
+        //theFunctions.printAlways(this.gameObject.name);
+        //theFunctions.printAlways(theFunctions.planToText(pendingActions));
+        //theFunctions.printAlways(theFunctions.planToText(toDoList));
+        //theFunctions.printAlways(theFunctions.planToText(deepCopyMinus1stAction));
+
         
+        List<action> toDoListPlusPendingActions = theFunctions.appendPlanToEndOfOtherPlan(deepCopyPlan(pendingActions), thisDeepCopy);
+
+        //theFunctions.printAlways(theFunctions.planToText(toDoListPlusPendingActions));
+        //theFunctions.printPlan(toDoListPlusPendingActions);
         //my checking function returns an index integer
         //why am I doing it this way?  What if there's MORE THAN ONE impossible action?
         //very weird, need to re-write this somehow...
         int Z;
         //returns the index number of the first action on that list that CANNOT be completed
-        Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, state);
+
+        //theFunctions.printAlways(this.gameObject.name);
+        //theFunctions.printAlways(theFunctions.planToText(toDoList));
+
+        //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, planningState);
+
+        //theFunctions.printAlways(Z.ToString());
+        //theFunctions.printAlways(theFunctions.planToText(toDoListPlusPendingActions));
+
+        Z = theFunctions.findFirstImpossibleAction(toDoListPlusPendingActions, knownActions, planningState);
+
+        //theFunctions.printAlways(Z.ToString());
         //if all actions can be completed fine, it returns negative two
 
         //theFunctions.print(Z.ToString());
-        
+
         if (Z != -2)
         {
+            //theFunctions.printAlways("fffffffffffffffffffffthere is an impossible toDoList to blank out");
+            //theFunctions.printAlways(this.gameObject.name);
             if (this.name == npcx)
             {
                 theFunctions.print("22222222222222222there is an impossible toDoList to blank out");
-
+                //theFunctions.printState(state);
+                //theFunctions.printState(planningState);
+                //theFunctions.printState(factionState);
                 //printPlanListForSpecificNPC();
                 //printPlanList(planList);
-                //printToDoList(toDoList);
+                //printToDoList(toDoListPlusPendingActions);
                 
 
 
@@ -547,7 +610,7 @@ public class AI1 : MonoBehaviour
 
     public void handleAnyNextAction()
     {
-        
+
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         //theFunctions.print("11111111111111111111111111111111111111");
         //theFunctions.printKnownActionsDeeply(knownActions);
@@ -556,6 +619,10 @@ public class AI1 : MonoBehaviour
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         //first, blank toDoList if it is impossible:
         blankImpossibleToDoList();
+
+
+
+
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
         //theFunctions.print("22222222222222222222222222222222222222222");
         //theFunctions.printKnownActionsDeeply(knownActions);
@@ -606,7 +673,7 @@ public class AI1 : MonoBehaviour
     {
         if (theFunctions.isStateAccomplished(recurringGoal, state) == true)
         {
-            //so, goal is accomplished.  so needs ot be refilled!
+            //so, goal is accomplished.  so needs to be refilled!
 
             if (recurringGoal.inStateOrNot == false)
             {
@@ -619,7 +686,7 @@ public class AI1 : MonoBehaviour
             {
                 //need a way to handle WANTED goals?
                 //right, ADD a quantity to the amount WANTED.  change THE GOAL ITSELF
-                //recurringGoal = ;
+                recurringGoal.item.quantity += 1;
 
 
                 //theFunctions.printAlways("need a way to handle WANTED goals, easy enough to check if actionItem goal is accomplished in state");
@@ -635,7 +702,100 @@ public class AI1 : MonoBehaviour
             ineffectiveActions.Clear();
         }
     }
-            
+
+    public bool checkIfEffectsAreDone(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //used to check if an action is redundant, if it's done already.
+        //this is similar to the funciton that checks prereqs.  Could probably use that fact to cut down on duplicate code...
+
+
+        //assume true, then check and change to false where needed
+        bool tf;
+        tf = true;
+
+
+        foreach (actionItem effectX in thisAction.effects)
+        {
+
+            if (theFunctions.isStateAccomplished(effectX, state) == false)
+            {
+
+                return false;
+            }
+        }
+
+        return tf;
+
+    }
+
+    public bool checkIfActionIsNeeded(action thisAction, Dictionary<string, List<stateItem>> state)
+    {
+        //NOT A PROPER TEST OF FULL PLAN
+        //ALSO NOT A PROPER TEST IF THERE IS ONLY ONE ACTION
+        //[SEE DEVJOURNAL "why don't NPCs dump ''redundant'' orders by player"
+        //ASSUMES THE ACTION IS THE FIRST ACTION IN THE "toDoList" VARIABLE!
+        //used to check if an action is redundant, if it's done already.
+        //this is similar to the function that checks prereqs.  Could probably use that fact to cut down on duplicate code...
+
+        //theFunctions.print("======================================================");
+
+        if (checkIfEffectsAreDone(thisAction, state) == true)
+        {
+            //theFunctions.print("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
+            //action SEEMS done, but if it's still necessary
+            //[such as if a quantity greater than 1 is needed]
+            //it might still not be redundant
+            //so, check if removing it causes plan to be impossible
+
+            //masterPrintControl = true;
+            //theFunctions.print("effects of this action are done");
+
+
+            //copy plan
+            //remove 1st action
+            //if this new plan is impossible, then the action MAY NOT be considered redundant
+            //(full unmodified plan SHOULD get checked for impossibility elsewhere)
+            List<action> thisDeepCopy = new List<action>();
+            thisDeepCopy = deepCopyPlan(toDoList);
+            thisDeepCopy.RemoveAt(0);
+
+
+            List<action> deepCopyMinus1stAction = new List<action>();
+            deepCopyMinus1stAction = deepCopyPlan(toDoList);
+            deepCopyMinus1stAction.RemoveAt(0);
+
+
+
+            //theFunctions.print("current to do list:");
+            //theFunctions.printPlan(toDoList);
+            //theFunctions.print("test to do list with first action removed:");
+            //theFunctions.printPlan(thisDeepCopy);
+            //theFunctions.print(theFunctions.actionItemToTextDeep(recurringGoal));
+            //theFunctions.printState(state);
+            //theFunctions.printState(planningState);
+            //theFunctions.printState(factionState);
+            if (theFunctions.doesPlanAccomplishGoal(theFunctions.appendPlanToEndOfOtherPlan(deepCopyPlan(pendingActions), deepCopyMinus1stAction), recurringGoal, state) == true)
+            {
+
+                return false;
+            }
+            else
+            {
+                //so plan no longer accomplishes the goal
+                //so assuming the plan accomplished the goal when it was complete
+                //then the fact that it no longer works when you remove first action proves the first action is necessary:
+                return true;
+            }
+        }
+        else
+        {
+            //if the effects of the action aren't done, then the action should be needed:
+            return true;
+        }
+
+    }
+
+
 
 
     /////////////////////////////////////
@@ -683,92 +843,6 @@ public class AI1 : MonoBehaviour
     {
         return deepCopyPlan(planList[0]);
     }
-
-    public bool checkIfEffectsAreDone(action thisAction, Dictionary<string, List<stateItem>> state)
-    {
-        //used to check if an action is redundant, if it's done already.
-        //this is similar to the funciton that checks prereqs.  Could probably use that fact to cut down on duplicate code...
-
-
-        //assume true, then check and change to false where needed
-        bool tf;
-        tf = true;
-        
-
-        foreach (actionItem effectX in thisAction.effects)
-        {
-            
-            if (theFunctions.isStateAccomplished(effectX, state) == false)
-            {
-
-                return false;
-            }
-        }
-
-        return tf;
-
-    }
-
-    public bool checkIfActionIsNeeded(action thisAction, Dictionary<string, List<stateItem>> state)
-    {
-        //NOT A PROPER TEST OF FULL PLAN
-        //ALSO NOT A PROPER TEST IF THERE IS ONLY ONE ACTION
-        //[SEE DEVJOURNAL "why don't NPCs dump ''redundant'' orders by player"
-        //ASSUMES THE ACTION IS THE FIRST ACTION IN THE "toDoList" VARIABLE!
-        //used to check if an action is redundant, if it's done already.
-        //this is similar to the function that checks prereqs.  Could probably use that fact to cut down on duplicate code...
-
-        //theFunctions.print("======================================================");
-        
-        if(checkIfEffectsAreDone(thisAction, state) == true)
-        {
-            //theFunctions.print("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-            //action SEEMS done, but if it's still necessary
-            //[such as if a quantity greater than 1 is needed]
-            //it might still not be redundant
-            //so, check if removing it causes plan to be impossible
-
-            //masterPrintControl = true;
-            //theFunctions.print("effects of this action are done");
-            
-
-            //copy plan
-            //remove 1st action
-            //if this new plan is impossible, then the action MAY NOT be considered redundant
-            //(full unmodified plan SHOULD get checked for impossibility elsewhere)
-            List<action> thisDeepCopy = new List<action>();
-            thisDeepCopy = deepCopyPlan(toDoList);
-            thisDeepCopy.RemoveAt(0);
-
-            //theFunctions.print("current to do list:");
-            //theFunctions.printPlan(toDoList);
-            //theFunctions.print("test to do list with first action removed:");
-            //theFunctions.printPlan(thisDeepCopy);
-            //theFunctions.print(theFunctions.actionItemToTextDeep(recurringGoal));
-            //theFunctions.printState(state);
-            //theFunctions.printState(planningState);
-            //theFunctions.printState(factionState);
-            if (theFunctions.doesPlanAccomplishGoal(thisDeepCopy, recurringGoal, state) == true)
-            {
-                
-                return false;
-            }
-            else
-            {
-                //so plan no longer accomplishes the goal
-                //so assuming the plan accomplished the goal when it was complete
-                //then the fact that it no longer works when you remove first action proves the first action is necessary:
-                return true;
-            }
-        }
-        else
-        {
-            //if the effects of the action aren't done, then the action should be needed:
-            return true;
-        }
-
-    }
-
 
 
     public void printThisInventory()

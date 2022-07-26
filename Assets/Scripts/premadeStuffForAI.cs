@@ -138,7 +138,10 @@ public class premadeStuffForAI : MonoBehaviour
     public action createStorage = new action();
 
     public action attackRandomEnemy = new action();
+
+    public action standardFactionGrowth = new action();
     
+
 
 
 
@@ -258,11 +261,14 @@ public class premadeStuffForAI : MonoBehaviour
         //actions:
         {
             //NOTE AD-HOC TARGET RIGHT NOW IS "anyLandPlot"!!!!!!!!!!!!!!!
-            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(storageOwnership), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(), 1, anyNONGroupMember);
-            orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(soldier), 1, anyLandPlot);
+            createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(storageOwnership, resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(), 1, anyNONGroupMember);
+            orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(soldier, threat), 1, anyLandPlot);
             //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
             attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyUnderling);
-            
+
+            standardFactionGrowth = actionCreator("standardFactionGrowth", "growth", wantedPrereqsLister(quantityOfItemGenerator(resource1, 2), soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(), 1, anyLandPlot);
+
+            //why is "placeHolderFactionGoal" in the PREREQS????
             doJobGeneric = actionCreator("doJobGeneric", "genericJob", wantedPrereqsLister(placeHolderFactionGoal), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, anyEnemyUnderling);
 
             createShop = actionCreator("createShop", "createProperty", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(shopOwnership), UNwantedEffectsLister(), 7, anyLandPlot);
@@ -543,8 +549,10 @@ public class premadeStuffForAI : MonoBehaviour
         newList.Add(buyHome);
 
         newList.Add(doTheWork);
-
+        newList.Add(standardFactionGrowth);
         
+
+
         //newList.Add(pickVictimsPocket);
         newList.Add(recruit);
         //newList.Add(askMemberForMoney);

@@ -19,9 +19,9 @@ public class pickpocketNPC : MonoBehaviour
         //this is my pickpocket npc [or test NPC]
 
         //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.hungry), 0);
-        //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.placeHolderFactionGoal), 1);
+        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.deepStateItemCopier(stateGrabber.placeHolderFactionGoal), 1);
         //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.quantityOfItemGenerator(stateGrabber.money, 557), 1);
-        actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.quantityOfItemGenerator(stateGrabber.soldier, 5), 1);
+        //actionItem goalActionItem = stateGrabber.convertToActionItem(stateGrabber.quantityOfItemGenerator(stateGrabber.soldier, 1), 1);
         theHub.recurringGoal = goalActionItem;
         theHub.state = stateGrabber.createPickpocketState();
         theHub.knownActions = stateGrabber.createPickpocketKnownActions();
