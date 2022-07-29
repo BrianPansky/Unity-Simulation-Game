@@ -207,8 +207,13 @@ public class functionsForAI : MonoBehaviour
         if (target != null && whicheverprereqStateChecker(nextAction, state, target) == true)
         {
 
-            //print("prereqs met");
+            //print("======================= prereqs met, enacting this action:  =======================");
             //if(gameObject.name == "NPC")
+            //print(nextAction.name);
+            //printState(thisAI.state);
+            //printState(thisAI.planningState);
+            //printState(thisAI.factionState);
+            //printPlan(thisAI.toDoList);
 
             //I SHOULD REALLY BUNDLE THESE INSIDE THE DEFINITIONS OF THE ACTIONS?  OR HAVE THEM "LINKED" IN THERE...
 
@@ -364,9 +369,10 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "hireResourceGatherer")
             {
+                //printPlan(thisAI.toDoList);
                 if (hiring(target, premadeStuff.resource1GatheringJob, "storage"))
                 {
-                    //Debug.Log("hired..........");
+                    //Debug.Log("hired a ResourceGatherer..........");
                     //ad-hoc update of state:
                     //state = implementALLEffectsREAL(nextAction, state);
                     addActionToPendingList(nextAction, 2500);
@@ -378,6 +384,7 @@ public class functionsForAI : MonoBehaviour
                     //printState(thisAI.state);
                     //printState(thisAI.planningState);
                     //printState(thisAI.factionState);
+                    //printPlan(thisAI.toDoList);
 
 
                 }
@@ -849,6 +856,14 @@ public class functionsForAI : MonoBehaviour
                 state = implementALLEffectsREAL(nextAction, state);
                 target = dumpAction(target);
             }
+            else if (nextAction.name == "standardFactionGrowth")
+            {
+                printAlways("standardFactionGrowth!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                foreach(actionItem prereq in nextAction.prereqs)
+                {
+                    prereq.item.quantity += 1;
+                }
+            }
 
             else
             {
@@ -864,7 +879,13 @@ public class functionsForAI : MonoBehaviour
                 //alert();
             }
 
-            
+            //print("after:");
+            //printState(thisAI.state);
+            //printState(thisAI.planningState);
+            //printState(thisAI.factionState);
+            //printPlan(thisAI.toDoList);
+
+            //print("======================= end of enaction =======================");
         }
 
         //ad hoc for now:
@@ -1555,9 +1576,9 @@ public class functionsForAI : MonoBehaviour
             commandToDoXAction(theXAction, person);
 
             //FOR INVESTIGATING/TESTING:
-            AI1 targetAI = person.GetComponent("AI1") as AI1;
-            targetAI.masterPrintControl = true;
-            targetAI.npcx = targetAI.gameObject.name;
+            //AI1 targetAI = person.GetComponent("AI1") as AI1;
+            //targetAI.masterPrintControl = true;
+            //targetAI.npcx = targetAI.gameObject.name;
             //Debug.Log("updated ''npcx''");
         }
     }
@@ -5263,6 +5284,8 @@ public class functionsForAI : MonoBehaviour
 
         //print("check if goal is accomplished at end");
         //now after all that, check if GOAL is accomplished in imaginary state:
+        //print(stateItemToTextDeep(goal.item));
+        //printState(imaginaryState);
         return isStateAccomplished(goal, imaginaryState);
 
     }

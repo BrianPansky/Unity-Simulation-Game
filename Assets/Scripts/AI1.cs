@@ -135,7 +135,7 @@ public class AI1 : MonoBehaviour
         npcx = "NPC pickpocket";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = false;
+        masterPrintControl = true;
 
 
         //i think this should work?
@@ -156,8 +156,8 @@ public class AI1 : MonoBehaviour
     void Update()
     {
         
-        theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-        printToDoList(toDoList);
+        //theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+        //printToDoList(toDoList);
 
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
@@ -169,7 +169,7 @@ public class AI1 : MonoBehaviour
             {
 
                 //theFunctions.print("TESTTTTTTTTTTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!");
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
 
                 //get NPC moving again if it was stopped by conversation:
                 getGoingAgan();
@@ -181,12 +181,12 @@ public class AI1 : MonoBehaviour
 
                 //fine time to do sensing, I guess...
                 doSensing();
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
                 //remove all plans that contain "ineffective actions":
                 removeIneffectiveActions();
 
                 //theFunctions.print("TESTTTTTTTTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!");
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
 
                 if (inputtedToDoList.Count > 0)
                 {
@@ -207,7 +207,7 @@ public class AI1 : MonoBehaviour
                 else if (toDoList.Count == 0)
                 {
                     //theFunctions.print("TESTTTTTTTTTT!!!!!!55555555555555555555555555555555555555555!!!");
-                    printToDoList(toDoList);
+                    //printToDoList(toDoList);
                     //so we need a plan:
                     getPlan();
 
@@ -227,24 +227,24 @@ public class AI1 : MonoBehaviour
                     }
                     //printPlanListForSpecificNPC();
                     //printToDoListForSpecificNPC();
-                    printToDoList(toDoList);
+                    //printToDoList(toDoList);
 
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-                    printToDoList(toDoList);
+                    //printToDoList(toDoList);
 
                 }
 
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
 
                 //printToDoListForSpecificNPC();
                 //doing the to-do list (checks if it's not zero length):
 
                 //theFunctions.print("TESTTTTTTTTTT before handle action");
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
                 handleAnyNextAction();
-                printToDoList(toDoList);
+                //printToDoList(toDoList);
 
                 //theFunctions.print("TESTTTTTTTTTT22222222222222222222222222222222222");
                 //masterPrintControl = false;
@@ -437,12 +437,14 @@ public class AI1 : MonoBehaviour
         //returns the index number of the first action on that list that CANNOT be completed
 
         //theFunctions.printAlways(this.gameObject.name);
+        //theFunctions.print(this.gameObject.name);
         //theFunctions.printAlways(theFunctions.planToText(toDoList));
 
         //Z = theFunctions.findFirstImpossibleAction(toDoList, knownActions, planningState);
 
         //theFunctions.printAlways(Z.ToString());
         //theFunctions.printAlways(theFunctions.planToText(toDoListPlusPendingActions));
+        //theFunctions.print(theFunctions.planToText(toDoListPlusPendingActions));
 
         Z = theFunctions.findFirstImpossibleAction(toDoListPlusPendingActions, knownActions, planningState);
 
@@ -464,6 +466,7 @@ public class AI1 : MonoBehaviour
                 //printPlanListForSpecificNPC();
                 //printPlanList(planList);
                 //printToDoList(toDoListPlusPendingActions);
+                //masterPrintControl = true;
                 
 
 
@@ -737,7 +740,7 @@ public class AI1 : MonoBehaviour
         //used to check if an action is redundant, if it's done already.
         //this is similar to the function that checks prereqs.  Could probably use that fact to cut down on duplicate code...
 
-        //theFunctions.print("======================================================");
+        //theFunctions.print("======================== start checkIfActionIsNeeded ==============================");
 
         if (checkIfEffectsAreDone(thisAction, state) == true)
         {
@@ -774,9 +777,10 @@ public class AI1 : MonoBehaviour
             //theFunctions.printState(state);
             //theFunctions.printState(planningState);
             //theFunctions.printState(factionState);
-            if (theFunctions.doesPlanAccomplishGoal(theFunctions.appendPlanToEndOfOtherPlan(deepCopyPlan(pendingActions), deepCopyMinus1stAction), recurringGoal, state) == true)
+            if (theFunctions.doesPlanAccomplishGoal(theFunctions.appendPlanToEndOfOtherPlan(deepCopyPlan(pendingActions), deepCopyMinus1stAction), recurringGoal, planningState) == true)
             {
-
+                //theFunctions.print("returned true [plan accomplishes goal even when this action is removed], so this action is deemed unncecessary:");
+                //theFunctions.print(thisAction.name);
                 return false;
             }
             else
@@ -792,6 +796,8 @@ public class AI1 : MonoBehaviour
             //if the effects of the action aren't done, then the action should be needed:
             return true;
         }
+
+        //theFunctions.print("======================== end checkIfActionIsNeeded ==============================");
 
     }
 

@@ -266,7 +266,7 @@ public class premadeStuffForAI : MonoBehaviour
             //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
             attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyUnderling);
 
-            standardFactionGrowth = actionCreator("standardFactionGrowth", "growth", wantedPrereqsLister(quantityOfItemGenerator(resource1, 2), soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(), 1, anyLandPlot);
+            standardFactionGrowth = actionCreator("standardFactionGrowth", "growth", wantedPrereqsLister(quantityOfItemGenerator(resource1, 1), soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(), 1, anyLandPlot);
 
             //why is "placeHolderFactionGoal" in the PREREQS????
             doJobGeneric = actionCreator("doJobGeneric", "genericJob", wantedPrereqsLister(placeHolderFactionGoal), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(money), 1, anyEnemyUnderling);
