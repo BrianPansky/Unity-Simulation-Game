@@ -155,7 +155,7 @@ public class AI1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
         //theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
         //printToDoList(toDoList);
 

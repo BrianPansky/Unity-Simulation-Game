@@ -35,6 +35,7 @@ public class playerClickInteraction : MonoBehaviour
     public AI1 theHub;
     public playerHUD myHUD;
     public functionsForAI theFunctions;
+    public nonAIScript theNonAIScript;
 
 
     public taggedWith theTagScript;
@@ -67,6 +68,8 @@ public class playerClickInteraction : MonoBehaviour
 
         premadeStuff = GetComponent<premadeStuffForAI>();
         theHub = GetComponent<AI1>();
+        theNonAIScript = GetComponent<nonAIScript>();
+
         myHUD = GetComponent<playerHUD>();
         inMenu = false;
         recruitingMenu.SetActive(false);
@@ -96,7 +99,8 @@ public class playerClickInteraction : MonoBehaviour
         //check for click:
         handleAnyClick();
 
-        //handle other butons:
+        //handle other buttons:
+        handleOtherButtons();
         toggleBuildMode();
 
         ///*
@@ -172,6 +176,12 @@ public class playerClickInteraction : MonoBehaviour
         }
     }
 
+    public void handleOtherButtons()
+    {
+        toggleBuildMode();
+        toggleWeapon();
+    }
+
     public void toggleBuildMode()
     {
         
@@ -180,10 +190,8 @@ public class playerClickInteraction : MonoBehaviour
 
     if (Input.GetKeyDown(KeyCode.B))
         {
-            //Debug.Log("222222222222222222222");
             if (buildMode == false)
             {
-                //Debug.Log("build mode activated");
                 buildMode = true;
 
                 //now bring up menu to select what to build
@@ -192,11 +200,30 @@ public class playerClickInteraction : MonoBehaviour
             }
             else
             {
-                //Debug.Log("build mode de-activated");
                 buildMode = false;
             }
         }
-}
+    }
+
+    public void toggleWeapon()
+    {
+
+        //[SerializeField]
+
+        //"G" for "gun"....
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            if (weapon == false)
+            {
+                weapon = true;
+                
+            }
+            else
+            {
+                weapon = false;
+            }
+        }
+    }
 
     //public void buildModeVisualCue()
 
@@ -266,28 +293,31 @@ public class playerClickInteraction : MonoBehaviour
         return clickedOn;
     }
 
+    public Ray rayFromPlayerCamera()
+    {
+        //can input into "Physics.Raycast" as if it is a Vector3 data type?  oookayyy
+        //orrr, is that ONLY if you don't input an origin point!?!?
+        //ya, seems like yet ANOTHER hidden version of the "raycast" funciton.  ffs unity.
+        //Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        return Camera.main.ScreenPointToRay(Input.mousePosition); ;
+    }
+
+    public Vector3 vectorFromPlayerCamera()
+    {
+        return Camera.main.transform.forward;
+    }
+
     public void simpleShoot()
     {
         //beginning shooting mechanic
+        //hmm, Unity graphics are too glitchy, can't handle light placement, will do it later
+        //theNonAIScript.raycastFromCameraPrefabPlacement(theNonAIScript.gunFlash1);
 
-        clickedOn = whatDoesBulletHit();
-        if (clickedOn != null)
-        {
-            if (clickedOn.tag == "anNPC")
-            {
-                Debug.Log("you just shot " + clickedOn.name);
-                Debug.Log("object to be destroyed ");
-                Debug.Log(clickedOn);
-                Destroy(clickedOn);
-
-
-            }
-
-            //blank out mouse click each frame:
-            clickedOn = null;
-        }
-
-       
+        theNonAIScript.basicFiringWithInnacuracy(vectorFromPlayerCamera()*40);
+        
+        //blank out mouse click each frame:
+        clickedOn = null;
 
     }
 
@@ -548,7 +578,7 @@ public class playerClickInteraction : MonoBehaviour
         if (foreignTagScript.tags.Contains("PlayersGang"))
         {
             makeButton("hire as gatherer", this.hireResource1GathererButton);
-
+            makeButton("hire as soldier", this.hireSoldierButton);
             
 
             //makeButton("bring me food", this.bringLeaderFoodButton);
@@ -1050,6 +1080,18 @@ public class playerClickInteraction : MonoBehaviour
     public void hireResource1GathererButton()
     {
         if(theFunctions.hiring(selectedNPC, premadeStuff.resource1GatheringJob, "storage"))
+        {
+            Debug.Log("hired..........");
+        }
+        else
+        {
+            Debug.Log("FAILED TO HIRE");
+        }
+    }
+
+    public void hireSoldierButton()
+    {
+        if (theFunctions.hiring(selectedNPC, premadeStuff.soldierJob, "storage"))
         {
             Debug.Log("hired..........");
         }

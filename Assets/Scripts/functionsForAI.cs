@@ -7,6 +7,8 @@ using System.Linq;
 
 public class functionsForAI : MonoBehaviour
 {
+    //this script should be "artificial intelligence only".  only used by AI, not the player [in theory.  needs cleanup]
+
     [SerializeField]
     Transform _destination;
     public NavMeshAgent _navMeshAgent;
@@ -26,10 +28,11 @@ public class functionsForAI : MonoBehaviour
     public int workerCount;
     public List<GameObject> listOfCashiers = new List<GameObject>();
 
-
-    public AI1 thisAI;// = GetComponent<AI1>();
+    //other scripts:
+    public AI1 thisAI;
     public premadeStuffForAI premadeStuff;
     public taggedWith theTagScript;
+    public nonAIScript theNonAIScript;
 
     //ad hoc test thing
     public bool testTime;
@@ -61,6 +64,7 @@ public class functionsForAI : MonoBehaviour
         worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
         globalTags = theWorldScript.taggedStuff;
         theTagScript = GetComponent<taggedWith>();
+        theNonAIScript = GetComponent<nonAIScript>();
 
         //printAlways(stateItemToTextDeep(premadeStuff.food));
     }
@@ -172,6 +176,12 @@ public class functionsForAI : MonoBehaviour
             {
                 //need to get a target:
                 target = chooseTarget(nextAction.locationPrereq);
+
+                if (target != null)
+                {
+                    Vector3 newVector = theNonAIScript.vectorToTarget(target);
+                    
+                }
             }
             if (target == null)
             {
@@ -188,6 +198,7 @@ public class functionsForAI : MonoBehaviour
             else
             {
                 //print("should have a target");
+                //Vector3 newVector = vectorToTarget(target);
                 //print(target.name);
                 //the following should only happen if target is NOT null
                 travelToTargetObject(target);
@@ -446,7 +457,8 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("yo");
 
-                kill(target);
+                theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
+                //kill(target);
 
                 state = implementALLEffectsREAL(nextAction, state);
                 target = dumpAction(target);
@@ -850,7 +862,8 @@ public class functionsForAI : MonoBehaviour
             {
                 printAlways("enaction of the random attack!");
 
-                kill(target);
+                theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
+                //kill(target);
 
 
                 state = implementALLEffectsREAL(nextAction, state);
@@ -1803,27 +1816,7 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    public void kill(GameObject whoToKill)
-    {
-
-        //don't kill player for testing:
-        if (whoToKill.name != "Player")
-        {
-            //NEED TO REMOVE THIS OBJECT FROM ALL LISTS BEFORE DESTROYING IT!
-            //OTHERWISE WILL GET NULL/"object does not exist" ERRORS!!!!!
-
-            thisAI.taggedWith.foreignRemoveALLtags(whoToKill);
-            //print("a killer just shot " + target.name);
-            //print("object to be destroyed:");
-            //print(target);
-            Destroy(whoToKill);
-        }
-        else
-        {
-            print("you are shot!");
-            //whoToKill = null;
-        }
-    }
+    
 
     //pretty ad-hoc
 
