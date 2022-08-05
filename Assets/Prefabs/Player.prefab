@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 6128988794682438767}
   - component: {fileID: 310021312455318196}
   - component: {fileID: 7378499042799406245}
-  - component: {fileID: 7866370346245095191}
+  - component: {fileID: 7252143799947160354}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -304,6 +304,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
+  tag1: factionLeader
+  tag2: 
+  tag3: 
+  tag4: 
 --- !u!114 &8471529389858309066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -320,13 +324,15 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  pendingActionTimer: 0
   masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
   atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
-  thisIsTaggedWith: {fileID: 0}
+  taggedWith: {fileID: 0}
+  social: {fileID: 0}
   npcx: 
   ignore: 0
   goalWait: 0
@@ -449,7 +455,10 @@ MonoBehaviour:
   defaultTrust: 0
   theFunctions: {fileID: 0}
   theHub: {fileID: 0}
---- !u!114 &7866370346245095191
+  factionList: []
+  allyFactionList: []
+  enemyFactionList: []
+--- !u!114 &7252143799947160354
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -458,14 +467,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8239240193439217715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 638651203e7ba6e4b98e478c41f42f81, type: 3}
+  m_Script: {fileID: 11500000, guid: c2dee90bed910f645a39c8dc9d9bdb26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thisIsTaggedWith: {fileID: 0}
-  tag1: 
-  tag2: 
-  tag3: 
-  tag4: 
+  gunFlash1: {fileID: 1644270354528127361, guid: ad575b38f1150ed42a400c2f6772f6fe,
+    type: 3}
 --- !u!1001 &2208505812413378550
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 418249366537334465}
   - component: {fileID: 1107403957602663128}
   - component: {fileID: 4671134275979853450}
+  - component: {fileID: 6452136577631040163}
   m_Layer: 0
   m_Name: NPC shopkeeper
   m_TagString: anNPC
@@ -114,6 +115,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tags: []
+  tag1: 
+  tag2: 
+  tag3: 
+  tag4: 
 --- !u!114 &8638543676797519505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,11 +135,18 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  pendingActionTimer: 0
+  masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
+  atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
-  thisIsTaggedWith: {fileID: 0}
+  taggedWith: {fileID: 0}
+  social: {fileID: 0}
+  npcx: 
+  ignore: 0
+  goalWait: 0
 --- !u!114 &-951165740514222979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -157,6 +169,8 @@ MonoBehaviour:
   listOfCashiers: []
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
+  testTime: 0
 --- !u!195 &4474087527148379903
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -191,6 +205,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storagePrefab: {fileID: 0}
+  theFunctions: {fileID: 0}
 --- !u!114 &1107403957602663128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,6 +237,23 @@ MonoBehaviour:
   defaultTrust: 0
   theFunctions: {fileID: 0}
   theHub: {fileID: 0}
+  factionList: []
+  allyFactionList: []
+  enemyFactionList: []
+--- !u!114 &6452136577631040163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5963062928679372863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2dee90bed910f645a39c8dc9d9bdb26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gunFlash1: {fileID: 1644270354528127361, guid: ad575b38f1150ed42a400c2f6772f6fe,
+    type: 3}
 --- !u!1001 &5152848537423361885
 PrefabInstance:
   m_ObjectHideFlags: 0
