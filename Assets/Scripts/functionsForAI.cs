@@ -13,7 +13,7 @@ public class functionsForAI : MonoBehaviour
     Transform _destination;
     public NavMeshAgent _navMeshAgent;
 
-    public GameObject storePrefab;
+    
 
     //I don't remember making this, why is it here instead of in the function where I use it?
     //probably carried over from some tutorial?  On navmesh?
@@ -824,7 +824,7 @@ public class functionsForAI : MonoBehaviour
                 //print(actionToTextDeep(newAction));
                 //printKnownActionsDeeply(knownActions);
 
-                createBuildingX(storePrefab);
+                theNonAIScript.createBuildingX(theNonAIScript.storePrefab);
 
                 //printKnownActionsDeeply(knownActions);
 
@@ -838,7 +838,7 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "createStorage")
             {
-                createBuildingX(premadeStuff.storagePrefab);
+                theNonAIScript.createBuildingX(theNonAIScript.storagePrefab);
                 
 
                 target = dumpAction(target);
@@ -1596,56 +1596,6 @@ public class functionsForAI : MonoBehaviour
         }
     }
 
-    public void createBuildingX(GameObject buildingX)
-    {
-        //input a prefab
-        //will instantiate it RIGHT WHERE npc IS STANDING
-        //and will update ownership tags
-        //some ad-hoc junk too, alas
-
-
-        //create store:
-        GameObject newBuilding = new GameObject();
-        //newShop = Instantiate(storePrefab, new Vector3(5, 0, -11), Quaternion.identity);
-
-        //---get XYZ values from gameObject.transform somehow
-        //---adjust Y value
-        //---combine XYZ values into...a 3Vector or whatever...somehow
-        //---plug into instantiate function
-        //Vector3 whereToPlace = new Vector3(gameObject.transform.x, (gameObject.transform.y - 113), gameObject.transform.z);
-
-        newBuilding = Instantiate(buildingX, new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z), Quaternion.identity);
-
-
-        //now "buy" it:
-
-        //check if it's for sale:
-        //get other script I need:
-        taggedWith otherIsTaggedWith = newBuilding.GetComponent<taggedWith>() as taggedWith;
-
-        string ownershipTag = "owned by " + this.name;
-        otherIsTaggedWith.foreignAddTag(ownershipTag, newBuilding);
-
-        //need to remember in the future WHICH store is theirs
-        //so they ca go to it, and sned their employees there:
-        //thisAI.roleLocation = target;
-
-        //ad-hoc action completion:
-        //thisAI.toDoList.RemoveAt(0);
-
-
-        //make this NPC self employed, so i will have role-location for buying from them...bit ad-hoc...
-        //SHOULD MOVE THIS TO "CREATE STORE" ENACTION, BUT
-        //REQUIRES THE "NEWBUILDING" GAME OBJECT, NOT JUST THE PREFAB!
-        //so, should RETURN this generated building object, to be used further
-        //[or have OTHER way to "find" it for use]
-        if(buildingX.name == "storeToCreate")
-        {
-            doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
-        }
-        
-
-    }
 
     //other:
     public void travelToactionItem(actionItem X)

@@ -11,14 +11,14 @@ public class playerClickInteraction : MonoBehaviour
     //CHANGING "clickedOn" TO PUBLIC DIDN'T FIX, AND "selectedNPC" ISN'T PUBLIC EITHER...
     public GameObject clickedOn;
 
-    //ad-hoc?
+    //selection
     GameObject selectedNPC;
+    public GameObject currentPrefab;
 
     public string ownershipTag;
 
     //plug-in menu objects:
     public GameObject recruitingMenu;
-
     public GameObject myPrefabButton1;
     public GameObject myGridCanvas;
     public List<GameObject> currentGridButtons;
@@ -31,11 +31,13 @@ public class playerClickInteraction : MonoBehaviour
     public bool inMenu;
     public bool buildMode;
 
-    public premadeStuffForAI premadeStuff;
+    //other scripts
     public AI1 theHub;
     public playerHUD myHUD;
-    public functionsForAI theFunctions;
     public nonAIScript theNonAIScript;
+    public functionsForAI theFunctions;
+    public premadeStuffForAI premadeStuff;
+    
 
 
     public taggedWith theTagScript;
@@ -49,8 +51,8 @@ public class playerClickInteraction : MonoBehaviour
     //definitely ad-hoc:
     public bool haveStore;
     public bool weapon;
-    public GameObject myPrefab;
-    public GameObject currentPrefab;
+    //public GameObject myPrefab;
+    
     public bool swapDirection;
 
     // Start is called before the first frame update
@@ -96,12 +98,11 @@ public class playerClickInteraction : MonoBehaviour
     void Update()
     {
 
-        //check for click:
+        //check for mouse click:
         handleAnyClick();
 
-        //handle other buttons:
+        //handle other buttons the player has pressed:
         handleOtherButtons();
-        toggleBuildMode();
 
         ///*
         //debugging
@@ -184,14 +185,15 @@ public class playerClickInteraction : MonoBehaviour
 
     public void toggleBuildMode()
     {
-        
+
         //[SerializeField]
         //private KeyCode newObjectHotkey = KeyCode.A;
 
-    if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.B))
         {
             if (buildMode == false)
             {
+                Debug.Log("1111111111111111111111111111111111111111111111111111111");
                 buildMode = true;
 
                 //now bring up menu to select what to build
@@ -200,6 +202,7 @@ public class playerClickInteraction : MonoBehaviour
             }
             else
             {
+                Debug.Log("22222222222222222222222222222222222222222222222222222");
                 buildMode = false;
             }
         }
@@ -230,6 +233,8 @@ public class playerClickInteraction : MonoBehaviour
     private void raycastBuildingPlacement()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        Debug.Log(currentPrefab.name);
 
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo) && currentPrefab != null)
@@ -267,31 +272,7 @@ public class playerClickInteraction : MonoBehaviour
 
         return clickedOn;
     }
-
-    public GameObject whatDoesBulletHit()
-    {
-        //returns the object that was clicked on
-
-        GameObject clickedOn;
-        clickedOn = null;
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit myHit;
-            Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(myRay, out myHit, 50.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                if (myHit.transform != null)
-                {
-                    //Debug.Log(myHit.transform.gameObject);
-                    clickedOn = myHit.transform.gameObject;
-                }
-            }
-        }
-
-        return clickedOn;
-    }
+    
 
     public Ray rayFromPlayerCamera()
     {
@@ -630,9 +611,9 @@ public class playerClickInteraction : MonoBehaviour
 
         //make these from a list later, ad hoc for now...
         
-        makeButton("build " + myPrefab.name, () => this.selectWhatToBuild(myPrefab));
+        makeButton("build " + theNonAIScript.storePrefab.name, () => this.selectWhatToBuild(theNonAIScript.storePrefab));
 
-        makeButton("build " + premadeStuff.storagePrefab.name, () => this.selectWhatToBuild(premadeStuff.storagePrefab));
+        makeButton("build " + theNonAIScript.storagePrefab.name, () => this.selectWhatToBuild(theNonAIScript.storagePrefab));
         
 
 

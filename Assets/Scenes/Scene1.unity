@@ -916,7 +916,7 @@ PrefabInstance:
     - target: {fileID: 464508929170896757, guid: ae4fef7f97573a24eab98b2b59d90e62,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 144.80585
+      value: 141.2
       objectReference: {fileID: 0}
     - target: {fileID: 464508929170896757, guid: ae4fef7f97573a24eab98b2b59d90e62,
         type: 3}
@@ -967,6 +967,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4474087527148379903, guid: ae4fef7f97573a24eab98b2b59d90e62,
+        type: 3}
+      propertyPath: m_Speed
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4474087527148379903, guid: ae4fef7f97573a24eab98b2b59d90e62,
+        type: 3}
+      propertyPath: m_Acceleration
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 5963062928679372863, guid: ae4fef7f97573a24eab98b2b59d90e62,
         type: 3}
@@ -4511,6 +4521,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2020820003}
   - component: {fileID: 2020820004}
+  - component: {fileID: 2020820005}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -4549,6 +4560,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   theTime: 0
+--- !u!114 &2020820005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020820002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11195772ead2daa45a80dbc9bba2ecb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2034750604
 GameObject:
   m_ObjectHideFlags: 0

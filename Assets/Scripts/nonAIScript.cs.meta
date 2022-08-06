@@ -6,6 +6,13 @@ MonoImporter:
   defaultReferences:
   - gunFlash1: {fileID: 1644270354528127361, guid: ad575b38f1150ed42a400c2f6772f6fe,
       type: 3}
+  - storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
+      type: 3}
+  - storagePrefab: {fileID: 5897906389598753279, guid: f9a001edb86876149ab7598dc5844506,
+      type: 3}
+  - thisAI: {instanceID: 0}
+  - theFunctions: {instanceID: 0}
+  - premadeStuff: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

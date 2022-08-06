@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class premadeStuffForAI : MonoBehaviour
 {
-    public GameObject storagePrefab;
+    
 
     //HMMM, INSTED OF GENERATING EVERYTHING, SHOULD JUST HAVE "ITEM" AND "TARGET" AND STUFF???
     //THEN ***FILL*** IT WITH ALL RELEVANT NEEDED INFO???

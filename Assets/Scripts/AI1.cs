@@ -59,7 +59,7 @@ public class AI1 : MonoBehaviour
 
     public actionItem recurringGoal = new actionItem();
 
-    public functionsForAI theFunctions;// = GetComponent<functionsForAI>();
+    public functionsForAI theFunctions;
     //public stateForAI state;
     public taggedWith taggedWith;
     public social social;

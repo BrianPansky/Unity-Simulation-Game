@@ -9,8 +9,26 @@ public class nonAIScript : MonoBehaviour
     //effect prefabs:
     public GameObject gunFlash1;
 
+    //building prefabs:
+    public GameObject storePrefab;
+    public GameObject storagePrefab;
+
+    //other scripts:
+    public AI1 thisAI;
+    public functionsForAI theFunctions;
+    public premadeStuffForAI premadeStuff;
 
 
+    void Awake()
+    {
+        //initialize other scripts:
+        thisAI = GetComponent<AI1>();
+        theFunctions = GetComponent<functionsForAI>();
+        premadeStuff = GetComponent<premadeStuffForAI>();
+
+
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -74,6 +92,61 @@ public class nonAIScript : MonoBehaviour
             //whoToKill = null;
         }
     }
+
+
+
+    //========================= BUILDING STUFF =========================
+    public void createBuildingX(GameObject buildingX)
+    {
+        //input a prefab
+        //will instantiate it RIGHT WHERE npc IS STANDING
+        //and will update ownership tags
+        //some ad-hoc junk too, alas [does "HIRING" of the builder!!!]
+
+        
+        //create building/prefab:
+        GameObject newBuilding = new GameObject();
+        //newShop = Instantiate(storePrefab, new Vector3(5, 0, -11), Quaternion.identity);
+
+        //---get XYZ values from gameObject.transform somehow
+        //---adjust Y value
+        //---combine XYZ values into...a 3Vector or whatever...somehow
+        //---plug into instantiate function
+        //Vector3 whereToPlace = new Vector3(gameObject.transform.x, (gameObject.transform.y - 113), gameObject.transform.z);
+
+        newBuilding = Instantiate(buildingX, new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z), Quaternion.identity);
+
+
+        //now "buy" it:
+
+        //check if it's for sale:
+        //get other script I need:
+        taggedWith otherIsTaggedWith = newBuilding.GetComponent<taggedWith>() as taggedWith;
+
+        string ownershipTag = "owned by " + this.name;
+        otherIsTaggedWith.foreignAddTag(ownershipTag, newBuilding);
+
+        //need to remember in the future WHICH store is theirs
+        //so they ca go to it, and sned their employees there:
+        //thisAI.roleLocation = target;
+
+        //ad-hoc action completion:
+        //thisAI.toDoList.RemoveAt(0);
+
+
+        //make this NPC self employed, so i will have role-location for buying from them...bit ad-hoc...
+        //SHOULD MOVE THIS TO "CREATE STORE" ENACTION, BUT
+        //REQUIRES THE "NEWBUILDING" GAME OBJECT, NOT JUST THE PREFAB!
+        //so, should RETURN this generated building object, to be used further
+        //[or have OTHER way to "find" it for use]
+        if (buildingX.name == "storeToCreate")
+        {
+            theFunctions.doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
+        }
+
+
+    }
+
 
 
     //========================= misc =========================
@@ -141,7 +214,7 @@ public class nonAIScript : MonoBehaviour
         //newVector = Quaternion.AngleAxis(randomSpread(accuracy), axis) * originalVector;
         newVector = Quaternion.Euler(randomSpread(accuracy), randomSpread(accuracy), randomSpread(accuracy)) * originalVector;
 
-        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.blue, 3);
+        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.red, 3);
 
         return newVector;
     }
