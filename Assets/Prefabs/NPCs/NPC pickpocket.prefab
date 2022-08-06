@@ -254,8 +254,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
   _navMeshAgent: {fileID: 0}
-  storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
-    type: 3}
   stopwatch: 0
   effectivenessTimer: 0
   workerCount: 0
@@ -263,6 +261,7 @@ MonoBehaviour:
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
   theTagScript: {fileID: 0}
+  theNonAIScript: {fileID: 0}
   testTime: 0
 --- !u!195 &4474087527148379903
 NavMeshAgent:
@@ -298,7 +297,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!114 &3651601685852517964
 MonoBehaviour:
@@ -347,6 +345,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunFlash1: {fileID: 1644270354528127361, guid: ad575b38f1150ed42a400c2f6772f6fe,
     type: 3}
+  storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
+    type: 3}
+  storagePrefab: {fileID: 5897906389598753279, guid: f9a001edb86876149ab7598dc5844506,
+    type: 3}
+  thisAI: {fileID: 0}
+  theFunctions: {fileID: 0}
+  premadeStuff: {fileID: 0}
 --- !u!1001 &3837084469687796168
 PrefabInstance:
   m_ObjectHideFlags: 0
