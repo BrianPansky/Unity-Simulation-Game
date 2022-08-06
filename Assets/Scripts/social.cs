@@ -26,6 +26,7 @@ public class social : MonoBehaviour
     public AI1 theHub;
     public AI1 thisAI;
     public premadeStuffForAI premadeStuff;
+    public taggedWith theTagScript;
 
 
 
@@ -43,6 +44,7 @@ public class social : MonoBehaviour
         theHub = GetComponent<AI1>();
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
+        theTagScript = GetComponent<taggedWith>();
 
         //initialize numbers:
         politicalSide = -50;
@@ -188,7 +190,7 @@ public class social : MonoBehaviour
             //customerAI.roleLocation = thisAI.roleLocation;
             string ownershipTag = "owned by " + this.name;
             //need cashierZone of the owned store:
-            GameObject roleLocation = theFunctions.randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
+            GameObject roleLocation = theTagScript.randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
 
             if (roleLocation == null)
             {
@@ -337,6 +339,8 @@ public class social : MonoBehaviour
     {
         //ok, recruitment suceeds
         Debug.Log("recruitment successful");
+        Debug.Log("recruited by:  " + this.gameObject.name);
+        Debug.Log("gang tag will be:  " + gangTag(this.gameObject));
 
         taggedWith foreignTagScript = whoIsRecruited.GetComponent<taggedWith>();
         foreignTagScript.foreignAddTag(gangTag(this.gameObject), whoIsRecruited);
@@ -358,14 +362,17 @@ public class social : MonoBehaviour
     {
         if (leader.name == "Player")
         {
+            Debug.Log("Player color");
             toColor.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
         }
         else if (leader.name == "NPC pickpocket")
         {
+            Debug.Log("NPC pickpocket color");
             toColor.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
         }
         else
         {
+            Debug.Log("''else'' color");
             toColor.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
         }
     }

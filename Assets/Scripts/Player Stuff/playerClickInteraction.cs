@@ -233,8 +233,8 @@ public class playerClickInteraction : MonoBehaviour
     private void raycastBuildingPlacement()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        Debug.Log(currentPrefab.name);
+        //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        //Debug.Log(currentPrefab.name);
 
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo) && currentPrefab != null)
@@ -534,7 +534,7 @@ public class playerClickInteraction : MonoBehaviour
 
         //only if you own a store, menu will include a hiring option:
         //this is a "GameObject"???!!!?!?
-        GameObject check = theFunctions.randomTaggedWithMultiple("shop", ownershipTag);
+        GameObject check = theTagScript.randomTaggedWithMultiple("shop", ownershipTag);
         
         if (check != null)
         {
@@ -709,9 +709,9 @@ public class playerClickInteraction : MonoBehaviour
         //for now, just use default.  Haven't made a "relationship" yet
 
         //need to get the social script on them:
-        social theSocialScript = selectedNPC.GetComponent("social") as social;
+        social theselectedNPCsSocialScript = selectedNPC.GetComponent("social") as social;
 
-        if (theSocialScript.checkTrust(this.name) > 60)
+        if (theselectedNPCsSocialScript.checkTrust(this.name) > 60)
         {
             //ok, recruitment suceeds
             theSocialScript.succeedAtRecruitment(selectedNPC);
@@ -1046,7 +1046,7 @@ public class playerClickInteraction : MonoBehaviour
                 //selectedAI.roleLocation = thisAI.roleLocation;
                 
                 //need cashierZone of the owned store [PROBABLY SHOULDN"T BE RANDOM, BUT USING IT FOR NOW]:
-                selectedAI.roleLocation = theFunctions.randomTaggedWithMultiple("shop", ownershipTag);
+                selectedAI.roleLocation = theTagScript.randomTaggedWithMultiple("shop", ownershipTag);
 
                 //Increase the "clearance level" of the worker:
                 //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.

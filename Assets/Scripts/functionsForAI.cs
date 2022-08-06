@@ -75,8 +75,6 @@ public class functionsForAI : MonoBehaviour
 
 
     ////////////////////////    SENSING    ////////////////////////
-
-    //handles ALL sensing:
     public void sensing(Dictionary<string, List<stateItem>> state)
     {
         //function used to have "action nextAction, GameObject target, " as additional inputs.
@@ -150,9 +148,7 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    ////////////////////////    ACTIONS    ////////////////////////
-
-    //handles the enactment of ALL actions:
+    ////////////////////////    ENACTION PHASE    ////////////////////////
     public GameObject doNextAction(action nextAction, Dictionary<string, List<stateItem>> state, GameObject target, List<action> ineffectiveActions)
     {
         //this is the ENACTION phase.  the DOING of an aciton.
@@ -337,7 +333,7 @@ public class functionsForAI : MonoBehaviour
                 thisAI.goalWait = 1100;
                 
                 //ad-hoc, do targeting of ALL soldiers HERE for now:
-                List<GameObject> listOfSoldiers = ALLTaggedWithMultiple(gangTag(this.gameObject), "soldier");
+                List<GameObject> listOfSoldiers = theTagScript.ALLTaggedWithMultiple(gangTag(this.gameObject), "soldier");
 
                 //printAlways("******************************giving order to attack...*********************************");
                 //print(thisAI.gameObject.name);
@@ -1688,8 +1684,6 @@ public class functionsForAI : MonoBehaviour
 
 
 
-
-
     ////////////////////////    TARGETING    ////////////////////////
 
     public GameObject chooseTarget(stateItem criteria)
@@ -1697,6 +1691,9 @@ public class functionsForAI : MonoBehaviour
         //takes criteria, returns one target
         //for now, input is an actionItem from nextAction.locationPrereq
         //output is a GameObject
+
+        //ad-hoc maybe, can i make this less spagetti?
+        //AI1 thisAI = GetComponent<AI1>();
 
 
         string name1 = criteria.name;
@@ -1712,17 +1709,18 @@ public class functionsForAI : MonoBehaviour
         else if (criteria.locationType == "deliverTo")
         {
 
-            if(criteria.name == "storagePlace")
+            if (criteria.name == "storagePlace")
             {
-                target = randomTaggedWithMultiple("storage", thisLeadersOwnerTag());
+                target = theTagScript.randomTaggedWithMultiple("storage", thisLeadersOwnerTag());
             }
             else
             {
+
                 //for now ad hoc, just deliver to me, the leader
                 //should have a "deliveryTarget" variable?  But could have multiple...need it embedded in the "deliver" action...
                 target = thisAI.leader;
             }
-            
+
 
 
         }
@@ -1734,17 +1732,17 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("anyStore");
                 //get any store:
-                target = randomTaggedWithMultiple("shop", "forSale");
+                target = theTagScript.randomTaggedWithMultiple("shop", "forSale");
             }
             else if (criteria.name == "anyHome")
             {
                 //print("anyHome");
                 //get any home:
-                target = randomTaggedWithMultiple("home", "forSale");
+                target = theTagScript.randomTaggedWithMultiple("home", "forSale");
             }
             else if (criteria.name == "anyResource1")
             {
-                target = randomTaggedWith("resource1");
+                target = theTagScript.randomTaggedWith("resource1");
             }
             else if (criteria.name == "checkout")
             {
@@ -1755,40 +1753,40 @@ public class functionsForAI : MonoBehaviour
             }
             else if (criteria.name == "anyGroupMember")
             {
-                target = randomTaggedWith(gangTag(this.gameObject));
-                //printAlways(target.name);
-                
+                target = theTagScript.randomTaggedWith(gangTag(this.gameObject));
+                //Debug.Log(target.name);
+
             }
             else if (criteria.name == "anyLandPlot")
             {
                 //ad hoc for now, just select self lol?
                 target = gameObject;
             }
-            else if(criteria.name == "toRecruit")
+            else if (criteria.name == "toRecruit")
             {
 
             }
             else if (criteria.name == "anyEnemyLeader")
             {
-                target = randomTaggedWithMIX(ALLTaggedWithMultiple("factionLeader"), this.gameObject.name);
+                target = theTagScript.randomTaggedWithMIX(theTagScript.ALLTaggedWithMultiple("factionLeader"), this.gameObject.name);
             }
             else if (criteria.name == "anyNONGroupMember")
             {
                 //this should target anyone who is part of NO group/faction
                 //print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz   targeting anyNONGroupMember:   zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
                 //printTextList(thisAI.social.factionList); 
-                target = randomObjectFromList(narrowingTaggedWithNoneOnList(ALLTaggedWithMultiple("person"), thisAI.social.factionList));
+                target = theTagScript.randomObjectFromList(theTagScript.narrowingTaggedWithNoneOnList(theTagScript.ALLTaggedWithMultiple("person"), thisAI.social.factionList));
             }
             else if (criteria.name == "anyEnemyUnderling")
             {
                 social socialScriptOfLeader = thisAI.leader.GetComponent<social>();
-                target = randomTaggedWithMIX(ALLTaggedWithMultiple(randomStringFromList(socialScriptOfLeader.enemyFactionList)), "factionLeader");
+                target = theTagScript.randomTaggedWithMIX(theTagScript.ALLTaggedWithMultiple(theTagScript.randomStringFromList(socialScriptOfLeader.enemyFactionList)), "factionLeader");
 
-                if(target != null)
+                if (target != null)
                 {
-                    printAlways(target.name);
+                    Debug.Log(target.name);
                 }
-                
+
             }
         }
         else if (criteria.locationType == "roleLocation")
@@ -1806,7 +1804,7 @@ public class functionsForAI : MonoBehaviour
         {
             string ownershipTag = "owned by " + this.name;
             //need cashierZone of the owned store:
-            target = getCashierMapZoneOfStore(randomTaggedWithMultiple("shop", ownershipTag));
+            target = getCashierMapZoneOfStore(theTagScript.randomTaggedWithMultiple("shop", ownershipTag));
         }
         else if (criteria.name == "home")
         {
@@ -1823,7 +1821,7 @@ public class functionsForAI : MonoBehaviour
             //new method based on tagging
             //find the home they own:
             string ownershipTag = "owned by " + this.name;
-            target = randomTaggedWithMultiple(criteria.name, ownershipTag);  //yes, using "random" is redundant here, but it's my only function right now
+            target = theTagScript.randomTaggedWithMultiple(criteria.name, ownershipTag);  //yes, using "random" is redundant here, but it's my only function right now
         }
         else
         {
@@ -1841,637 +1839,6 @@ public class functionsForAI : MonoBehaviour
         return target;
     }
 
-
-    //find objects using tags [should these be moved to tag script?]:
-    public GameObject randomTaggedWith(string theTag)
-    {
-        //should return ONE random GameObject that is tagged with the inputted tag
-
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        if (globalTags.ContainsKey(theTag))
-        {
-            allPotentialTargets = globalTags[theTag];
-        }
-        
-
-        /*
-        if (theTag == "shop")
-        {
-            print("choosing a shop...");
-
-            print(allPotentialTargets.Count);
-
-            foreach(GameObject item in allPotentialTargets)
-            {
-                print(item.transform.position);
-            }
-        }
-        */
-
-
-        if (allPotentialTargets.Count > 0)
-        {
-            GameObject thisObject;
-            thisObject = null;
-            int randomIndex = Random.Range(0, allPotentialTargets.Count);
-            thisObject = allPotentialTargets[randomIndex];
-
-            /*
-            if (theTag == "shop")
-            {
-                print("FOUND a shop...");
-                print(randomIndex);
-                print(thisObject.name);
-
-                //print coordinates?  how?
-                print(thisObject.transform.position);
-            }
-            */
-
-            return thisObject;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public GameObject randomTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //should return ONE random GameObject that is tagged with ALL inputted tags
-
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        if (globalTags.ContainsKey(theTag))
-        {
-            allPotentialTargets = globalTags[theTag];
-        }
-
-        //BUT THAT'S A SHALLOW COPY!
-        //so I need to make a corrosponding list of indices to use, to prevent messing with it:
-        List<int> listOfIndices = new List<int>();
-        int length = 0;
-        //WILL THIS MAKE IT THE RIGHT NUMBER?  OR ONE TOO MANY?  ONE TOO FEW???
-        //I think it's correct now?
-        while (length < allPotentialTargets.Count)
-        {
-            listOfIndices.Add(length);
-            length += 1;
-        }
-
-        /*
-        if (theTag == "shop")
-        {
-            print("choosing a shop...");
-            //print(length);
-        }
-        */
-            
-
-
-        //put the optional other tags in a list:
-        List<string> otherTags = new List<string>();
-        otherTags.Add(tag2);
-        otherTags.Add(tag3);
-        otherTags.Add(tag4);
-
-
-
-        GameObject thisObject;
-        thisObject = null;
-        bool doWeHaveGoodTarget = false;
-
-        int randomNumber;
-        int myIndex;
-
-        //print("do we have even ONE of these????");
-        //print(theTag);
-        //print(allPotentialTargets.Count);
-        while (doWeHaveGoodTarget == false && listOfIndices.Count > 0)
-        {
-            //print("yes at least one");
-            //grab a randomn object from the list:
-            randomNumber = Random.Range(0, listOfIndices.Count);
-            myIndex = listOfIndices[randomNumber];
-
-            thisObject = allPotentialTargets[myIndex];
-
-            
-            //now, check all the other tags on that^ object
-            //if it lacks a needed tag, remove that item from the array
-            //and choose again
-            //to do that, need to grab the tags on that object:
-            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-            //assume this object will correctly have ALL the tags
-            //then falsify by checking:
-            doWeHaveGoodTarget = true;
-
-
-            foreach (string thisTag in otherTags)
-            {
-                //make sure it's not null:
-                if (thisTag != null)
-                {
-
-                    if (theTagScript.tags.Contains(thisTag) == false)
-                    {
-                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-                        //print(thisTag);
-
-                        doWeHaveGoodTarget = false;
-                        listOfIndices.RemoveAt(randomNumber);
-
-                        //set thisObject back to null:
-                        thisObject = null;
-                        break;
-                    }
-                    /*
-                    else
-                    {
-                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-                        print(thisTag);
-                    }
-                    */
-                }
-            }
-
-            //see if the object passed the test:
-            if (doWeHaveGoodTarget == true)
-            {
-                /*
-                if (theTag == "shop")
-                {
-                    print("FOUND a shop...");
-                    print(myIndex);
-                    print(thisObject.name);
-                }
-                */
-
-                return thisObject;
-            }
-        }
-
-        //this will be null if the above loop didn't find one:
-        return thisObject;
-    }
-
-    public List<GameObject> ALLTaggedWithMultiple(string theTag, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //INPUTS setup
-        //STARTING place for contructing answer to return
-        List<GameObject> starterList = new List<GameObject>();
-        if (globalTags.ContainsKey(theTag))
-        {
-            starterList = globalTags[theTag];
-        }
-        
-        //put the optional other tags in a list:
-        List<string> otherTags = new List<string>();
-        otherTags.Add(tag2);
-        otherTags.Add(tag3);
-        otherTags.Add(tag4);
-
-
-        //OUTPUT initializing
-        //only add items to following list when they are CONFIRMED to fit ALL criteria:
-        List<GameObject> allThatFit = new List<GameObject>();
-
-
-        bool thisObjectFitsTheCriteria = false;
-
-
-
-        //print(theTag);
-        //print(allPotentialTargets.Count);
-        foreach (GameObject thisObject in starterList)
-        {
-
-            //now, check all the other tags on that^ object
-            //if it lacks a needed tag, don't add it to the output
-            //to do that, need to grab the tags on that object:
-            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-            //assume this object will correctly have ALL the tags
-            //then falsify by checking:
-            thisObjectFitsTheCriteria = true;
-
-
-            foreach (string thisTag in otherTags)
-            {
-                //make sure it's not null:
-                //[CAN BE NULL BECAUSE THESE ARE THE OPTIONAL INPUTS, WHICH DEFAULT TO "NULL"]
-                if (thisTag != null)
-                {
-
-                    if (theTagScript.tags.Contains(thisTag) == false)
-                    {
-                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-                        //print(thisTag);
-
-                        thisObjectFitsTheCriteria = false;
-                        
-                        break;
-                    }
-                    /*
-                    else
-                    {
-                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-                        print(thisTag);
-                    }
-                    */
-                }
-            }
-
-            //see if the object passed the test:
-            if (thisObjectFitsTheCriteria == true)
-            {
-                allThatFit.Add(thisObject);
-            }
-        }
-
-        return allThatFit;
-    }
-
-    public List<GameObject> ALLTaggedWithANY(List<string> tagList)
-    {
-        //takes a list of tags
-        //returns ALL gameObjects that have ANY of those tags
-        //difficlut part is handing DUPLICATES
-
-        List<GameObject> objectList = new List<GameObject>();
-
-        foreach(string thisTag in tagList)
-        {
-            if (globalTags.ContainsKey(thisTag))
-            {
-                foreach(GameObject thisObject in globalTags[thisTag])
-                {
-                    //only add it if we don't already have it:
-                    if(objectList.Contains(thisObject) != true)
-                    {
-                        objectList.Add(thisObject);
-                    }
-                }
-            }
-        }
-
-        return objectList;
-    }
-
-    public GameObject randomTaggedWithMIX(List<GameObject> positiveList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //"mix" of positive and negatives
-        //positive means it HAS the tag, negative means it EXCLUDES the tag
-        //the first input is everything that contains the positive tags [found using "ALLTaggedWithMultiple"]
-        //the other string inputs are optional, and they FILTER OUT tags
-
-
-        //INPUTS setup
-
-        //put all unwanted tags in a list:
-        List<string> unwantedTags = new List<string>();
-        unwantedTags.Add(tag1);
-        unwantedTags.Add(tag2);
-        unwantedTags.Add(tag3);
-        unwantedTags.Add(tag4);
-
-
-        //OUTPUT initializing
-        //only add items to following list when they are CONFIRMED to fit ALL criteria:
-        List<GameObject> allThatFit = new List<GameObject>();
-
-
-
-
-        //so I need to make a corrosponding list of indices to use, to prevent messing with it:
-        List<int> listOfIndices = new List<int>();
-        int length = 0;
-        //WILL THIS MAKE IT THE RIGHT NUMBER?  OR ONE TOO MANY?  ONE TOO FEW???
-        //I think it's correct now?
-        while (length < positiveList.Count)
-        {
-            listOfIndices.Add(length);
-            length += 1;
-        }
-
-
-
-
-
-
-        //print(theTag);
-        //print(allPotentialTargets.Count);
-
-
-        GameObject thisObject;
-        thisObject = null;
-        bool doWeHaveGoodTarget = false;
-
-        int randomNumber;
-        int myIndex;
-
-        //print("do we have even ONE of these????");
-        //print(theTag);
-        //print(allPotentialTargets.Count);
-        while (doWeHaveGoodTarget == false && listOfIndices.Count > 0)
-        {
-            //print("yes at least one");
-            //grab a randomn object from the list:
-            randomNumber = Random.Range(0, listOfIndices.Count);
-            myIndex = listOfIndices[randomNumber];
-
-            thisObject = positiveList[myIndex];
-
-
-            //now, check all the other tags on that^ object
-            //if it has unwanted tag, remove that item from the array
-            //and choose again
-            //to do that, need to grab the tags on that object:
-            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-            //assume this object will correctly have NO UNWANTED tags
-            //then falsify by checking:
-            doWeHaveGoodTarget = true;
-
-
-            foreach (string thisUnwantedTag in unwantedTags)
-            {
-                //make sure it's not null:
-                if (thisUnwantedTag != null)
-                {
-
-                    if (theTagScript.tags.Contains(thisUnwantedTag) == true)
-                    {
-                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-                        //print(thisTag);
-
-                        doWeHaveGoodTarget = false;
-                        listOfIndices.RemoveAt(randomNumber);
-
-                        //set thisObject back to null:
-                        thisObject = null;
-                        break;
-                    }
-                    /*
-                    else
-                    {
-                        print("YAAAAAAAAAAAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-                        print(thisTag);
-                    }
-                    */
-                }
-            }
-
-            //see if the object passed the test:
-            if (doWeHaveGoodTarget == true)
-            {
-
-                return thisObject;
-            }
-        }
-
-        //this will be null if the above loop didn't find one:
-        return thisObject;
-
-
-    }
-
-    public List<GameObject> narrowingTaggedWithAll(List<GameObject> objectList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //takes a list of objects
-        //returns all objects from the list that fit a set of tags
-
-        //so, create a NEW list to return
-        //iterate through OLD list, add objects to new list if they fit criteria
-        //return new list
-
-        //INPUTS setup
-        
-
-        //OUTPUT initializing
-        //only add items to following list when they are CONFIRMED to fit ALL criteria:
-        List<GameObject> allThatFit = new List<GameObject>();
-
-        foreach(GameObject thisObject in objectList)
-        {
-            if(hasAllTags(thisObject, tag1, tag2, tag3, tag4))
-            {
-                allThatFit.Add(thisObject);
-            }
-        }
-
-        return allThatFit;
-
-    }
-
-    public GameObject randomObjectFromList(List<GameObject> objectList)
-    {
-        //but check to be sure list is not empty:
-
-        if (objectList.Count > 0)
-        {
-            int randomNumber = Random.Range(0, objectList.Count);
-            
-            return objectList[randomNumber];
-        }
-        else
-        {
-            return null;
-        }
-    }
-    
-    public List<GameObject> narrowingTaggedWithNoneOnList(List<GameObject> objectList, List<string> unwantedTags)
-    {
-        //takes a list of objects, and a list of tags
-        //returns all objects from the list that have NONE of the tags
-
-        //so, create a NEW list to return
-        //iterate through OLD list, add objects to new list if they fit criteria
-        //return new list
-
-        //OUTPUT initializing
-        //only add items to following list when they are CONFIRMED to have NONE of the tags:
-        List<GameObject> allThatFit = new List<GameObject>();
-
-
-        //print("who fits??????????????????");
-
-        foreach (GameObject thisObject in objectList)
-        {
-            //we don't want it to have ANY of the tags on that list:
-            if (hasANYTagsOnList(thisObject, unwantedTags) == false)
-            {
-                //print(thisObject.name);
-                allThatFit.Add(thisObject);
-            }
-        }
-
-
-        return allThatFit;
-    }
-    
-    public bool hasAllTagsOnList(GameObject thisObject, List<string> wantedTags)
-    {
-        //should be moved to tagging script or something!
-        //returns true if this object has all tags
-
-        //need to grab the tags on that object:
-        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-        foreach (string tag in wantedTags)
-        {
-            if (theTagScript.tags.Contains(tag) == false)
-            {
-                return false;
-            }
-        }
-
-        //if we reach this point, it means the object does indeed have all the tags we want!
-        return true;
-    }
-
-    public bool hasANYTagsOnList(GameObject thisObject, List<string> wantedTags)
-    {
-        //should be moved to tagging script or something!
-        //returns true if this object has ANY tags
-        
-        //need to grab the tags on that object:
-        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-        
-        foreach (string tag in wantedTags)
-        {
-            if (theTagScript.tags.Contains(tag) == true)
-            {
-                return true;
-            }
-        }
-
-        //if we reach this point, it means the object does NOT have ANY the tags we want!
-        return false;
-    }
-
-    public bool hasAllTags(GameObject thisObject, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //should be moved to tagging script or something!
-        //returns true if this object has all tags
-
-        //put all unwanted tags in a list:
-        List<string> wantedTags = removeNullStrings(tag1, tag2, tag3, tag4);
-
-        //need to grab the tags on that object:
-        taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-        foreach (string tag in wantedTags)
-        {
-            if (theTagScript.tags.Contains(tag) == false)
-            {
-                return false;
-            }
-        }
-
-        //if we reach this point, it means the object does indeed have all the tags we want!
-        return true;
-    }
-
-    public List<string> removeNullStrings(string tag1, string tag2, string tag3, string tag4)
-    {
-        //input 4 strings
-        //get backa  list of all of them that are NOT null
-
-        List<string> allStrings = new List<string>();
-        allStrings.Add(tag1);
-        allStrings.Add(tag2);
-        allStrings.Add(tag3);
-        allStrings.Add(tag4);
-
-        List<string> nonNullStrings = new List<string>();
-
-        foreach(string thisString in allStrings)
-        {
-            if(thisString != null)
-            {
-                nonNullStrings.Add(thisString);
-            }
-        }
-
-        return nonNullStrings;
-    }
-
-    //not needed???
-    public List<GameObject> ALLTaggedWithMIX(List<GameObject> positiveList, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
-    {
-        //"mix" of positive and negatives
-        //positive means it HAS the tag, negative means it EXCLUDES the tag
-        //the first input is everything that contains the positive tags [found using "ALLTaggedWithMultiple"]
-        //the other string inputs are optional, and they FILTER OUT tags
-
-
-        //INPUTS setup
-
-        //put all unwanted tags in a list:
-        List<string> otherTags = new List<string>();
-        otherTags.Add(tag1);
-        otherTags.Add(tag2);
-        otherTags.Add(tag3);
-        otherTags.Add(tag4);
-
-
-        //OUTPUT initializing
-        //only add items to following list when they are CONFIRMED to fit ALL criteria:
-        List<GameObject> allThatFit = new List<GameObject>();
-
-
-        bool thisObjectFitsTheCriteria = false;
-
-
-
-        //print(theTag);
-        //print(allPotentialTargets.Count);
-        foreach (GameObject thisObject in positiveList)
-        {
-
-            //now, check all the other tags on that^ object
-            //if it has unwanted tag, don't add it to ooutput list
-            //to do that, need to grab the tags on that object:
-            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
-
-            //assume this object will correctly have ALL the tags
-            //then falsify by checking:
-            thisObjectFitsTheCriteria = true;
-
-
-            foreach (string thisTag in otherTags)
-            {
-                //make sure it's not null:
-                //[CAN BE NULL BECAUSE THESE ARE THE OPTIONAL INPUTS, WHICH DEFAULT TO "NULL"]
-                if (thisTag != null)
-                {
-
-                    if (theTagScript.tags.Contains(thisTag) == true)
-                    {
-                        //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-                        //print(thisTag);
-
-                        thisObjectFitsTheCriteria = false;
-
-                        break;
-                    }
-                }
-            }
-
-            //see if the object passed the test:
-            if (thisObjectFitsTheCriteria == true)
-            {
-                allThatFit.Add(thisObject);
-            }
-        }
-
-        return allThatFit;
-
-
-    }
 
 
 
@@ -2521,7 +1888,7 @@ public class functionsForAI : MonoBehaviour
         {
             return false;
         }
-        
+
 
 
     }
@@ -2572,34 +1939,121 @@ public class functionsForAI : MonoBehaviour
 
     public string thisLeadersOwnerTag()
     {
+        //ad-hoc, messy to grab other script here [won't work if this is a non-AI object with no AI hub script]:
+        AI1 thisAI = GetComponent<AI1>();
         return leadersOwnerTag(thisAI.leader);
     }
-    
+
     public string leadersOwnerTag(GameObject leader)
     {
         return "owned by " + leader.name;
     }
 
-    public string randomStringFromList(List<string> theList)
+
+
+    //old targeting [used for "mobile" type, but i should get rid of it]:
+    public GameObject whoToTarget()
     {
+        //ad-hoc for now, this is being used in pickpocketing action
+        //should return ONE NPC GameObject as a target
 
-        string thisString;
-        thisString = null;
+        List<GameObject> allPotentialTargets = new List<GameObject>();
 
+        //now to find suitable targets using my new tagging system:
+        //NOTE: RIGHT NOW THIS LIST WILL INCLUDE EVERYONE, EVEN THE PERSON DOING THE ACTION, SO THEY MIGHT TARGET THEMSELVES!
+        allPotentialTargets = globalTags["person"];
 
-        if (theList.Count > 0)
+        //....................................................................
+        //old way to get stuff, using old stupid Unity tag system, and stupid "Array" data type for no reason, good riddence:
+        //GameObject[] allNPCsArray;
+        //allNPCsArray = GameObject.FindGameObjectsWithTag("anNPC");
+
+        //convert this stupid fucking array data type to a list:
+        /*
+        List<GameObject> allPotentialTargets = new List<GameObject>();
+        foreach (GameObject g in allNPCsArray)
         {
-            int randomIndex = Random.Range(0, theList.Count);
-            thisString = theList[randomIndex];
-            
+            allPotentialTargets.Add(g);
+        }
+        */
+        //....................................................................
+
+
+        //choose one randomly
+        //Random rnd = new Random();
+
+        GameObject thisNPC;
+        thisNPC = null;
+        bool doWeHaveGoodTarget = false;
+        //print(">>>>>>>>>>>>>>>>>>");
+        //print(allPotentialTargets.Count);
+
+        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
+        {
+            int randomIndex = Random.Range(0, allPotentialTargets.Count);
+            thisNPC = allPotentialTargets[randomIndex];
+            //but, criteria, ad-hoc for now
+            //if it's the shopkeeper, remove that item from the array (will that leave a "null" hole in array???)
+            //and choose again
+            //print("during iteration:");
+            //print(allPotentialTargets.Count);
+            if (thisNPC != null)
+            {
+                if (thisNPC.name == "NPC shopkeeper" || thisNPC.name == "NPC pickpocket")
+                {
+                    allPotentialTargets.RemoveAt(randomIndex);
+                    thisNPC = null;
+                }
+                else
+                {
+                    doWeHaveGoodTarget = true;
+                }
+
+
+            }
+
+        }
+
+
+        return thisNPC;
+    }
+
+
+    //maybe ad-hoc, messy:
+    public GameObject anyCheckout()
+    {
+        //ad-hoc for now, this is being used in buyFood action
+        //should return ONE random checkoutZone GameObject as a target
+
+        //first, use anyStore() to find a store, then use namedChild
+        //to get the checkout...
+
+
+        GameObject thisShop;
+        thisShop = null;
+        thisShop = anyStore();
+
+        if (thisShop != null)
+        {
+            //now get the checkoutZone of that shop:
+            GameObject thisCheckout;
+            thisCheckout = null;
+            //print("here, right??????????????????????????");
+            thisCheckout = namedChild(thisShop, "checkout");
+
+
+            return thisCheckout;
         }
         else
         {
-            printAlways("LIST OF STRINGS IS EMPTY!");
+            return null;
         }
-        return thisString;
+
     }
 
+
+
+    /////////////////////////unsure:
 
 
     //ad-hoc:
@@ -2612,7 +2066,7 @@ public class functionsForAI : MonoBehaviour
         thisShop = null;
 
         //print("sooooooooooooooooooooooo");
-        thisShop = randomTaggedWith("shop");
+        thisShop = theTagScript.randomTaggedWith("shop");
         //print("---------done----------");
 
         return thisShop;
@@ -2816,111 +2270,9 @@ public class functionsForAI : MonoBehaviour
     }
 
 
-    public GameObject anyCheckout()
-    {
-        //ad-hoc for now, this is being used in buyFood action
-        //should return ONE random checkoutZone GameObject as a target
-
-        //first, use anyStore() to find a store, then use namedChild
-        //to get the checkout...
-
-
-        GameObject thisShop;
-        thisShop = null;
-        thisShop = anyStore();
-
-        if (thisShop != null)
-        {
-            //now get the checkoutZone of that shop:
-            GameObject thisCheckout;
-            thisCheckout = null;
-            //print("here, right??????????????????????????");
-            thisCheckout = namedChild(thisShop, "checkout");
-
-
-            return thisCheckout;
-        }
-        else
-        {
-            return null;
-        }
-        
-    }
-
-    //old targeting:
-    public GameObject whoToTarget()
-    {
-        //ad-hoc for now, this is being used in pickpocketing action
-        //should return ONE NPC GameObject as a target
-
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        //now to find suitable targets using my new tagging system:
-        //NOTE: RIGHT NOW THIS LIST WILL INCLUDE EVERYONE, EVEN THE PERSON DOING THE ACTION, SO THEY MIGHT TARGET THEMSELVES!
-        allPotentialTargets = globalTags["person"];
-
-        //....................................................................
-        //old way to get stuff, using old stupid Unity tag system, and stupid "Array" data type for no reason, good riddence:
-        //GameObject[] allNPCsArray;
-        //allNPCsArray = GameObject.FindGameObjectsWithTag("anNPC");
-
-        //convert this stupid fucking array data type to a list:
-        /*
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-        foreach (GameObject g in allNPCsArray)
-        {
-            allPotentialTargets.Add(g);
-        }
-        */
-        //....................................................................
-
-
-        //choose one randomly
-        //Random rnd = new Random();
-
-        GameObject thisNPC;
-        thisNPC = null;
-        bool doWeHaveGoodTarget = false;
-        //print(">>>>>>>>>>>>>>>>>>");
-        //print(allPotentialTargets.Count);
-
-        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
-        {
-            int randomIndex = Random.Range(0, allPotentialTargets.Count);
-            thisNPC = allPotentialTargets[randomIndex];
-            //but, criteria, ad-hoc for now
-            //if it's the shopkeeper, remove that item from the array (will that leave a "null" hole in array???)
-            //and choose again
-            //print("during iteration:");
-            //print(allPotentialTargets.Count);
-            if (thisNPC != null)
-            { 
-                if (thisNPC.name == "NPC shopkeeper" || thisNPC.name == "NPC pickpocket")
-                {
-                    allPotentialTargets.RemoveAt(randomIndex);
-                    thisNPC = null;
-                }
-                else
-                {
-                    doWeHaveGoodTarget = true;
-                }
-            
-
-            }
-                
-        }
-
-
-        return thisNPC;
-    }
-
-
-
-
 
 
     ///////////////////////   POST-PLANNING PHASE   /////////////////////////
-
     public List<List<action>> planRanker(List<List<action>> unsortedPlans)
     {
         //takes a list of unsorted plans
@@ -2957,8 +2309,7 @@ public class functionsForAI : MonoBehaviour
 
         return rankedPlans;
     }
-
-
+    
     public List<int> findIndexOrder(List<int> unsortedCosts)
     {
         //given unsorted list of costs
@@ -3044,11 +2395,9 @@ public class functionsForAI : MonoBehaviour
 
 
 
-
-
+    
 
     ///////////////////////   TESTS   /////////////////////////
-
     public void testIndexListSortedThing()
     {
         //create my test list
@@ -3072,7 +2421,6 @@ public class functionsForAI : MonoBehaviour
 
 
     ///////////////////////   Misc diagnostic functions   /////////////////////////
-
     public void print(string text)
     {
         
