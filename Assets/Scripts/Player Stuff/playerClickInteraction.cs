@@ -34,13 +34,11 @@ public class playerClickInteraction : MonoBehaviour
     //other scripts
     public AI1 theHub;
     public playerHUD myHUD;
+    public social theSocialScript;
+    public taggedWith theTagScript;
     public nonAIScript theNonAIScript;
     public functionsForAI theFunctions;
     public premadeStuffForAI premadeStuff;
-    
-
-
-    public taggedWith theTagScript;
 
 
     //bit ad hoc:
@@ -68,17 +66,19 @@ public class playerClickInteraction : MonoBehaviour
 
         ownershipTag = "owned by " + this.name;
 
-        premadeStuff = GetComponent<premadeStuffForAI>();
+        //other scripts [and components?]:
         theHub = GetComponent<AI1>();
-        theNonAIScript = GetComponent<nonAIScript>();
-
         myHUD = GetComponent<playerHUD>();
+        theSocialScript = GetComponent<social>();
+        theTagScript = GetComponent<taggedWith>();
+        theNonAIScript = GetComponent<nonAIScript>();
+        theFunctions = GetComponent<functionsForAI>();
+        premadeStuff = GetComponent<premadeStuffForAI>();
+
+        
         inMenu = false;
         recruitingMenu.SetActive(false);
 
-        theFunctions = GetComponent<functionsForAI>();
-
-        theTagScript = GetComponent<taggedWith>();
 
 
         //just for testing, give me a gun at start:
@@ -714,7 +714,7 @@ public class playerClickInteraction : MonoBehaviour
         if (theSocialScript.checkTrust(this.name) > 60)
         {
             //ok, recruitment suceeds
-            theFunctions.succeedAtRecruitment(selectedNPC);
+            theSocialScript.succeedAtRecruitment(selectedNPC);
             /*
             Debug.Log("recruitment successful");
 
@@ -1033,7 +1033,7 @@ public class playerClickInteraction : MonoBehaviour
                 selectedAI.jobSeeking = false;
 
                 //listOfCashiers.Add(customer);
-                theFunctions.changeRoles(selectedNPC, premadeStuff.deepActionCopier(premadeStuff.workAsCashier), premadeStuff.deepActionCopier(premadeStuff.doTheWork));
+                theSocialScript.changeRoles(selectedNPC, premadeStuff.deepActionCopier(premadeStuff.workAsCashier), premadeStuff.deepActionCopier(premadeStuff.doTheWork));
 
                 print(selectedNPC.name);
 
@@ -1060,7 +1060,7 @@ public class playerClickInteraction : MonoBehaviour
 
     public void hireResource1GathererButton()
     {
-        if(theFunctions.hiring(selectedNPC, premadeStuff.resource1GatheringJob, "storage"))
+        if(theSocialScript.hiring(selectedNPC, premadeStuff.resource1GatheringJob, "storage"))
         {
             Debug.Log("hired..........");
         }
@@ -1072,7 +1072,7 @@ public class playerClickInteraction : MonoBehaviour
 
     public void hireSoldierButton()
     {
-        if (theFunctions.hiring(selectedNPC, premadeStuff.soldierJob, "storage"))
+        if (theSocialScript.hiring(selectedNPC, premadeStuff.soldierJob, "storage"))
         {
             Debug.Log("hired..........");
         }
@@ -1084,7 +1084,7 @@ public class playerClickInteraction : MonoBehaviour
 
     public void fetchXButton(action availableCommand)
     {
-        theFunctions.commandToDoFetchXAction(availableCommand, selectedNPC);
+        theSocialScript.commandToDoFetchXAction(availableCommand, selectedNPC);
 
         /*
 

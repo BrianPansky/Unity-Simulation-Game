@@ -15,6 +15,7 @@ public class nonAIScript : MonoBehaviour
 
     //other scripts:
     public AI1 thisAI;
+    public social theSocialScript;
     public functionsForAI theFunctions;
     public premadeStuffForAI premadeStuff;
 
@@ -23,6 +24,7 @@ public class nonAIScript : MonoBehaviour
     {
         //initialize other scripts:
         thisAI = GetComponent<AI1>();
+        theSocialScript = GetComponent<social>();
         theFunctions = GetComponent<functionsForAI>();
         premadeStuff = GetComponent<premadeStuffForAI>();
 
@@ -141,12 +143,16 @@ public class nonAIScript : MonoBehaviour
         //[or have OTHER way to "find" it for use]
         if (buildingX.name == "storeToCreate")
         {
-            theFunctions.doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
+            theSocialScript.doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
         }
 
 
     }
 
+
+
+
+    
 
 
     //========================= misc =========================

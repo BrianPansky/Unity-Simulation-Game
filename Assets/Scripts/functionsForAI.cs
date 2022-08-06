@@ -33,6 +33,7 @@ public class functionsForAI : MonoBehaviour
     public premadeStuffForAI premadeStuff;
     public taggedWith theTagScript;
     public nonAIScript theNonAIScript;
+    public social theSocialScript;
 
     //ad hoc test thing
     public bool testTime;
@@ -41,9 +42,11 @@ public class functionsForAI : MonoBehaviour
 
     void Awake()
     {
+        //other scripts:
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
-        
+        theSocialScript = GetComponent<social>();
+
     }
 
     // Start is called before the first frame update
@@ -298,7 +301,8 @@ public class functionsForAI : MonoBehaviour
             {
                 //Debug.Log("trying to hire SOLDIER ....");
                 //printState(state);
-                if (hiring(target, premadeStuff.soldierJob, "storage"))
+                
+                if (theSocialScript.hiring(target, premadeStuff.soldierJob, "storage"))
                 {
                     //Debug.Log("hired soldier!");
                     //printState(state);
@@ -331,7 +335,7 @@ public class functionsForAI : MonoBehaviour
                 testOn();
 
                 thisAI.goalWait = 1100;
-
+                
                 //ad-hoc, do targeting of ALL soldiers HERE for now:
                 List<GameObject> listOfSoldiers = ALLTaggedWithMultiple(gangTag(this.gameObject), "soldier");
 
@@ -355,7 +359,7 @@ public class functionsForAI : MonoBehaviour
 
 
                 //DO I NEED TO DEEP COPY ACTION?  PRobably...
-                commandGROUPtoDoXAction(premadeStuff.attackRandomEnemy, listOfSoldiers);
+                theSocialScript.commandGROUPtoDoXAction(premadeStuff.attackRandomEnemy, listOfSoldiers);
 
                 //implementALLEffectsREAL
                 //incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
@@ -381,7 +385,7 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "hireResourceGatherer")
             {
                 //printPlan(thisAI.toDoList);
-                if (hiring(target, premadeStuff.resource1GatheringJob, "storage"))
+                if (theSocialScript.hiring(target, premadeStuff.resource1GatheringJob, "storage"))
                 {
                     //Debug.Log("hired a ResourceGatherer..........");
                     //ad-hoc update of state:
@@ -552,7 +556,7 @@ public class functionsForAI : MonoBehaviour
                 //check for an NPC customer in the checkoutZone:
                 GameObject customer = checkForCustomer(checkoutZone);
                 //GameObject whoToHire, job theJob, string jobLocationTypeTag
-                if (customer != null && customer.name != "NPC shopkeeper" && customer.name != "NPC shopkeeper (1)" && hiring(customer, premadeStuff.cashierJob, "shop"))
+                if (customer != null && customer.name != "NPC shopkeeper" && customer.name != "NPC shopkeeper (1)" && theSocialScript.hiring(customer, premadeStuff.cashierJob, "shop"))
                 {
                     //successfully hired them!
 
@@ -627,7 +631,7 @@ public class functionsForAI : MonoBehaviour
             else if (nextAction.name == "recruit")
             {
                 //print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                succeedAtRecruitment(target);
+                theSocialScript.succeedAtRecruitment(target);
                 state = implementALLEffectsREAL(nextAction, state);
                 target = dumpAction(target);
             }
@@ -637,7 +641,7 @@ public class functionsForAI : MonoBehaviour
                 thisAI.goalWait = 1100;
 
                 //print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                commandToDoFetchXAction(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.money)), target);
+                theSocialScript.commandToDoFetchXAction(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.money)), target);
                 
                 target = dumpAction(target);
             }
@@ -1396,253 +1400,19 @@ public class functionsForAI : MonoBehaviour
 
 
 
-    //change knownActions and such:
-    public void addKnownActionToGameObject(GameObject agent, action theAction)
-    {
-        //first, go from "GameObject" to it's script that has knownActions:
-        AI1 hubScript = getHubScriptFromGameObject(agent);
-
-        //now add the knownAction:
-        hubScript.knownActions.Add(premadeStuff.deepActionCopier(theAction));
-        
-    }
-
-    public void removeKnownActionFromGameObject(GameObject agent, action theAction)
-    {
-        //first, go from "GameObject" to it's script that has knownActions:
-        AI1 hubScript = getHubScriptFromGameObject(agent);
-
-        //now add the knownAction:
-        hubScript.knownActions.RemoveAll(y => y.name == theAction.name);
-    }
-
-    public void changeRoles(GameObject agent, action roleToAdd, action roleToRemove)
-    {
-        //maybe in future the inputs can be some role class object
-        //for now, it's just a quick way to add one action and remove another
-
-        addKnownActionToGameObject(agent, roleToAdd);
-        removeKnownActionFromGameObject(agent, roleToRemove);
-
-    }
-
-    public bool hiring(GameObject whoToHire, job theJob, string jobLocationTypeTag)
-    {
-        //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
-        //Has to return bool to show if it worked or no.  clunky, but oh well?
-
-        //ad-hoc way to hire more than one employee for now:
-        //if (listOfCashiers.Contains(customer) == false)
-        AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
-        if (targetAI.jobSeeking == true)
-        {
-            //print("no problem");
-
-            //listOfCashiers.Add(customer);
-            //changeRoles(whotoHire, premadeStuff.workAsCashier, premadeStuff.doTheWork);
-
-            //print(customer.name);
-
-
-            //workerCount += 1;
-
-            //print(workerCount);
-
-            //need the worker to show up at the correct store for their shift:
-            //customerAI.roleLocation = thisAI.roleLocation;
-            string ownershipTag = "owned by " + this.name;
-            //need cashierZone of the owned store:
-            GameObject roleLocation = randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
-
-            if(roleLocation == null)
-            {
-                print("cannot find a role location, probably trying to hire someone before you've made a business, or my system is unfinished");
-
-                return false;
-            }
-            else
-            {
-                doSuccsessfulHiring(targetAI, theJob, roleLocation);
-            }
-
-            
-
-
-
-            return true;
-        }
-        else
-        {
-            //print("not job seeking");
-            return false;
-        }
-    }
-
-    public void doSuccsessfulHiring(AI1 targetAI, job theJob, GameObject roleLocation)
-    {
-        //print(roleLocation);
-        targetAI.jobSeeking = false;
-        targetAI.leader = this.gameObject;
-
-        //record in factionState:
-        //mmm, need it to INCREMENT...
-        //NEEDS TO BE DIFFERENT DEPENDING ON WHICH JOB IS BEING HIRED FOR
-        //KINDA SEEMS LIKE IT WOULD BE NICE TO HAVE A SIMPLE DICTIONARY WITH TEXT KEYS THAT ARE JOB NAMES, AND NUMBERS FOR QUANTITY, RIGHT???
-        incrementItem(thisAI.factionState["unitState"], premadeStuff.employee, 1);
-        //thisAI.factionState["unitState"].Add(deepStateItemCopier(premadeStuff.employee));
-
-        //need to add gang tag!
-        targetAI.taggedWith.addTag(gangTag(this.gameObject));
-
-        //color:
-        changeToFactionColor(targetAI.gameObject, this.gameObject);
-
-        //add tag of job name
-        targetAI.taggedWith.addTag(theJob.name);
-
-        //Increase the "clearance level" of the worker:
-        //BIT ad-hoc.  Characters might have different clearance levels for different places/factions etc.  Right now I just have one.
-        targetAI.clearanceLevel = 1;
-
-        //now...to finish and deliver "theJob" class object...
-        targetAI.currentJob = premadeStuff.jobFinisher(theJob, this.gameObject, roleLocation);
-
-        //but still have to add the known actions to their known actions!  sigh.
-        foreach (action x in theJob.theKnownActions)
-        {
-            targetAI.knownActions.Add(premadeStuff.deepActionCopier(x));
-            //addKnownActionToGameObject(whoToHire, x);
-        }
-
-        //updateFactionState?
-    }
-
-    public void commandToDoFetchXAction(action theBringLeaderXAction, GameObject whoToCommand)
-    {
-        //commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
-
-        //need their AI1 script:
-        AI1 NPChubScript = whoToCommand.GetComponent("AI1") as AI1;
-
-        //going to blank out their to-do list, and fill it with test "orders":
-        //AD HOC, SHOULD NOT DO THIS?!?!?
-        NPChubScript.toDoList.Clear();
-
-
-        NPChubScript.inputtedToDoList.Add(theBringLeaderXAction);
-    }
-
-    public void commandToDoXAction(action theXAction, GameObject whoToCommand)
-    {
-        //commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
-
-        //need their AI1 script:
-        AI1 NPChubScript = whoToCommand.GetComponent("AI1") as AI1;
-
-
-
-        //print(thisAI.gameObject.name);
-        //print(whoToCommand.name);
-        //printPlan(thisAI.toDoList);
-        //printPlan(whoToCommand.toDoList);
-        if (thisAI.currentJob != null)
-        {
-            //print(thisAI.currentJob.name);
-        }
-        //if (whoToCommand.currentJob != null)
-        {
-            //print(whoToCommand.currentJob.name);
-        }
-
-
-
-
-        //going to blank out their to-do list, and fill it with test "orders":
-        //AD HOC, SHOULD NOT DO THIS?!?!?
-        NPChubScript.toDoList.Clear();
-        //or this one.  hopefully this stops the orders from piling up infinitely...for now.
-        //AD-HOC.  in future, shoudl be able to queue up orders!!!
-        NPChubScript.inputtedToDoList.Clear();
-
-
-        //print(thisAI.gameObject.name);
-        //print(whoToCommand.name);
-        //printPlan(thisAI.toDoList);
-        //printPlan(whoToCommand.toDoList);
-        if (thisAI.currentJob != null)
-        {
-            //print(thisAI.currentJob.name);
-        }
-        //if (whoToCommand.currentJob != null)
-        {
-            //print(whoToCommand.currentJob.name);
-        }
-
-
-        NPChubScript.inputtedToDoList.Add(theXAction);
-    }
-
-    public void commandGROUPtoDoXAction(action theXAction, List<GameObject> whoToCommand)
-    {
-        foreach(GameObject person in whoToCommand)
-        {
-            commandToDoXAction(theXAction, person);
-
-            //FOR INVESTIGATING/TESTING:
-            //AI1 targetAI = person.GetComponent("AI1") as AI1;
-            //targetAI.masterPrintControl = true;
-            //targetAI.npcx = targetAI.gameObject.name;
-            //Debug.Log("updated ''npcx''");
-        }
-    }
-
 
     //other:
     public void travelToactionItem(actionItem X)
     {
+        //was used in early version of navigation it seems.
+        //no longer used
+        //possibly could be useful in future, so i'll leave it for now
 
         string name1 = X.name;
         t1 = GameObject.Find(name1);
 
         Vector3 targetVector = t1.GetComponent<Transform>().position;
         _navMeshAgent.SetDestination(targetVector);
-    }
-
-    public void succeedAtRecruitment(GameObject whoIsRecruited)
-    {
-        //ok, recruitment suceeds
-        Debug.Log("recruitment successful");
-        
-        taggedWith foreignTagScript = whoIsRecruited.GetComponent<taggedWith>();
-        foreignTagScript.foreignAddTag(gangTag(this.gameObject), whoIsRecruited);
-        changeToFactionColor(whoIsRecruited, this.gameObject);
-
-        //Debug.Log("should be recruited to gang now, by tagging");
-
-        //but they need to be able to FIND me, their leader, to deliver money to me
-        //so, for now, fill their leader variable:
-        //need their AI1 script:
-        AI1 NPChubScript = whoIsRecruited.GetComponent("AI1") as AI1;
-        NPChubScript.leader = this.gameObject;
-
-        //ALSO NEED TO BLANK-OUT THEIR TARGET!!!
-        NPChubScript.target = null;
-    }
-    
-    public void changeToFactionColor(GameObject toColor, GameObject leader)
-    {
-        if(leader.name == "Player")
-        {
-            toColor.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
-        }
-        else if (leader.name == "NPC pickpocket")
-        {
-            toColor.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
-        }
-        else
-        {
-            toColor.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
-        }
     }
 
     public void addActionToPendingList(action thisAction, int amountToWait)
@@ -1964,14 +1734,12 @@ public class functionsForAI : MonoBehaviour
             {
                 //print("anyStore");
                 //get any store:
-                //target = anyStoreForSale();
                 target = randomTaggedWithMultiple("shop", "forSale");
             }
             else if (criteria.name == "anyHome")
             {
                 //print("anyHome");
-                //get any store:
-                //target = anyStoreForSale();
+                //get any home:
                 target = randomTaggedWithMultiple("home", "forSale");
             }
             else if (criteria.name == "anyResource1")
@@ -2722,9 +2490,12 @@ public class functionsForAI : MonoBehaviour
 
     public string gangTag(GameObject leader)
     {
+        //why is this a duplicate?  well, one has more descriptive name, one has shorter name, both are nice, can't decide i guess
+        //orrr....at some point, i might make them turn out different.  gang name migh tbe different from gang tag
         string theGangTag = leader.name + "sGang";
         return theGangTag;
     }
+
 
     public bool isThisMyLeader(GameObject maybeLeader)
     {
@@ -2832,49 +2603,9 @@ public class functionsForAI : MonoBehaviour
 
 
     //ad-hoc:
-    public GameObject anyStoreForSale()
-    {
-        //ad-hoc for now, this is being used in buyStore action
-        //should return ONE random shop GameObject as a target that is tagged with "forSale"
-
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        //now to find suitable targets using my new tagging system:
-        allPotentialTargets = globalTags["shop"];
-
-        GameObject thisShop;
-        thisShop = null;
-        bool doWeHaveGoodTarget = false;
-
-        while (doWeHaveGoodTarget == false && allPotentialTargets.Count > 0)
-        {
-            int randomIndex = Random.Range(0, allPotentialTargets.Count);
-            thisShop = allPotentialTargets[randomIndex];
-
-            //print(thisShop.name);
-
-            //but, criteria, ad-hoc for now
-            //if it's wrong criteria, remove that item from the array (will that leave a "null" hole in array???)
-            //and choose again
-            //check if it is for sale
-            taggedWith theTagScript = thisShop.GetComponent("taggedWith") as taggedWith;
-            if (theTagScript.tags.Contains("forSale") == false)
-            {
-                allPotentialTargets.RemoveAt(randomIndex);
-                thisShop = null;
-            }
-            else
-            {
-                doWeHaveGoodTarget = true;
-            }
-        }
-
-
-        return thisShop;
-    }
-
     public GameObject anyStore()
     {
+        //can delete this NOO, only used in "anyCheckout", which is still used in targeting.  fix that
         //should return ONE random shop GameObject as a target
 
         GameObject thisShop;
