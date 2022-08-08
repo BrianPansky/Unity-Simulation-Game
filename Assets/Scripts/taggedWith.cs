@@ -266,11 +266,25 @@ public class taggedWith : MonoBehaviour
     {
         //should return ONE random GameObject that is tagged with ALL inputted tags
 
+
+        //ad-hoc for debug
+        functionsForAI theFunctions = GetComponent<functionsForAI>();
+        //theFunctions.print("---------------------------- start randomTaggedWithMultiple -----------------------------");
+        //theFunctions.print(theTag + ", " + tag2  + ", " + tag3  + ", " + tag4);
+
+
+
+
         List<GameObject> allPotentialTargets = new List<GameObject>();
 
         if (globalTags.ContainsKey(theTag))
         {
             allPotentialTargets = globalTags[theTag];
+        }
+        
+        //foreach(GameObject thisListItem in allPotentialTargets)
+        {
+            //theFunctions.print(thisListItem.name);
         }
 
         //BUT THAT'S A SHALLOW COPY!
@@ -310,6 +324,7 @@ public class taggedWith : MonoBehaviour
         int randomNumber;
         int myIndex;
 
+        //theFunctions.print("now the while loop-------------");
         //print("do we have even ONE of these????");
         //print(theTag);
         //print(allPotentialTargets.Count);
@@ -322,26 +337,35 @@ public class taggedWith : MonoBehaviour
 
             thisObject = allPotentialTargets[myIndex];
 
+            //theFunctions.print(thisObject.name);
+            //theFunctions.print("should NOT be null");
 
             //now, check all the other tags on that^ object
             //if it lacks a needed tag, remove that item from the array
             //and choose again
             //to do that, need to grab the tags on that object:
-            taggedWith theTagScript = thisObject.GetComponent("taggedWith") as taggedWith;
+            taggedWith theTagScript = allPotentialTargets[myIndex].GetComponent("taggedWith") as taggedWith;
 
             //assume this object will correctly have ALL the tags
             //then falsify by checking:
             doWeHaveGoodTarget = true;
 
+            //theFunctions.print("has these tags:");
+            //foreach (string thisTag in theTagScript.tags)
+            {
+                //theFunctions.print(thisTag);
+            }
 
             foreach (string thisTag in otherTags)
             {
                 //make sure it's not null:
                 if (thisTag != null)
                 {
+                    //theFunctions.print(thisTag);
 
                     if (theTagScript.tags.Contains(thisTag) == false)
                     {
+                        //theFunctions.print("doesn't contain this tag");
                         //print("grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
                         //print(thisTag);
 
@@ -349,6 +373,7 @@ public class taggedWith : MonoBehaviour
                         listOfIndices.RemoveAt(randomNumber);
 
                         //set thisObject back to null:
+                        //theFunctions.print("should be null");
                         thisObject = null;
                         break;
                     }
@@ -365,6 +390,8 @@ public class taggedWith : MonoBehaviour
             //see if the object passed the test:
             if (doWeHaveGoodTarget == true)
             {
+                //theFunctions.print("we have a good target");
+                //theFunctions.print(thisObject.name);
                 /*
                 if (theTag == "shop")
                 {
@@ -378,6 +405,7 @@ public class taggedWith : MonoBehaviour
             }
         }
 
+        //theFunctions.print("ends up here, meaning that no good object was found");
         //this will be null if the above loop didn't find one:
         return thisObject;
     }

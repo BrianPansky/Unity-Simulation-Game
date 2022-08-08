@@ -172,7 +172,7 @@ public class AI1 : MonoBehaviour
                 //printToDoList(toDoList);
 
                 //get NPC moving again if it was stopped by conversation:
-                getGoingAgan();
+                getGoingAgain();
 
                 //printPlanListForSpecificNPC();
 
@@ -191,7 +191,7 @@ public class AI1 : MonoBehaviour
                 if (inputtedToDoList.Count > 0)
                 {
                     //for now, do orders/favors and such first
-                    //theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
+                    theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
 
                     //NEED TO BLANK TARGET!
                     target = null;
@@ -202,7 +202,7 @@ public class AI1 : MonoBehaviour
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-                    //printToDoList(toDoList);
+                    printToDoList(toDoList);
                 }
                 else if (toDoList.Count == 0)
                 {
@@ -293,7 +293,7 @@ public class AI1 : MonoBehaviour
 
     }
 
-    public void getGoingAgan()
+    public void getGoingAgain()
     {
         //get NPC moving again if it was stopped by conversation.
 
@@ -373,6 +373,7 @@ public class AI1 : MonoBehaviour
         //I tried adding "break" above, hopefully that's the correct way to avoid duplicates...
         foreach (List<action> thisPlan in plansToRemove)
         {
+            //theFunctions.print("because impossible?!?!!??!?!");
             //remove the plan from the planList
             planList.Remove(thisPlan);
 
@@ -581,8 +582,8 @@ public class AI1 : MonoBehaviour
         //but eventually want to keep it remembered UNTIL it is completed or cancelled
         //but right now it isn't guaranteed that one of those outcomes will occurr
         inputtedToDoList.RemoveAt(0);
-        //print("so, this is broken???");
-        //printPlanList(planList);
+        print("so, this is broken???");
+        printPlanList(planList);
     }
 
     public void makeFirstPlanTheToDoList()

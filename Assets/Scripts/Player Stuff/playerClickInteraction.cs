@@ -239,8 +239,10 @@ public class playerClickInteraction : MonoBehaviour
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo) && currentPrefab != null)
         {
-            GameObject x = new GameObject();
-            x = Instantiate(currentPrefab, hitInfo.point, Quaternion.identity);
+            //GameObject x = new GameObject();
+            //x = Instantiate(currentPrefab, hitInfo.point, Quaternion.identity);
+            theNonAIScript.createBuildingX(theNonAIScript.storagePrefab, hitInfo.point);
+
             //myPrefab.transform.position = hitInfo.point;
             //myPrefab.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
         }
@@ -338,6 +340,7 @@ public class playerClickInteraction : MonoBehaviour
             //FOR INVESTIGATING/TESTING:
             targetAI.masterPrintControl = true;
             targetAI.npcx = targetAI.gameObject.name;
+            theHub.npcx = this.gameObject.name;
             Debug.Log("updated ''npcx''");
 
             //targetAI.state["threatState"].Add(premadeStuff.threat);
@@ -378,7 +381,7 @@ public class playerClickInteraction : MonoBehaviour
                 //this is a regular free-roaming NPC
                 //disable the "buy food" button
                 createRecruitmentButtonGrid();
-                Debug.Log("regular free-roaming NPC");
+                //Debug.Log("regular free-roaming NPC");
             }
 
             
@@ -506,7 +509,7 @@ public class playerClickInteraction : MonoBehaviour
 
         makeButton("recruit to gang", this.recruitButton);
 
-        //makeButton("regular work", this.makeRegularWorkerButton);
+        //makeButton("regular ''bank'' work", this.makeBankWorkerButton);
 
         //makeButton("give gun", this.giftGunButton);
 
@@ -912,7 +915,7 @@ public class playerClickInteraction : MonoBehaviour
         //hubScript.knownActions.RemoveAll(y => y.name == "pickVictimsPocket");
     }
 
-    public void makeRegularWorkerButton()
+    public void makeBankWorkerButton()
     {
         Debug.Log("well, THIS button works");
         //for now ad-hoc

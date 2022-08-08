@@ -98,7 +98,7 @@ public class nonAIScript : MonoBehaviour
 
 
     //========================= BUILDING STUFF =========================
-    public void createBuildingX(GameObject buildingX)
+    public void createBuildingX(GameObject buildingX, Vector3 locationVector)
     {
         //input a prefab
         //will instantiate it RIGHT WHERE npc IS STANDING
@@ -116,7 +116,8 @@ public class nonAIScript : MonoBehaviour
         //---plug into instantiate function
         //Vector3 whereToPlace = new Vector3(gameObject.transform.x, (gameObject.transform.y - 113), gameObject.transform.z);
 
-        newBuilding = Instantiate(buildingX, new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z), Quaternion.identity);
+        //newBuilding = Instantiate(buildingX, new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z), Quaternion.identity);
+        newBuilding = Instantiate(buildingX, locationVector, Quaternion.identity);
 
 
         //now "buy" it:
@@ -160,7 +161,8 @@ public class nonAIScript : MonoBehaviour
     {
         //no, this doesn't work because instantiated objects have a number appended to their name
         //need to use a different method.  my tags?  tag with god damn "self Destruct"? 
-        if(this.gameObject.name == "gunFlash1")
+        //or no wait, they only have "(Clone)" appended to their names?  so try that some day...
+        if(this.gameObject.name == "gunFlash1(Clone)")
         {
             Destroy(this.gameObject);
         }

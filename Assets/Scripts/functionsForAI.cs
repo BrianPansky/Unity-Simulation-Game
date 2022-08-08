@@ -417,9 +417,19 @@ public class functionsForAI : MonoBehaviour
                 //incrementInventoriesOfThisAndTargetFromEffects(target, nextAction);
                 //AD-HOC FOR NOW, BECAUSE LEADER CANNOT CURRENTLY PLAN WITH FACTION INVENTORY:
                 //incrementInventoriesOfThisAndTargetFromEffects(thisAI.leader, nextAction);
-                if(TRYincrementInventoriesOfThisAndTargetFromEffects(thisAI.leader, nextAction))
+                print("==============================================");
+                printPlan(thisAI.inputtedToDoList);
+                printPlan(thisAI.toDoList);
+                printState(thisAI.state);
+                printState(thisAI.planningState);
+                printState(thisAI.factionState);
+                if (TRYincrementInventoriesOfThisAndTargetFromEffects(thisAI.leader, nextAction))
                 {
-
+                    print("worked!!!!!!!!!!!!!!!!!!!!");
+                }
+                else
+                {
+                    print("   FAILED   ");
                 }
 
 
@@ -449,8 +459,9 @@ public class functionsForAI : MonoBehaviour
                     target = dumpAction(target);
                 }
 
-                
 
+                printPlan(thisAI.inputtedToDoList);
+                printPlan(thisAI.toDoList);
 
             }
             else if (nextAction.name == "shootSpree")
@@ -824,7 +835,9 @@ public class functionsForAI : MonoBehaviour
                 //print(actionToTextDeep(newAction));
                 //printKnownActionsDeeply(knownActions);
 
-                theNonAIScript.createBuildingX(theNonAIScript.storePrefab);
+                //theNonAIScript.createBuildingX(theNonAIScript.storePrefab);
+                Vector3 newVector = new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z);
+                theNonAIScript.createBuildingX(theNonAIScript.storePrefab, newVector);
 
                 //printKnownActionsDeeply(knownActions);
 
@@ -838,7 +851,9 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "createStorage")
             {
-                theNonAIScript.createBuildingX(theNonAIScript.storagePrefab);
+                //theNonAIScript.createBuildingX(theNonAIScript.storagePrefab);
+                Vector3 newVector = new Vector3(gameObject.transform.position.x, (gameObject.transform.position.y - 1), gameObject.transform.position.z);
+                theNonAIScript.createBuildingX(theNonAIScript.storagePrefab, newVector);
                 
 
                 target = dumpAction(target);
@@ -1246,6 +1261,9 @@ public class functionsForAI : MonoBehaviour
         List<actionItem> actionerReceives = new List<actionItem>();
 
         bool theTRY = false;
+        //print(actionToTextDeep(nextAction));
+        //printInventoryDeep(actionerInventory);
+        //printInventoryDeep(inventory2);
 
         //look to gift EACH item in the "effects" of the gift action
         //but only LOOK and take note, don't modify inventories YET (can lead to error)
@@ -1331,6 +1349,8 @@ public class functionsForAI : MonoBehaviour
             if(found == false)
             {
                 //means one item is not found, so no swap can take place,!
+                //print("not found!");
+                //print(effect.name);
 
                 return false;
             }
@@ -1358,9 +1378,11 @@ public class functionsForAI : MonoBehaviour
         //[supposedly "actioner" VS" target", but both are iterating through the same "deepCopyVERIFIEDeffectsList"!!!]
         //and the "amount" is only set to be the "item quantity" if it's NOT in state????? why?
         int amount = 1;
+        
         //actioner inventory:
         foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
         {
+            //print("1111111111111111111111111111111111111111");
             theTRY = true;
             if (effect.inStateOrNot == false)
             {
@@ -1373,6 +1395,7 @@ public class functionsForAI : MonoBehaviour
         amount = -1;
         foreach (actionItem effect in deepCopyVERIFIEDeffectsList)
         {
+            //print("22222222222222222222222222222222222222222");
             theTRY = true;
             if (effect.inStateOrNot == false)
             {

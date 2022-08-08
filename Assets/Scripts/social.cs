@@ -169,6 +169,8 @@ public class social : MonoBehaviour
         //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
         //Has to return bool to show if it worked or no.  clunky, but oh well?
 
+        theFunctions.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         //ad-hoc way to hire more than one employee for now:
         //if (listOfCashiers.Contains(customer) == false)
         AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
@@ -192,14 +194,19 @@ public class social : MonoBehaviour
             //need cashierZone of the owned store:
             GameObject roleLocation = theTagScript.randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
 
+            
+
             if (roleLocation == null)
             {
-                print("cannot find a role location, probably trying to hire someone before you've made a business, or my system is unfinished");
+                Debug.Log("cannot find a role location, probably trying to hire someone before you've made a business, or my system is unfinished");
 
                 return false;
             }
             else
             {
+                //Debug.Log(roleLocation.name);
+                theFunctions.print(roleLocation.name);
+                theFunctions.print("111111111111111");
                 doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
 
@@ -338,9 +345,9 @@ public class social : MonoBehaviour
     public void succeedAtRecruitment(GameObject whoIsRecruited)
     {
         //ok, recruitment suceeds
-        Debug.Log("recruitment successful");
-        Debug.Log("recruited by:  " + this.gameObject.name);
-        Debug.Log("gang tag will be:  " + gangTag(this.gameObject));
+        //Debug.Log("recruitment successful");
+        //Debug.Log("recruited by:  " + this.gameObject.name);
+        //Debug.Log("gang tag will be:  " + gangTag(this.gameObject));
 
         taggedWith foreignTagScript = whoIsRecruited.GetComponent<taggedWith>();
         foreignTagScript.foreignAddTag(gangTag(this.gameObject), whoIsRecruited);
@@ -362,17 +369,14 @@ public class social : MonoBehaviour
     {
         if (leader.name == "Player")
         {
-            Debug.Log("Player color");
             toColor.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
         }
         else if (leader.name == "NPC pickpocket")
         {
-            Debug.Log("NPC pickpocket color");
             toColor.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
         }
         else
         {
-            Debug.Log("''else'' color");
             toColor.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
         }
     }
