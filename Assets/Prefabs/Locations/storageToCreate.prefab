@@ -109,7 +109,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bad6b52183c9514f94e1cd405d69b60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  storagePrefab: {fileID: 0}
   theFunctions: {fileID: 0}
 --- !u!114 &2485297271306337335
 MonoBehaviour:
@@ -139,8 +138,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _destination: {fileID: 0}
   _navMeshAgent: {fileID: 0}
-  storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
-    type: 3}
   stopwatch: 0
   effectivenessTimer: 0
   workerCount: 0
@@ -148,6 +145,8 @@ MonoBehaviour:
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
   theTagScript: {fileID: 0}
+  theNonAIScript: {fileID: 0}
+  theSocialScript: {fileID: 0}
   testTime: 0
 --- !u!114 &7931028571116217599
 MonoBehaviour:
@@ -165,13 +164,15 @@ MonoBehaviour:
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
+  pendingActionTimer: 0
   masterPrintControl: 0
   jobSeeking: 0
   inConversation: 0
   atWork: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
-  thisIsTaggedWith: {fileID: 0}
+  taggedWith: {fileID: 0}
+  social: {fileID: 0}
   npcx: 
   ignore: 1
   goalWait: 0
@@ -189,6 +190,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tags: []
   tag1: storage
-  tag2: owned by Player
+  tag2: 
   tag3: 
   tag4: 
