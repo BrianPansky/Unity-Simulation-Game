@@ -17,6 +17,8 @@ GameObject:
   - component: {fileID: 3340885695876105948}
   - component: {fileID: 7931028571116217599}
   - component: {fileID: 1880860526876978608}
+  - component: {fileID: 432158661071457199}
+  - component: {fileID: 4279606605441126569}
   m_Layer: 0
   m_Name: storageToCreate
   m_TagString: container
@@ -193,3 +195,46 @@ MonoBehaviour:
   tag2: 
   tag3: 
   tag4: 
+--- !u!114 &432158661071457199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5897906389598753279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2dee90bed910f645a39c8dc9d9bdb26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gunFlash1: {fileID: 1644270354528127361, guid: ad575b38f1150ed42a400c2f6772f6fe,
+    type: 3}
+  storePrefab: {fileID: 6396609487247316962, guid: bbda423bf55dbcf419d8a2a05e1aeda7,
+    type: 3}
+  storagePrefab: {fileID: 5897906389598753279}
+  thisAI: {fileID: 0}
+  theSocialScript: {fileID: 0}
+  theFunctions: {fileID: 0}
+  premadeStuff: {fileID: 0}
+--- !u!114 &4279606605441126569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5897906389598753279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6953b2bcb18ab64baa17503ca0ad7d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  politicalSide: 0
+  defaultTrust: 0
+  theFunctions: {fileID: 0}
+  theHub: {fileID: 0}
+  thisAI: {fileID: 0}
+  premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
+  factionList: []
+  allyFactionList: []
+  enemyFactionList: []
