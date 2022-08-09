@@ -169,7 +169,7 @@ public class social : MonoBehaviour
         //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
         //Has to return bool to show if it worked or no.  clunky, but oh well?
 
-        theFunctions.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //theFunctions.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         //ad-hoc way to hire more than one employee for now:
         //if (listOfCashiers.Contains(customer) == false)
@@ -205,8 +205,8 @@ public class social : MonoBehaviour
             else
             {
                 //Debug.Log(roleLocation.name);
-                theFunctions.print(roleLocation.name);
-                theFunctions.print("111111111111111");
+                //theFunctions.print(roleLocation.name);
+                //theFunctions.print("111111111111111");
                 doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
 

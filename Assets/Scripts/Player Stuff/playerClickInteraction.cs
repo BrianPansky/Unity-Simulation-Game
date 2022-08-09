@@ -193,7 +193,7 @@ public class playerClickInteraction : MonoBehaviour
         {
             if (buildMode == false)
             {
-                Debug.Log("1111111111111111111111111111111111111111111111111111111");
+                //Debug.Log("1111111111111111111111111111111111111111111111111111111");
                 buildMode = true;
 
                 //now bring up menu to select what to build
@@ -202,7 +202,7 @@ public class playerClickInteraction : MonoBehaviour
             }
             else
             {
-                Debug.Log("22222222222222222222222222222222222222222222222222222");
+                //Debug.Log("22222222222222222222222222222222222222222222222222222");
                 buildMode = false;
             }
         }
@@ -366,7 +366,7 @@ public class playerClickInteraction : MonoBehaviour
             {
                 //yes, they are a cashier
                 //enable the "buy food" button
-                Debug.Log("worker");
+                //Debug.Log("worker");
                 createStoreMenu();
 
             }
@@ -1065,7 +1065,7 @@ public class playerClickInteraction : MonoBehaviour
     {
         if(theSocialScript.hiring(selectedNPC, premadeStuff.resource1GatheringJob, "storage"))
         {
-            Debug.Log("hired..........");
+            //Debug.Log("hired..........");
         }
         else
         {

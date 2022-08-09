@@ -52,15 +52,19 @@ public class AI1 : MonoBehaviour
     public bool jobSeeking;
     public bool inConversation;
     public bool atWork;
+    public GameObject secondaryObject;
 
     public int clearanceLevel;
+
+    //public stateForAI state;
 
 
 
     public actionItem recurringGoal = new actionItem();
 
+
+    //other scripts
     public functionsForAI theFunctions;
-    //public stateForAI state;
     public taggedWith taggedWith;
     public social social;
 
@@ -79,6 +83,7 @@ public class AI1 : MonoBehaviour
     {
         pendingActionTimer = 0;
         pendingActions = new List<action>();
+
         //get some other scripts I'll need:
         theFunctions = GetComponent<functionsForAI>();
         taggedWith = GetComponent<taggedWith>();
@@ -191,7 +196,7 @@ public class AI1 : MonoBehaviour
                 if (inputtedToDoList.Count > 0)
                 {
                     //for now, do orders/favors and such first
-                    theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
+                    //theFunctions.print("TESTTTTTTTTTT444444444444444444444444444444444444444444444!");
 
                     //NEED TO BLANK TARGET!
                     target = null;
@@ -202,7 +207,7 @@ public class AI1 : MonoBehaviour
 
                     //now, pick top-ranked plan (if there are any)
                     makeFirstPlanTheToDoList();
-                    printToDoList(toDoList);
+                    //printToDoList(toDoList);
                 }
                 else if (toDoList.Count == 0)
                 {
@@ -582,8 +587,8 @@ public class AI1 : MonoBehaviour
         //but eventually want to keep it remembered UNTIL it is completed or cancelled
         //but right now it isn't guaranteed that one of those outcomes will occurr
         inputtedToDoList.RemoveAt(0);
-        print("so, this is broken???");
-        printPlanList(planList);
+        //print("so, this is broken???");
+        //printPlanList(planList);
     }
 
     public void makeFirstPlanTheToDoList()

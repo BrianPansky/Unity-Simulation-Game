@@ -417,19 +417,19 @@ public class functionsForAI : MonoBehaviour
                 //incrementInventoriesOfThisAndTargetFromEffects(target, nextAction);
                 //AD-HOC FOR NOW, BECAUSE LEADER CANNOT CURRENTLY PLAN WITH FACTION INVENTORY:
                 //incrementInventoriesOfThisAndTargetFromEffects(thisAI.leader, nextAction);
-                print("==============================================");
-                printPlan(thisAI.inputtedToDoList);
-                printPlan(thisAI.toDoList);
-                printState(thisAI.state);
-                printState(thisAI.planningState);
-                printState(thisAI.factionState);
+                //print("==============================================");
+                //printPlan(thisAI.inputtedToDoList);
+                //printPlan(thisAI.toDoList);
+                //printState(thisAI.state);
+                //printState(thisAI.planningState);
+                //printState(thisAI.factionState);
                 if (TRYincrementInventoriesOfThisAndTargetFromEffects(thisAI.leader, nextAction))
                 {
-                    print("worked!!!!!!!!!!!!!!!!!!!!");
+                    //print("worked!!!!!!!!!!!!!!!!!!!!");
                 }
                 else
                 {
-                    print("   FAILED   ");
+                    //print("   FAILED   (does player have enough money to pay for this job?)");
                 }
 
 
@@ -460,8 +460,8 @@ public class functionsForAI : MonoBehaviour
                 }
 
 
-                printPlan(thisAI.inputtedToDoList);
-                printPlan(thisAI.toDoList);
+                //printPlan(thisAI.inputtedToDoList);
+                //printPlan(thisAI.toDoList);
 
             }
             else if (nextAction.name == "shootSpree")
@@ -886,7 +886,7 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "standardFactionGrowth")
             {
-                printAlways("standardFactionGrowth!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                //printAlways("standardFactionGrowth!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 foreach(actionItem prereq in nextAction.prereqs)
                 {
                     prereq.item.quantity += 1;
@@ -1765,7 +1765,11 @@ public class functionsForAI : MonoBehaviour
             }
             else if (criteria.name == "anyResource1")
             {
-                target = theTagScript.randomTaggedWith("resource1");
+                //target = theTagScript.randomTaggedWith("resource1");
+                //find nearest to THIS NPC for now.  seems sensible, right?  
+                //saves time?  maybe?  unless it leads to longer journey back to base
+                //whatever, should be fine for now:
+                target = theTagScript.findXNearestToY("resource1", thisAI.currentJob.roleLocation);
             }
             else if (criteria.name == "checkout")
             {

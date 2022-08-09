@@ -15,6 +15,7 @@ public class nonAIScript : MonoBehaviour
 
     //other scripts:
     public AI1 thisAI;
+    public taggedWith taggedWith;
     public social theSocialScript;
     public functionsForAI theFunctions;
     public premadeStuffForAI premadeStuff;
@@ -24,24 +25,25 @@ public class nonAIScript : MonoBehaviour
     {
         //initialize other scripts:
         thisAI = GetComponent<AI1>();
+        taggedWith = GetComponent<taggedWith>();
         theSocialScript = GetComponent<social>();
         theFunctions = GetComponent<functionsForAI>();
         premadeStuff = GetComponent<premadeStuffForAI>();
 
-
-
+        
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        //ONLY NEEDED FOR SOME OBJECTS:
+        //selfDestructSomeObjects();
+        //storageInitialization();
     }
 
     // Update is called once per frame
     void Update()
     {
-        selfDestructSomeObjects();
     }
 
 
@@ -67,7 +69,7 @@ public class nonAIScript : MonoBehaviour
 
     public void basicFiringWithInnacuracy(Vector3 theLine)
     {
-        basicFiringFunction(makeVectorInaccurate(theLine, 77));
+        basicFiringFunction(makeVectorInaccurate(theLine, 11));
     }
 
     public void kill(GameObject whoToKill)
@@ -156,7 +158,7 @@ public class nonAIScript : MonoBehaviour
     
 
 
-    //========================= misc =========================
+    //========================= for specific objects =========================
     public void selfDestructSomeObjects()
     {
         //no, this doesn't work because instantiated objects have a number appended to their name
@@ -168,7 +170,24 @@ public class nonAIScript : MonoBehaviour
         }
     }
 
+    public void testByName(string theName)
+    {
+        if(this.gameObject.name == theName)
+        {
+            Debug.Log("heloooooooooooooooooooooooooo");
+        }
+    }
 
+    public void storageInitialization()
+    {
+        if (this.gameObject.name == "storageToCreate(Clone)")
+        {
+            thisAI.secondaryObject = taggedWith.findNearestX("resource1");
+            //Debug.Log(thisAI.secondaryObject.name);
+        }
+    }
+
+    
 
 
     //========================= raycast/vector stuff ========================= [often used for weapon shooting, but may have other uses]

@@ -892,7 +892,91 @@ public class taggedWith : MonoBehaviour
     }
 
 
+    //bit beyond mere "which objects have these tags", but basically same "find the right object" functions:
+    public GameObject findNearestX(string tagToLookFor)
+    {
+        //one tag input for now
+        //return nearest object with that tag
+        //other funciton can be called "nearest XYZ" or something lol
 
+
+        //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
+        //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        return whichObjectOnListIsNearest(allPotentialTargets);
+    }
+
+    public GameObject findXNearestToY(string tagToLookFor, GameObject objectWeWantItClosestTo)
+    {
+        //one tag input for now
+        //return nearest object with that tag
+        //other funciton can be called "nearest XYZ" or something lol
+
+
+        //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
+        //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        return whichObjectOnListIsNearestToInputtedObject(allPotentialTargets, objectWeWantItClosestTo);
+    }
+
+
+    public GameObject whichObjectOnListIsNearest(List<GameObject> listOfObjects)
+    {
+        //closest to what?  to THIS object, i suppose
+
+        GameObject theClosestSoFar = null;
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            if (theClosestSoFar != null)
+            {
+                float distanceToThisObject = Vector3.Distance(thisObject.transform.position, this.gameObject.transform.position);
+                float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, this.gameObject.transform.position);
+
+                if (distanceToThisObject < distanceToTheClosestSoFar)
+                {
+                    theClosestSoFar = thisObject;
+                }
+            }
+            else
+            {
+                theClosestSoFar = thisObject;
+            }
+        }
+
+        return theClosestSoFar;
+    }
+
+    public GameObject whichObjectOnListIsNearestToInputtedObject(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
+    {
+        //nearest to the INPUTTED object, not current object
+
+        GameObject theClosestSoFar = null;
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            if (theClosestSoFar != null)
+            {
+                float distanceToThisObject = Vector3.Distance(thisObject.transform.position, objectWeWantItClosestTo.transform.position);
+                float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, objectWeWantItClosestTo.transform.position);
+
+                if (distanceToThisObject < distanceToTheClosestSoFar)
+                {
+                    theClosestSoFar = thisObject;
+                }
+            }
+            else
+            {
+                theClosestSoFar = thisObject;
+            }
+        }
+
+        return theClosestSoFar;
+    }
 
 
 }
