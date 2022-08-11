@@ -307,7 +307,7 @@ public class functionsForAI : MonoBehaviour
                     //printState(state);
 
                     //ad-hoc update of faction unit state stuff:
-                    incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
+                    incrementItem(thisAI.leader.GetComponent<AI1>().factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
                     
 
                     //incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
@@ -359,7 +359,7 @@ public class functionsForAI : MonoBehaviour
 
                 //implementALLEffectsREAL
                 //incrementItem(thisAI.state[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
-                //incrementItem(thisAI.factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
+                //incrementItem(thisAI.leader.GetComponent<AI1>().factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, -1);
 
                 //AI1 targetHubScript = getHubScriptFromGameObject(target);
                 //incrementItem(targetHubScript.state["inventory"], premadeStuff.money, -1);
@@ -1223,11 +1223,11 @@ public class functionsForAI : MonoBehaviour
 
         printState(targetHubScript.state);
         printState(targetHubScript.planningState);
-        printState(targetHubScript.factionState);
+        printState(targetHubScript.leader.GetComponent<AI1>().factionState);
 
         incrementItem(targetHubScript.state[theItem.stateCategory], theItem, amount);
         incrementItem(targetHubScript.planningState[theItem.stateCategory], theItem, amount);
-        incrementItem(targetHubScript.factionState[theItem.stateCategory], theItem, amount);
+        incrementItem(targetHubScript.leader.GetComponent<AI1>().factionState[theItem.stateCategory], theItem, amount);
         
     }
 
@@ -1548,10 +1548,11 @@ public class functionsForAI : MonoBehaviour
 
         //for faction one....need to find it.....it is in leader game object.  
         //get leader game object....from job class object
-        AI1 leaderHub = thisAI.currentJob.boss.GetComponent("AI1") as AI1;
+        //AI1 leaderHub = thisAI.currentJob.boss.GetComponent("AI1") as AI1;
 
         //now deep copy...paste into faction....
-        leaderHub.factionState["inventory"] = deepStateCategoryCopyer("inventory", contHub.state);
+        //leaderHub.factionState["inventory"] = deepStateCategoryCopyer("inventory", contHub.state);
+        thisAI.leader.GetComponent<AI1>().factionState["inventory"] = deepStateCategoryCopyer("inventory", contHub.state);
 
     }
 
@@ -1753,18 +1754,22 @@ public class functionsForAI : MonoBehaviour
             //sorta ad-hoc for now...
             if (criteria.name == "anyStore")
             {
+                //yes this is ad hoc.  this is NOT "any store".  it's any store FOR SALE.  need to modularize
                 //print("anyStore");
                 //get any store:
                 target = theTagScript.randomTaggedWithMultiple("shop", "forSale");
             }
             else if (criteria.name == "anyHome")
             {
+                //yes this is ad hoc.  this is NOT "any home".  it's any home FOR SALE.  need to modularize
+
                 //print("anyHome");
                 //get any home:
                 target = theTagScript.randomTaggedWithMultiple("home", "forSale");
             }
             else if (criteria.name == "anyResource1")
             {
+                //this is now NEAREST, not "any".
                 //target = theTagScript.randomTaggedWith("resource1");
                 //find nearest to THIS NPC for now.  seems sensible, right?  
                 //saves time?  maybe?  unless it leads to longer journey back to base

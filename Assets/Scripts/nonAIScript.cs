@@ -128,7 +128,11 @@ public class nonAIScript : MonoBehaviour
         //get other script I need:
         taggedWith otherIsTaggedWith = newBuilding.GetComponent<taggedWith>() as taggedWith;
 
-        string ownershipTag = "owned by " + this.name;
+        //Debug.Log("1111111111111111111111111111111111111111111111");
+        //string ownershipTag = "owned by " + this.name;
+        //Debug.Log(ownershipTag);
+        string ownershipTag = "owned by " + thisAI.leader.name;
+        //Debug.Log(ownershipTag);
         otherIsTaggedWith.foreignAddTag(ownershipTag, newBuilding);
 
         //need to remember in the future WHICH store is theirs
@@ -146,6 +150,7 @@ public class nonAIScript : MonoBehaviour
         //[or have OTHER way to "find" it for use]
         if (buildingX.name == "storeToCreate")
         {
+            //won't this add a DUPLICATE "leader" tag?
             theSocialScript.doSuccsessfulHiring(thisAI, premadeStuff.cashierJob, newBuilding);
         }
 

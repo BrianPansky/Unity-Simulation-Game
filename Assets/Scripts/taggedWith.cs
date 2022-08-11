@@ -953,7 +953,7 @@ public class taggedWith : MonoBehaviour
 
     public GameObject whichObjectOnListIsNearestToInputtedObject(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
     {
-        //nearest to the INPUTTED object, not current object
+        //closest to what?  to THIS object, i suppose
 
         GameObject theClosestSoFar = null;
 

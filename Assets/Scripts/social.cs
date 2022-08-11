@@ -23,7 +23,6 @@ public class social : MonoBehaviour
 
     //other scripts
     public functionsForAI theFunctions;
-    public AI1 theHub;
     public AI1 thisAI;
     public premadeStuffForAI premadeStuff;
     public taggedWith theTagScript;
@@ -41,7 +40,6 @@ public class social : MonoBehaviour
     {
         //other scripts:
         theFunctions = GetComponent<functionsForAI>();
-        theHub = GetComponent<AI1>();
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
         theTagScript = GetComponent<taggedWith>();
@@ -94,9 +92,9 @@ public class social : MonoBehaviour
         List<List<action>> planListFormat = new List<List<action>>();
         planListFormat.Add(thePlan);
 
-        planListFormat = theFunctions.simulatingPlansToEnsurePrereqs(planListFormat, theHub.knownActions, theHub.state, 20);
+        planListFormat = theFunctions.simulatingPlansToEnsurePrereqs(planListFormat, thisAI.knownActions, thisAI.state, 20);
 
-        theHub.planList = planListFormat;
+        thisAI.planList = planListFormat;
     }
 
 
@@ -164,35 +162,30 @@ public class social : MonoBehaviour
 
     }
 
-    public bool hiring(GameObject whoToHire, job theJob, string jobLocationTypeTag)
+    public bool hiring(GameObject whoToHire, job theJob, string jobLocationNameTag)
     {
         //for now, ad-hoc enter "jobLocationType" string.  used to find location using tags.  later, pull that info from the boss automatically somehow....
         //Has to return bool to show if it worked or no.  clunky, but oh well?
-
-        //theFunctions.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-        //ad-hoc way to hire more than one employee for now:
-        //if (listOfCashiers.Contains(customer) == false)
+        
         AI1 targetAI = whoToHire.GetComponent("AI1") as AI1;
         if (targetAI.jobSeeking == true)
         {
-            //print("no problem");
-
-            //listOfCashiers.Add(customer);
             //changeRoles(whotoHire, premadeStuff.workAsCashier, premadeStuff.doTheWork);
 
             //print(customer.name);
 
 
-            //workerCount += 1;
-
-            //print(workerCount);
 
             //need the worker to show up at the correct store for their shift:
             //customerAI.roleLocation = thisAI.roleLocation;
-            string ownershipTag = "owned by " + this.name;
-            //need cashierZone of the owned store:
-            GameObject roleLocation = theTagScript.randomTaggedWithMultiple(jobLocationTypeTag, ownershipTag);
+
+            //Debug.Log("22222222222222222222222222222222222222222222222222");
+
+            string ownershipTag = "owned by " + thisAI.leader.name;
+            //need roleLocation:
+            //Debug.Log(ownershipTag);
+            //Debug.Log(jobLocationNameTag);
+            GameObject roleLocation = theTagScript.randomTaggedWithMultiple(jobLocationNameTag, ownershipTag);
 
             
 
@@ -204,15 +197,9 @@ public class social : MonoBehaviour
             }
             else
             {
-                //Debug.Log(roleLocation.name);
-                //theFunctions.print(roleLocation.name);
-                //theFunctions.print("111111111111111");
                 doSuccsessfulHiring(targetAI, theJob, roleLocation);
             }
-
-
-
-
+            
 
             return true;
         }
@@ -227,20 +214,21 @@ public class social : MonoBehaviour
     {
         //print(roleLocation);
         targetAI.jobSeeking = false;
-        targetAI.leader = this.gameObject;
+        targetAI.leader = thisAI.leader;
+        
 
         //record in factionState:
         //mmm, need it to INCREMENT...
         //NEEDS TO BE DIFFERENT DEPENDING ON WHICH JOB IS BEING HIRED FOR
         //KINDA SEEMS LIKE IT WOULD BE NICE TO HAVE A SIMPLE DICTIONARY WITH TEXT KEYS THAT ARE JOB NAMES, AND NUMBERS FOR QUANTITY, RIGHT???
-        theFunctions.incrementItem(thisAI.factionState["unitState"], premadeStuff.employee, 1);
+        theFunctions.incrementItem(thisAI.leader.GetComponent<AI1>().factionState["unitState"], premadeStuff.employee, 1);
         //thisAI.factionState["unitState"].Add(deepStateItemCopier(premadeStuff.employee));
 
         //need to add gang tag!
-        targetAI.taggedWith.addTag(gangTag(this.gameObject));
+        targetAI.taggedWith.addTag(gangTag(thisAI.leader));
 
         //color:
-        changeToFactionColor(targetAI.gameObject, this.gameObject);
+        changeToFactionColor(targetAI.gameObject, thisAI.leader);
 
         //add tag of job name
         targetAI.taggedWith.addTag(theJob.name);
@@ -250,12 +238,12 @@ public class social : MonoBehaviour
         targetAI.clearanceLevel = 1;
 
         //now...to finish and deliver "theJob" class object...
-        targetAI.currentJob = premadeStuff.jobFinisher(theJob, this.gameObject, roleLocation);
+        targetAI.currentJob = premadeStuff.jobFinisher(theJob, thisAI.leader, roleLocation);
 
         //but still have to add the known actions to their known actions!  sigh.
-        foreach (action x in theJob.theKnownActions)
+        foreach (action eachAction in theJob.theKnownActions)
         {
-            targetAI.knownActions.Add(premadeStuff.deepActionCopier(x));
+            targetAI.knownActions.Add(premadeStuff.deepActionCopier(eachAction));
             //addKnownActionToGameObject(whoToHire, x);
         }
 

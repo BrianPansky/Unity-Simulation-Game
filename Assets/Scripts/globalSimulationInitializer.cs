@@ -25,22 +25,34 @@ public class globalSimulationInitializer : MonoBehaviour
         //ad-hoc:
         leaderObjList.Add(GameObject.Find("Player"));
         leaderObjList.Add(GameObject.Find("NPC pickpocket"));
+        leaderObjList.Add(GameObject.Find("NPC shopkeeper"));
+        leaderObjList.Add(GameObject.Find("NPC shopkeeper (1)"));
+        
 
-        foreach (GameObject leader in leaderObjList)
+        //make them their OWN leaders:
+        foreach (GameObject thisLeader in leaderObjList)
+        {
+            AI1 thisAI = thisLeader.GetComponent<AI1>();
+
+            thisAI.leader = thisLeader;
+        }
+
+        //tag them:
+        foreach (GameObject thisLeader in leaderObjList)
         {
             //should use "auto generate gang tag" thing here:
-            factionList.Add(leader.name + "sGang");
+            factionList.Add(thisLeader.name + "sGang");
 
             //add stuff to their tags
-            taggedWith taggedWith = leader.GetComponent<taggedWith>();
+            taggedWith taggedWith = thisLeader.GetComponent<taggedWith>();
             taggedWith.addTag("leader");
-            taggedWith.addTag(leader.name + "sGang");
+            taggedWith.addTag(thisLeader.name + "sGang");
         }
 
         //now give it to leaders?  so, need to get their social scripts
-        foreach (GameObject leader in leaderObjList)
+        foreach (GameObject thisLeader in leaderObjList)
         {
-            social theSocialScript = leader.GetComponent<social>();
+            social theSocialScript = thisLeader.GetComponent<social>();
 
             //now...add list of ENEMIES?  and also full faction list too?????
             foreach (string gangTag in factionList)
@@ -51,7 +63,7 @@ public class globalSimulationInitializer : MonoBehaviour
                 //for now, add ALL gangs to list of enemies
                 //except their OWN faction, so check if it's their own factions' tag:
                 //should use "auto generate gang tag" thing here:
-                if (gangTag != (leader.name + "sGang"))
+                if (gangTag != (thisLeader.name + "sGang"))
                 {
                     theSocialScript.enemyFactionList.Add(gangTag);
                 }
