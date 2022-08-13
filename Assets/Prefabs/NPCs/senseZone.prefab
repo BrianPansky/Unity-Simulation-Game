@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8928057846489955663}
   - component: {fileID: 4923321371183084672}
   - component: {fileID: 5985063744597869341}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: senseZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}

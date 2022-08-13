@@ -308,7 +308,10 @@ public class functionsForAI : MonoBehaviour
 
                     //ad-hoc update of faction unit state stuff:
                     incrementItem(thisAI.leader.GetComponent<AI1>().factionState[premadeStuff.soldier.stateCategory], premadeStuff.soldier, 1);
-                    
+
+
+                    target.GetComponent<AI1>().npcx = target.gameObject.name;
+                    Debug.Log("updated ''npcx''");
 
                     //incrementItem(thisAI.state["inventory"], premadeStuff.resource1, -1);
 
@@ -875,14 +878,23 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "attackRandomEnemy")
             {
-                printAlways("enaction of the random attack!");
+                Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 4);
+                //printAlways("enaction of the random attack!");
+                if (theNonAIScript.doesLineOfSightSeeTarget(target))
+                {
+                    Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
+                    theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
+                    //kill(target);
 
-                theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
-                //kill(target);
 
+                    //state = implementALLEffectsREAL(nextAction, state);
+                    //target = dumpAction(target);
+                }
+                else
+                {
+                    //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 3);
+                }
 
-                state = implementALLEffectsREAL(nextAction, state);
-                target = dumpAction(target);
             }
             else if (nextAction.name == "standardFactionGrowth")
             {
@@ -1800,7 +1812,10 @@ public class functionsForAI : MonoBehaviour
             }
             else if (criteria.name == "anyEnemyLeader")
             {
-                target = theTagScript.randomTaggedWithMIX(theTagScript.ALLTaggedWithMultiple("factionLeader"), this.gameObject.name);
+
+                //target = theTagScript.randomTaggedWithMIX(theTagScript.ALLTaggedWithMultiple("factionLeader"), this.gameObject.name);thisAI
+                target = theTagScript.randomTaggedWithMIX(theTagScript.ALLTaggedWithMultiple("factionLeader"), thisAI.leader.name); 
+
             }
             else if (criteria.name == "anyNONGroupMember")
             {
@@ -3779,7 +3794,11 @@ public class functionsForAI : MonoBehaviour
         float distance = Vector3.Distance(thisNPC.transform.position, target.transform.position);
         //print("distance, for this target:");
         //print(target.name);
-        //print(distance);
+        if (thisAI.npcx == this.gameObject.name)
+        {
+            //print(distance);
+        }
+        
 
         //some actions need a bigger or smaller range.  Ad-hoc adding that here for now...
         //default is basically zero range:
@@ -3788,12 +3807,25 @@ public class functionsForAI : MonoBehaviour
         //change range for some things:
         if(thisAction.name == "shootSpree")
         {
-            theRange = 15;
+            theRange = 900000;
+        }
+        if (thisAction.name == "attackRandomEnemy")
+        {
+            theRange = 300;
         }
 
 
+        
+        if (thisAI.npcx == this.gameObject.name)
+        {
+            //print(distance);
+            //print(theRange);
+        }
+        
+
         if (distance < theRange)
         {
+            //print("close now");
             return true;
         }
         else

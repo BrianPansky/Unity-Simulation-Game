@@ -92,7 +92,7 @@ public class nonAIScript : MonoBehaviour
         }
         else
         {
-            print("you are shot!");
+            //print("you are shot!");
             //whoToKill = null;
         }
     }
@@ -207,7 +207,7 @@ public class nonAIScript : MonoBehaviour
         RaycastHit infoAboutTheThingTheRaycastHit;
         //Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(this.gameObject.transform.position, theLine, out infoAboutTheThingTheRaycastHit, 50.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(this.gameObject.transform.position, theLine, out infoAboutTheThingTheRaycastHit, 500.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             if (infoAboutTheThingTheRaycastHit.transform != null)
             {
@@ -234,6 +234,33 @@ public class nonAIScript : MonoBehaviour
 
 
         return theVector;
+    }
+
+    public bool doesLineOfSightSeeTarget(GameObject target)
+    {
+        GameObject whatIsHit = whatDoesLineHit(vectorToTarget(target) * 6);
+        if(whatIsHit == null)
+        {
+            return false;
+        }
+        if (target.name == whatIsHit.name)
+        {
+            Debug.Log("yes");
+            return true;
+        }
+        else
+        {
+            Debug.Log(target.name);
+            if(whatIsHit != null)
+            {
+                Debug.Log(whatIsHit.name);
+            }
+            else
+            {
+                Debug.Log("null");
+            }
+            return false;
+        }
     }
 
     public Vector3 makeVectorInaccurate(Vector3 originalVector, float accuracy)

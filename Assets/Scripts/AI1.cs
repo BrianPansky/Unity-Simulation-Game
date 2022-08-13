@@ -137,7 +137,8 @@ public class AI1 : MonoBehaviour
 
 
         //for easy debug printing
-        npcx = "NPC pickpocket";
+        //npcx = "NPC pickpocket";
+        npcx = "xxxxx";
         //npcx = "NPC";
         //diagnostic
         masterPrintControl = true;

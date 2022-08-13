@@ -264,7 +264,7 @@ public class premadeStuffForAI : MonoBehaviour
             createSoldier = actionCreator("createSoldier", "work", wantedPrereqsLister(storageOwnership, resource1), UNwantedPrereqsLister(), wantedEffectsLister(soldier), UNwantedEffectsLister(), 1, anyNONGroupMember);
             orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(soldier, threat), 1, anyLandPlot);
             //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
-            attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyUnderling);
+            attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyLeader); //  anyEnemyUnderling   anyEnemyLeader
 
             standardFactionGrowth = actionCreator("standardFactionGrowth", "growth", wantedPrereqsLister(quantityOfItemGenerator(resource1, 1), soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(), 1, anyLandPlot);
 
