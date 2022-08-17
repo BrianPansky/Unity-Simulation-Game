@@ -46,7 +46,7 @@ public class functionsForAI : MonoBehaviour
         thisAI = GetComponent<AI1>();
         premadeStuff = GetComponent<premadeStuffForAI>();
         theSocialScript = GetComponent<social>();
-
+        
     }
 
     // Start is called before the first frame update
@@ -145,6 +145,62 @@ public class functionsForAI : MonoBehaviour
 
     }
 
+    public void gunShotSoundSensing()
+    {
+        //make everyone view the shooter as a "threat", unless it is themselves or ally
+        //for now ad-hoc:  COMMAND them to HIDE from that threat
+        //FOR NOW HERE ARE NOT "ally" FACTIONS!  JUST THE SHOOTER'S OWN FACTION!
+
+
+
+        //List<GameObject> everyone = theTagScript.ALLTaggedWithMultiple("person");
+
+        //FOR NOW HERE ARE NOT "ally" FACTIONS!  JUST THE SHOOTER'S OWN FACTION!
+        List<GameObject> everyoneNotInShootersFaction = theTagScript.ALLTaggedWithMIX(theTagScript.ALLTaggedWithMultiple("person"), gangTag(thisAI.leader));
+
+        foreach (GameObject thisPerson in everyoneNotInShootersFaction)
+        {
+            //a shooter should not scare THEMSELVES [or player]:
+            if(thisPerson != this.gameObject && thisPerson.name != "Player")
+            {
+                //Debug.Log(thisPerson.name);
+                //need their AI1 script:
+                //AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
+                AI1 NPChubScript = thisPerson.GetComponent("AI1") as AI1;
+
+                //going to blank out their to-do list, and fill it with test "orders":
+                //AD HOC, SHOULD NOT DO THIS?!?!?
+                NPChubScript.toDoList.Clear();
+                NPChubScript.threatCooldown += addToCooldown(NPChubScript.threatCooldown);
+
+                NPChubScript.threatObject = this.gameObject;
+
+                //stateItem food = premadeStuff.food;
+                //action generatedAction = premadeStuff.bringLeaderX(food);
+                action actionToInput = premadeStuff.hideFromShooter;
+
+                NPChubScript.inputtedToDoList.Add(actionToInput);
+            }
+            
+        }
+
+    }
+
+
+    public int addToCooldown(int currentCooldown)
+    {
+        //returns amount to ADD.  doesn't add it in here.
+
+        //basic for now.  should eventually have smooth curve.  add lots when cooldown is currently low, but add ZERO if it's over a certain amount
+        if(currentCooldown < 500)
+        {
+            return 300;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 
 
 
@@ -154,6 +210,8 @@ public class functionsForAI : MonoBehaviour
         //this is the ENACTION phase.  the DOING of an aciton.
         //testSwitch();
         //alert();
+        //print("======================= ENACTION PHASE  =======================");
+        //print(this.gameObject.name);
 
         //List<GameObject> allPotentialTargets = new List<GameObject>();
 
@@ -162,7 +220,7 @@ public class functionsForAI : MonoBehaviour
         //allPotentialTargets = globalTags["person"];
         //print("allPotentialTargets =");
         //print(allPotentialTargets.Count);
-        
+
 
 
         //handle the travel prereqs here:
@@ -196,9 +254,12 @@ public class functionsForAI : MonoBehaviour
             }
             else
             {
+                //printPlan(thisAI.toDoList);
+                //print(actionToTextDeep(nextAction));
                 //print("should have a target");
                 //Vector3 newVector = vectorToTarget(target);
                 //print(target.name);
+                //print(theTagScript.allForeignTagsAsText(target));
                 //the following should only happen if target is NOT null
                 travelToTargetObject(target);
             }
@@ -331,7 +392,7 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "orderAttack")
             {
-                testOn();
+                //testOn();
 
                 thisAI.goalWait = 1100;
                 
@@ -379,7 +440,7 @@ public class functionsForAI : MonoBehaviour
                 target = dumpAction(target);
 
                 //printAlways("***************************//// end of attack order ////*****************************");
-                testOff();
+                //testOff();
             }
             else if (nextAction.name == "hireResourceGatherer")
             {
@@ -710,31 +771,9 @@ public class functionsForAI : MonoBehaviour
                 GameObject thisProperty;
                 thisProperty = null;
                 thisProperty = target;
-
-                //print("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
-
-                //check if it's for sale:
-                //get other script I need:
-                taggedWith otherIsTaggedWith = target.GetComponent<taggedWith>() as taggedWith;
-                if (otherIsTaggedWith.tags.Contains("forSale"))
+                
+                if(theNonAIScript.TRYbuyingBuilding(target))
                 {
-                    //ok, it's for sale, now can buy it
-
-                    //printTextList(otherIsTaggedWith.tags);
-                    //remove the "for sale" tag:
-                    otherIsTaggedWith.foreignRemoveTag("forSale", target);
-                    //printTextList(otherIsTaggedWith.tags);
-                    //add the "owned by _____" tag...:
-                    string ownershipTag = "owned by " + this.name;
-                    otherIsTaggedWith.foreignAddTag(ownershipTag, target);
-
-                    //need to remember in the future WHICH store is theirs
-                    //so they ca go to it, and sned their employees there:
-                    //thisAI.roleLocation = target;
-
-                    //ad-hoc action completion:
-                    //thisAI.toDoList.RemoveAt(0);
-
                     target = dumpAction(target);
 
                     //ad-hoc update of state:
@@ -878,17 +917,20 @@ public class functionsForAI : MonoBehaviour
             }
             else if (nextAction.name == "attackRandomEnemy")
             {
-                Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 4);
+                //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 4);
                 //printAlways("enaction of the random attack!");
+                //thisAI.leader.GetComponent<AI1>().npcx = thisAI.leader.name;
+                //thisAI.leader.GetComponent<AI1>().masterPrintControl = true;
+
                 if (theNonAIScript.doesLineOfSightSeeTarget(target))
                 {
-                    Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
+                    //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
                     theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
                     //kill(target);
 
 
                     //state = implementALLEffectsREAL(nextAction, state);
-                    //target = dumpAction(target);
+                    target = dumpAction(target);
                 }
                 else
                 {
@@ -904,7 +946,21 @@ public class functionsForAI : MonoBehaviour
                     prereq.item.quantity += 1;
                 }
             }
-
+            else if (nextAction.name == "hideFromShooter")
+            {
+                //printAlways("SUCCESS!!!!!!!!!");
+                thisAI.threatCooldown -= 1;
+                if(thisAI.threatCooldown > 0)
+                {
+                    Destroy(target);
+                    target = nearestCover();
+                }
+                else
+                {
+                    target = dumpAction(target);
+                }
+                
+            }
             else
             {
                 //thisAI.masterPrintControl = true;
@@ -1836,6 +1892,18 @@ public class functionsForAI : MonoBehaviour
 
             }
         }
+        else if (criteria.locationType == "nearest")
+        {
+            //ad-hoc, can't wait to make a the better system for both targeting and enaction phase
+
+            if (criteria.name == "nearestCover")
+            {
+
+
+                target = nearestCover();
+
+            }
+        }
         else if (criteria.locationType == "roleLocation")
         {
             //print("else if (criteria.name == roleLocation)");
@@ -1887,6 +1955,42 @@ public class functionsForAI : MonoBehaviour
     }
 
 
+
+
+    public GameObject nearestCover()
+    {
+
+        //not great for now
+        //first find nearest non-person object
+        //then find a point behind it, on the side opposite the threat
+        GameObject target;
+        target = null;
+
+        if (thisAI.threatObject != null)
+        {
+            //get cover:
+            target = theTagScript.findNearestX("home");
+
+            //get threat's line of sight to the cover (from threat to cover):
+            Vector3 threatLine = theNonAIScript.vectorFromXToY(thisAI.threatObject, target);
+            //Debug.DrawRay(thisAI.threatObject.GetComponent<Transform>().position, threatLine, Color.white, 3);
+
+            //extend the line slightly, create an invisible target object, return that object as the target:
+
+
+            //target = Instantiate(theNonAIScript.storagePrefab, threatLine + thisAI.threatObject.transform.position, Quaternion.identity);
+
+
+            target = Instantiate(theNonAIScript.invisibleTarget, threatLine * 1.2f + thisAI.threatObject.transform.position, Quaternion.identity);
+            return target;
+        }
+        else
+        {
+            printAlways("thisAI.threatObject is null");
+            return target;
+        }
+
+    }
 
 
 

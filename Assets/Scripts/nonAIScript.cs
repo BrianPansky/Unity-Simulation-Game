@@ -13,6 +13,9 @@ public class nonAIScript : MonoBehaviour
     public GameObject storePrefab;
     public GameObject storagePrefab;
 
+    //other prefabs:
+    public GameObject invisibleTarget;
+
     //other scripts:
     public AI1 thisAI;
     public taggedWith taggedWith;
@@ -56,6 +59,9 @@ public class nonAIScript : MonoBehaviour
         //[FOR NOW ONLY KILL WHAT IS HIT IF IT IS A "person"!]
         //[and also (for testing) do NOT kill the player!]
 
+        //first, make non-allies [and not self] afraid and hide [should move this to SENSING?  probably eventually, so use "theFunctions" for now to indicate that]:
+        theFunctions.gunShotSoundSensing();
+
         GameObject whatIsHit = whatDoesLineHit(theLine);
         if (whatIsHit != null)
         {
@@ -80,21 +86,34 @@ public class nonAIScript : MonoBehaviour
         {
             //NEED TO REMOVE THIS OBJECT FROM ALL LISTS BEFORE DESTROYING IT!
             //OTHERWISE WILL GET NULL/"object does not exist" ERRORS!!!!!
-
+            
             Debug.Log("a killer just shot " + whoToKill.name);
+            if (this.gameObject.name == thisAI.npcx)
+            {
 
+                taggedWith.printAllTags();
+            }
             this.gameObject.GetComponent<taggedWith>().foreignRemoveALLtags(whoToKill);
             //print("a killer just shot " + whoToKill.name);
-            
+            if (this.gameObject.name == thisAI.npcx)
+            {
+
+                taggedWith.printAllTags();
+            }
+
             //print("object to be destroyed:");
             //print(whoToKill);
             Destroy(whoToKill);
+            
+
         }
         else
         {
             //print("you are shot!");
             //whoToKill = null;
         }
+
+        
     }
 
 
@@ -160,7 +179,38 @@ public class nonAIScript : MonoBehaviour
 
 
 
-    
+    //buy/sell stuff
+    public bool TRYbuyingBuilding(GameObject buildingToBuy)
+    {
+
+        //check if it's for sale:
+        //get other script I need:
+        taggedWith otherIsTaggedWith = buildingToBuy.GetComponent<taggedWith>() as taggedWith;
+        if (otherIsTaggedWith.tags.Contains("forSale"))
+        {
+            //ok, it's for sale, now can buy it
+
+            //printTextList(otherIsTaggedWith.tags);
+            //remove the "for sale" tag:
+            otherIsTaggedWith.foreignRemoveBOTHTags("forSale", buildingToBuy);
+            //printTextList(otherIsTaggedWith.tags);
+            //add the "owned by _____" tag...:
+            string ownershipTag = "owned by " + this.name;
+            otherIsTaggedWith.foreignAddTag(ownershipTag, buildingToBuy);
+
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+
+    }
+
+
+
 
 
     //========================= for specific objects =========================
@@ -236,6 +286,20 @@ public class nonAIScript : MonoBehaviour
         return theVector;
     }
 
+    public Vector3 vectorFromXToY(GameObject objectX, GameObject objectY)
+    {
+        //returns a vector between current object/NPC, and the inputted target
+        Vector3 theVector = objectY.transform.position - objectX.transform.position;
+
+        //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.right, Color.green, 3);
+        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theVector * Vector3.Distance(target.transform.position, transform.position), Color.green, 3);
+
+        //Debug.DrawRay(objectX.GetComponent<Transform>().position, theVector, Color.white, 3);
+
+
+        return theVector;
+    }
+
     public bool doesLineOfSightSeeTarget(GameObject target)
     {
         GameObject whatIsHit = whatDoesLineHit(vectorToTarget(target) * 6);
@@ -245,15 +309,15 @@ public class nonAIScript : MonoBehaviour
         }
         if (target.name == whatIsHit.name)
         {
-            Debug.Log("yes");
+            //Debug.Log("yes");
             return true;
         }
         else
         {
-            Debug.Log(target.name);
+            //Debug.Log(target.name);
             if(whatIsHit != null)
             {
-                Debug.Log(whatIsHit.name);
+                //Debug.Log(whatIsHit.name);
             }
             else
             {

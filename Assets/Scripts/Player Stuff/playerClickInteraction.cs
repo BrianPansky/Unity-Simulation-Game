@@ -181,6 +181,7 @@ public class playerClickInteraction : MonoBehaviour
     {
         toggleBuildMode();
         toggleWeapon();
+        debugMenu();
     }
 
     public void toggleBuildMode()
@@ -228,7 +229,15 @@ public class playerClickInteraction : MonoBehaviour
         }
     }
 
-    //public void buildModeVisualCue()
+    public void debugMenu()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            menuMode();
+            createDebugMenu();
+        }
+            
+    }
 
     private void raycastBuildingPlacement()
     {
@@ -324,7 +333,8 @@ public class playerClickInteraction : MonoBehaviour
             //save selected NPC to operate on:
             selectedNPC = GameObject.Find(clickedOn.name);
 
-
+            //AD-HOC TEST BUTTON:
+            makeButton("[AD-HOC TEST BUTTON]", this.adHocTestButton);
 
 
             //ad-hoc for now
@@ -406,44 +416,17 @@ public class playerClickInteraction : MonoBehaviour
 
         if (clickedOn.tag == "aProperty")
         {
-            //check if it's for sale:
-            //get other script I need:
-            taggedWith otherIsTaggedWith = clickedOn.GetComponent<taggedWith>() as taggedWith;
-            if (otherIsTaggedWith.tags.Contains("forSale"))
+            
+            if (theNonAIScript.TRYbuyingBuilding(clickedOn))
             {
-                //ok, it's for sale, now can buy it
-
-                //printTextList(otherIsTaggedWith.tags);
-                //remove the "for sale" tag:
-                otherIsTaggedWith.foreignRemoveTag("forSale", clickedOn);
-                //printTextList(otherIsTaggedWith.tags);
-                //add the "owned by _____" tag...:
-                string ownershipTag = "owned by " + this.name;
-                otherIsTaggedWith.foreignAddTag(ownershipTag, clickedOn);
-
-                //need to remember in the future WHICH store is theirs
-                //so they ca go to it, and sned their employees there:
-                //thisAI.roleLocation = target;
-
-                //ad-hoc action completion:
-                //thisAI.toDoList.RemoveAt(0);
-
-
-                //ad-hoc update of state:
-                //state = implementALLEffects(nextAction, state);
 
                 haveStore = true;
                 theFunctions.print("you got a store!");
-
-                //Debug.Log(clickedOn.transform.position);
-
             }
-
-
             else
             {
                 //well, this one is NOT for sale, so 
-                theFunctions.print("not for sale");
+                theFunctions.print("maybe not for sale");
 
                 //Debug.Log(clickedOn.transform.position);
             }
@@ -622,6 +605,10 @@ public class playerClickInteraction : MonoBehaviour
 
     }
 
+    public void createDebugMenu()
+    {
+        makeButton("enable print", this.debugButton);
+    }
 
     public void destroyObjectListItems(List<GameObject> theList)
     {
@@ -753,7 +740,38 @@ public class playerClickInteraction : MonoBehaviour
 
     }
 
-    
+    public void adHocTestButton()
+    {
+        //for testing, ad-hoc
+
+        //testing "hide from shooter"
+
+        //moved to "gunShotSoundSensing()" in sensing
+
+
+        List<GameObject> everyone = theTagScript.ALLTaggedWithMultiple("person");
+
+        foreach(GameObject thisPerson in everyone)
+        {
+            Debug.Log(thisPerson.name);
+            //need their AI1 script:
+            //AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
+            AI1 NPChubScript = thisPerson.GetComponent("AI1") as AI1;
+
+            //going to blank out their to-do list, and fill it with test "orders":
+            //AD HOC, SHOULD NOT DO THIS?!?!?
+            NPChubScript.toDoList.Clear();
+
+            NPChubScript.threatObject = this.gameObject;
+
+            //stateItem food = premadeStuff.food;
+            //action generatedAction = premadeStuff.bringLeaderX(food);
+            action actionToInput = premadeStuff.hideFromShooter;
+
+            NPChubScript.inputtedToDoList.Add(actionToInput);
+        }
+    }
+
     public void refreshRecruitmentMenu()
     {
         //see if just closing and opening menu in one frame works and looks fine:
@@ -1198,16 +1216,17 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-    ////////////////////////////////////////////////
-    //         Misc diagnostic functions
-    ////////////////////////////////////////////////
-    ///
+    //////////////////////////////  Misc diagnostic functions  ///////////////////////////////
     public void print(string text)
     {
         Debug.Log(text);
     }
 
-
+    public void debugButton()
+    {
+        //enable printing and update npcx for enemy leader
+        //AI1 enemyLeaderAIScript = foreignGameObject.GetComponent<AI1>();
+    }
 
 
     public class GroundPlacementController : MonoBehaviour

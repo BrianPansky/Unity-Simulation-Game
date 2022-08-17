@@ -82,8 +82,9 @@ public class premadeStuffForAI : MonoBehaviour
     public stateItem anyNONGroupMember = new stateItem();
 
     public stateItem placeHolderFactionGoal = new stateItem();
-    
 
+    public stateItem nearestCover = new stateItem();
+    
 
 
     ////////////////////////    ACTIONS    ////////////////////////
@@ -138,9 +139,13 @@ public class premadeStuffForAI : MonoBehaviour
     public action createStorage = new action();
 
     public action attackRandomEnemy = new action();
+    public action hideFromShooter = new action();
 
     public action standardFactionGrowth = new action();
+
+
     
+
 
 
 
@@ -229,6 +234,11 @@ public class premadeStuffForAI : MonoBehaviour
             anyLandPlot = stateItemCreator("anyLandPlot", "locationState");
             anyLandPlot.locationType = "any";
 
+            nearestCover = stateItemCreator("nearestCover", "locationState");
+            nearestCover.locationType = "nearest";
+
+            
+            //this is not "nearest" [to storage?], so it should not be "any"
             anyResource1 = stateItemCreator("anyResource1", "locationState");
             anyResource1.locationType = "any";
             
@@ -265,6 +275,8 @@ public class premadeStuffForAI : MonoBehaviour
             orderAttack = actionCreator("orderAttack", "work", wantedPrereqsLister(soldier), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(soldier, threat), 1, anyLandPlot);
             //only attacks enemy UNDERLINGS for now, easier so it doesn't kill me while i test
             attackRandomEnemy = actionCreator("attackRandomEnemy", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(money), UNwantedEffectsLister(), 1, anyEnemyLeader); //  anyEnemyUnderling   anyEnemyLeader
+            hideFromShooter = actionCreator("hideFromShooter", "ad-hoc", wantedPrereqsLister(), UNwantedPrereqsLister(), wantedEffectsLister(), UNwantedEffectsLister(), 1, nearestCover);
+
 
             standardFactionGrowth = actionCreator("standardFactionGrowth", "growth", wantedPrereqsLister(quantityOfItemGenerator(resource1, 1), soldier), UNwantedPrereqsLister(), wantedEffectsLister(placeHolderFactionGoal), UNwantedEffectsLister(), 1, anyLandPlot);
 

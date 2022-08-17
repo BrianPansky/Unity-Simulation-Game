@@ -53,6 +53,9 @@ public class AI1 : MonoBehaviour
     public bool inConversation;
     public bool atWork;
     public GameObject secondaryObject;
+    public GameObject threatObject;
+    //eventually use the "value" variable inside the "threat" stateItem.  can do that later though, for now:
+    public int threatCooldown;
 
     public int clearanceLevel;
 
@@ -83,6 +86,7 @@ public class AI1 : MonoBehaviour
     {
         pendingActionTimer = 0;
         pendingActions = new List<action>();
+        threatCooldown = 0;
 
         //get some other scripts I'll need:
         theFunctions = GetComponent<functionsForAI>();
@@ -141,7 +145,7 @@ public class AI1 : MonoBehaviour
         npcx = "xxxxx";
         //npcx = "NPC";
         //diagnostic
-        masterPrintControl = true;
+        masterPrintControl = false;
 
 
         //i think this should work?
@@ -164,6 +168,14 @@ public class AI1 : MonoBehaviour
 
         //theFunctions.print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
         //printToDoList(toDoList);
+        //theFunctions.printKnownActionsDeeply(knownActions);
+        //if (this.gameObject.name == npcx)
+        {
+            //taggedWith.printAllTags();
+        }
+        
+
+        //masterPrintControl = false;
 
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
@@ -286,6 +298,10 @@ public class AI1 : MonoBehaviour
             pendingActionTimer -= 1;
         }
         //theFunctions.print(theFunctions.actionToTextDeep(theFunctions.premadeStuff.workAsCashier));
+        //if (this.gameObject.name == npcx)
+        {
+            //taggedWith.printAllTags();
+        }
     }
 
     ////////////////    Stuff for the Update function:    ////////////////

@@ -10,7 +10,11 @@ MonoImporter:
       type: 3}
   - storagePrefab: {fileID: 5897906389598753279, guid: f9a001edb86876149ab7598dc5844506,
       type: 3}
+  - invisibleTarget: {fileID: 8995975858493711486, guid: 455367e93e51c6a4b8074760c1154152,
+      type: 3}
   - thisAI: {instanceID: 0}
+  - taggedWith: {instanceID: 0}
+  - theSocialScript: {instanceID: 0}
   - theFunctions: {instanceID: 0}
   - premadeStuff: {instanceID: 0}
   executionOrder: 0

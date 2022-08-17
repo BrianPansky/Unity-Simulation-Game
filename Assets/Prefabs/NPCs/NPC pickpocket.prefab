@@ -233,6 +233,8 @@ MonoBehaviour:
   jobSeeking: 0
   inConversation: 0
   atWork: 0
+  secondaryObject: {fileID: 0}
+  threatObject: {fileID: 0}
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   taggedWith: {fileID: 0}
@@ -262,6 +264,7 @@ MonoBehaviour:
   premadeStuff: {fileID: 0}
   theTagScript: {fileID: 0}
   theNonAIScript: {fileID: 0}
+  theSocialScript: {fileID: 0}
   testTime: 0
 --- !u!195 &4474087527148379903
 NavMeshAgent:
@@ -327,7 +330,9 @@ MonoBehaviour:
   politicalSide: 0
   defaultTrust: 0
   theFunctions: {fileID: 0}
-  theHub: {fileID: 0}
+  thisAI: {fileID: 0}
+  premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
   factionList: []
   allyFactionList: []
   enemyFactionList: []
@@ -349,7 +354,11 @@ MonoBehaviour:
     type: 3}
   storagePrefab: {fileID: 5897906389598753279, guid: f9a001edb86876149ab7598dc5844506,
     type: 3}
+  invisibleTarget: {fileID: 8995975858493711486, guid: 455367e93e51c6a4b8074760c1154152,
+    type: 3}
   thisAI: {fileID: 0}
+  taggedWith: {fileID: 0}
+  theSocialScript: {fileID: 0}
   theFunctions: {fileID: 0}
   premadeStuff: {fileID: 0}
 --- !u!1001 &3837084469687796168

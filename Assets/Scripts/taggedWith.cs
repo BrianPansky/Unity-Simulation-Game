@@ -147,41 +147,65 @@ public class taggedWith : MonoBehaviour
 
     }
 
-    public void foreignRemoveTag(string tag, GameObject removeFromThis)
+    public void foreignRemoveGlobalTag(string tag, GameObject removeFromThis)
+    {
+        //update "global" tags...
+        //the "global"...Dicitonary of objects
+
+        //should I add checks here to make sure the tag is present?
+        //because it will have errors if I try to remove a tag that's basicaly already removed...
+        if (globalTags.ContainsKey(tag))
+        {
+            //remove the game object from the list of objects tagged with that tag:
+            globalTags[tag].Remove(removeFromThis);
+        }
+
+        
+        
+    }
+
+    public void foreignRemoveBOTHTags(string tag, GameObject foreignGameObject)
     {
         //this funciton updates BOTH lists of tags
         //the "local" list, and the "global"...Dicitonary of objects
 
-        //should I add checks here to make sure the tag is present?
-        //because it will have errors if I try to remove a tag that's basicaly already removed...
+
+        taggedWith foreignGameObjectsTagScript = foreignGameObject.GetComponent<taggedWith>();
 
         //update "local" tags
-        tags.Remove(tag);
+        foreignGameObjectsTagScript.tags.Remove(tag);
 
-        //update "global" tags...
-        //remove the game object to the list of objects tagged with that tag:
-        globalTags[tag].Remove(removeFromThis);
+        //should I add checks here to make sure the tag is present?
+        //because it will have errors if I try to remove a tag that's basicaly already removed...
+        if (globalTags.ContainsKey(tag))
+        {
+            //remove the game object from the list of objects tagged with that tag:
+            globalTags[tag].Remove(foreignGameObject);
+        }
+
+
+
     }
 
-    public void foreignRemoveALLtags(GameObject thisGameObject)
+
+    public void foreignRemoveALLtags(GameObject foreignGameObject)
     {
 
         //REMOVES this object from ALL tag lists
         //necessary when destroying objects, 
         //otherwise there will be "null" object references on those lists!
-
-        //UHH, THIS IS TAG SCRIPT, NOT "SOCIAL" SCRIPT, THAT"S SOMETHING ELSE!!!
-        taggedWith thisGameObjectsSocialScript = thisGameObject.GetComponent<taggedWith>();
+        
+        taggedWith foreignGameObjectsTagScript = foreignGameObject.GetComponent<taggedWith>();
 
         //remove object from all global tag lists:
-        foreach (string tag in thisGameObjectsSocialScript.tags)
+        foreach (string tag in foreignGameObjectsTagScript.tags)
         {
-            foreignRemoveTag(tag, thisGameObject);
+            foreignRemoveGlobalTag(tag, foreignGameObject);
             //globalTags[tag].Remove(thisGameObject);
         }
 
         //delete local tags:
-        thisGameObjectsSocialScript.tags.Clear();
+        foreignGameObjectsTagScript.tags.Clear();
     }
 
     //diagnostic:
@@ -202,6 +226,35 @@ public class taggedWith : MonoBehaviour
 
         Debug.Log(printout);
 
+        
+    }
+
+    public string allForeignTagsAsText(GameObject thisForeignObject)
+    {
+        taggedWith thisForeignSocialScript = thisForeignObject.GetComponent<taggedWith>();
+
+        if(thisForeignSocialScript != null)
+        {
+            string printout = string.Empty;
+
+            printout += "Tags:  [ ";
+
+
+
+            foreach (string tag in thisForeignSocialScript.tags)
+            {
+                printout += tag + ", ";
+            }
+
+            printout += "]";
+
+            return printout;
+        }
+
+        else
+        {
+            return "no tag script";
+        }
         
     }
 
