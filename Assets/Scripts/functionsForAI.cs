@@ -22,7 +22,8 @@ public class functionsForAI : MonoBehaviour
     //maybe ad-hoc for now:
     public int stopwatch;
     public int effectivenessTimer;
-    
+    public int shootingCooldownTimer;
+
 
     //VERY ad-hoc for now:
     public int workerCount;
@@ -59,6 +60,7 @@ public class functionsForAI : MonoBehaviour
         stopwatch = 0;
         effectivenessTimer = 0;
         workerCount = 0;
+        shootingCooldownTimer = 0;
 
         _navMeshAgent = this.GetComponent<NavMeshAgent>();
 
@@ -72,7 +74,14 @@ public class functionsForAI : MonoBehaviour
         //printAlways(stateItemToTextDeep(premadeStuff.food));
     }
 
-
+    void Update()
+    {
+        if(shootingCooldownTimer > 0)
+        {
+            shootingCooldownTimer -= 1;
+        }
+        
+    }
 
     ////////////////////////    SENSING    ////////////////////////
     public void sensing(Dictionary<string, List<stateItem>> state)
@@ -147,6 +156,10 @@ public class functionsForAI : MonoBehaviour
 
     public void gunShotSoundSensing()
     {
+        //should really make each NPC call this on themselves, rather than digging through tags to find the NPCs?
+        //but if i do it this way, then it only needs to be called when there is a gun shot.
+        //well i don't know which is optimal, i shoudln't optimize for processing speed right now.  i shuld optimize for sensible "modular" code.
+
         //make everyone view the shooter as a "threat", unless it is themselves or ally
         //for now ad-hoc:  COMMAND them to HIDE from that threat
         //FOR NOW HERE ARE NOT "ally" FACTIONS!  JUST THE SHOOTER'S OWN FACTION!
@@ -163,23 +176,10 @@ public class functionsForAI : MonoBehaviour
             //a shooter should not scare THEMSELVES [or player]:
             if(thisPerson != this.gameObject && thisPerson.name != "Player")
             {
-                //Debug.Log(thisPerson.name);
                 //need their AI1 script:
-                //AI1 NPChubScript = selectedNPC.GetComponent("AI1") as AI1;
                 AI1 NPChubScript = thisPerson.GetComponent("AI1") as AI1;
-
-                //going to blank out their to-do list, and fill it with test "orders":
-                //AD HOC, SHOULD NOT DO THIS?!?!?
-                NPChubScript.toDoList.Clear();
                 NPChubScript.threatCooldown += addToCooldown(NPChubScript.threatCooldown);
-
                 NPChubScript.threatObject = this.gameObject;
-
-                //stateItem food = premadeStuff.food;
-                //action generatedAction = premadeStuff.bringLeaderX(food);
-                action actionToInput = premadeStuff.hideFromShooter;
-
-                NPChubScript.inputtedToDoList.Add(actionToInput);
             }
             
         }
@@ -921,21 +921,25 @@ public class functionsForAI : MonoBehaviour
                 //printAlways("enaction of the random attack!");
                 //thisAI.leader.GetComponent<AI1>().npcx = thisAI.leader.name;
                 //thisAI.leader.GetComponent<AI1>().masterPrintControl = true;
-
-                if (theNonAIScript.doesLineOfSightSeeTarget(target))
+                if(shootingCooldownTimer < 1)
                 {
-                    //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
-                    theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
-                    //kill(target);
+                    if (theNonAIScript.doesLineOfSightSeeTarget(target))
+                    {
+                        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
+                        theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
+                        //kill(target);
 
+                        shootingCooldownTimer += 20 + Random.Range(0, 31);
 
-                    //state = implementALLEffectsREAL(nextAction, state);
-                    target = dumpAction(target);
+                        //state = implementALLEffectsREAL(nextAction, state);
+                        target = dumpAction(target);
+                    }
+                    else
+                    {
+                        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 3);
+                    }
                 }
-                else
-                {
-                    //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.yellow, 3);
-                }
+                
 
             }
             else if (nextAction.name == "standardFactionGrowth")
@@ -1535,7 +1539,10 @@ public class functionsForAI : MonoBehaviour
 
         //when action is done, remove the action from the plan, and set target to null
         target = null;
-        thisAI.toDoList.RemoveAt(0);
+        if(thisAI.toDoList.Count() > 0)
+        {
+            thisAI.toDoList.RemoveAt(0);
+        }
 
         //maybe check if plan is complete.
         //if so, should ALSO blank out "planList"

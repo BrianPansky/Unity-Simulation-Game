@@ -18,6 +18,9 @@ public class AI1 : MonoBehaviour
 
     public job currentJob;
 
+    //sorta like character traits, but may vary for situational reasons:
+    public int bravery;
+
 
     public GameObject roleLocation;
     public GameObject homeLocation;
@@ -95,7 +98,10 @@ public class AI1 : MonoBehaviour
 
         //need to initialize, don't want faction inventory etc. to be null/non-existent
         factionState = createEmptyFactionState();
-    }
+
+        //sorta like character traits, but may vary for situational reasons:
+        bravery = 10;
+}
 
     // Start is called before the first frame update
     void Start()
@@ -180,8 +186,28 @@ public class AI1 : MonoBehaviour
         //"ignore means this is not an AI, it doesn't DO anything.  just uses this script for inventory.  maybe a dumb idea...
         if (ignore == false)
         {
+
+
             //now handle the checking stuff.  like checking to pay PLAYER for work shift.  just JOB stuff for now i guess:
             checkJobs();
+
+
+            //urgent threat stuff here for now:
+            if (threatCooldown > bravery)
+            {
+                //going to blank out their to-do list, and fill it with test "orders":
+                //AD HOC, SHOULD NOT DO THIS?!?!?
+                toDoList.Clear();
+
+                
+                //stateItem food = premadeStuff.food;
+                //action generatedAction = premadeStuff.bringLeaderX(food);
+                action actionToInput = theFunctions.premadeStuff.hideFromShooter;
+
+                inputtedToDoList.Add(actionToInput);
+            }
+
+
 
             if (inConversation == false)
             {

@@ -247,6 +247,13 @@ public class social : MonoBehaviour
             //addKnownActionToGameObject(whoToHire, x);
         }
 
+        //mega-ad-hoc:
+        if(theJob.name == "soldier")
+        {
+            targetAI.bravery = 800;
+        }
+
+
         //updateFactionState?
     }
 
