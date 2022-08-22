@@ -51,6 +51,29 @@ public class nonAIScript : MonoBehaviour
 
 
     //========================= WEAPON STUFF =========================
+    public GameObject whichNpcIsHit(Vector3 theLine)
+    {
+        //input a vector
+        //see what gets hit
+        //if it's an NPC, return it, otherwise, return null
+
+        GameObject whatIsHit = whatDoesLineHit(theLine);
+        if (whatIsHit != null)
+        {
+            if (whatIsHit.tag == "anNPC")
+            {
+                return whatIsHit;
+            }
+
+        }
+        return null;
+    }
+
+    
+    
+
+
+
     public void basicFiringFunction(Vector3 theLine)
     {
         //input a vector
@@ -88,18 +111,13 @@ public class nonAIScript : MonoBehaviour
             //OTHERWISE WILL GET NULL/"object does not exist" ERRORS!!!!!
             
             Debug.Log("a killer just shot " + whoToKill.name);
-            if (this.gameObject.name == thisAI.npcx)
-            {
+            //whoToKill.GetComponent<taggedWith>().printAllTags();
+            //taggedWith.printAllTags();
 
-                taggedWith.printAllTags();
-            }
-            this.gameObject.GetComponent<taggedWith>().foreignRemoveALLtags(whoToKill);
-            //print("a killer just shot " + whoToKill.name);
-            if (this.gameObject.name == thisAI.npcx)
-            {
+            //this.gameObject.GetComponent<taggedWith>().foreignRemoveALLtags(whoToKill);
+            taggedWith.foreignRemoveALLtags(whoToKill);
 
-                taggedWith.printAllTags();
-            }
+            
 
             //print("object to be destroyed:");
             //print(whoToKill);
@@ -325,6 +343,36 @@ public class nonAIScript : MonoBehaviour
             }
             return false;
         }
+    }
+
+    public bool doesLineHitObjectWithTagsXY(Vector3 theLine, string tag1, string tag2)
+    {
+        //hit object with line
+        //grab the tag script of that object
+        //check if it has BOTH tags
+        //return TRUE if it DOES
+
+        GameObject whatWasHitByLine = whatDoesLineHit(theLine);
+
+        taggedWith theForeignTagScript = whatWasHitByLine.GetComponent<taggedWith>();
+        if(theForeignTagScript == null)
+        {
+            //no tags, thus not tagged with these tags:
+            return false;
+        }
+        else
+        {
+            if (theForeignTagScript.tags.Contains(tag1))
+            {
+                if (theForeignTagScript.tags.Contains(tag2))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
     }
 
     public Vector3 makeVectorInaccurate(Vector3 originalVector, float accuracy)

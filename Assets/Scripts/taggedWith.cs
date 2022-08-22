@@ -945,6 +945,40 @@ public class taggedWith : MonoBehaviour
     }
 
 
+    //start with an object, THEN see if it has the desired tags:
+    public bool doesObjectHaveALLTags(GameObject someGameObject, string tag1, string tag2 = null, string tag3 = null, string tag4 = null)
+    {
+        //INPUTS setup
+
+        //put all wanted tags in a list:
+        List<string> allTags = new List<string>();
+        allTags.Add(tag1);
+        allTags.Add(tag2);
+        allTags.Add(tag3);
+        allTags.Add(tag4);
+
+        taggedWith theTagScript = someGameObject.GetComponent("taggedWith") as taggedWith;
+
+        foreach (string thisTag in allTags)
+        {
+            //make sure it's not null:
+            if (thisTag != null)
+            {
+                //theFunctions.print(thisTag);
+
+                if (theTagScript.tags.Contains(thisTag) == false)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+
+
     //bit beyond mere "which objects have these tags", but basically same "find the right object" functions:
     public GameObject findNearestX(string tagToLookFor)
     {

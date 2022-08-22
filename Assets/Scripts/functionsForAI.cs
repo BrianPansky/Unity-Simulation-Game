@@ -921,18 +921,18 @@ public class functionsForAI : MonoBehaviour
                 //printAlways("enaction of the random attack!");
                 //thisAI.leader.GetComponent<AI1>().npcx = thisAI.leader.name;
                 //thisAI.leader.GetComponent<AI1>().masterPrintControl = true;
+                //this timer is a bit like another prereq...
                 if(shootingCooldownTimer < 1)
                 {
                     if (theNonAIScript.doesLineOfSightSeeTarget(target))
                     {
-                        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, (target.transform.position - this.transform.position), Color.magenta, 33);
-                        theNonAIScript.basicFiringWithInnacuracy(theNonAIScript.vectorToTarget(target));
-                        //kill(target);
+                        //just to avoid too much magic shooting around allies, add a delay after each try, even if an ally means they have to not take the shot:
+                        shootingCooldownTimer += 10 + Random.Range(0, 41);
 
-                        shootingCooldownTimer += 20 + Random.Range(0, 31);
+                        magicallyOnlyShootNonMembers(target);
 
-                        //state = implementALLEffectsREAL(nextAction, state);
                         target = dumpAction(target);
+
                     }
                     else
                     {
@@ -1631,7 +1631,29 @@ public class functionsForAI : MonoBehaviour
 
     }
 
-    
+    public void magicallyOnlyShootNonMembers(GameObject target)
+    {
+        //will only fire if the bullet would not hit a team member
+        //magically figures out wht the bullet WOULD hit, then only fires that bullet if it would NOT hit a tem member
+
+
+        Vector3 theScatterShot = theNonAIScript.makeVectorInaccurate(theNonAIScript.vectorToTarget(target), 11);
+
+        GameObject whoeverIsHit = theNonAIScript.whichNpcIsHit(theScatterShot);
+
+        //magically detect if this line will be friendly fire [on a PERSON, it's ok to hit buildings right now]:
+
+        if (whoeverIsHit != null && theTagScript.doesObjectHaveALLTags(whoeverIsHit, gangTag(thisAI.leader), "person") == false)
+        {
+            //first, make non-allies [and not self] afraid and hide:
+            gunShotSoundSensing();
+            theNonAIScript.kill(whoeverIsHit);
+        }
+
+        
+
+
+    }
 
     //pretty ad-hoc
 
