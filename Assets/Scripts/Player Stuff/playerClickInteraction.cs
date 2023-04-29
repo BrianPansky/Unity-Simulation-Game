@@ -17,6 +17,8 @@ public class playerClickInteraction : MonoBehaviour
 
     public string ownershipTag;
 
+    public GameObject gunLaserSight;
+
     //plug-in menu objects:
     public GameObject recruitingMenu;
     public GameObject myPrefabButton1;
@@ -89,7 +91,7 @@ public class playerClickInteraction : MonoBehaviour
         commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.food)));
         commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.money)));
         commandList.Add(premadeStuff.bringLeaderX(premadeStuff.deepStateItemCopier(premadeStuff.resource1)));
-        commandList.Add(premadeStuff.deepActionCopier(premadeStuff.resource1Dropoff));
+        //commandList.Add(premadeStuff.deepActionCopier(premadeStuff.resource1Dropoff));
 
         swapDirection = true;
     }
@@ -226,6 +228,8 @@ public class playerClickInteraction : MonoBehaviour
             {
                 weapon = false;
             }
+            //gunLaserSight.GetComponent<Light>().spotAngle = 0.1f;
+            gunLaserSight.GetComponent<Light>().enabled = weapon;
         }
     }
 
