@@ -85,6 +85,10 @@ public class nonAIScript : MonoBehaviour
         //first, make non-allies [and not self] afraid and hide [should move this to SENSING?  probably eventually, so use "theFunctions" for now to indicate that]:
         theFunctions.gunShotSoundSensing();
 
+        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theLine, Color.yellow, 0.04f);
+        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theLine, Color.white, 0.02f);
+        
+
         GameObject whatIsHit = whatDoesLineHit(theLine);
         if (whatIsHit != null)
         {
@@ -298,7 +302,7 @@ public class nonAIScript : MonoBehaviour
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.right, Color.green, 3);
         //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theVector * Vector3.Distance(target.transform.position, transform.position), Color.green, 3);
 
-        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theVector, Color.green, 3);
+        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, theVector, Color.green, 3);
 
 
         return theVector;
@@ -385,7 +389,9 @@ public class nonAIScript : MonoBehaviour
         //newVector = Quaternion.AngleAxis(randomSpread(accuracy), axis) * originalVector;
         newVector = Quaternion.Euler(randomSpread(accuracy), randomSpread(accuracy), randomSpread(accuracy)) * originalVector;
 
-        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.red, 3);
+        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.red, 3);
+        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.yellow, 0.08f);
+        Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.white, 0.06f);
 
         return newVector;
     }

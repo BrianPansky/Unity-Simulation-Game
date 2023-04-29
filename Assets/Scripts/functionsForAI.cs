@@ -164,6 +164,7 @@ public class functionsForAI : MonoBehaviour
         //for now ad-hoc:  COMMAND them to HIDE from that threat
         //FOR NOW HERE ARE NOT "ally" FACTIONS!  JUST THE SHOOTER'S OWN FACTION!
 
+        
 
 
         //List<GameObject> everyone = theTagScript.ALLTaggedWithMultiple("person");
@@ -176,6 +177,9 @@ public class functionsForAI : MonoBehaviour
             //a shooter should not scare THEMSELVES [or player]:
             if(thisPerson != this.gameObject && thisPerson.name != "Player")
             {
+                thisPerson.GetComponent<NavMeshAgent>().speed = 15;
+                thisPerson.GetComponent<NavMeshAgent>().acceleration = 33;
+
                 //need their AI1 script:
                 AI1 NPChubScript = thisPerson.GetComponent("AI1") as AI1;
                 NPChubScript.threatCooldown += addToCooldown(NPChubScript.threatCooldown);
@@ -956,11 +960,14 @@ public class functionsForAI : MonoBehaviour
                 thisAI.threatCooldown -= 1;
                 if(thisAI.threatCooldown > 0)
                 {
+                    
                     Destroy(target);
                     target = nearestCover();
                 }
                 else
                 {
+                    this.gameObject.GetComponent<NavMeshAgent>().speed = 6;
+                    this.gameObject.GetComponent<NavMeshAgent>().acceleration = 8;
                     target = dumpAction(target);
                 }
                 
@@ -1633,6 +1640,7 @@ public class functionsForAI : MonoBehaviour
 
     public void magicallyOnlyShootNonMembers(GameObject target)
     {
+        gunShotSoundSensing();
         //will only fire if the bullet would not hit a team member
         //magically figures out wht the bullet WOULD hit, then only fires that bullet if it would NOT hit a tem member
 
@@ -1646,7 +1654,8 @@ public class functionsForAI : MonoBehaviour
         if (whoeverIsHit != null && theTagScript.doesObjectHaveALLTags(whoeverIsHit, gangTag(thisAI.leader), "person") == false)
         {
             //first, make non-allies [and not self] afraid and hide:
-            gunShotSoundSensing();
+            //gunShotSoundSensing();
+            
             theNonAIScript.kill(whoeverIsHit);
         }
 

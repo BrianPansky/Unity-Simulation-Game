@@ -7,12 +7,27 @@ public class globalSimulationInitializer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        testObjectGeneration();
+
 
         initializeFactions();
 
 
     }
     
+
+    public void testObjectGeneration()
+    {
+        
+        //Debug.DrawRay(thisAI.threatObject.GetComponent<Transform>().position, threatLine, Color.white, 3);
+
+        GameObject X = Resources.Load("resource1") as GameObject;
+
+        Vector3 Y = new Vector3();
+        Y.Set(0, 20, -55);
+
+        generateXatY(X, Y);
+    }
 
 
     public void initializeFactions()
@@ -71,5 +86,14 @@ public class globalSimulationInitializer : MonoBehaviour
             }
         }
 
+    }
+
+
+    public void generateXatY(GameObject X, Vector3 Y)
+    {
+        if (X != null)
+        {
+            Instantiate(X, Y, Quaternion.identity);
+        }
     }
 }
