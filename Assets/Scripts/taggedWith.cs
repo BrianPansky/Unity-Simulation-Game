@@ -20,6 +20,7 @@ public class taggedWith : MonoBehaviour
 
     List<string> tagsToAdd = new List<string>();
 
+    worldScript theWorldScript;
 
 
     public Dictionary<string, List<GameObject>> globalTags;
@@ -31,7 +32,7 @@ public class taggedWith : MonoBehaviour
         //(hopefully will allow me to modify them here
         //SHOULD be a shallow copy, NOT a deep copy)
         GameObject theWorldObject = GameObject.Find("World");
-        worldScript theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+        theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
         globalTags = theWorldScript.taggedStuff;
 
 
@@ -260,7 +261,44 @@ public class taggedWith : MonoBehaviour
 
 
 
-    //find objects using tags [should these be moved to tag script?]:
+    //find objects using tags:
+    
+    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    {
+        //use with my "ALLTaggedWithMultiple" funcitons etc., they return a list of objects
+
+        //Debug.Log("///////////////// here is the list:");
+        //foreach (GameObject obj in theList)
+        {
+            //Debug.Log(obj.name);
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            int randomIndex = Random.Range(0, theList.Count);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != notTHISObject)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+        
+        
+
+
+        return thisObject;
+
+    }
+    
     public GameObject randomTaggedWith(string theTag)
     {
         //should return ONE random GameObject that is tagged with the inputted tag
@@ -295,17 +333,6 @@ public class taggedWith : MonoBehaviour
             int randomIndex = Random.Range(0, allPotentialTargets.Count);
             thisObject = allPotentialTargets[randomIndex];
 
-            /*
-            if (theTag == "shop")
-            {
-                print("FOUND a shop...");
-                print(randomIndex);
-                print(thisObject.name);
-
-                //print coordinates?  how?
-                print(thisObject.transform.position);
-            }
-            */
 
             return thisObject;
         }
@@ -1011,6 +1038,22 @@ public class taggedWith : MonoBehaviour
     }
 
 
+    public GameObject findXNearestToYExceptY(string tagToLookFor, GameObject objectWeWantItClosestTo)
+    {
+        //one tag input for now
+        //return nearest object with that tag
+        //other funciton can be called "nearest XYZ" or something lol
+
+
+        //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
+        //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        return whichObjectOnListIsNearestToInputtedObjectExceptThatObject(allPotentialTargets, objectWeWantItClosestTo);
+    }
+
+
     public GameObject whichObjectOnListIsNearest(List<GameObject> listOfObjects)
     {
         //closest to what?  to THIS object, i suppose
@@ -1040,7 +1083,6 @@ public class taggedWith : MonoBehaviour
 
     public GameObject whichObjectOnListIsNearestToInputtedObject(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
     {
-        //closest to what?  to THIS object, i suppose
 
         GameObject theClosestSoFar = null;
 
@@ -1065,5 +1107,134 @@ public class taggedWith : MonoBehaviour
         return theClosestSoFar;
     }
 
+    public GameObject whichObjectOnListIsNearestToInputtedObjectExceptThatObject(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
+    {
+        //how to make it not return the inputted object?
+
+        GameObject theClosestSoFar = null;
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            //thisObject.name != objectWeWantItClosestTo.name
+
+            //Debug.Log("===================================================");
+            //Debug.Log(thisObject.name);
+            //Debug.Log(objectWeWantItClosestTo.name);
+
+
+
+            if (thisObject.name != objectWeWantItClosestTo.name)
+            {
+                if (theClosestSoFar != null)
+                {
+                    float distanceToThisObject = Vector3.Distance(thisObject.transform.position, objectWeWantItClosestTo.transform.position);
+                    float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, objectWeWantItClosestTo.transform.position);
+
+                    if (distanceToThisObject < distanceToTheClosestSoFar)
+                    {
+                        theClosestSoFar = thisObject;
+                    }
+                }
+                else
+                {
+                    theClosestSoFar = thisObject;
+                }
+            }
+            else
+            {
+                //Debug.Log("333333333333333333333333333333333333333333333");
+            }
+            
+        }
+
+        return theClosestSoFar;
+    }
+
+    public GameObject findSECONDNearestXToYExceptY(string tagToLookFor, GameObject objectWeWantItClosestTo)
+    {
+        //one tag input for now
+        //return nearest object with that tag
+        //other funciton can be called "nearest XYZ" or something lol
+
+
+        //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
+        //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        foreach(GameObject obj in allPotentialTargets)
+        {
+            Debug.Log(obj);
+        }
+        //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
+        return whichObjectOnListIsSECONDNearestToInputtedObjectExceptThatObject(allPotentialTargets, objectWeWantItClosestTo);
+    }
+
+    public GameObject whichObjectOnListIsSECONDNearestToInputtedObjectExceptThatObject(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
+    {
+        //how to make it not return the inputted object?
+
+        GameObject theClosestSoFar = null;
+        GameObject theSECONDClosestSoFar = null;
+
+        List<GameObject> validObjects = null;
+        List<float> allDistancesToValidObjects = new List<float>();
+
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            //thisObject.name != objectWeWantItClosestTo.name
+
+            //Debug.Log(thisObject.name);
+            //Debug.Log(objectWeWantItClosestTo.name);
+
+
+
+
+            if (thisObject.name != objectWeWantItClosestTo.name)
+            {
+                if (theClosestSoFar == null)
+                {
+                    theClosestSoFar = thisObject;
+                }
+                else if (theSECONDClosestSoFar == null)
+                {
+                    if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
+                    {
+                        theSECONDClosestSoFar = theClosestSoFar;
+                        theClosestSoFar = thisObject;
+                    }
+                    else
+                    {
+                        theSECONDClosestSoFar = thisObject;
+                    }
+                }
+                else if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theSECONDClosestSoFar, objectWeWantItClosestTo))
+                {
+
+                    if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
+                    {
+                        theSECONDClosestSoFar = theClosestSoFar;
+                        theClosestSoFar = thisObject;
+                    }
+                    else
+                    {
+                        theSECONDClosestSoFar = thisObject;
+                    }
+                }
+                else
+                {
+                    //Debug.Log("bbbbbbbbbbbbbbbbbbbbbbb says 2nd is closer, so do nothing??? bbbbbbbbbbbbbbbbbbbbbbbbb");
+
+                }
+
+
+            }
+        }
+
+        return theSECONDClosestSoFar;
+    }
+
+
+    
 
 }

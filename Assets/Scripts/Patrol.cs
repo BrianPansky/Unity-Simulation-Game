@@ -17,7 +17,7 @@ public class Patrol : MonoBehaviour
 
         //SpotLight L = GetComponent<SpotLight>();
         GameObject L = GameObject.Find("Spot Light1");
-        L.GetComponent<Light>().intensity = 100f;
+        L.GetComponent<Light>().intensity = 2f;
         //Transform T = GetComponent<Transform>();
         //T.position.y = 160f;
     }
