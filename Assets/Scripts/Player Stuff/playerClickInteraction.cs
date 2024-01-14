@@ -14,6 +14,7 @@ public class playerClickInteraction : MonoBehaviour
     //selection
     GameObject selectedNPC;
     public GameObject currentPrefab;
+    public GameObject theInteractionSphere;
 
     public string ownershipTag;
 
@@ -41,6 +42,7 @@ public class playerClickInteraction : MonoBehaviour
     public nonAIScript theNonAIScript;
     public functionsForAI theFunctions;
     public premadeStuffForAI premadeStuff;
+    public inventory1 theInventory;
 
 
     //bit ad hoc:
@@ -59,7 +61,9 @@ public class playerClickInteraction : MonoBehaviour
     void Start()
     {
 
-        
+        this.gameObject.AddComponent<inventory1>();
+        theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
+
 
 
         haveStore = false;
@@ -281,6 +285,11 @@ public class playerClickInteraction : MonoBehaviour
             {
                 //Debug.Log(myHit.transform.gameObject);
                 clickedOn = myHit.transform.gameObject;
+                GameObject thisObject = createPrefabAtPointAndRETURN(theInteractionSphere, myHit.point);
+
+                //      should this use "interactionMate" isntead?
+                thisObject.GetComponent<authorScript1>().theAuthor = this.gameObject;
+                
             }
         }
         
@@ -288,6 +297,20 @@ public class playerClickInteraction : MonoBehaviour
         return clickedOn;
     }
     
+    void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)
+    {
+        //GameObject newBuilding = new GameObject();
+        //newBuilding = Instantiate(thePrefab, thePoint, Quaternion.identity);
+        Instantiate(thePrefab, thePoint, Quaternion.identity);
+    }
+
+    GameObject createPrefabAtPointAndRETURN(GameObject thePrefab, Vector3 thePoint)
+    {
+        //GameObject newBuilding = new GameObject();
+        //newBuilding = Instantiate(thePrefab, thePoint, Quaternion.identity);
+        return Instantiate(thePrefab, thePoint, Quaternion.identity);
+    }
+
 
     public Ray rayFromPlayerCamera()
     {
