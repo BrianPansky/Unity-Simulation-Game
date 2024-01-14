@@ -1,5 +1,96 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2496302550033514154
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4279664994421747859}
+  - component: {fileID: 4693347342046870378}
+  m_Layer: 2
+  m_Name: Spot Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4279664994421747859
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2496302550033514154}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.05000019, y: -0.43000007, z: 0.58}
+  m_LocalScale: {x: 2.9690657, y: 0.5232541, z: 3.2886}
+  m_Children: []
+  m_Father: {fileID: 8239240192670018385}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!108 &4693347342046870378
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2496302550033514154}
+  m_Enabled: 1
+  serializedVersion: 9
+  m_Type: 0
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 1
+  m_InnerSpotAngle: 1
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!1 &8239240192353588404
 GameObject:
   m_ObjectHideFlags: 0
@@ -108,7 +199,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.74, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 4279664994421747859}
   m_Father: {fileID: 8239240193439217677}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -321,6 +413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
+  bravery: 0
   roleLocation: {fileID: 0}
   homeLocation: {fileID: 0}
   leader: {fileID: 0}
@@ -329,6 +422,9 @@ MonoBehaviour:
   jobSeeking: 0
   inConversation: 0
   atWork: 0
+  secondaryObject: {fileID: 0}
+  threatObject: {fileID: 0}
+  threatCooldown: 0
   clearanceLevel: 0
   theFunctions: {fileID: 0}
   taggedWith: {fileID: 0}
@@ -365,12 +461,14 @@ MonoBehaviour:
   _navMeshAgent: {fileID: 0}
   stopwatch: 0
   effectivenessTimer: 0
+  shootingCooldownTimer: 0
   workerCount: 0
   listOfCashiers: []
   thisAI: {fileID: 0}
   premadeStuff: {fileID: 0}
   theTagScript: {fileID: 0}
   theNonAIScript: {fileID: 0}
+  theSocialScript: {fileID: 0}
   testTime: 0
 --- !u!114 &3217855257292685481
 MonoBehaviour:
@@ -399,7 +497,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickedOn: {fileID: 0}
+  currentPrefab: {fileID: 0}
+  theInteractionSphere: {fileID: 5953803115850116078, guid: 1a8a8b7ee725f3f42896f2e6d08dce8b,
+    type: 3}
   ownershipTag: 
+  gunLaserSight: {fileID: 2496302550033514154}
   recruitingMenu: {fileID: 0}
   myPrefabButton1: {fileID: 0}
   myGridCanvas: {fileID: 0}
@@ -407,16 +509,15 @@ MonoBehaviour:
   personOfInterest: {fileID: 0}
   inMenu: 0
   buildMode: 0
-  premadeStuff: {fileID: 0}
   theHub: {fileID: 0}
   myHUD: {fileID: 0}
-  theFunctions: {fileID: 0}
-  theNonAIScript: {fileID: 0}
+  theSocialScript: {fileID: 0}
   theTagScript: {fileID: 0}
+  theNonAIScript: {fileID: 0}
+  theFunctions: {fileID: 0}
+  premadeStuff: {fileID: 0}
   haveStore: 0
   weapon: 0
-  myPrefab: {fileID: 0}
-  currentPrefab: {fileID: 0}
   swapDirection: 0
 --- !u!114 &310021312455318196
 MonoBehaviour:
@@ -454,7 +555,9 @@ MonoBehaviour:
   politicalSide: 0
   defaultTrust: 0
   theFunctions: {fileID: 0}
-  theHub: {fileID: 0}
+  thisAI: {fileID: 0}
+  premadeStuff: {fileID: 0}
+  theTagScript: {fileID: 0}
   factionList: []
   allyFactionList: []
   enemyFactionList: []
@@ -476,7 +579,10 @@ MonoBehaviour:
     type: 3}
   storagePrefab: {fileID: 5897906389598753279, guid: f9a001edb86876149ab7598dc5844506,
     type: 3}
+  invisibleTarget: {fileID: 0}
   thisAI: {fileID: 0}
+  taggedWith: {fileID: 0}
+  theSocialScript: {fileID: 0}
   theFunctions: {fileID: 0}
   premadeStuff: {fileID: 0}
 --- !u!1001 &2208505812413378550
