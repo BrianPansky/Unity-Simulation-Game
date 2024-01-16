@@ -24,11 +24,6 @@ public class interactionEffects1 : MonoBehaviour
 
     //public Dictionary<>
     [SerializeField] public List<testInteraction> interactionsAvailable = new List<testInteraction>();
-    public int testThisFuckingInt = new int();
-    public List<int> testThisFuckingIntList = new List<int>();
-    [SerializeField] public fuckingTestClass fuckingTestClassObject = new fuckingTestClass();
-    [SerializeField] public List<fuckingTestClass> fuckingTestClassObjectList = new List<fuckingTestClass>();
-    [SerializeField] public List<testInteraction> fuckThis = new List<testInteraction>();
 
 
 
@@ -198,7 +193,6 @@ public class interactionEffects1 : MonoBehaviour
         //this.gameObject.GetComponent<interactionEffects1>().interactionsAvailable.Add(oneToGenerate);
         theWorldScript.theRespository.theLegibstrata.legibstrate(this.gameObject, oneToGenerate);
         interactionsAvailable.Add(oneToGenerate);
-        fuckThis.Add(oneToGenerate);
 
         return oneToGenerate;
     }
@@ -260,7 +254,12 @@ public class interactionEffects1 : MonoBehaviour
             //thisMate.target1 = other.gameObject;
             thisMate.target1 = this.gameObject;
 
-            doInteraction1(other.GetComponent<authorScript1>().theAuthor, thisMate);
+
+            //doInteraction1(other.GetComponent<authorScript1>().theAuthor, thisMate);
+
+            thisMate.enactThisInteraction = interactionsAvailable[0];
+            thisMate.printMate();
+            thisMate.doThisInteractionIfPrereqsMet(thisMate);
 
 
         }
@@ -279,181 +278,43 @@ public class interactionEffects1 : MonoBehaviour
         //for now, just do the FIRST interaction available:
 
         //      FOR MATE theObjectInitiatingTheInteraction, this.gameObject
-        modularInteractions1(interactionsAvailable[0], thisMate);
-
+        //modularInteractions1(interactionsAvailable[0], thisMate);
+        
         //foreach (testInteraction thisAvailableInteraction in interactionsAvailable)
         {
             //if (thisAvailableInteraction.name == "pickUpItem")
             {
                 //pickUp1();
-                
+
             }
         }
     }
 
-    public bool modularPrereqCheckBool(testInteraction theInteraction, interactionMate theInteractionMate)
-    {
-        //Debug.Log(theInteraction);
-        //Debug.Log(theInteraction.name);
-        //Debug.Log(theInteraction.atoms);
-        foreach (var thisAtom in theInteraction.atoms)
-        {
-            //Debug.Log("1?");
-            foreach (var thisSubAtom in thisAtom.subAtoms)
-            {
-                //Debug.Log("2?");
-                if (thisSubAtom.prereqs.Count == 0)
-                {
-                    //Debug.Log("3?");
-                    return true;
-                }
-
-                foreach (var thisPrereq in thisSubAtom.prereqs)
-                {
-                    //Debug.Log("4) we are checking this, right?");
-                    if (checkOnePrereqFromSubAtom(thisPrereq, theInteractionMate) != true)
-                    {
-                        //Debug.Log("5?");
-                        return false;
-                    }
-                }
-                
-            }
-        }
-
-        return true;
-    }
-
-    public bool checkOnePrereqFromSubAtom(string theSubAtomPrereq, interactionMate theInteractionMate)
-    {
-        //grabTestLOCKSubAtomPrereq1
-        if (theSubAtomPrereq == "grabTestLOCKSubAtomPrereq1")
-        {
-            //Debug.Log("the testName11111 effect has occured");
-            if (theInteractionMate.interactionAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") != true)
-            {
-                return false;
-            }
-
-        }
-        if(theSubAtomPrereq == "needsthisIsTheDamnLock")
-        {
-            //ad-hoc check if this variable is null:
-            if (theInteractionMate.thisIsTheDamnLock == null)
-            {
-                Debug.Log("ddddddddddddddddddd says it's null:");
-                return false;
-            }
-            else
-            {
-                Debug.Log("pppppppppppppp says not null:");
-                Debug.Log(theInteractionMate.thisIsTheDamnLock);
-            }
-        }
-        if (theSubAtomPrereq == "proximity0")
-        {
-            //needs SMALL distance between theObjectInitiatingTheInteraction and theObjectBeingInteractedWith
 
 
-            if(areThereErrorsWithInteractionMate(theInteractionMate) == false)
-            {
-                //Debug.Log(theInteractionMate.thisIsTheDamnLock);
-                float distance = Vector3.Distance(theInteractionMate.interactionAuthor.transform.position, theInteractionMate.target1.transform.position);
-                //some actions need a bigger or smaller range.  Ad-hoc adding that here for now...
-                //default is basically zero range:
-                float theRange = 3.2f;
+    
 
 
-                if (distance > theRange)
-                {
-                    return false;
-                }
-
-
-            }
-            
-
-
-        }
-        if (theSubAtomPrereq == "needsthisIsTheDamnLock")
-        {
-            if(theInteractionMate.thisIsTheDamnLock == null)
-            {
-                return false;
-            }
-        }
-        
-
-
-        //else if (theSubAtomPrereq == "testName2")
-        {
-            //Debug.Log("the testName22222 effect has occured");
-            //theObjectBeingInteractedWith.GetComponent<Renderer>().material.color = new Color(0, 0, 255);
-        }
-
-        return true;
-    }
-
-
-
-    public bool areThereErrorsWithInteractionMate(interactionMate theInteractionMate)
-    {
-        //return false if there are no errors
-
-        //Debug.Log(theInteractionMate);
-        //Debug.Log(theInteractionMate.interactionAuthor);
-        //Debug.Log(theInteractionMate.interactionAuthor.transform.position);
-        //Debug.Log(theInteractionMate.target1);
-        //Debug.Log(theInteractionMate.target1.transform.position);
-
-
-        if (theInteractionMate == null)
-        {
-            Debug.Log("theInteractionMate in my enaction phase is NULL");
-            return true;
-        }
-        else if (theInteractionMate.interactionAuthor == null)
-        {
-            Debug.Log("''theInteractionMate.interactionAuthor'' in my enaction phase is NULL");
-            return true;
-        }
-        else if (theInteractionMate.target1 == null)
-        {
-            Debug.Log("''theInteractionMate.target1'' in my enaction phase is NULL");
-            return true;
-        }
-
-        return false;
-    }
-
-
-
-    public bool doesThisObjectHaveThisEffect(string thisEffect, GameObject thisObject)
+    public bool doesObjectXHaveThisEffect(string thisEffect, GameObject objectX)
     {
         //i need something to check whether something has a specific EFFECT
 
-        interactionEffects1 interactionScript = thisObject.GetComponent<interactionEffects1>();
+        interactionEffects1 interactionScript = objectX.GetComponent<interactionEffects1>();
 
-        foreach(var theInteraction in interactionScript.interactionsAvailable)
+        return interactionScript.doesThisScriptHaveInteractionsAvailableWithThisEffect(thisEffect);
+    }
+
+    public bool doesThisScriptHaveInteractionsAvailableWithThisEffect(string thisEffect)
+    {
+        //i need something to check whether something has a specific EFFECT
+
+        foreach (var theInteraction in interactionsAvailable)
         {
-            foreach (var thisAtom in theInteraction.atoms)
+            if (theInteraction.doesThisInteractionContainEffectX(thisEffect) == true)
             {
-                foreach (var thisSubAtom in thisAtom.subAtoms)
-                {
-                    foreach (var thisOTHEREffect in thisSubAtom.effects)
-                    {
-                        Debug.Log("compare the desired effect:  " + thisEffect + ", to the effect this other object has:  " + thisOTHEREffect);
-                        if (thisOTHEREffect == thisEffect)
-                        {
-                            return true;
-                        }
-                    }
-
-                }
+                return true;
             }
         }
-
-        
 
         return false;
     }
@@ -467,107 +328,14 @@ public class interactionEffects1 : MonoBehaviour
 
         foreach (var theInteraction in interactionScript.interactionsAvailable)
         {
-            foreach (var thisAtom in theInteraction.atoms)
+            if (theInteraction.doesThisInteractionContainEffectX(thisEffect))
             {
-                foreach (var thisSubAtom in thisAtom.subAtoms)
-                {
-                    foreach (var thisOTHEREffect in thisSubAtom.effects)
-                    {
-                        Debug.Log("compare the desired effect:  " + thisEffect + ", to the effect this other object has:  " + thisOTHEREffect);
-                        if (thisOTHEREffect == thisEffect)
-                        {
-                            return theInteraction;
-                        }
-                    }
-
-                }
+                return theInteraction;
             }
         }
-
-
 
         return null;
     }
-
-
-    public void modularInteractions1(testInteraction theInteraction, interactionMate theInteractionMate)
-    {
-        //      ok so this is silly, i currently (somewhere) "unshell" an interaction mate, but now i'm gonna shell it AGAIN?  fix that
-
-        //should the object be referenced inside the interaction class object?
-        //or some other way?
-        //what if interaction affects MULTIPLE targets?
-
-        if (modularPrereqCheckBool(theInteraction, theInteractionMate) == false)
-        {
-            return;
-        }
-
-        foreach(var thisAtom in theInteraction.atoms)
-        {
-            foreach(var thisSubAtom in thisAtom.subAtoms)
-            {
-                //ok so this is silly, i currently (somewhere) "unshell" an interaction mate, but now i'm gonna shell it AGAIN?  fix that
-                thisSubAtom.doSubAtom(theInteractionMate);
-            }
-        }
-    }
-
-    
-
-    void doInteraction1OLD()
-    {
-        this.transform.Rotate(0.0f, 30.0f, 0.0f, Space.World);
-        //Destroy(this.gameObject);
-        //this.gameObject.
-        //if (connectedObjects.Count > 0)
-        {
-            //foreach (GameObject thisObject in connectedObjects)
-            {
-                //interactive1 interactionScript = thisObject.GetComponent<interactive1>();
-
-                //move this to other script
-                //thisObject.transform.Rotate(30.0f, 00.0f, 0.0f, Space.World);
-            }
-        }
-        //if (docked == true  && connectedObjects.Count > 0)
-        {
-            //output signal
-            //basicInputOutput1 inOutScript = input1.GetComponent<basicInputOutput1>();
-            //inOutScript.outBoolSignal = true;
-        }
-        //else
-        {
-            //this.transform.Rotate(0.0f, 30.0f, 0.0f, Space.World);
-        }
-    }
-
-
-    void pickUp1()
-    {
-        //turn off the visible part of the object
-        //move it to the location of the "inventory"
-        //create parent-child relationship
-        //.....add it to an inventory object list!
-
-
-
-        Debug.Log("picked up item");
-
-        //...................now i need to have access to which person is DOING the interaction.............hmmm.....
-    }
-
-
-
-
-    void fire()
-    {
-        this.transform.Rotate(0.0f, 30.0f, 0.0f, Space.World);
-    }
-
-
-
-
 
     public void clonify(interactionEffects1 newInputScript)
     {
@@ -607,15 +375,18 @@ public class interactionSubAtom
 
     //public void doSubAtom(GameObject theObjectInitiatingTheInteraction, GameObject theObjectBeingInteractedWith)
 
+
+
+
     public void doSubAtom(interactionMate theInteractionMate)
     {
         foreach (var thisEffect in effects)
         {
-            doSubAtomEffects(thisEffect, theInteractionMate);
+            doThisSubAtomEffect(thisEffect, theInteractionMate);
         }
     }
 
-    public void doSubAtomEffects(string theSubAtomEffect, interactionMate theInteractionMate)
+    public void doThisSubAtomEffect(string theSubAtomEffect, interactionMate theInteractionMate)
     {
         bool aTestBool = false;
 
@@ -799,7 +570,121 @@ public class interactionSubAtom
         }
     }
 
-    
+    public List<string> listUnfilledPrereqs(interactionMate thisMate)
+    {
+        List<string> unfilledPrereqs = new List<string>();
+
+        foreach (var thisPrereq in prereqs)
+        {
+            if (checkOnePrereq(thisPrereq, thisMate) == false)
+            {
+                unfilledPrereqs.Add(thisPrereq);
+            }
+
+        }
+
+        return unfilledPrereqs;
+    }
+
+
+    public bool checkOnePrereq(string thisPrereq, interactionMate theInteractionMate)
+    {
+        //returns TRUE if prereqs are met
+
+        //grabTestLOCKSubAtomPrereq1
+        if (thisPrereq == "grabTestLOCKSubAtomPrereq1")
+        {
+            //Debug.Log("the testName11111 effect has occured");
+            if (theInteractionMate.interactionAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") != true)
+            {
+                return false;
+            }
+
+        }
+        if (thisPrereq == "needsthisIsTheDamnLock")
+        {
+            //ad-hoc check if this variable is null:
+            if (theInteractionMate.thisIsTheDamnLock == null)
+            {
+                Debug.Log("ddddddddddddddddddd says ''thisIsTheDamnLock'' is null when it is a required prereq");
+                return false;
+            }
+            else
+            {
+                //Debug.Log("pppppppppppppp says not null:");
+                //Debug.Log(theInteractionMate.thisIsTheDamnLock);
+            }
+        }
+        if (thisPrereq == "proximity0")
+        {
+            //needs SMALL distance between theObjectInitiatingTheInteraction and theObjectBeingInteractedWith
+
+
+            if (areThereErrorsWithInteractionMate(theInteractionMate) == false)
+            {
+                //Debug.Log(theInteractionMate.thisIsTheDamnLock);
+                float distance = Vector3.Distance(theInteractionMate.interactionAuthor.transform.position, theInteractionMate.target1.transform.position);
+                //some actions need a bigger or smaller range.  Ad-hoc adding that here for now...
+                //default is basically zero range:
+                float theRange = 3.2f;
+
+
+                if (distance > theRange)
+                {
+                    return false;
+                }
+
+
+            }
+
+
+
+        }
+        if (thisPrereq == "needsthisIsTheDamnLock")
+        {
+            if (theInteractionMate.thisIsTheDamnLock == null)
+            {
+                return false;
+            }
+        }
+
+
+
+        return true;
+    }
+
+    public bool checkAllPrereqs(interactionMate theInteractionMate)
+    {
+        //returns TRUE if prereqs are met
+
+        foreach(string thisPrereq in prereqs)
+        {
+            if(checkOnePrereq(thisPrereq, theInteractionMate) == false)
+            {
+                return false;
+            }
+        }
+
+
+        return true;
+    }
+
+
+    public bool areThereErrorsWithInteractionMate(interactionMate theInteractionMate)
+    {
+        //this function is here [or at least STARTS here] instead of inside the interactionMate class definition
+        //because one error is it could be null.  at which point i don't think it can even do those functions.
+
+        //return false if there are no errors
+
+        if (theInteractionMate == null)
+        {
+            Debug.Log("theInteractionMate in my enaction phase is NULL");
+            return true;
+        }
+
+        return theInteractionMate.anyErrors();
+    }
 
 }
 
@@ -829,6 +714,14 @@ public class interactionAtom
 
         return newCopy;
     }
+
+    public void enactAtom(interactionMate theInteractionMate)
+    {
+        foreach(interactionSubAtom subAtom in subAtoms)
+        {
+            subAtom.doSubAtom(theInteractionMate);
+        }
+    }
 }
 
 public class testInteraction
@@ -840,6 +733,33 @@ public class testInteraction
     [SerializeField] public string name;
     [SerializeField] public List<interactionAtom> atoms = new List<interactionAtom>();
 
+    public void doInteraction(interactionMate theInteractionMate)
+    {
+        foreach(interactionAtom atom in atoms)
+        {
+            atom.enactAtom(theInteractionMate);
+        }
+    }
+
+
+
+
+
+    public List<interactionSubAtom> allSubAtoms()
+    {
+        List<interactionSubAtom> listOfSubAtoms = new List<interactionSubAtom>();
+
+        //first get all the sub-atoms, simple so i don't have to look at this nested code:
+        foreach (var thisAtom in atoms)
+        {
+            foreach (var thisSubAtom in thisAtom.subAtoms)
+            {
+                listOfSubAtoms.Add(thisSubAtom);
+            }
+        }
+
+        return listOfSubAtoms;
+    }
     public testInteraction deepCopy()
     {
         testInteraction newCopy = new testInteraction();
@@ -854,6 +774,80 @@ public class testInteraction
         newCopy.atoms = deepCopiedAtoms;
 
         return newCopy;
+    }
+
+    public bool doesThisInteractionContainEffectX(string effectX)
+    {
+        foreach(string thisEffect in allEffects())
+        {
+            //Debug.Log("compare the desired effectX:  " + effectX + ", to the effect this other object has:  " + thisEffect);
+
+            if (thisEffect == effectX)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public List<string> allEffects()
+    {
+        List<string> theList = new List<string>();
+
+        foreach (var thisAtom in atoms)
+        {
+            foreach (var thisSubAtom in thisAtom.subAtoms)
+            {
+                foreach (var thisSubAtomEffect in thisSubAtom.effects)
+                {
+                    theList.Add(thisSubAtomEffect);
+                }
+            }
+        }
+
+        return theList;
+    }
+
+    public List<string> returnAllUnfilledPrereqs(interactionMate thisMate)
+    {
+        List<string> unfilledPrereqs = new List<string>();
+        List<interactionSubAtom> listOfSubAtoms = allSubAtoms();
+
+        foreach (interactionSubAtom thisSubAtom in listOfSubAtoms)
+        {
+            unfilledPrereqs.AddRange(thisSubAtom.listUnfilledPrereqs(thisMate));
+        }
+
+        return unfilledPrereqs;
+    }
+
+    public bool checkPrereqs(interactionMate interactionMate)
+    {
+        //return TRUE if prereqs are met
+
+        foreach(interactionSubAtom thisSubAtom in allSubAtoms())
+        {
+            if (thisSubAtom.checkAllPrereqs(interactionMate) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void printUnfilledPrereqs(interactionMate thisMate)
+    {
+        Debug.Log("here are unfilled prereqs:  ");
+
+        foreach(string thisUnfilledPrereq in returnAllUnfilledPrereqs(thisMate))
+        {
+            Debug.Log(thisUnfilledPrereq);
+        }
+
+        Debug.Log("-------- END of unfilled prereqs:  ");
+
     }
 }
 
@@ -876,6 +870,50 @@ public class interactionMate
     public string whereTheFuckIsThisMade;
 
 
+    public void doThisInteraction()
+    {
+        //      are we assuming the prereqs have been MET here?
+        //get all sub atoms
+        //do all sub atoms
+
+
+        List<interactionSubAtom> allSubatoms = enactThisInteraction.allSubAtoms();
+
+        foreach (var thisSubAtom in allSubatoms)
+        {
+            thisSubAtom.doSubAtom(this);
+        }
+    }
+
+
+    public bool checkInteractionMatePrereqs()
+    {
+        return enactThisInteraction.checkPrereqs(this);
+    }
+
+
+
+    
+
+
+    public bool areThereErrorsWithInteractionMate(interactionMate theInteractionMate)
+    {
+        //this function is here [or at least STARTS here] instead of inside the interactionMate class definition
+        //because one error is it could be null.  at which point i don't think it can even do those functions.
+
+        //return false if there are no errors
+
+        if (theInteractionMate == null)
+        {
+            Debug.Log("theInteractionMate in my enaction phase is NULL");
+            return true;
+        }
+
+        return theInteractionMate.anyErrors();
+    }
+
+
+
     public void printMate()
     {
         Debug.Log("MMMMMMMMMMMMMMMMMMMMMMMMMMMM    printing interaction mate    MMMMMMMMMMMMMMMMMMMMMMMMMMMM");
@@ -893,9 +931,41 @@ public class interactionMate
         Debug.Log("WWWWWWWWWWWWWWWWW    END printing interaction mate    WWWWWWWWWWWWWWWWW");
     }
 
-}
+    public bool anyErrors()
+    {
+        //returns TRUE if there's an ERROR
 
-[SerializeField] public class fuckingTestClass
-{
-    [SerializeField] public int fuckingInt;
+
+        //Debug.Log(theInteractionMate);
+        //Debug.Log(theInteractionMate.interactionAuthor);
+        //Debug.Log(theInteractionMate.interactionAuthor.transform.position);
+        //Debug.Log(theInteractionMate.target1);
+        //Debug.Log(theInteractionMate.target1.transform.position);
+
+
+        if (interactionAuthor == null)
+        {
+            Debug.Log("''theInteractionMate.interactionAuthor'' in my enaction phase is NULL");
+            return true;
+        }
+        else if (target1 == null)
+        {
+            Debug.Log("''theInteractionMate.target1'' in my enaction phase is NULL");
+            return true;
+        }
+
+        return false;
+    }
+
+    public void doThisInteractionIfPrereqsMet(interactionMate thisMate)
+    {
+        if (enactThisInteraction.checkPrereqs(thisMate) == false)
+        {
+            enactThisInteraction.printUnfilledPrereqs(thisMate);
+            return;
+        }
+
+        enactThisInteraction.doInteraction(thisMate);
+    }
+
 }

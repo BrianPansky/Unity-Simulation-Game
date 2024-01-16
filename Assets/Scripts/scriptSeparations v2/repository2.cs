@@ -50,57 +50,6 @@ public class repository2 : MonoBehaviour
     {
         GameObject toPrint = duplifier(thePrefab, thePoint);
 
-        //just to minimize all that, don't even need to comment it all out!
-        if (true == false)
-        {
-
-
-            Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
-
-            Debug.Log("test integer = " + toPrint.GetComponent<interactionEffects1>().testThisFuckingInt);
-
-            Debug.Log("test integer list " + toPrint.GetComponent<interactionEffects1>().testThisFuckingIntList);
-
-            foreach (int x in toPrint.GetComponent<interactionEffects1>().testThisFuckingIntList)
-            {
-                Debug.Log(x);
-            }
-
-            Debug.Log("test class object " + toPrint.GetComponent<interactionEffects1>().fuckingTestClassObject);
-            Debug.Log("test class object integer = " + toPrint.GetComponent<interactionEffects1>().fuckingTestClassObject.fuckingInt);
-
-
-            Debug.Log("test class object list " + toPrint.GetComponent<interactionEffects1>().fuckingTestClassObjectList);
-            Debug.Log("COUNT of test class object list = " + toPrint.GetComponent<interactionEffects1>().fuckingTestClassObjectList.Count);
-
-            foreach (fuckingTestClass x in toPrint.GetComponent<interactionEffects1>().fuckingTestClassObjectList)
-            {
-                //Debug.Log(x);
-                Debug.Log(x.fuckingInt);
-            }
-
-            Debug.Log("test class object of ''testInteraction'' type: " + toPrint.GetComponent<interactionEffects1>().fuckThis);
-
-
-            foreach (testInteraction x in toPrint.GetComponent<interactionEffects1>().fuckThis)
-            {
-                //Debug.Log(x);
-                Debug.Log(x.name);
-            }
-
-            //Debug.Log(x.name);
-            Debug.Log("test class object of ''testInteraction'' type in interactionsAvailable: " + toPrint.GetComponent<interactionEffects1>().interactionsAvailable);
-
-            foreach (testInteraction x in toPrint.GetComponent<interactionEffects1>().interactionsAvailable)
-            {
-                //Debug.Log(x);
-                Debug.Log(x.name);
-            }
-
-        }
-
-
 
         if (toPrint.GetComponent<interactionEffects1>().interactionsAvailable == null)
         {

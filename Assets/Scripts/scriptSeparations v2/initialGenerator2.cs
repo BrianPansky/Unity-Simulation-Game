@@ -7,7 +7,6 @@ public class initialGenerator2 : MonoBehaviour
 {
 
     [SerializeField] public int newEffingInt = 22;
-    [SerializeField] public fuckingTestClass helpMe = new fuckingTestClass();
 
     public Dictionary<string, interactionSubAtom> subAtoms = new Dictionary<string, interactionSubAtom>();
     public List<interactionSubAtom> subAtomInitializerList;
@@ -190,47 +189,6 @@ public class initialGenerator2 : MonoBehaviour
         //interactionScriptOnGeneratedObject.interactionsAvailable.Add(interactionScriptOnGeneratedObject.generateInteraction("pickUpItem"));
         interactionScriptOnGeneratedObject.generateInteraction("pickUpItem");
         //kay, that "generates" interaction.  but does it ADD it to OBJECT and the object et to LEGIBSTRATA?
-
-        //minimizing this:
-        if (true == false)
-        {
-
-
-            //          trying to figure out why variables aren't copying over to duplicate instances made later:
-            interactionScriptOnGeneratedObject.testThisFuckingInt = 5;
-
-            interactionScriptOnGeneratedObject.testThisFuckingIntList.Add(7);
-            interactionScriptOnGeneratedObject.testThisFuckingIntList.Add(8);
-
-            fuckingTestClass helpMe = new fuckingTestClass();
-            //[SerializeField] public int newEffingInt = 22;
-            helpMe.fuckingInt = newEffingInt;
-            interactionScriptOnGeneratedObject.fuckingTestClassObject = helpMe;
-
-
-            fuckingTestClass heLLLLp = new fuckingTestClass();
-            heLLLLp.fuckingInt = -4;
-            interactionScriptOnGeneratedObject.fuckingTestClassObjectList.Add(heLLLLp);
-
-
-
-            //fuckThis
-            testInteraction FUCK = new testInteraction();
-            FUCK.name = "fuck you, that's why";
-            interactionScriptOnGeneratedObject.generateInteraction("fuckMyLife");
-            interactionScriptOnGeneratedObject.generateInteraction("fuckEVERYTHING");
-            interactionScriptOnGeneratedObject.fuckThis.Add(FUCK);
-            //interactionScriptOnGeneratedObject.fuckThis.Add(FUCK);
-            //generateInteraction("pickUpItem");
-
-
-            foreach (testInteraction x in interactionScriptOnGeneratedObject.fuckThis)
-            {
-                //Debug.Log(x);
-                Debug.Log(x.name);
-            }
-
-        }
 
 
         //well, for now, let's do direct teleport to a notch on tower

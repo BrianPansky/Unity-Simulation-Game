@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.AI;
 using static interactionEffects1;
@@ -136,12 +137,11 @@ public class AIHub2 : MonoBehaviour
             //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
             //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
 
-            if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]))
+            //if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]))
+            
+            if (adhocPrereqFillerTest[0].checkInteractionMatePrereqs())
             {
-                //Debug.Log("prereqs met for:  " + thisInteraction.name);
-                //travelToTargetObject(randomInteractionTarget);
-                //      FOR MATE  this.gameObject, randomInteractionTarget
-                theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]);
+                adhocPrereqFillerTest[0].doThisInteraction();
                 randomInteractionTarget = null;
             }
 
@@ -160,16 +160,22 @@ public class AIHub2 : MonoBehaviour
 
         testInteraction thisInteraction = pickRandomInteractionONObject(randomInteractableObject);
 
-
-        interactionMate thisMate = new interactionMate();
-        thisMate.interactionAuthor = this.gameObject;
-        thisMate.target1 = randomInteractableObject;
-        thisMate.enactThisInteraction = thisInteraction;
+        interactionMate thisMate = createBasicInteractionMate(this.gameObject, randomInteractableObject, thisInteraction);
+        
 
         return thisMate;
     }
 
+    public interactionMate createBasicInteractionMate(GameObject author, GameObject target1, testInteraction theInteractionToEnact)
+    {
+        interactionMate newMate = new interactionMate();
 
+        newMate.interactionAuthor = author;
+        newMate.target1 = target1;
+        newMate.enactThisInteraction = theInteractionToEnact;
+
+        return newMate;
+    }
 
 
     public void pickRandomNearbyInteractionAndTryIt()
@@ -177,65 +183,14 @@ public class AIHub2 : MonoBehaviour
         //step 1:  find some nearby interactions, and randomly pick one
         //step 2:  "try" it [not necessarily succeed, though i'm not sure how failure will work yet]
 
-        //but how to not select new every frame?  how to skip work tha is done?
-        //need to be saving variables, generating plan from bottom-up?
-
-        //for now, just pick object.  have interaction info stored in the object:
-
         interactionMate thisMate = pickRandomNearbyInteractionReturnMate();
-
-
-
-
-        //doThisInteractionMateOrPlanToDoIt(thisMate);
-
 
         List<interactionMate> listOfActions = planForPrereqsIfNeeded(thisMate);
 
-
         if(areThereAnyErrorsWithThisListOfActions(listOfActions) == false)
         {
-            theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(listOfActions[0].enactThisInteraction, listOfActions[0]);
-            //randomInteractionTarget = null;
+            listOfActions[0].doThisInteraction();
         }
-
-
-
-
-
-
-        if (true == false)
-        {
-            randomInteractionTarget = pickRandomNearbyInteractableObject();
-            //Debug.Log("ok so is it still this object???:  " + randomInteractionTarget.name);
-
-            testInteraction thisInteraction = pickRandomInteractionONObject(randomInteractionTarget);
-            //tryRandomInteractionWithTarget(randomInteractionTarget);
-            Debug.Log("kay, picked an interaction on it:  " + thisInteraction.name);
-
-            interactionMate newMate = new interactionMate();
-            newMate.interactionAuthor = this.gameObject;
-            newMate.target1 = randomInteractionTarget;
-
-            doThisInteractionOrPlanToDoIt(thisInteraction, newMate);
-
-        }
-
-
-
-        //if(true == false)
-        {
-            //if (randomInteractionTarget == null)
-            {
-                //Debug.Log(this.gameObject.name + "22222222 nulllllllllllllllllllllllllllllllllllll");
-
-            }
-            //else
-            {
-                //Debug.Log(this.gameObject.name + "22222 NOT null:  " + randomInteractionTarget.name);
-            }
-        }
-        
 
     }
 
@@ -244,7 +199,7 @@ public class AIHub2 : MonoBehaviour
 
     public bool areThereAnyErrorsWithThisListOfActions(List<interactionMate> listOfActions)
     {
-        //returns true if there's an error
+        //returns TRUE if there's an ERROR
 
         if(listOfActions == null)
         {
@@ -268,123 +223,71 @@ public class AIHub2 : MonoBehaviour
 
     public List<interactionMate> planForPrereqsIfNeeded(interactionMate thisMate)
     {
-        //SIMILAR FUNCTION TO "whatIsThisAdhocEnactionStuff" [among others]
         //if prereqs are met, do it
-        //if not, plan to fill them....
-        //      .....then presumably the "fill them" check in update function will catch that and handle it.....
+        //if not, plan to fill them
 
         List<interactionMate> thePlan = new List<interactionMate>();
-
-        //      FOR MATE  this.gameObject, randomInteractionTarget
-        //Debug.Log("yyyyyyyyyyyyy  checking prereqs before doing action");
         testInteraction thisInteraction = thisMate.enactThisInteraction;
-        if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(thisInteraction, thisMate))
+
+        //if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(thisInteraction, thisMate))
+
+        if (thisMate.checkInteractionMatePrereqs())
         {
-            Debug.Log("prereqs met for this interaction:  " + thisInteraction.name);
+            //Debug.Log("prereqs met for this interaction:  " + thisInteraction.name);
+            
             thePlan.Add(thisMate);
             return thePlan;
         }
         else
         {
-            Debug.Log("prereqs NOT met for this interaction:  " + thisInteraction.name);
-            List<string> unfilledPrereqs = returnAllUnfilledPrereqs(thisInteraction, thisMate);
-            foreach(string prereq in unfilledPrereqs)
-            {
-                Debug.Log("one of the unfilled prereqs is:  " + prereq);
-            }
+            //Debug.Log("prereqs NOT met for this interaction:  " + thisInteraction.name);
 
-            //is this the right function to use?
-            thisMate.printMate();
+
+            
+            //List<string> unfilledPrereqs = returnAllUnfilledPrereqs(thisInteraction, thisMate);
+            //printStringListWithPreface("one of the unfilled prereqs is:  ", unfilledPrereqs);
+            
+
+            //thisMate.printMate();
             interactionMate newMate = new interactionMate();
             newMate.interactionAuthor = this.gameObject;
             newMate.target1 = thisMate.target1;
             newMate.thisIsTheDamnLock = thisMate.target1;
+
             return returnPlanToFillPrereqs(thisInteraction, newMate);
-            //randomInteractionTarget = null;
         }
     }
 
-    public void doThisInteractionMateOrPlanToDoIt(interactionMate thisMate)
+
+
+    public void printStringListWithPreface(string preface, List<string> theList)
     {
-        //SIMILAR FUNCTION TO "whatIsThisAdhocEnactionStuff"
-        //if prereqs are met, do it
-        //if not, plan to fill them....
-        //      .....then presumably the "fill them" check in update function will catch that and handle it.....
+        //"preface" isn't quite the correct word.  that would imply it only appears once, at the start
+        //instead, it appears before EVERY entry.
+        //or could change it so i DO only print a preface at start. and maybe a dividine line at the end...
 
-        //      FOR MATE  this.gameObject, randomInteractionTarget
-        Debug.Log("yyyyyyyyyyyyy  checking prereqs before doing action");
-        testInteraction thisInteraction = thisMate.enactThisInteraction;
-        if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(thisInteraction, thisMate))
+        foreach (string thisItem in theList)
         {
-            Debug.Log("  tttttttt  prereqs met for:  " + thisInteraction.name);
-            //travelToTargetObject(randomInteractionTarget);
-            //      FOR MATE  this.gameObject, randomInteractionTarget
-            theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(thisInteraction, thisMate);
-            randomInteractionTarget = null;
+            Debug.Log(preface + thisItem);
         }
-        else
-        {
-            Debug.Log("wwwwwww  prereqs NOT met for:  " + thisInteraction.name);
-            //is this the right function to use?
-            interactionMate newMate = new interactionMate();
-            newMate.interactionAuthor = this.gameObject;
-            newMate.target1 = randomInteractionTarget;
-            returnPlanToFillPrereqs(thisInteraction, newMate);
-            //randomInteractionTarget = null;
-        }
-
     }
 
     List<interactionMate> returnPlanToFillPrereqs(testInteraction theInteraction, interactionMate thisMate)
     {
-
-        //kay.
-        //so, for now, just do everything HERE.  can sort out where i want to put all this code and handle everything later.
         //so.  prereqs are not filled.
         //so how to fill them?
         //"look around" in environment [tags, actually] for objects with interactions that can fulfil it.
         //so:
         //      need to know WHICH prereq(s) is/are not filled
         //      need to fill it/each
-        //      have a plan somewhere so it can be DONE next frame.....
+        //      have a plan somewhere so it can be DONE next frame.....[or i just do it THIS frame for now?]
 
 
         //which prereqs are not filled:
-        List<string> unfilledPrereqs = returnAllUnfilledPrereqs(theInteraction, thisMate);
+        List<string> unfilledPrereqs = theInteraction.returnAllUnfilledPrereqs(thisMate);
 
         //how to fill each:
         List<interactionMate> prereqFillers = returnPlansToFillPrereqs(unfilledPrereqs, thisMate);
-
-        if(true == false)
-        {
-            Debug.Log("here are prereqFillers for:  " + theInteraction.name);
-            foreach (interactionMate theInteractionMate in prereqFillers)
-            {
-                //Debug.Log(prereq.name);
-                theInteractionMate.fillsPrereqFor = theInteraction;
-                Debug.Log("11111here is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
-            }
-
-
-            //at the end....        PUT THE PLAN SOMEWHERE SO IT CAN BE DONE:
-            adhocPrereqFillerTest = prereqFillers;
-            Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
-            Debug.Log(adhocPrereqFillerTest);
-            Debug.Log(adhocPrereqFillerTest[0]);
-            Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
-            Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
-            Debug.Log("now ''adhocPrereqFillerTest'' should NOT be null....if there are prereq fillers");
-            foreach (interactionMate theInteractionMate in prereqFillers)
-            {
-                //Debug.Log(prereq.name);
-                Debug.Log("zzzzzzhere is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
-            }
-            //or, ad hoc, just do it NOW:
-
-        }
-
-
-
 
         return prereqFillers;
     }
@@ -392,84 +295,10 @@ public class AIHub2 : MonoBehaviour
 
 
 
-
-    public void doThisInteractionOrPlanToDoIt(testInteraction thisInteraction, interactionMate theInteractionMate)
-    {
-        //SIMILAR FUNCTION TO "whatIsThisAdhocEnactionStuff"
-        //if prereqs are met, do it
-        //if not, plan to fill them....
-        //      .....then presumably the "fill them" check in update function will catch that and handle it.....
-
-        //      FOR MATE  this.gameObject, randomInteractionTarget
-        Debug.Log("yyyyyyyyyyyyy  checking prereqs before doing action");
-        if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(thisInteraction, theInteractionMate))
-        {
-            Debug.Log("  tttttttt  prereqs met for:  " + thisInteraction.name);
-            //travelToTargetObject(randomInteractionTarget);
-            //      FOR MATE  this.gameObject, randomInteractionTarget
-            theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(thisInteraction, theInteractionMate);
-            randomInteractionTarget = null;
-        }
-        else
-        {
-            Debug.Log("wwwwwww  prereqs NOT met for:  " + thisInteraction.name);
-            //is this the right function to use?
-            interactionMate thisMate = new interactionMate();
-            thisMate.interactionAuthor = this.gameObject;
-            thisMate.target1 = randomInteractionTarget;
-            doingStuffWhenPrereqsNotMetHereForNow(thisInteraction, thisMate);
-            //randomInteractionTarget = null;
-        }
-    
-    }
-
-    public void goToWhicheverAvailableTarget()
-    {
-        //[for initial testing]
-
-        if (theSensorySystem.target != null)
-        {
-            travelToTargetObject(theSensorySystem.target);
-        }
-        else
-        {
-            //travelToTargetPoint(mytest);
-            travelToTargetObject(testTarget);
-        }
-    }
-
-
     public GameObject pickRandomNearbyInteractableObject()
     {
-        //step 1:  find some nearby interactions, and randomly pick one
-        //step 2:  "try" it [not necessarily succeed, though i'm not sure how failure will work yet]
-
-        //but how to not select new every frame?  how to skip work tha is done?
-        //need to be saving variables, generating plan from bottom-up?
-
-        //for now, just pick object.  have interaction info stored in the object:
-
-        if (randomInteractionTarget == null)
-        {
-            //Debug.Log(this.gameObject.name + "111111 nulllllllllllllllllllllllllllllllllllll");
-            return pickRandomNearbyInteractable();
-            //Debug.Log(randomInteractionTarget.name);
-
-            if (randomInteractionTarget != null)
-            {
-                //Debug.Log(randomInteractionTarget.name);
-            }
-            else
-            {
-                //Debug.Log("nulllllllllllllllllllllllllllllllllllll");
-            }
-        }
-        else
-        {
-            //Debug.Log(this.gameObject.name + "111111 NOT null:  " + randomInteractionTarget.name);
-        }
-
-        return randomInteractionTarget;
+        //well this seems redundant:
+        return pickRandomNearbyInteractable();
     }
 
     public testInteraction pickRandomInteractionONObject(GameObject randomInteractionTarget)
@@ -478,8 +307,7 @@ public class AIHub2 : MonoBehaviour
         
         if (availableIntertactions.Count > 0)
         {
-            //right now it's returning FIRST one!  not random one!
-            return availableIntertactions[0];
+            return availableIntertactions[UnityEngine.Random.Range(0, availableIntertactions.Count)];
         }
         else
         {
@@ -490,259 +318,7 @@ public class AIHub2 : MonoBehaviour
     }
 
 
-    public void whatIsThisAdhocEnactionStuff(List<testInteraction> availableIntertactions, interactionMate theInteractionMate)
-    {
-        //SIMILAR FUNCTION TO "doThisInteractionOrPlanToDoIt"
-        //      indeed, just do ENACTION here as well for now.  don't bother with proximity checks or "nextAction" or anything.  just get modular enaction going.  then get same for player interaction.
-        //now i have a prereq checker.  so do that for "trying", for now:
-        //      FOR MATE  this.gameObject, randomInteractionTarget
-        if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(availableIntertactions[0], theInteractionMate))
-        {
-            travelToTargetObject(randomInteractionTarget);
-            //      for mate this.gameObject, randomInteractionTarget
-            theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(availableIntertactions[0], theInteractionMate);
-        }
-        else
-        {
-            interactionMate thisMate = new interactionMate();
-            thisMate.interactionAuthor = this.gameObject;
-            thisMate.target1 = randomInteractionTarget;
-            doingStuffWhenPrereqsNotMetHereForNow(availableIntertactions[0], thisMate);
-            randomInteractionTarget = null;
 
-        }
-    }
-
-    
-    public void tryRandomInteractionWithTargetDONTUSETHIS(GameObject randomInteractionTarget, interactionMate theInteractionMate)
-    {
-        //randomly select an available interaction "on" the object
-        //check prereqs, fill them?  [including PROXIMITY prereq!]
-        //do interaction
-
-
-
-        //so, need to detect
-        //      what interactions are availalbe on the object
-        //      how to do them [what is required to perform the interaction]
-        //      [for now we are ignoring the effects, we don't care abou tconsequences]
-        //and THEN need to actually "try" DOING them
-
-        //so, step 1, pick random interaction ON the object:
-        //so, i need a "legibstration" of such info.  or something.
-        //possibly a class object that needs to be [sigh] initialized for each object
-        //but it's a trade off between the flexibility of a dictionary's STRING keys, but the inflexibility of their contents
-        //with the flexibility of a class object's contents, but the inflexibility of calling for them by name
-        //for now, i can't think of anything for it to contain other than strings like tags, so just do it that way?
-        //and if i need to store objects, a SEPARATE dictionary can store objects, using keys related to legibstration info?
-
-
-
-
-        //NEED TO FIX!  NOT INITIALIZED WITH KEYS AND CONTENTS!!!  SEE CHECKLIST BELOW!!!
-        //List<string> availableIntertactions = theWorldScript.theRespository.theLegibstrata.legibictionary[this.gameObject.name]["interactions"];
-        
-        //get the list of legible "sub-tags" from the lebistrata dictionary:
-        //[also needs to be initialized in the interaction script, along with the rest of the actual interaction stuff for each object]
-        
-        //foreach(string str in availableIntertactions)
-        {
-            //Debug.Log(str);
-            //it works!
-
-            //now:
-            //be able to pick one at random
-            //decide what to do based on modular info associated with that? [again, maybe these should be like "action" class objects, not mere strings]
-        }
-
-        //need to add these to lebictionary:
-        //      name of object key
-        //          "interactions" category key
-        //              some strings on the resulting list, that name interactions
-
-
-        //now pick a random item from that list somehow
-
-        //now class objects:
-        //Debug.Log(randomInteractionTarget.name);
-        //List<string> myKeyList = new List<string>(this.theWorldScript.interactionLegibstration.Keys);
-        //foreach(string key in myKeyList)
-        {
-            //Debug.Log("HELLLOOOOOOOOOOOOOOOOOOOOO?????????????????????????????????????????????????????????");
-            //Debug.Log(key);
-        }
-        //List<testInteraction> availableIntertactions = theWorldScript.interactionLegibstration[randomInteractionTarget.name];
-        List<testInteraction> availableIntertactions = randomInteractionTarget.GetComponent<interactionEffects1>().interactionsAvailable;
-        //foreach (testInteraction thisTestInteraction in availableIntertactions)
-        {
-            //Debug.Log(thisTestInteraction.name);
-        }
-
-        //picking random is easy, so skip it FOR NOW.  just pick first one if list is not empty?
-        //now what?  "try" it somehow, for some reason.  magic reason for now?  the reasons for calling this funciton should exist OUTSIDE this function, don't worry about that here.
-        //so, what does "trying" an interaction entail?  for simple "doing", basically you do the whole "check prereqs and fill them" thing.
-        //should i start there?  or go for whatever else this "trying" stuff is?  i don't have a clear idea or example of trying.
-        //think of ho things fail, or are thwarted by others, i guess.  pretty important.  but does that belong HERE?  not really.
-        //either way, basically need to hand this desired interaction over to some kind of PLANNER, and go from there.
-        //but i don't care about much actual PLANNING right now.  but i do care about modular enaction/interaction system, which the planner will presumably need to handle
-        //          so, start with the interactions and enaction phase [build planner later]
-
-        //      indeed, just do ENACTION here as well for now.  don't bother with proximity checks or "nextAction" or anything.  just get modular enaction going.  then get same for player interaction.
-        if(availableIntertactions.Count > 0)
-        {
-            //now i have a prereq checker.  so do that for "trying", for now:
-            //      FOR MATE this.gameObject, randomInteractionTarget
-            if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(availableIntertactions[0], theInteractionMate))
-            {
-                //for testing:
-                //GameObject objectFromLegibstrata = 
-                //well, START with object from tags:
-                //GameObject randomInteractableObject = theWorldScript.theTagScript.randomTaggedWith("interactable");
-                //wait, that's what i'm already doing.  so now i need to take this object i already have, and pick an interaction inside of it.....basicdally....
-                travelToTargetObject(randomInteractionTarget);
-
-
-                //      FOR MATE this.gameObject, randomInteractionTarget
-                theWorldScript.theRespository.theInteractionEffects1.modularInteractions1(availableIntertactions[0], theInteractionMate);
-            }
-            else
-            {
-                //randomInteractionTarget = null;  //uhhhh this doesn't work!!!!!!!!!!!!!!!  because this function doesn't "Return" it???
-                //so, for now, just do everything HERE.  can sort out where i want to put all this code and handle everything later.
-                //so.  prereqs are not filled.
-                //so how to fill them?
-                //"look around" in environment [tags, actually] for objects with interactions that can fulfil it.
-                //so:
-                //      need to know WHICH prereq(s) is/are not filled
-                //      need to fill it/each
-                //      have a plan somewhere so it can be DONE next frame.....
-                interactionMate thisMate = new interactionMate();
-                thisMate.interactionAuthor = this.gameObject;
-                thisMate.target1 = randomInteractionTarget;
-                doingStuffWhenPrereqsNotMetHereForNow(availableIntertactions[0], thisMate);
-                randomInteractionTarget = null;
-
-
-
-                //Debug.Log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-                //is that all i need to do?  will find new interactions?  i think it will actually keep trying the SAME one, forever....
-                //because my "random" interaction picker isn't actually random.  picks the same one EVERY SINGLE FRAME right now, i think
-            }
-            
-        }
-        else
-        {
-            Debug.Log("there are zero items on the interactions available list for this object, but it's supposed to have interactions:  " + randomInteractionTarget.name);
-            Debug.DrawLine(this.gameObject.GetComponent<Transform>().position, randomInteractionTarget.GetComponent<Transform>().position, Color.red, 0.1f);
-        }
-
-
-        //very nice, it works
-
-
-
-
-        if (randomInteractionTarget == null)
-        {
-            //Debug.Log("nulllllllllllllllllllllllllllllllllllll");
-
-        }
-        else
-        {
-            //Debug.Log("NOT null:  " + randomInteractionTarget.name);
-        }
-
-
-    }
-
-
-
-
-    public void doingStuffWhenPrereqsNotMetHereForNow(testInteraction theInteraction, interactionMate thisMate)
-    {
-        //kay.
-        //so, for now, just do everything HERE.  can sort out where i want to put all this code and handle everything later.
-        //so.  prereqs are not filled.
-        //so how to fill them?
-        //"look around" in environment [tags, actually] for objects with interactions that can fulfil it.
-        //so:
-        //      need to know WHICH prereq(s) is/are not filled
-        //      need to fill it/each
-        //      have a plan somewhere so it can be DONE next frame.....
-
-
-        //which prereqs are not filled:
-        List<string> unfilledPrereqs = new List<string>();
-        unfilledPrereqs = returnAllUnfilledPrereqs(theInteraction, thisMate);
-
-        //how to fill each:
-        List<interactionMate> prereqFillers = new List<interactionMate>();
-        prereqFillers = returnPlansToFillPrereqs(unfilledPrereqs, thisMate);
-        Debug.Log("here are prereqFillers for:  " + theInteraction.name);
-        foreach(interactionMate theInteractionMate in prereqFillers)
-        {
-            //Debug.Log(prereq.name);
-            theInteractionMate.fillsPrereqFor = theInteraction;
-            Debug.Log("11111here is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
-        }
-
-        
-        //at the end....        PUT THE PLAN SOMEWHERE SO IT CAN BE DONE:
-        adhocPrereqFillerTest = prereqFillers;
-        Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
-        Debug.Log(adhocPrereqFillerTest);
-        Debug.Log(adhocPrereqFillerTest[0]);
-        Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
-        Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
-        Debug.Log("now ''adhocPrereqFillerTest'' should NOT be null....if there are prereq fillers");
-        foreach (interactionMate theInteractionMate in prereqFillers)
-        {
-            //Debug.Log(prereq.name);
-            Debug.Log("zzzzzzhere is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
-        }
-        //or, ad hoc, just do it NOW:
-
-
-    }
-
-    public List<string> returnAllUnfilledPrereqs(testInteraction theInteraction, interactionMate thisMate)
-    {
-        List<string> unfilledPrereqs = new List<string>();
-
-        foreach (var thisAtom in theInteraction.atoms)
-        {
-            foreach (var thisSubAtom in thisAtom.subAtoms)
-            {
-                List<string> thisBunch = listUnfilledPrereqsForOneSubAtom(thisSubAtom, thisMate);
-
-                if (thisBunch != null)
-                {
-                    unfilledPrereqs.AddRange(thisBunch);
-                }
-
-            }
-        }
-
-
-        return unfilledPrereqs;
-    }
-
-
-    public List<string> listUnfilledPrereqsForOneSubAtom(interactionSubAtom theSubAtom, interactionMate thisMate)
-    {
-        List<string> unfilledPrereqs = new List<string>();
-
-        foreach (var thisPrereq in theSubAtom.prereqs)
-        {
-            if(theWorldScript.theRespository.theInteractionEffects1.checkOnePrereqFromSubAtom(thisPrereq, thisMate) == false)
-            {
-                unfilledPrereqs.Add(thisPrereq);
-            }
-
-        }
-
-        return unfilledPrereqs;
-    }
 
 
     public List<interactionMate> returnPlansToFillPrereqs(List<string> unfilledPrereqs, interactionMate thisMate)
@@ -780,12 +356,12 @@ public class AIHub2 : MonoBehaviour
 
         foreach (GameObject thisObject in allObjectsThatAreInteractable)
         {
-            Debug.Log("does this object fulfill prereq we are looking for?:  " + thisObject.name);
+            //Debug.Log("does this object fulfill prereq we are looking for?:  " + thisObject.name);
             //if (theWorldScript.theRespository.theInteractionEffects1.doesThisObjectHaveThisEffect(unfilledPrereq, thisObject) == true)
             testInteraction isThereAnInteraction = theWorldScript.theRespository.theInteractionEffects1.returnFirstInteractionOnObjectWithThisEffect(unfilledPrereq, thisObject);
             if (isThereAnInteraction != null)
             {
-                Debug.Log("yes");
+                //Debug.Log("yes");
 
                 //interactionMate
                 interactionMate newMate = new interactionMate();
@@ -797,41 +373,25 @@ public class AIHub2 : MonoBehaviour
                 newMate.enactThisInteraction = isThereAnInteraction;
 
 
-                Debug.Log("WWWWWWWWWWWWWWWWWWWWWWWWWW       if this is to fill the lock prereq, which of these variables has the lock???       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-                Debug.Log(thisMate.target1);
-                Debug.Log(thisMate.forInteraction);
-                Debug.Log(thisMate.immediateInteraction);
-                Debug.Log(thisMate.enactThisInteraction);
+                //Debug.Log("WWWWWWWWWWWWWWWWWWWWWWWWWW       if this is to fill the lock prereq, which of these variables has the lock???       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+                //Debug.Log(thisMate.target1);
+                //Debug.Log(thisMate.forInteraction);
+                //Debug.Log(thisMate.immediateInteraction);
+                //Debug.Log(thisMate.enactThisInteraction);
                 //newMate.thisIsTheDamnLock = ;
 
 
 
 
 
-                //Debug.Log("WWWWWWWWWWWWWWWWWWWWWWWWWW       that's right, it' snot fucking null, is it???       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-                //Debug.Log(isThereAnInteraction);
-                //Debug.Log(isThereAnInteraction.name);
-                //Debug.Log(isThereAnInteraction.atoms);
-
-
 
                 prereqFillers.Add(newMate);
 
-                //Debug.Log(prereqFillers);
-                //Debug.Log(prereqFillers[0]);
-                //Debug.Log(prereqFillers[0].enactThisInteraction);
-                //Debug.Log(prereqFillers[0].enactThisInteraction.name);
-
-                //foreach (interactionMate theInteractionMate in prereqFillers)
-                {
-                    //Debug.Log(prereq.name);
-                    //Debug.Log("here is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
-                }
 
             }
             else
             {
-                Debug.Log("says no");
+                //Debug.Log("says no");
             }
 
             //i think i don't need this now:
@@ -859,7 +419,7 @@ public class AIHub2 : MonoBehaviour
         foreach (interactionMate theInteractionMate in prereqFillers)
         {
             //Debug.Log(prereq.name);
-            Debug.Log("zzzzzzhere is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
+            //Debug.Log("zzzzzzhere is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
         }
 
         return prereqFillers;
@@ -888,16 +448,6 @@ public class AIHub2 : MonoBehaviour
 
     }
 
-    public void travelToTargetObject(GameObject target)
-    {
 
-        Vector3 targetVector = target.GetComponent<Transform>().position;
-        travelToTargetPoint(targetVector);
-    }
-
-    public void travelToTargetPoint(Vector3 targetPoint)
-    {
-        thisNavMeshAgent.SetDestination(targetPoint);
-    }
 
 }
