@@ -51,7 +51,7 @@ public class AIHub2 : MonoBehaviour
 
 
         //this should be moved to a "regular human body" script:
-        interactionEffects1 interactionScriptOnGeneratedObject = this.gameObject.AddComponent<interactionEffects1>();
+        interactionEffects1 interactionScriptOnThisObject = this.gameObject.AddComponent<interactionEffects1>();
         //interactionScriptOnGeneratedObject.generateInteractionFULL("grabTestKey1", atomLister(atoms["grabTestKey1Atom"]));
         //interactionsAvailable
         //initialGenerator2
@@ -60,10 +60,10 @@ public class AIHub2 : MonoBehaviour
         {
             Debug.Log("keys:  " + thisKey);
         }
-        interactionScriptOnGeneratedObject.interactionsAvailable.Add(
-            interactionScriptOnGeneratedObject.generateInteractionFULL("proximity0FillerInteraction1",
-                theGeneratorScript.atomLister(theGeneratorScript.atoms["proximity0Atom"])
-                ));
+        interactionScriptOnThisObject.generateInteractionFULL("proximity0FillerInteraction1",
+                theGeneratorScript.atomLister(theGeneratorScript.atoms["proximity0Atom"]),
+                0
+                );
     }
 
     // Update is called once per frame
@@ -243,16 +243,12 @@ public class AIHub2 : MonoBehaviour
             //Debug.Log("prereqs NOT met for this interaction:  " + thisInteraction.name);
 
 
-            
-            //List<string> unfilledPrereqs = returnAllUnfilledPrereqs(thisInteraction, thisMate);
-            //printStringListWithPreface("one of the unfilled prereqs is:  ", unfilledPrereqs);
-            
 
+            //      THIS IS PROBABLY REDUNDANT NOW, JUST USE THE MATE I ALREADY HAVE
             //thisMate.printMate();
             interactionMate newMate = new interactionMate();
             newMate.interactionAuthor = this.gameObject;
             newMate.target1 = thisMate.target1;
-            newMate.thisIsTheDamnLock = thisMate.target1;
 
             return returnPlanToFillPrereqs(thisInteraction, newMate);
         }
@@ -272,7 +268,13 @@ public class AIHub2 : MonoBehaviour
         }
     }
 
-    List<interactionMate> returnPlanToFillPrereqs(testInteraction theInteraction, interactionMate thisMate)
+
+
+
+
+
+    //          ARE THESE THE SAME?  REDUNDANT?
+    public List<interactionMate> returnPlanToFillPrereqs(testInteraction theInteraction, interactionMate thisMate)
     {
         //so.  prereqs are not filled.
         //so how to fill them?
@@ -291,6 +293,33 @@ public class AIHub2 : MonoBehaviour
 
         return prereqFillers;
     }
+
+    public List<interactionMate> returnPlansToFillPrereqs(List<string> unfilledPrereqs, interactionMate thisMate)
+    {
+        List<interactionMate> prereqFillers = new List<interactionMate>();
+
+        //should be able to check just the string to see if other available interactions in the area have that effect?
+        //are they in legibstrata?  or what?
+        //for ALL [or until a suitable one is found?] interactions "in the area" [everywhere for now][so, find them ALL with "interactable" tag, then iterate through their availableInteractions]
+        //      see if this interaction can fulfill the specific prereq
+        //      if so, for now just return the FIRST one that works?
+
+        foreach (string thisUnfilledPrereq in unfilledPrereqs)
+        {
+            //doesn't need objects or context???  well, for now?  context will be found by the tagging system inside this next function, and perhaps that can be specified from outside of it.  but for now just ALL
+            prereqFillers.AddRange(returnPlansToFillONEPrereq(thisUnfilledPrereq, thisMate));
+        }
+
+
+
+
+        return prereqFillers;
+    }
+
+
+
+
+
 
 
 
@@ -321,35 +350,55 @@ public class AIHub2 : MonoBehaviour
 
 
 
-    public List<interactionMate> returnPlansToFillPrereqs(List<string> unfilledPrereqs, interactionMate thisMate)
-    {
-        List<interactionMate> prereqFillers = new List<interactionMate>();
-
-        //should be able to check just the string to see if other available interactions in the area have that effect?
-        //are they in legibstrata?  or what?
-        //for ALL [or until a suitable one is found?] interactions "in the area" [everywhere for now][so, find them ALL with "interactable" tag, then iterate through their availableInteractions]
-        //      see if this interaction can fulfill the specific prereq
-        //      if so, for now just return the FIRST one that works?
-
-        foreach(string thisUnfilledPrereq in unfilledPrereqs)
-        {
-            //doesn't need objects or context???  well, for now?  context will be found by the tagging system inside this next function, and perhaps that can be specified from outside of it.  but for now just ALL
-            prereqFillers.AddRange(returnPlansToFillONEPrereq(thisUnfilledPrereq, thisMate));
-        }
-
-
-
-
-        return prereqFillers;
-    }
-
 
     public List<interactionMate> returnPlansToFillONEPrereq(string unfilledPrereq, interactionMate thisMate)
     {
         List<interactionMate> prereqFillers = new List<interactionMate>();
 
+        prereqFillers.AddRange(privatePrereqFillers(unfilledPrereq, thisMate));
+        prereqFillers.AddRange(onPersonPrereqFillers(unfilledPrereq, thisMate));
+
+        if(prereqFillers == null || prereqFillers.Count == 0)
+        {
+            prereqFillers.AddRange(worldPrereqFillers(unfilledPrereq, thisMate));
+        }
+
+        return prereqFillers;
+    }
+
+    private List<interactionMate> privatePrereqFillers(string unfilledPrereq, interactionMate thisMate)
+    {
+        List<interactionMate> prereqFillers = new List<interactionMate>();
 
 
+
+        testInteraction isThereAnInteraction = theWorldScript.theRespository.theInteractionEffects1.returnFirstPrivateInteractionOnObjectWithThisEffect(unfilledPrereq, this.gameObject);
+        if (isThereAnInteraction != null)
+        {
+            prereqFillers.Add(basicPackup(isThereAnInteraction, thisMate));
+        }
+
+        return prereqFillers;
+    }
+
+    private List<interactionMate> onPersonPrereqFillers(string unfilledPrereq, interactionMate thisMate)
+    {
+        //this will be for stuff like INVENTORIES, which i don't have totally implemented yet!
+        //technically the "key" currently goes in inventory, but the lock just works if the key is there, no actual "interaction" has to happen between lock and key.
+        //i guess i should change that!  key should "unlock' the lock, and then a SEPARATE interaction should "open" it.
+
+
+
+        List<interactionMate> prereqFillers = new List<interactionMate>();
+
+        return prereqFillers;
+    }
+
+    private List<interactionMate> worldPrereqFillers(string unfilledPrereq, interactionMate thisMate)
+    {
+        //currently returns "first" prereq filler, not ALL possible ones
+
+        List<interactionMate> prereqFillers = new List<interactionMate>();
 
         //this is HUGELY computationally wasteful, and the legibstrata should have a dictionary to EASILY look up ONLY the objects etc that can fulfill a SPECIFIC prereq!
         List<GameObject> allObjectsThatAreInteractable = theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable");
@@ -359,71 +408,27 @@ public class AIHub2 : MonoBehaviour
             //Debug.Log("does this object fulfill prereq we are looking for?:  " + thisObject.name);
             //if (theWorldScript.theRespository.theInteractionEffects1.doesThisObjectHaveThisEffect(unfilledPrereq, thisObject) == true)
             testInteraction isThereAnInteraction = theWorldScript.theRespository.theInteractionEffects1.returnFirstInteractionOnObjectWithThisEffect(unfilledPrereq, thisObject);
-            if (isThereAnInteraction != null)
+            if (thisObject != this.gameObject && isThereAnInteraction != null)
             {
-                //Debug.Log("yes");
-
-                //interactionMate
-                interactionMate newMate = new interactionMate();
-                newMate.interactionAuthor = this.gameObject;
-                newMate.target1 = thisMate.target1;
-                //newMate.fillsPrereqFor = unfilledPrereq;
-                //Debug.Log("is this null???  " + thisMate.target1 + ", for this npc:  " + this.gameObject.name);
-                newMate.thisIsTheDamnLock = thisMate.target1;
-                newMate.enactThisInteraction = isThereAnInteraction;
-
-
-                //Debug.Log("WWWWWWWWWWWWWWWWWWWWWWWWWW       if this is to fill the lock prereq, which of these variables has the lock???       WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
-                //Debug.Log(thisMate.target1);
-                //Debug.Log(thisMate.forInteraction);
-                //Debug.Log(thisMate.immediateInteraction);
-                //Debug.Log(thisMate.enactThisInteraction);
-                //newMate.thisIsTheDamnLock = ;
-
-
-
-
-
-
-                prereqFillers.Add(newMate);
-
-
+                prereqFillers.Add(basicPackup(isThereAnInteraction, thisMate));
             }
-            else
-            {
-                //Debug.Log("says no");
-            }
-
-            //i think i don't need this now:
-            if (true == false)
-            {
-                //iterate through their availableInteractions
-                //      see if this interaction can fulfill the specific prereq
-                //      if so, for now just return the FIRST one that works?
-                foreach (testInteraction thisInteraction in thisObject.GetComponent<interactionEffects1>().interactionsAvailable)
-                {
-                    //modularPrereqCheckBool
-                    //if (thisInteraction)
-
-
-                    //if (theWorldScript.theRespository.theInteractionEffects1.doesThisObjectHaveThisEffect(thisInteraction, thisObject) == true)
-                    {
-                        //prereqFillers.Add(thisObject);
-
-                    }
-                }
-            }
-            
-        }
-
-        foreach (interactionMate theInteractionMate in prereqFillers)
-        {
-            //Debug.Log(prereq.name);
-            //Debug.Log("zzzzzzhere is the [prereq filling] interaction mate author:  " + theInteractionMate.interactionAuthor.name + ", and the ''target1'':  " + theInteractionMate.target1.name);
         }
 
         return prereqFillers;
     }
+
+    private interactionMate basicPackup(testInteraction isThereAnInteraction, interactionMate thisMate)
+    {
+
+        //interactionMate
+        interactionMate newMate = new interactionMate();
+        newMate.interactionAuthor = this.gameObject;
+        newMate.target1 = thisMate.target1;
+        newMate.enactThisInteraction = isThereAnInteraction;
+
+        return newMate;
+    }
+
 
 
     private GameObject pickRandomNearbyInteractable()

@@ -29,7 +29,7 @@ public class initialGenerator2 : MonoBehaviour
         subAtomInitializerList = new List<interactionSubAtom>
         {
             generateInteractionSUBAtomFULL("grabTestKeySubAtom", stringLister(), stringLister("grabTestLOCKSubAtomPrereq1")), 
-            generateInteractionSUBAtomFULL("proximity0SubAtom", stringLister("needsthisIsTheDamnLock"), stringLister("proximity0"))
+            generateInteractionSUBAtomFULL("proximity0SubAtom", stringLister(), stringLister("proximity0"))
         };
         foreach(interactionSubAtom thisSubAtom in subAtomInitializerList)
         {
@@ -233,7 +233,7 @@ public class initialGenerator2 : MonoBehaviour
         GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestLOCK1");
         myTest.AddComponent<interactionEffects1>();
         myTest.transform.localScale = new Vector3(1f, 2, 1f);
-        myTest.transform.position += new Vector3(0, 0, -2);
+        myTest.transform.position += new Vector3(0, 0, -8);
 
         interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
         interactionScriptOnGeneratedObject.generateInteractionFULL(

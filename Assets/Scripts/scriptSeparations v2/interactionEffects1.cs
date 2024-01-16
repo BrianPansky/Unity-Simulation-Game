@@ -24,7 +24,7 @@ public class interactionEffects1 : MonoBehaviour
 
     //public Dictionary<>
     [SerializeField] public List<testInteraction> interactionsAvailable = new List<testInteraction>();
-
+    [SerializeField] public List<testInteraction> privateInteractionsAvailable = new List<testInteraction>();
 
 
 
@@ -59,14 +59,11 @@ public class interactionEffects1 : MonoBehaviour
         theWorldScript.theTagScript.foreignAddTag("interactionEffects1", this.gameObject);
 
         //just a GENERAL tag:
-        theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
-
-        //if(interactionsAvailable.Count == 0)
+        if(interactionsAvailable.Count > 0)
         {
-            //is this a good idea?  this is for handling clones.  but by definition....ya will never work because name of clone is different!
-            //theWorldScript.interactionLegibstration[this.gameObject.name] = interactionsAvailable;
+            theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
         }
-
+        
 
 
         //just...wtf is going on here?
@@ -83,45 +80,9 @@ public class interactionEffects1 : MonoBehaviour
 
         //Debug.Log(interactionsAvailable);
         //Debug.Log(theWorldScript.interactionLegibstration[this.gameObject.name]);
-        theWorldScript.interactionLegibstration[this.gameObject.name] = interactionsAvailable;
+        //theWorldScript.interactionLegibstration[this.gameObject.name] = interactionsAvailable;
         //Debug.Log(theWorldScript.interactionLegibstration[this.gameObject.name]);
         //Debug.Log(interactionsAvailable);
-
-
-        List<testInteraction> myInteractionList = theWorldScript.interactionLegibstration[this.gameObject.name];
-        //Debug.Log(myInteractionList);
-        foreach (testInteraction x in myInteractionList)
-        {
-            //Debug.Log("HELLLOOOOOOOOOOOOOOOOOOOOO?????????????????????????????????????????????????????????");
-            Debug.Log("interactions on this object: " + this.gameObject.name);
-            Debug.Log(x);
-        }
-        //Debug.Log("???????????????????????????      END looking at contents for this object's key     ??????????????????????????????");
-
-        //foreach(var x in interactionsAvailable)
-        {
-
-        }
-        //      [switch these over to be interaction class objects, not strings]
-        //List<string> availableIntertactions = new List<string>();
-        //availableIntertactions.Add("interactiontest1");
-        //availableIntertactions.Add("interactionTest2");
-        //theWorldScript.theRespository.theLegibstrata.interactionLebistration[this.gameObject.name] = availableIntertactions;
-        //List<testInteraction> availableIntertactions = new List<testInteraction>();
-        //availableIntertactions.Add(interactionTest1());
-        //availableIntertactions.Add(interactionTest2());
-        //theWorldScript.theRespository.theLegibstrata.interactionLebistration[this.gameObject.name] = availableIntertactions;
-
-
-        //foreach (var slot in slotObjects)
-        {
-            //Debug.Log(slot);
-        }
-
-        //if(preselectedHost != null)
-        {
-            //preselectedHost.GetComponent<interactionEffects1>().slotObjects.Add(this.gameObject);
-        }
 
 
     }
@@ -139,7 +100,7 @@ public class interactionEffects1 : MonoBehaviour
     }
 
 
-    public testInteraction generateInteractionFULL(string theName, List<interactionAtom> theAtoms)
+    public testInteraction generateInteractionFULL(string theName, List<interactionAtom> theAtoms, int zeroIfPrivate = 1)
     {
         testInteraction oneToGenerate = new testInteraction();
         //public List<interactionAtom> atoms = new List<interactionAtom>();
@@ -159,8 +120,17 @@ public class interactionEffects1 : MonoBehaviour
 
         //Debug.Log("should NOT just be world object:  " + this.gameObject);
 
-        theWorldScript.theRespository.theLegibstrata.legibstrate(this.gameObject, oneToGenerate);
-        interactionsAvailable.Add(oneToGenerate);
+        //theWorldScript.theRespository.theLegibstrata.legibstrate(this.gameObject, oneToGenerate);
+        
+        if(zeroIfPrivate == 0) 
+        {
+            privateInteractionsAvailable.Add(oneToGenerate);
+        }
+        else
+        {
+            interactionsAvailable.Add(oneToGenerate);
+        }
+        
 
         return oneToGenerate;
     }
@@ -191,7 +161,7 @@ public class interactionEffects1 : MonoBehaviour
         //Debug.Log(theName);
         //Debug.Log("-------------------------    end    ---------------------------");
         //this.gameObject.GetComponent<interactionEffects1>().interactionsAvailable.Add(oneToGenerate);
-        theWorldScript.theRespository.theLegibstrata.legibstrate(this.gameObject, oneToGenerate);
+        //theWorldScript.theRespository.theLegibstrata.legibstrate(this.gameObject, oneToGenerate);
         interactionsAvailable.Add(oneToGenerate);
 
         return oneToGenerate;
@@ -292,7 +262,22 @@ public class interactionEffects1 : MonoBehaviour
 
 
 
-    
+
+    public void clonify(interactionEffects1 newInputScript)
+    {
+        //"deep copy" all important variables from this current script into this new input script.
+
+        //public List<testInteraction> interactionsAvailable = new List<testInteraction>();
+
+        List<testInteraction> cloningOldInteractionsAvailable = new List<testInteraction>();
+        foreach (testInteraction thisTestInteraction in interactionsAvailable)
+        {
+            cloningOldInteractionsAvailable.Add(thisTestInteraction.deepCopy());
+        }
+
+        newInputScript.interactionsAvailable = cloningOldInteractionsAvailable;
+    }
+
 
 
     public bool doesObjectXHaveThisEffect(string thisEffect, GameObject objectX)
@@ -326,7 +311,19 @@ public class interactionEffects1 : MonoBehaviour
 
         interactionEffects1 interactionScript = thisObject.GetComponent<interactionEffects1>();
 
-        foreach (var theInteraction in interactionScript.interactionsAvailable)
+        return returnFirstIntearctionOnListWithEffectX(thisEffect, interactionScript.interactionsAvailable);
+    }
+
+    public testInteraction returnFirstPrivateInteractionOnObjectWithThisEffect(string thisEffect, GameObject thisObject)
+    {
+        interactionEffects1 interactionScript = thisObject.GetComponent<interactionEffects1>();
+
+        return returnFirstIntearctionOnListWithEffectX(thisEffect, interactionScript.privateInteractionsAvailable);
+    }
+
+    public testInteraction returnFirstIntearctionOnListWithEffectX(string thisEffect, List<testInteraction> listOfInteracitons)
+    {
+        foreach (var theInteraction in listOfInteracitons)
         {
             if (theInteraction.doesThisInteractionContainEffectX(thisEffect))
             {
@@ -336,24 +333,6 @@ public class interactionEffects1 : MonoBehaviour
 
         return null;
     }
-
-    public void clonify(interactionEffects1 newInputScript)
-    {
-        //"deep copy" all important variables from this current script into this new input script.
-
-        //public List<testInteraction> interactionsAvailable = new List<testInteraction>();
-
-        List<testInteraction> cloningOldInteractionsAvailable = new List<testInteraction>();
-        foreach(testInteraction thisTestInteraction in interactionsAvailable)
-        {
-            cloningOldInteractionsAvailable.Add(thisTestInteraction.deepCopy());
-        }
-
-        newInputScript.interactionsAvailable = cloningOldInteractionsAvailable;
-    }
-
-
-
 }
 
 public class interactionSubAtom
@@ -406,21 +385,6 @@ public class interactionSubAtom
             if (theInteractionMate.interactionAuthor.name == null)
             {
                 Debug.Log("''theInteractionMateinteractionAuthor.name'' is NULL in enaction phase");
-                aTestBool = true;
-            }
-            if (theInteractionMate.thisIsTheDamnLock == null)
-            {
-                Debug.Log("''theInteractionMate.thisIsTheDamnLock'' is NULL in enaction phase");
-                aTestBool = true;
-            }
-            if (theInteractionMate.thisIsTheDamnLock.name == null)
-            {
-                Debug.Log("''theInteractionMate.thisIsTheDamnLock.name'' is NULL in enaction phase");
-                aTestBool = true;
-            }
-            if (theInteractionMate.whereTheFuckIsThisMade == null)
-            {
-                Debug.Log("''theInteractionMate.whereTheFuckIsThisMade'' is NULL in enaction phase");
                 aTestBool = true;
             }
             if (theInteractionMate.target1 == null)
@@ -540,23 +504,14 @@ public class interactionSubAtom
                 Debug.Log("''theInteractionMate.interactionAuthor'' is NULL in enaction phase");
                 aTestBool = true;
             }
-            if (theInteractionMate.thisIsTheDamnLock == null)
-            {
-                Debug.Log("''theInteractionMate.thisIsTheDamnLock'' is NULL in enaction phase");
-                aTestBool = true;
-            }
 
 
 
             if (aTestBool == false)
             {
-                Debug.Log("should be going from " + theInteractionMate.interactionAuthor.name + " to:  " + theInteractionMate.thisIsTheDamnLock.name);
-                //Debug.Log(theInteractionMate.target1);
-                Debug.Log(theInteractionMate.thisIsTheDamnLock.name);
-                //Debug.Log(theInteractionMate.target1.GetComponent<Transform>());
-                //Debug.Log(theInteractionMate.target1.GetComponent<Transform>().position);
+                Debug.Log("should be going from " + theInteractionMate.interactionAuthor.name + " to:  " + theInteractionMate.target1.name);
 
-                Vector3 targetVector = theInteractionMate.thisIsTheDamnLock.GetComponent<Transform>().position;
+                Vector3 targetVector = theInteractionMate.target1.GetComponent<Transform>().position;
                 theInteractionMate.interactionAuthor.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
             }
             
@@ -601,21 +556,7 @@ public class interactionSubAtom
             }
 
         }
-        if (thisPrereq == "needsthisIsTheDamnLock")
-        {
-            //ad-hoc check if this variable is null:
-            if (theInteractionMate.thisIsTheDamnLock == null)
-            {
-                Debug.Log("ddddddddddddddddddd says ''thisIsTheDamnLock'' is null when it is a required prereq");
-                return false;
-            }
-            else
-            {
-                //Debug.Log("pppppppppppppp says not null:");
-                //Debug.Log(theInteractionMate.thisIsTheDamnLock);
-            }
-        }
-        if (thisPrereq == "proximity0")
+        else if (thisPrereq == "proximity0")
         {
             //needs SMALL distance between theObjectInitiatingTheInteraction and theObjectBeingInteractedWith
 
@@ -640,14 +581,10 @@ public class interactionSubAtom
 
 
         }
-        if (thisPrereq == "needsthisIsTheDamnLock")
+        else
         {
-            if (theInteractionMate.thisIsTheDamnLock == null)
-            {
-                return false;
-            }
+            Debug.Log("no ''if'' statement catches this prereq to see if it's met:  " + thisPrereq);
         }
-
 
 
         return true;
@@ -860,14 +797,7 @@ public class interactionMate
     public GameObject target3;
 
     public testInteraction enactThisInteraction;
-    public testInteraction forInteraction;
-    public testInteraction immediateInteraction;
-    public testInteraction fillsPrereqFor;
-    public GameObject objectFillsPrereq;
 
-    public GameObject thisIsTheDamnLock;
-
-    public string whereTheFuckIsThisMade;
 
 
     public void doThisInteraction()
@@ -922,12 +852,6 @@ public class interactionMate
         Debug.Log("target2:  " + target2);
         Debug.Log("target3:  " + target3);
         Debug.Log("enactThisInteraction:  " + enactThisInteraction.name);
-        Debug.Log("forInteraction:  " + forInteraction);
-        Debug.Log("immediateInteraction:  " + immediateInteraction);
-        Debug.Log("fillsPrereqFor:  " + fillsPrereqFor);
-        Debug.Log("objectFillsPrereq:  " + objectFillsPrereq);
-        Debug.Log("thisIsTheDamnLock:  " + thisIsTheDamnLock);
-        Debug.Log("whereTheFuckIsThisMade:  " + whereTheFuckIsThisMade);
         Debug.Log("WWWWWWWWWWWWWWWWW    END printing interaction mate    WWWWWWWWWWWWWWWWW");
     }
 
