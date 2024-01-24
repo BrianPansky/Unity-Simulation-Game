@@ -175,7 +175,11 @@ public class AIHub2 : MonoBehaviour
 
             if (adhocPrereqFillerTest[0].target1 != null)
             {
-                body.lookingRay = new Ray(this.transform.position, this.transform.position - adhocPrereqFillerTest[0].target1.transform.position);
+                adhocPrereqFillerTest[0].printMate();
+                Debug.DrawLine(new Vector3(0, 0, 0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
+                //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
+                body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
+                Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
                 //Debug.Log();
                 //adhocPrereqFillerTest[0].printMate();
 
@@ -186,7 +190,12 @@ public class AIHub2 : MonoBehaviour
             {
                 Debug.Log("this has no target:  " + adhocPrereqFillerTest[0].enactThisInteraction.name);
                 giveItARandomInteractableTarget(adhocPrereqFillerTest[0]);
-                body.lookingRay = new Ray(this.transform.position, this.transform.position - adhocPrereqFillerTest[0].target1.transform.position);
+                adhocPrereqFillerTest[0].printMate();
+                Debug.DrawLine(new Vector3(0,0,0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
+                
+                //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
+                body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
+                Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
                 adhocPrereqFillerTest[0].doThisInteraction();
 
             }
