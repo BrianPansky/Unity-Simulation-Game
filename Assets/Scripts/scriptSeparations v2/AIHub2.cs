@@ -11,13 +11,23 @@ public class AIHub2 : MonoBehaviour
 {
     private worldScript theWorldScript;
     public NavMeshAgent thisNavMeshAgent;
+    public planningAndImagination thePlanner;
+
+    public body1 body;
+
+    //i should move these to the BODY:
+    public sensorySystem theSensorySystem;
+    public inventory1 theInventory;
+
+
     private Vector3 mytest;
     public GameObject testTarget;
-    private sensorySystem theSensorySystem;
-    public planningAndImagination thePlanner;
-    public inventory1 theInventory;
-    public List<interactionMate> adhocPrereqFillerTest;
+    
+    
+    public List<interactionMate> adhocPrereqFillerTest = new List<interactionMate>();
     public List<GameObject> imGoinGTOLoseMyMInd;
+
+    
 
     GameObject randomInteractionTarget;
 
@@ -27,6 +37,9 @@ public class AIHub2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+
+
         thisNavMeshAgent = GetComponent<NavMeshAgent>();
         mytest = this.transform.position + new Vector3(0, 0, -15);
 
@@ -49,6 +62,9 @@ public class AIHub2 : MonoBehaviour
         this.gameObject.AddComponent<inventory1>();
         theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
 
+        this.gameObject.AddComponent<body1>();
+        body = this.gameObject.GetComponent<body1>();
+
 
         //this should be moved to a "regular human body" script:
         interactionEffects1 interactionScriptOnThisObject = this.gameObject.AddComponent<interactionEffects1>();
@@ -69,14 +85,14 @@ public class AIHub2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("========================     START update for:  " + this.gameObject.name + "     =====================");
+        Debug.Log("==================AAAAAAAAAAAA====================     START update for:  " + this.gameObject.name + "     ==================AAAAAAAAA=====================");
 
 
         //ad hoc plan/action switching in some cases for now:
         if (forgetfulnessTimer == 0)
         {
             //forget whole plan, start again:
-            adhocPrereqFillerTest = null;
+            adhocPrereqFillerTest = new List<interactionMate>();
 
             //reset timer:
             forgetfulnessTimer = 10;
@@ -87,12 +103,13 @@ public class AIHub2 : MonoBehaviour
         }
 
 
-
+        //Debug.Log("11111111111111111111111111111111111111111111111111111");
 
         if (adhocPrereqFillerTest == null)
         {
             //Debug.Log("''adhocPrereqFillerTest'' is null for this NPC:  " + this.gameObject.name);
-            pickRandomNearbyInteractionAndTryIt();
+            //pickRandomNearbyInteractionAndTryIt();
+            newInteractionFunction();
 
             //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             //Debug.Log(adhocPrereqFillerTest);
@@ -103,7 +120,8 @@ public class AIHub2 : MonoBehaviour
         else if (adhocPrereqFillerTest.Count == 0)
         {
             //Debug.Log("''adhocPrereqFillerTest'' is EMPTY for this NPC:  " + this.gameObject.name);
-            pickRandomNearbyInteractionAndTryIt();
+            //pickRandomNearbyInteractionAndTryIt();
+            newInteractionFunction();
 
             //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
             //Debug.Log(adhocPrereqFillerTest);
@@ -139,19 +157,120 @@ public class AIHub2 : MonoBehaviour
 
             //if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]))
             
-            if (adhocPrereqFillerTest[0].checkInteractionMatePrereqs())
-            {
-                adhocPrereqFillerTest[0].doThisInteraction();
-                randomInteractionTarget = null;
-            }
+            
 
 
 
         }
+
+
+        Debug.Log("prereqs met?");
+        if (adhocPrereqFillerTest[0].checkInteractionMatePrereqs())
+        {
+            Debug.Log("yes");
+            //ad-hoc aim for now
+            //theInteractionMate.target1
+
+            //Debug.Log(body);
+
+            if (adhocPrereqFillerTest[0].target1 != null)
+            {
+                body.lookingRay = new Ray(this.transform.position, this.transform.position - adhocPrereqFillerTest[0].target1.transform.position);
+                //Debug.Log();
+                //adhocPrereqFillerTest[0].printMate();
+
+                adhocPrereqFillerTest[0].doThisInteraction();
+                //randomInteractionTarget = null;
+            }
+            else
+            {
+                Debug.Log("this has no target:  " + adhocPrereqFillerTest[0].enactThisInteraction.name);
+                giveItARandomInteractableTarget(adhocPrereqFillerTest[0]);
+                body.lookingRay = new Ray(this.transform.position, this.transform.position - adhocPrereqFillerTest[0].target1.transform.position);
+                adhocPrereqFillerTest[0].doThisInteraction();
+
+            }
+
+        }
+
+
         //goToWhicheverAvailableTarget();
 
 
-        Debug.Log("----------------------     END update for:  " + this.gameObject.name + "     -----------------------");
+        Debug.Log("-----------////////////////////////-----------     END update for:  " + this.gameObject.name + "     -------------////////////////////////----------");
+    }
+
+    private void giveItARandomInteractableTarget(interactionMate interactionMate)
+    {
+        //[besides itself]
+        interactionMate.target1 = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject);
+
+
+    }
+
+    private void newInteractionFunction()
+    {
+        //Debug.Log("222222222222222222222222222222222222222222222222222222222");
+        //pick random nearby interactable
+        //if it's not themselves, "try" the standard "click" interaction aimed at it
+        //if it IS themselves, should be walk function, pick a random TARGET and walk to it [i already have this working]
+
+        GameObject randomInteractableObject = pickRandomNearbyInteractableObject();
+
+        if(randomInteractableObject != null)
+        {
+            //Debug.Log("33333333333333333333333333333333333333333333333333333");
+            if (randomInteractableObject.name == this.gameObject.name)
+            {
+                //Debug.Log("4444444444444444444444444444444444444444444444");
+                //if it IS themselves, should be walk function, pick a random TARGET and walk to it [i already have this working] = "walkSomewhere"
+                interactionMate newMate = new interactionMate();
+
+                newMate.interactionAuthor = this.gameObject;
+
+                //ad-hoc for now:
+                testInteraction theInteractionToEnact = pickRandomInteractionONObject(randomInteractableObject);
+                newMate.enactThisInteraction = theInteractionToEnact;
+
+
+                //super ad-hoc nonsense for now:
+                if (theInteractionToEnact.name == "walkSomewhere")
+                {
+                    Debug.Log("55555555555555555555555555555555555555555555555555");
+                    //literally just look for a random interactable BESIDES themselves to walk to:
+                    //theWorldScript.taggedStuff.ALLTaggedWithMultiple("intera");
+                    List<GameObject> allObjectsThatAreInteractable = theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable");
+                    newMate.target1 = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(allObjectsThatAreInteractable, this.gameObject);
+                }
+
+
+                adhocPrereqFillerTest.Add(newMate);
+
+            }
+            else
+            {
+                //if it's not themselves, "try" the standard "click" interaction aimed at it
+                //      need to AIM [make a function that automatically aligns their body's "ray" at the target object?  sure, for now
+                //      then need to do:  "standardInteraction1"
+
+
+                string nameOfCurrentClickInteraction = "standardInteraction1";
+                interactionMate theInteractionMate = new interactionMate();
+                theInteractionMate.interactionAuthor = this.gameObject;
+                theInteractionMate.target1 = randomInteractableObject;
+                
+                theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
+                //theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
+
+                //Debug.Log(adhocPrereqFillerTest);
+
+                adhocPrereqFillerTest.Add(theInteractionMate);
+
+
+            }
+        }
+
+
     }
 
     public interactionMate pickRandomNearbyInteractionReturnMate()
@@ -168,11 +287,24 @@ public class AIHub2 : MonoBehaviour
 
     public interactionMate createBasicInteractionMate(GameObject author, GameObject target1, testInteraction theInteractionToEnact)
     {
+        //move this to interactionEffects1?
+
         interactionMate newMate = new interactionMate();
 
         newMate.interactionAuthor = author;
         newMate.target1 = target1;
         newMate.enactThisInteraction = theInteractionToEnact;
+
+
+        //super ad-hoc nonsense for now:
+        if(theInteractionToEnact.name == "walkSomewhere")
+        {
+            //literally just look for a random interactable BESIDES themselves to walk to:
+            //theWorldScript.taggedStuff.ALLTaggedWithMultiple("intera");
+            List<GameObject> allObjectsThatAreInteractable = theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable");
+            newMate.target1 = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(allObjectsThatAreInteractable, this.gameObject);
+        }
+
 
         return newMate;
     }
@@ -334,6 +466,9 @@ public class AIHub2 : MonoBehaviour
     {
         List<testInteraction> availableIntertactions = randomInteractionTarget.GetComponent<interactionEffects1>().interactionsAvailable;
         
+
+
+
         if (availableIntertactions.Count > 0)
         {
             return availableIntertactions[UnityEngine.Random.Range(0, availableIntertactions.Count)];
@@ -447,7 +582,13 @@ public class AIHub2 : MonoBehaviour
 
         //return theWorldScript.theTagScript.findXNearestToYExceptY("interactable", this.gameObject);
         //pickRandomObjectFromListEXCEPT
-        GameObject thisSelection = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject);
+
+
+
+        //GameObject thisSelection = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject);
+        GameObject thisSelection = theWorldScript.theTagScript.randomTaggedWithMultiple("interactable");
+
+
         //Debug.Log("ok it's '''randomly''' picking this object:  " + thisSelection.name);
         return thisSelection;
 

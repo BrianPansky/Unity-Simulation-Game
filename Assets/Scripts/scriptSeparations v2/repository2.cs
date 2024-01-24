@@ -11,6 +11,7 @@ public class repository2 : MonoBehaviour
     public GameObject npc2Prefab;
     public GameObject placeHolderCubePrefab;
     public GameObject invisibleCubePrefab;
+    public GameObject interactionSphere;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;
@@ -70,6 +71,14 @@ public class repository2 : MonoBehaviour
     {
         return duplifier(thePrefab, thePoint);
     }
+
+    public GameObject createPrefabAtPointAndRETURN(GameObject thePrefab, Vector3 thePoint)
+    {
+        //GameObject newBuilding = new GameObject();
+        //newBuilding = Instantiate(thePrefab, thePoint, Quaternion.identity);
+        return Instantiate(thePrefab, thePoint, Quaternion.identity);
+    }
+
 
     public GameObject createAndReturnPrefabAtPointWITHNAME(GameObject thePrefab, Vector3 thePoint, string theName)
     {

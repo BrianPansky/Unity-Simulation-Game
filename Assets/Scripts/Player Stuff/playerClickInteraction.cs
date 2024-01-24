@@ -11,6 +11,9 @@ public class playerClickInteraction : MonoBehaviour
     //CHANGING "clickedOn" TO PUBLIC DIDN'T FIX, AND "selectedNPC" ISN'T PUBLIC EITHER...
     public GameObject clickedOn;
 
+
+    public body1 body;
+
     //selection
     GameObject selectedNPC;
     public GameObject currentPrefab;
@@ -64,7 +67,8 @@ public class playerClickInteraction : MonoBehaviour
         this.gameObject.AddComponent<inventory1>();
         theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
 
-
+        this.gameObject.AddComponent<body1>();
+        body = this.gameObject.GetComponent<body1>();
 
         haveStore = false;
         weapon = false;
@@ -103,6 +107,11 @@ public class playerClickInteraction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //update body ray variable:
+        body.lookingRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        
+
 
         //check for mouse click:
         handleAnyClick();
@@ -279,22 +288,50 @@ public class playerClickInteraction : MonoBehaviour
         RaycastHit myHit;
         Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        //insert "grab" action [from BODY] here
+
+        //body.interactionScript.interactionDictionary
+        //      make interactionMate (or get one from dictionary, and fill in any details it leaves out)
+        string nameOfCurrentClickInteraction = "standardInteraction1";  //this should be generalized, so it always plugs in the right one
+        //interactionMate theInteractionMate = body.interactionScript.interactionDictionary[nameOfCurrentClickInteraction];
+        interactionMate theInteractionMate = new interactionMate();
+        theInteractionMate.interactionAuthor = this.gameObject;
+        theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
+        //theInteractionMate.printMate();
+        theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
+
+
+        //old:
+        if (true == false)
         {
-            if (myHit.transform != null)
+
+
+            //RaycastHit myHit;
+            //Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+
+
+            if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
-                //Debug.Log(myHit.transform.gameObject);
-                clickedOn = myHit.transform.gameObject;
-                GameObject thisObject = createPrefabAtPointAndRETURN(theInteractionSphere, myHit.point);
+                if (myHit.transform != null)
+                {
+                    //Debug.Log(myHit.transform.gameObject);
+                    clickedOn = myHit.transform.gameObject;
+                    GameObject thisObject = createPrefabAtPointAndRETURN(theInteractionSphere, myHit.point);
 
-                //      should this use "interactionMate" isntead?
-                thisObject.GetComponent<authorScript1>().theAuthor = this.gameObject;
-                
+                    //      should this use "interactionMate" isntead?
+                    thisObject.GetComponent<authorScript1>().theAuthor = this.gameObject;
+
+                }
             }
-        }
-        
 
-        return clickedOn;
+
+            return clickedOn;
+        }
+
+
+
+        return theInteractionMate.clickedOn;
     }
     
     void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)

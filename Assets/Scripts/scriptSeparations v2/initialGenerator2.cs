@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class initialGenerator2 : MonoBehaviour
 {
 
-    [SerializeField] public int newEffingInt = 22;
+    public int newEffingInt = 22;
 
     public Dictionary<string, interactionSubAtom> subAtoms = new Dictionary<string, interactionSubAtom>();
     public List<interactionSubAtom> subAtomInitializerList;
@@ -28,22 +28,35 @@ public class initialGenerator2 : MonoBehaviour
         //  ==== 1 ====    make SUB atoms here:
         subAtomInitializerList = new List<interactionSubAtom>
         {
-            generateInteractionSUBAtomFULL("grabTestKeySubAtom", stringLister(), stringLister("grabTestLOCKSubAtomPrereq1")), 
-            generateInteractionSUBAtomFULL("proximity0SubAtom", stringLister(), stringLister("proximity0"))
+            generateInteractionSUBAtomFULL("grabTestKeySubAtom", stringLister(), stringLister()), 
+            generateInteractionSUBAtomFULL("proximity0SubAtom", stringLister(), stringLister()),
+            generateInteractionSUBAtomFULL("mainInteractionSubAtom", stringLister(), stringLister("standardInteraction1"))
         };
-        foreach(interactionSubAtom thisSubAtom in subAtomInitializerList)
-        {
-            //Debug.Log("name:  " + thisSubAtom.name);
-            subAtoms.Add(thisSubAtom.name, thisSubAtom);
-        }
+        processSubatomList(subAtomInitializerList);
 
 
         //  ==== 2 ====    make [interaction/action] "ATOMS" here:
         atomInitializerList = new List<interactionAtom>
         {
             generateInteractionAtomFULL("grabTestKey1Atom", interactionSUBAtomLister(subAtoms["grabTestKeySubAtom"])),
-            generateInteractionAtomFULL("proximity0Atom", interactionSUBAtomLister(subAtoms["proximity0SubAtom"]))
+            generateInteractionAtomFULL("proximity0Atom", interactionSUBAtomLister(subAtoms["proximity0SubAtom"])),
+            generateInteractionAtomFULL("standardInteraction1Atom", interactionSUBAtomLister(subAtoms["mainInteractionSubAtom"]))
         };
+        processAtomList(atomInitializerList);
+
+    }
+
+    public void processSubatomList(List<interactionSubAtom> theList)
+    {
+        foreach (interactionSubAtom thisSubAtom in theList)
+        {
+            //Debug.Log("name:  " + thisSubAtom.name);
+            subAtoms.Add(thisSubAtom.name, thisSubAtom);
+        }
+    }
+
+    public void processAtomList(List<interactionAtom> theList)
+    {
         foreach (interactionAtom thisAtom in atomInitializerList)
         {
             atoms.Add(thisAtom.name, thisAtom);
@@ -225,7 +238,21 @@ public class initialGenerator2 : MonoBehaviour
 
 
         interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
-        interactionScriptOnGeneratedObject.generateInteractionFULL("grabTestKey1", atomLister(atoms["grabTestKey1Atom"]));
+        //interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", atomLister(atoms["grabTestKey1Atom"]));
+
+        interactionMate mainInteractionMate = new interactionMate();
+
+        mainInteractionMate.interactionAuthor = this.gameObject;
+        GameObject theWorldObject = GameObject.Find("World");
+        worldScript theWorldScript = theWorldObject.GetComponent<worldScript>();
+        initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
+
+        //.....why am i using an interactionMate in the initial generator???
+        //mainInteractionMate.enactThisInteraction = interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
+
+        testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justGrabIt");
+
+        interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
 
     }
     void generateTestLOCK1()
@@ -254,6 +281,11 @@ public class initialGenerator2 : MonoBehaviour
                     )
                 )
             );
+
+
+        testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justActivateLock");
+
+        interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
 
     }
 

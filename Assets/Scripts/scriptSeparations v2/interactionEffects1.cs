@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using UnityEditorInternal;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -23,10 +24,11 @@ public class interactionEffects1 : MonoBehaviour
 
 
     //public Dictionary<>
-    [SerializeField] public List<testInteraction> interactionsAvailable = new List<testInteraction>();
-    [SerializeField] public List<testInteraction> privateInteractionsAvailable = new List<testInteraction>();
+    public List<testInteraction> interactionsAvailable = new List<testInteraction>();
+    public List<testInteraction> privateInteractionsAvailable = new List<testInteraction>();
 
-
+    //is this all interactions?  only public ones?  only private ones?
+    public Dictionary<string, testInteraction> interactionDictionary = new Dictionary<string, testInteraction>();
 
 
 
@@ -213,6 +215,8 @@ public class interactionEffects1 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
+
 
         //Debug.Log(other.gameObject.name);
         if (other.tag == "interactionType1")
@@ -220,16 +224,72 @@ public class interactionEffects1 : MonoBehaviour
 
             //      or should these "author" and "target" be reversed?????
             interactionMate thisMate = new interactionMate();
-            thisMate.interactionAuthor = other.gameObject.GetComponent<authorScript1>().theAuthor;
+
+            authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
+            thisMate.interactionAuthor = theAuthorScript.theAuthor;
+            thisMate.enactThisInteraction = theAuthorScript.enactThisInteraction;
             //thisMate.target1 = other.gameObject;
             thisMate.target1 = this.gameObject;
 
+            Debug.Log("my interaction type:  " + theAuthorScript.interactionType);
 
             //doInteraction1(other.GetComponent<authorScript1>().theAuthor, thisMate);
 
-            thisMate.enactThisInteraction = interactionsAvailable[0];
-            thisMate.printMate();
-            thisMate.doThisInteractionIfPrereqsMet(thisMate);
+            //thisMate.enactThisInteraction = interactionsAvailable[0];
+
+            //sigh
+            Debug.Log(interactionDictionary.Keys.Count());
+            foreach (string aaaaa in interactionDictionary.Keys)
+            {
+                //Debug.Log("the dictionary key:  " + aaaaa);
+                if (aaaaa == "walkSomewhere")
+                {
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                    Debug.Log("the dictionary key:  " + aaaaa);
+                }
+                if (aaaaa == theAuthorScript.interactionType)
+                {
+                    Debug.Log("yes good, the dictionary key is the same as the interaction type.  now DO it");
+                    Debug.Log("so do this:  " + interactionDictionary[theAuthorScript.interactionType].name);
+                    //nteractionDictionary[theAuthorScript.interactionType].
+
+                    Debug.Log("on this object:  " + this.gameObject.name);
+                    Debug.Log("targeted by this author:  " + theAuthorScript.theAuthor.name);
+                    interactionDictionary[theAuthorScript.interactionType].doInteraction(thisMate);
+                }
+                if(aaaaa == thisMate.enactThisInteraction.name)
+                {
+                    //thisMate.printMate();
+                    //thisMate.doThisInteractionIfPrereqsMet(thisMate);
+                }
+
+                Debug.Log(interactionDictionary.Keys.Count());
+            }
 
 
         }
@@ -239,6 +299,10 @@ public class interactionEffects1 : MonoBehaviour
 
 
         }
+
+
+
+        Debug.Log("ZZZZZZZ     END onTriggerEnter for:  " + this.gameObject.name + "     ZZZZZZZ");
 
     }
 
@@ -359,8 +423,10 @@ public class interactionSubAtom
 
     public void doSubAtom(interactionMate theInteractionMate)
     {
+        Debug.Log(effects.Count());
         foreach (var thisEffect in effects)
         {
+            Debug.Log(effects.Count());
             doThisSubAtomEffect(thisEffect, theInteractionMate);
         }
     }
@@ -415,6 +481,54 @@ public class interactionSubAtom
 
             theInteractionMate.target1.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
         }
+        else if(theSubAtomEffect == "standardInteraction1")
+        {
+            RaycastHit myHit;
+            //Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            body1 authorBody = theInteractionMate.interactionAuthor.GetComponent<body1>();
+            Ray myRay = authorBody.lookingRay;
+            //Ray myRay = theInteractionMate.interactionAuthor.GetComponent<body1>().lookingRay;
+
+            if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                if (myHit.transform != null)
+                {
+                    //Debug.Log(myHit.transform.gameObject);
+
+                    //so, the following line basically magically RETURNS the interactionMate.  like, updates it so it can be used AFTER the current function call.  is that wise?  no.
+                    theInteractionMate.clickedOn = myHit.transform.gameObject;
+
+                    GameObject anInteractionSphere = authorBody.theWorldScript.theRespository.interactionSphere;
+
+                    GameObject thisObject = authorBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+
+                    //      should this use "interactionMate" isntead?
+                    authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+                    theAuthorScript.theAuthor = theInteractionMate.interactionAuthor;
+                    theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
+                    theAuthorScript.interactionType = "standardInteraction1";
+
+                }
+            }
+        }
+        else if (theSubAtomEffect == "justGrabIt")
+        {
+            theInteractionMate.target1.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
+
+            theInteractionMate.interactionAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
+        }
+        else if (theSubAtomEffect == "justActivateLock")
+        {
+            if (theInteractionMate.interactionAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") == true)
+            {
+                theInteractionMate.target1.GetComponent<Renderer>().material.color = new Color(1f, 0f, 1f);
+            }
+        }
+        else if (theSubAtomEffect == "walkSomewhere")
+        {
+            Vector3 targetVector = theInteractionMate.target1.GetComponent<Transform>().position;
+            theInteractionMate.interactionAuthor.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
+        }
         else if (theSubAtomEffect == "testName2")
         {
             //Debug.Log("the testName22222 effect has occured");
@@ -430,7 +544,7 @@ public class interactionSubAtom
             //Debug.Log("the subAtomslotAvailabilityInitializationThing effect has occured");
             theInteractionMate.target1.GetComponent<Renderer>().material.color = new Color(255, 111, 55);
         }
-        else if (theSubAtomEffect == "grabTestLOCKSubAtomPrereq1")
+        else if (theSubAtomEffect == "grabTestKeySubAtom")
         {
 
             if (theInteractionMate == null)
@@ -509,7 +623,7 @@ public class interactionSubAtom
 
             if (aTestBool == false)
             {
-                Debug.Log("should be going from " + theInteractionMate.interactionAuthor.name + " to:  " + theInteractionMate.target1.name);
+                //Debug.Log("should be going from " + theInteractionMate.interactionAuthor.name + " to:  " + theInteractionMate.target1.name);
 
                 Vector3 targetVector = theInteractionMate.target1.GetComponent<Transform>().position;
                 theInteractionMate.interactionAuthor.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
@@ -667,8 +781,8 @@ public class testInteraction
     //i mean, i GUESS.  that's the only reason modularizing interactions into atoms could serve, right?
     //well, no, modularizing them also helps with ENACTION, even if there were no larger abstraction?  i dunno
 
-    [SerializeField] public string name;
-    [SerializeField] public List<interactionAtom> atoms = new List<interactionAtom>();
+    public string name;
+    public List<interactionAtom> atoms = new List<interactionAtom>();
 
     public void doInteraction(interactionMate theInteractionMate)
     {
@@ -796,6 +910,8 @@ public class interactionMate
     public GameObject target2;
     public GameObject target3;
 
+    public GameObject clickedOn;
+
     public testInteraction enactThisInteraction;
 
 
@@ -851,6 +967,7 @@ public class interactionMate
         Debug.Log("target1:  " + target1);
         Debug.Log("target2:  " + target2);
         Debug.Log("target3:  " + target3);
+        Debug.Log("clickedOn:  " + clickedOn);
         Debug.Log("enactThisInteraction:  " + enactThisInteraction.name);
         Debug.Log("WWWWWWWWWWWWWWWWW    END printing interaction mate    WWWWWWWWWWWWWWWWW");
     }
