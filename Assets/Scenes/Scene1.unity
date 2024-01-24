@@ -624,8 +624,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputBoolSignal: 0
-  testThisFuckingInt: 0
-  testThisFuckingIntList: 
   preselectedHost: {fileID: 0}
   slotObjects: []
   targetToSelect: 
@@ -5567,8 +5565,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputBoolSignal: 0
-  testThisFuckingInt: 0
-  testThisFuckingIntList: 
   preselectedHost: {fileID: 0}
   slotObjects: []
   targetToSelect: 
@@ -5780,11 +5776,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thisNavMeshAgent: {fileID: 0}
-  testTarget: {fileID: 0}
   thePlanner: {fileID: 0}
+  body: {fileID: 0}
+  theSensorySystem: {fileID: 0}
   theInventory: {fileID: 0}
-  adhocPrereqFillerTest: []
+  testTarget: {fileID: 0}
   imGoinGTOLoseMyMInd: []
+  forgetfulnessTimer: 10
 --- !u!195 &1893941137
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -6284,6 +6282,8 @@ MonoBehaviour:
     type: 3}
   invisibleCubePrefab: {fileID: 832784894304381542, guid: 36b136b60ff1c2b44a7a3ceb1bd11060,
     type: 3}
+  interactionSphere: {fileID: 5953803115850116078, guid: 1a8a8b7ee725f3f42896f2e6d08dce8b,
+    type: 3}
   prefab4: {fileID: 0}
   prefab5: {fileID: 0}
   prefab6: {fileID: 0}
@@ -6406,8 +6406,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputBoolSignal: 0
-  testThisFuckingInt: 0
-  testThisFuckingIntList: 
   preselectedHost: {fileID: 0}
   slotObjects: []
   targetToSelect: 
