@@ -273,6 +273,12 @@ public class taggedWith : MonoBehaviour
             //Debug.Log(obj.name);
         }
 
+        if(theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
 
         int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
         GameObject thisObject;
@@ -281,7 +287,9 @@ public class taggedWith : MonoBehaviour
 
         while (numberOfTries > 0)
         {
+            //Debug.Log("list count is:  " + theList.Count);
             int randomIndex = Random.Range(0, theList.Count);
+            //Debug.Log("random index is:  " + randomIndex);
             thisObject = theList[randomIndex];
 
             if (thisObject != notTHISObject)

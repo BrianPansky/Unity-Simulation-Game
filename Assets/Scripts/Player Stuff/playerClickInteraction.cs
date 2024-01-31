@@ -286,19 +286,67 @@ public class playerClickInteraction : MonoBehaviour
 
         
         RaycastHit myHit;
-        Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);  //  COULD use this ray to ALSO update the "body1" lookingRay.  if i want to be more equivalent to NPCs
 
         //insert "grab" action [from BODY] here
 
-        //body.interactionScript.interactionDictionary
-        //      make interactionMate (or get one from dictionary, and fill in any details it leaves out)
-        string nameOfCurrentClickInteraction = "standardInteraction1";  //this should be generalized, so it always plugs in the right one
-        //interactionMate theInteractionMate = body.interactionScript.interactionDictionary[nameOfCurrentClickInteraction];
-        interactionMate theInteractionMate = new interactionMate();
-        theInteractionMate.interactionAuthor = this.gameObject;
-        theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
-        //theInteractionMate.printMate();
-        theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
+
+
+
+        //using same old code again?  why not?  well, needs ti be modified to have the "interactionType"
+        if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.transform != null)
+            {
+                //Debug.Log(myHit.transform.gameObject);
+                clickedOn = myHit.transform.gameObject;
+                GameObject thisObject = createPrefabAtPointAndRETURN(theInteractionSphere, myHit.point);
+
+
+                authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+                theAuthorScript.theAuthor = this.gameObject;
+                theAuthorScript.interactionType = "standardClick";
+
+            }
+        }
+
+
+        return clickedOn;
+
+
+
+
+
+
+
+
+        //.....newer "old"
+        if (true == false)
+        {
+            //body.interactionScript.interactionDictionary
+            //      make interactionMate (or get one from dictionary, and fill in any details it leaves out)
+            string nameOfCurrentClickInteraction = "standardInteraction1";  //this should be generalized, so it always plugs in the right one
+                                                                            //interactionMate theInteractionMate = body.interactionScript.interactionDictionary[nameOfCurrentClickInteraction];
+            interactionMate theInteractionMate = new interactionMate();
+            theInteractionMate.interactionAuthor = this.gameObject;
+
+
+
+
+            //          NEEDS TO BE FIXED
+            //theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
+
+
+
+
+
+            //theInteractionMate.printMate();
+            theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
+
+
+            return theInteractionMate.clickedOn;
+
+        }
 
 
         //old:
@@ -331,7 +379,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-        return theInteractionMate.clickedOn;
+        
     }
     
     void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)
