@@ -232,60 +232,77 @@ public class initialGenerator2 : MonoBehaviour
     void generateTestKey1()
     {
         GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestKey1");
-        myTest.AddComponent<interactionEffects1>();
+        interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(0.5f, 2, 0.5f);
         myTest.transform.position += new Vector3(0, 3, 3);
 
+        //theInteractionScript.listOfInteractions.Add("grabKey");
+        theInteractionScript.dictOfInteractions.Add("standardClick", "grabKey");
 
-        interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
-        //interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", atomLister(atoms["grabTestKey1Atom"]));
 
-        interactionMate mainInteractionMate = new interactionMate();
+        if (true == false)
+        {
 
-        mainInteractionMate.interactionAuthor = this.gameObject;
-        GameObject theWorldObject = GameObject.Find("World");
-        worldScript theWorldScript = theWorldObject.GetComponent<worldScript>();
-        initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
+            interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
+            //interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", atomLister(atoms["grabTestKey1Atom"]));
 
-        //.....why am i using an interactionMate in the initial generator???
-        //mainInteractionMate.enactThisInteraction = interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
+            interactionMate mainInteractionMate = new interactionMate();
 
-        testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justGrabIt");
+            mainInteractionMate.interactionAuthor = this.gameObject;
+            GameObject theWorldObject = GameObject.Find("World");
+            worldScript theWorldScript = theWorldObject.GetComponent<worldScript>();
+            initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
 
-        interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
+            //.....why am i using an interactionMate in the initial generator???
+            //mainInteractionMate.enactThisInteraction = interactionScriptOnGeneratedObject.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
+
+            testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justGrabIt");
+
+            interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
+
+        }
 
     }
     void generateTestLOCK1()
     {
         GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestLOCK1");
-        myTest.AddComponent<interactionEffects1>();
+        interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(1f, 2, 1f);
         myTest.transform.position += new Vector3(0, 0, -8);
 
-        interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
-        interactionScriptOnGeneratedObject.generateInteractionFULL(
-            "grabTestLOCK1",
-            atomLister(
-                generateInteractionAtomFULL(
-                    "grabTestLOCK1Atom",
-                    interactionSUBAtomLister(
-                        generateInteractionSUBAtomFULL(
-                            "grabTestLOCKSubAtom",
-                            stringLister("proximity0"
-                                ),
-                            stringLister(
-                                "grabTestLOCKSubAtomEffect1"
+        //theInteractionScript.listOfInteractions.Add("clickLock");
+        theInteractionScript.dictOfInteractions.Add("standardClick", "clickLock");
+
+
+
+        if (true == false)
+        {
+            interactionEffects1 interactionScriptOnGeneratedObject = myTest.GetComponent<interactionEffects1>();
+            interactionScriptOnGeneratedObject.generateInteractionFULL(
+                "grabTestLOCK1",
+                atomLister(
+                    generateInteractionAtomFULL(
+                        "grabTestLOCK1Atom",
+                        interactionSUBAtomLister(
+                            generateInteractionSUBAtomFULL(
+                                "grabTestLOCKSubAtom",
+                                stringLister("proximity0"
+                                    ),
+                                stringLister(
+                                    "grabTestLOCKSubAtomEffect1"
+                                    )
                                 )
                             )
                         )
                     )
-                )
-            );
+                );
 
 
-        testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justActivateLock");
+            testInteraction mainInteraction = interactionScriptOnGeneratedObject.generateInteraction("justActivateLock");
 
-        interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
+            interactionScriptOnGeneratedObject.interactionDictionary.Add("standardInteraction1", mainInteraction);
+
+        }
 
     }
 

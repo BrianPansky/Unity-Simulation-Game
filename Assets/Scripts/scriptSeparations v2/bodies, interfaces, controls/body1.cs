@@ -24,34 +24,60 @@ public class body1 : MonoBehaviour
 
 
     public worldScript theWorldScript;
-    public interactionEffects1 interactionScript;
+    public enactionScript enactionScript;
+    public interactionScript theInteractionScript;
 
 
     void Awake()
     {
-        this.gameObject.AddComponent<interactionEffects1>();
-        interactionScript = this.gameObject.GetComponent<interactionEffects1>();
+        this.gameObject.AddComponent<enactionScript>();
+        enactionScript = this.gameObject.GetComponent<enactionScript>();
+        enactionScript.availableEnactions.Add("walk");
+        enactionScript.availableEnactions.Add("navMeshWalk");
+        enactionScript.availableEnactions.Add("aim");
+        enactionScript.availableEnactions.Add("standardClick");
+
+        //"bullet1"
+        this.gameObject.AddComponent<interactionScript>();
+        theInteractionScript = this.gameObject.GetComponent<interactionScript>();
+        theInteractionScript.dictOfInteractions.Add("bullet1", "die");
+        //.Add("walk");
 
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
-        //interactionScript
+
+        if (true == false)
+        {
+            //this.gameObject.AddComponent<interactionEffects1>();
+            //interactionScript = this.gameObject.GetComponent<interactionEffects1>();
+
+            //GameObject theWorldObject = GameObject.Find("World");
+            //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+            //interactionScript
 
 
-        interactionMate mainInteractionMate = new interactionMate();
+            //interactionMate mainInteractionMate = new interactionMate();
 
-        mainInteractionMate.interactionAuthor = this.gameObject;
-        initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
+            //mainInteractionMate.interactionAuthor = this.gameObject;
+            //initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
 
 
-        //mainInteractionMate.enactThisInteraction = interactionScript.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
+            //mainInteractionMate.enactThisInteraction = interactionScript.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
 
-        testInteraction mainInteraction = interactionScript.generateInteraction("standardInteraction1");
+            //testInteraction mainInteraction = interactionScript.generateInteraction("standardInteraction1");
 
-        interactionScript.interactionDictionary.Add("doARegularClick", mainInteraction);
+            //interactionScript.interactionDictionary.Add("doARegularClick", mainInteraction);
 
-        testInteraction walkInteraction = interactionScript.generateInteraction("walkSomewhere");
+            //testInteraction walkInteraction = interactionScript.generateInteraction("walkSomewhere");
 
-        interactionScript.interactionDictionary.Add("walkSomewhere", walkInteraction);
+            //interactionScript.interactionDictionary.Add("walkSomewhere", walkInteraction);
+
+
+            //testInteraction hitByBullet = interactionScript.generateInteraction("hitByBullet");
+
+            //interactionScript.interactionDictionary.Add("bullet1", hitByBullet);
+        }
+        
     }
 
     // Start is called before the first frame update

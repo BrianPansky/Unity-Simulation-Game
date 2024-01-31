@@ -22,5 +22,8 @@ public class authorScript1 : MonoBehaviour
     void Update()
     {
         //Debug.Log("the author is:  "  + theAuthor.name);
+        //Debug.Log("the author is:  " + theAuthor);
+        //Debug.Log("authorScript is ON this object:  " + this.gameObject.name);
+        //Debug.Log("33333333333333333333333333333333333333333 the interactionType is:  " + interactionType);
     }
 }

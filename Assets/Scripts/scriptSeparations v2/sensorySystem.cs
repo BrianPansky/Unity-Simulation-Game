@@ -23,7 +23,7 @@ public class sensorySystem : MonoBehaviour
         target = theWorldScript.theTagScript.findXNearestToYExceptY("interactionEffects1", this.gameObject);
         //Debug.Log(target);
         //Debug.Log(theWorldScript);
-        if (theWorldScript.isThereAParentChildRelationshipHere(target, this.gameObject))
+        if (target != null && theWorldScript.isThereAParentChildRelationshipHere(target, this.gameObject))
         {
 
             target = theWorldScript.theTagScript.findSECONDNearestXToYExceptY("interactionEffects1", this.gameObject);

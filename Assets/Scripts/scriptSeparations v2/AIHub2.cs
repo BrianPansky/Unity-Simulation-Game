@@ -27,7 +27,10 @@ public class AIHub2 : MonoBehaviour
     public List<interactionMate> adhocPrereqFillerTest = new List<interactionMate>();
     public List<GameObject> imGoinGTOLoseMyMInd;
 
-    
+
+    public List<string> stringListToEnact = new List<string>();
+
+
 
     GameObject randomInteractionTarget;
 
@@ -85,14 +88,12 @@ public class AIHub2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("==================AAAAAAAAAAAA====================     START update for:  " + this.gameObject.name + "     ==================AAAAAAAAA=====================");
+        //Debug.Log("==================AAAAAAAAAAAA====================     START update for:  " + this.gameObject.name + "     ==================AAAAAAAAA=====================");
 
-
-        //ad hoc plan/action switching in some cases for now:
         if (forgetfulnessTimer == 0)
         {
             //forget whole plan, start again:
-            adhocPrereqFillerTest = new List<interactionMate>();
+            stringListToEnact = new List<string>();
 
             //reset timer:
             forgetfulnessTimer = 10;
@@ -103,111 +104,197 @@ public class AIHub2 : MonoBehaviour
         }
 
 
-        //Debug.Log("11111111111111111111111111111111111111111111111111111");
-
-        if (adhocPrereqFillerTest == null)
+        if (stringListToEnact.Count == 0 )
         {
-            //Debug.Log("''adhocPrereqFillerTest'' is null for this NPC:  " + this.gameObject.name);
-            //pickRandomNearbyInteractionAndTryIt();
-            newInteractionFunction();
-
-            //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            //Debug.Log(adhocPrereqFillerTest);
-            //Debug.Log(adhocPrereqFillerTest[0]);      right, this will ALWAYS be null error here!  we just tested for that!
-            
-
-        }
-        else if (adhocPrereqFillerTest.Count == 0)
-        {
-            //Debug.Log("''adhocPrereqFillerTest'' is EMPTY for this NPC:  " + this.gameObject.name);
-            //pickRandomNearbyInteractionAndTryIt();
-            newInteractionFunction();
-
-            //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-            //Debug.Log(adhocPrereqFillerTest);
-            //Debug.Log(adhocPrereqFillerTest[0]);
-            //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
-            //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
-        }
-        else
-        {
-            //Debug.Log("''adhocPrereqFillerTest'' has prereqFiller for the following NPC:  " + this.gameObject.name + ", so they should do them or plan to do them...");
-            //      ohhh this doesn't work.  the input to this function needs to be an OBJECT.
-            //      but what i have is a specific INTERACTION.
-            //      so, i need to grab what's needed, and maybe make a new function to do it properly
-            //      since the functions i made to find the interaction already presumably have access to the object, just modify those to return objects
-            //      then make an enaction "use" function that uses some interaction from an object.  somehow.  however that works.
-
-            //k i guess i sorta fixed that at some point?  i'm using an object now, right?  it works fine?
-            //Debug.Log(this.gameObject.name);
-            //Debug.Log(adhocPrereqFillerTest[0].interactionAuthor.name);
-
-            //interactionMate thisMate = new interactionMate();
-            //thisMate.interactionAuthor = this.gameObject;
-            //thisMate.target1 = randomInteractionTarget;
-
-            //tryRandomInteractionWithTarget(adhocPrereqFillerTest[0].target1, adhocPrereqFillerTest[0]);
-            //doThisInteractionOrPlanToDoIt(adhocPrereqFillerTest[0].forInteraction, adhocPrereqFillerTest[0]);
-            //adhocPrereqFillerTest = null;
-
-            //Debug.Log(adhocPrereqFillerTest);
-            //Debug.Log(adhocPrereqFillerTest[0]);
-            //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
-            //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
-
-            //if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]))
-            
-            
-
-
-
+            //need to randomly pick something to enact
+            stringListToEnact.Add(pickRandomEnactionONObject(this.gameObject));
         }
 
+        //then enact it:
+        body.enactionScript.stringEnaction(stringListToEnact[0]);
 
-        Debug.Log("prereqs met?");
-        if (adhocPrereqFillerTest[0].checkInteractionMatePrereqs())
+
+
+
+
+
+        if(true == false)
         {
-            Debug.Log("yes");
-            //ad-hoc aim for now
-            //theInteractionMate.target1
 
-            //Debug.Log(body);
-
-            if (adhocPrereqFillerTest[0].target1 != null)
+            //ad hoc plan/action switching in some cases for now:
+            if (forgetfulnessTimer == 0)
             {
-                adhocPrereqFillerTest[0].printMate();
-                Debug.DrawLine(new Vector3(0, 0, 0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
-                //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
-                body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
-                Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
-                //Debug.Log();
-                //adhocPrereqFillerTest[0].printMate();
+                //forget whole plan, start again:
+                adhocPrereqFillerTest = new List<interactionMate>();
 
-                adhocPrereqFillerTest[0].doThisInteraction();
-                //randomInteractionTarget = null;
+                //reset timer:
+                forgetfulnessTimer = 10;
             }
             else
             {
-                Debug.Log("this has no target:  " + adhocPrereqFillerTest[0].enactThisInteraction.name);
-                giveItARandomInteractableTarget(adhocPrereqFillerTest[0]);
-                adhocPrereqFillerTest[0].printMate();
-                Debug.DrawLine(new Vector3(0,0,0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
-                
-                //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
-                body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
-                Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
-                adhocPrereqFillerTest[0].doThisInteraction();
+                forgetfulnessTimer -= 1;
+            }
+
+
+
+
+
+
+
+
+            //Debug.Log("11111111111111111111111111111111111111111111111111111");
+
+            if (adhocPrereqFillerTest == null)
+            {
+                //Debug.Log("''adhocPrereqFillerTest'' is null for this NPC:  " + this.gameObject.name);
+                //pickRandomNearbyInteractionAndTryIt();
+                newInteractionFunction();
+
+                //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                //Debug.Log(adhocPrereqFillerTest);
+                //Debug.Log(adhocPrereqFillerTest[0]);      right, this will ALWAYS be null error here!  we just tested for that!
+
 
             }
+            else if (adhocPrereqFillerTest.Count == 0)
+            {
+                //Debug.Log("''adhocPrereqFillerTest'' is EMPTY for this NPC:  " + this.gameObject.name);
+                //pickRandomNearbyInteractionAndTryIt();
+                newInteractionFunction();
+
+                //Debug.Log("WHERE TEH FUCK IS THIS HAPPENEINGGGGGGGGGGGG BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                //Debug.Log(adhocPrereqFillerTest);
+                //Debug.Log(adhocPrereqFillerTest[0]);
+                //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
+                //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
+            }
+            else
+            {
+                //Debug.Log("''adhocPrereqFillerTest'' has prereqFiller for the following NPC:  " + this.gameObject.name + ", so they should do them or plan to do them...");
+                //      ohhh this doesn't work.  the input to this function needs to be an OBJECT.
+                //      but what i have is a specific INTERACTION.
+                //      so, i need to grab what's needed, and maybe make a new function to do it properly
+                //      since the functions i made to find the interaction already presumably have access to the object, just modify those to return objects
+                //      then make an enaction "use" function that uses some interaction from an object.  somehow.  however that works.
+
+                //k i guess i sorta fixed that at some point?  i'm using an object now, right?  it works fine?
+                //Debug.Log(this.gameObject.name);
+                //Debug.Log(adhocPrereqFillerTest[0].interactionAuthor.name);
+
+                //interactionMate thisMate = new interactionMate();
+                //thisMate.interactionAuthor = this.gameObject;
+                //thisMate.target1 = randomInteractionTarget;
+
+                //tryRandomInteractionWithTarget(adhocPrereqFillerTest[0].target1, adhocPrereqFillerTest[0]);
+                //doThisInteractionOrPlanToDoIt(adhocPrereqFillerTest[0].forInteraction, adhocPrereqFillerTest[0]);
+                //adhocPrereqFillerTest = null;
+
+                //Debug.Log(adhocPrereqFillerTest);
+                //Debug.Log(adhocPrereqFillerTest[0]);
+                //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction);
+                //Debug.Log(adhocPrereqFillerTest[0].enactThisInteraction.name);
+
+                //if (theWorldScript.theRespository.theInteractionEffects1.modularPrereqCheckBool(adhocPrereqFillerTest[0].enactThisInteraction, adhocPrereqFillerTest[0]))
+
+
+
+
+
+            }
+
+
+            Debug.Log("prereqs met?");
+            if (adhocPrereqFillerTest[0].checkInteractionMatePrereqs())
+            {
+                Debug.Log("yes");
+                //ad-hoc aim for now
+                //theInteractionMate.target1
+
+                //Debug.Log(body);
+
+                if (adhocPrereqFillerTest[0].target1 != null)
+                {
+                    //adhocPrereqFillerTest[0].printMate();
+                    //Debug.DrawLine(new Vector3(0, 0, 0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
+                    //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
+                    body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
+                    //Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.blue, 0.1f);
+
+                    //Debug.Log();
+                    //adhocPrereqFillerTest[0].printMate();
+
+                    adhocPrereqFillerTest[0].doThisInteraction();
+                    //randomInteractionTarget = null;
+                }
+                else
+                {
+                    Debug.Log("this has no target:  " + adhocPrereqFillerTest[0].enactThisInteraction.name);
+                    giveItARandomInteractableTarget(adhocPrereqFillerTest[0]);
+                    //adhocPrereqFillerTest[0].printMate();
+                    //Debug.DrawLine(new Vector3(0,0,0), adhocPrereqFillerTest[0].target1.transform.position, Color.green, 0.1f);
+
+                    //Debug.DrawLine(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
+                    body.lookingRay = new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
+                    //Debug.DrawRay(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position), Color.yellow, 0.1f);
+
+                    adhocPrereqFillerTest[0].doThisInteraction();
+
+                }
+
+            }
+
+
+            //goToWhicheverAvailableTarget();
 
         }
 
 
-        //goToWhicheverAvailableTarget();
-
-
-        Debug.Log("-----------////////////////////////-----------     END update for:  " + this.gameObject.name + "     -------------////////////////////////----------");
+        //Debug.Log("-----------////////////////////////-----------     END update for:  " + this.gameObject.name + "     -------------////////////////////////----------");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    public string pickRandomEnactionONObject(GameObject objectWithEnactions)
+    {
+        List<string> theAvailableEnactions = objectWithEnactions.GetComponent<enactionScript>().availableEnactions;
+
+
+
+
+        if (theAvailableEnactions.Count > 0)
+        {
+            return theAvailableEnactions[UnityEngine.Random.Range(0, theAvailableEnactions.Count)];
+        }
+        else
+        {
+            Debug.Log("there are zero items on the enactions available list for this object, but it's supposed to have enactions:  " + objectWithEnactions.name);
+            Debug.DrawLine(this.gameObject.GetComponent<Transform>().position, objectWithEnactions.GetComponent<Transform>().position, Color.red, 0.1f);
+            return null;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void giveItARandomInteractableTarget(interactionMate interactionMate)
     {
@@ -267,8 +354,15 @@ public class AIHub2 : MonoBehaviour
                 interactionMate theInteractionMate = new interactionMate();
                 theInteractionMate.interactionAuthor = this.gameObject;
                 theInteractionMate.target1 = randomInteractableObject;
-                
-                theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
+
+
+                //      "interactionScript" is no longer defined
+                //theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
+
+
+
+
+
                 //theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
 
                 //Debug.Log(adhocPrereqFillerTest);
