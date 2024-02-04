@@ -94,6 +94,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d04c89590023e643ae4255d39da60a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  theAuthor: {fileID: 0}
+  interactionType: 
 --- !u!135 &8932396487688968106
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -119,6 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62eadb461b96b7f43870674b68c4013d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  delay: 1
 --- !u!54 &-2012963312964018919
 Rigidbody:
   m_ObjectHideFlags: 0
