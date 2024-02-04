@@ -16,6 +16,11 @@ public class selfDestructScript1 : MonoBehaviour
     {
         if (delay == 0)
         {
+            //this.gameObject.transform.position = new Vector3(0, -500, 0);
+            Destroy(this.gameObject);
+        }
+        if (delay == -100)
+        {
             Destroy(this.gameObject);
         }
         delay -= 1;

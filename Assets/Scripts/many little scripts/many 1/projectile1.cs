@@ -25,7 +25,9 @@ public class projectile1 : MonoBehaviour
     {
         //technically, this is an interaction.  but whatever?  just put it here.
 
-        if (selfDestructOnCollision)
+
+
+        if (selfDestructOnCollision && other.gameObject.tag != "aMapZone")
         {
             Destroy(this.gameObject);
 

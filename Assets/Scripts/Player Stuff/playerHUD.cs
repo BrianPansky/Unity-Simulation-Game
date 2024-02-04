@@ -24,8 +24,10 @@ public class playerHUD : MonoBehaviour
     void Start()
     {
         theHub = GetComponent<AI1>();
-        theNPC0Hub = NPC0GameObject.GetComponent<AI1>();
-        //AI1 theTargetState = target.GetComponent("AI1") as AI1;
+
+
+        //      some NPC stuff is null error in scene 2, so removing for now:
+        //theNPC0Hub = NPC0GameObject.GetComponent<AI1>();
     }
 
     // Update is called once per frame
@@ -34,11 +36,13 @@ public class playerHUD : MonoBehaviour
         //not sure if I should do this once per frame here
         //or only update one time, right after clicking?
         //well, sometimes it might change for reasons besides clicking...
-        displayAllInventoryItems();
-        displayToDoList();
-        displayPlayerFakeGameReadout();
-        displayNPC0FakeGameReadout();
-        displayNPC0Inventory();
+
+        //      some NPC stuff is null error in scene 2, so removing for now [also in "start" function]:
+        //displayAllInventoryItems();
+        //displayToDoList();
+        //displayPlayerFakeGameReadout();
+        //displayNPC0FakeGameReadout();
+        //displayNPC0Inventory();
     }
 
     void displayAllInventoryItems()
@@ -123,7 +127,7 @@ public class playerHUD : MonoBehaviour
             }
             thePrintOut += "] ";
         }
-        
+
         thePrintOut += "]";
 
         textBox.GetComponent<Text>().text = thePrintOut;

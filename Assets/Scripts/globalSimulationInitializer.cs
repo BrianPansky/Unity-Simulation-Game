@@ -43,6 +43,14 @@ public class globalSimulationInitializer : MonoBehaviour
         leaderObjList.Add(GameObject.Find("NPC shopkeeper"));
         leaderObjList.Add(GameObject.Find("NPC shopkeeper (1)"));
         
+        //  ad-hoc check when i don't have all those NPCs
+        foreach(GameObject obj in leaderObjList) 
+        { 
+            if(obj == null)
+            {
+                return;
+            }
+        }
 
         //make them their OWN leaders:
         foreach (GameObject thisLeader in leaderObjList)

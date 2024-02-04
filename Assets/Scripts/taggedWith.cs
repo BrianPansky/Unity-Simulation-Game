@@ -23,7 +23,7 @@ public class taggedWith : MonoBehaviour
     worldScript theWorldScript;
 
 
-    public Dictionary<string, List<GameObject>> globalTags;
+    public Dictionary<string, List<GameObject>> globalTags = new Dictionary<string, List<GameObject>>();
 
     // Start is called before the first frame update
     void Awake()

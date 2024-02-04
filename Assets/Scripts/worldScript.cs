@@ -11,7 +11,13 @@ public class worldScript : MonoBehaviour
     //public List<GameObject> interactionLegibstration = new List<GameObject>();
     public int theTime;
 
-
+    public List<mapZoneScript> listOfMapZoneScripts = new List<mapZoneScript>();
+    public int numberOfMapZones;
+    public int currentMapZone = 0;
+    public int framesPerZone = 1;
+    public int currentZoneFrame = 0;
+    public int callableUpdatesPerZoneFrame = 7;
+    public int callableUpdateCounter = 0;
 
     //other scripts:
     //public AI1 thisAI;
@@ -24,9 +30,8 @@ public class worldScript : MonoBehaviour
     void Awake()
     {
         theTime = 0;
-
         //I'M JUST PLUGGING THIS IN [in the editor, right hand side] INSTEAD   theTagScript = this.gameObject.GetComponent<taggedWith>();
-        
+
     }
 
 
@@ -34,32 +39,57 @@ public class worldScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         theTagScript.addTag("worldObject");
 
-
+        numberOfMapZones = listOfMapZoneScripts.Count;
     }
 
     // Update is called once per frame
     void Update()
     {
+        numberOfMapZones = listOfMapZoneScripts.Count;
         timeIncrement();
-        //foreach(GameObject x in taggedStuff["interactive1"])
-        {
-            //Debug.Log(x.name);
-        }
-        //Debug.Log("====zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz=======");
 
-        /*
-        if (taggedStuff.ContainsKey("store"))
+        Debug.Log(currentMapZone);
+        Debug.Log(numberOfMapZones);
+
+        if (currentMapZone == numberOfMapZones)
         {
-            foreach(GameObject item in taggedStuff["store"])
+            currentMapZone = 1;
+            //numberOfMapZones = listOfMapZoneScripts.Count;
+        }
+        else
+        {
+            foreach (GameObject thisObject in listOfMapZoneScripts[currentMapZone - 1].theList)
             {
-                Debug.Log(item.name);
+                AIHub2 theHub = thisObject.GetComponent<AIHub2>();
+                if (theHub != null)
+                {
+                    while(callableUpdateCounter < callableUpdatesPerZoneFrame)
+                    {
+                        callableUpdateCounter++;
+                        theHub.callableUpdate();
+                    }
+                    callableUpdateCounter = 0;
+                    
+                }
             }
         }
-        */
         
-    }
+
+        if(currentZoneFrame == framesPerZone)
+        {
+            currentMapZone++;
+            currentZoneFrame = 0;
+        }
+        else
+        {
+            currentZoneFrame++;
+        }
+        
+
+}
 
     public void timeIncrement()
     {
