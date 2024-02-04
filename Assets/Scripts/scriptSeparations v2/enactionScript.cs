@@ -56,7 +56,7 @@ public class enactionScript : MonoBehaviour
         {
             //set lookingRay to a random target
             body1 theBody = this.gameObject.GetComponent<body1>();
-            theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject).transform.position - this.transform.position));
+            theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position - this.transform.position));
             //new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
 
         }
@@ -89,7 +89,7 @@ public class enactionScript : MonoBehaviour
             body1 theBody = this.gameObject.GetComponent<body1>();
             //theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject).transform.position - this.transform.position));
 
-            Vector3 targetVector = theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject).transform.position;
+            Vector3 targetVector = theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position;
             this.gameObject.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
         }
         if (stringToEnact == "shoot1")

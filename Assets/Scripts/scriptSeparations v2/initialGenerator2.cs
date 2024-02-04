@@ -66,13 +66,7 @@ public class initialGenerator2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        generateTestAgent1();
-
-        //generateTestTower1();
-
-        generateTestKey1();
-
-        generateTestLOCK1();
+        generateScene2();
 
     }
 
@@ -83,6 +77,61 @@ public class initialGenerator2 : MonoBehaviour
         
     }
 
+
+    void generateScene1()
+    {
+        generateTestAgent1();
+
+        //generateTestTower1();
+
+        generateTestKey1();
+
+        generateTestLOCK1();
+    }
+
+    void generateScene2()
+    {
+        //generateTestAgent1();
+        //generateTestAgent1();
+        //generateTestAgent1();
+
+
+
+        //generateTestTower1();
+
+        //generateTestKey1();
+
+        //generateTestLOCK1();
+
+        List<GameObject> objectList = new List<GameObject>();
+        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+
+        objectList.Add(returnTestAgent1());
+        objectList.Add(returnTestKey1());
+        objectList.Add(returnTestLOCK1());
+        objectList.Add(returnTestAgent1());
+        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(returnTestAgent1());
+        objectList.Add(returnTestKey1());
+        objectList.Add(returnTestLOCK1());
+        objectList.Add(returnTestAgent1());
+        
+        //returnTestKey1
+        //objectList.Add(testCube);
+        //objectList.Add(testCube);
+        //Debug.Log("=====================    begin generation    =====================");
+        int thisInitialXValue = -44;
+        int thisXValueSpaxing = 10;
+        int loopNumber = 0;
+        foreach (GameObject thisObject in objectList)
+        {
+            //Debug.Log(thisObject);
+            theRespository.placeOnLineAndDuplicate(thisObject, 111, 11, thisInitialXValue + thisXValueSpaxing*loopNumber);
+            loopNumber++;
+        }
+        
+
+    }
 
 
     void generateTestAgent1()
@@ -100,6 +149,26 @@ public class initialGenerator2 : MonoBehaviour
 
         //thisGameObject.transform.parent = yourParentObject.transform;
 
+    }
+
+    GameObject returnTestAgent1()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0,0,0), "returnTestAgent1");
+        
+        myTest.AddComponent<NavMeshAgent>();
+        myTest.AddComponent<AIHub2>();
+
+        return myTest;
+    }
+
+    GameObject returnTestLocation2()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestLocation2");
+
+        //myTest.AddComponent<NavMeshAgent>();
+        //myTest.AddComponent<AIHub2>();
+
+        return myTest;
     }
 
 
@@ -306,6 +375,34 @@ public class initialGenerator2 : MonoBehaviour
 
     }
 
+    GameObject returnTestKey1()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestKey1");
+        interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
+        myTest.transform.localScale = new Vector3(0.5f, 2, 0.5f);
+        //myTest.transform.position += new Vector3(0, 3, 3);
+
+        //theInteractionScript.listOfInteractions.Add("grabKey");
+        theInteractionScript.dictOfInteractions.Add("standardClick", "grabKey");
+
+        return myTest;
+
+    }
+    GameObject returnTestLOCK1()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "returnTestLOCK1");
+        interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
+        //myTest.transform.localScale = new Vector3(1f, 2, 1f);
+        //myTest.transform.position += new Vector3(0, 0, -8);
+
+        //theInteractionScript.listOfInteractions.Add("clickLock");
+        theInteractionScript.dictOfInteractions.Add("standardClick", "clickLock");
+
+
+
+        return myTest;
+
+    }
 
 
     void generateInteractionSlot1(Vector3 theLocation)

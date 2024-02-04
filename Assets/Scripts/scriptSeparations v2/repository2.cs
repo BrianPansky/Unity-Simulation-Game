@@ -12,6 +12,7 @@ public class repository2 : MonoBehaviour
     public GameObject placeHolderCubePrefab;
     public GameObject invisibleCubePrefab;
     public GameObject interactionSphere;
+    public GameObject mapZone2;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;
@@ -52,9 +53,9 @@ public class repository2 : MonoBehaviour
         GameObject toPrint = duplifier(thePrefab, thePoint);
 
 
-        if (toPrint.GetComponent<interactionEffects1>().interactionsAvailable == null)
+        //if (toPrint.GetComponent<interactionEffects1>().interactionsAvailable == null)
         {
-            Debug.Log("it's null");
+            //Debug.Log("it's null");
         }
         //Debug.Log(toPrint.GetComponent<interactionEffects1>().interactionsAvailable);
         //Debug.Log(toPrint.GetComponent<interactionEffects1>().interactionsAvailable.Count);
@@ -250,6 +251,70 @@ public class repository2 : MonoBehaviour
         //Debug.Log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr      END       rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
     }
 
+    public void placeDuplicatesOnLine2(GameObject theGameObject, int howMany, int theSpacing, int xValue)
+    {
+
+
+        foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
+        {
+            Vector3 fullPosition = thisPosition + new Vector3(xValue, 0, 0);
+            //Debug.Log("fullPosition x:  "+ fullPosition.x);
+            //Debug.Log("fullPosition y:  " + fullPosition.z);
+            createPrefabAtPoint(theGameObject, fullPosition);
+        }
+
+    }
+
+
+    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue)
+    {
+        bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
+
+        foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
+        {
+            Vector3 fullPosition = thisPosition + new Vector3(xValue, 0, 0);
+
+            if(needADuplicate == false)
+            {
+                theGameObject.transform.position = fullPosition;
+                needADuplicate = true;
+            }
+            else
+            {
+                //Debug.Log("fullPosition x:  "+ fullPosition.x);
+                //Debug.Log("fullPosition y:  " + fullPosition.z);
+                createPrefabAtPoint(theGameObject, fullPosition);
+            }
+            
+        }
+
+    }
+
+
+
+
+    List<Vector3> makeLinePattern1(int howMany, int theSpacing)
+    {
+        List <Vector3> thisList = new List <Vector3>();
+
+        int whichPositionWeAreOn = 0;
+
+        while (howMany > 0)
+        {
+            //Debug.Log(whichPositionWeAreOn);
+            thisList.Add(new Vector3(0,0, whichPositionWeAreOn*theSpacing));
+            whichPositionWeAreOn ++;
+            howMany--;
+        }
+
+        //foreach(Vector3 thisPosition in thisList) 
+        {
+            //Debug.Log(thisPosition.z);
+        }
+
+        return thisList;
+    }
+
 
     internal List<GameObject> makeListOfObjects(GameObject gameObject, int quantity)
     {
@@ -284,6 +349,23 @@ public class repository2 : MonoBehaviour
             //now clonify it.
             //call from old one, input new one.
             objectToDuplify.GetComponent<interactionEffects1>().clonify(thisInteractionEffects1);
+        }
+
+        interactionScript thisinteractionScript = theNewObject.GetComponent<interactionScript>();
+        if (thisinteractionScript != null)
+        {
+            //now clonify it.
+            //call from old one, input new one.
+            objectToDuplify.GetComponent<interactionScript>().clonify(thisinteractionScript);
+        }
+
+        mapZoneScript thisMapZoneScript = theNewObject.GetComponent<mapZoneScript>();
+        if (thisMapZoneScript != null)
+        {
+            //now clonify it.
+            //call from old one, input new one.
+
+            //objectToDuplify.GetComponent<mapZoneScript>().clonify(thisMapZoneScript);
         }
 
 

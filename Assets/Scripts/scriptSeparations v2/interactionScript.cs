@@ -34,7 +34,7 @@ public class interactionScript : MonoBehaviour
         {
 
             authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
-            Debug.Log("2222222222222the interaction type is:  " + theAuthorScript.interactionType);
+            //Debug.Log("2222222222222the interaction type is:  " + theAuthorScript.interactionType);
             if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType))
             {
                 string theDictEntry = dictOfInteractions[theAuthorScript.interactionType];
@@ -76,6 +76,7 @@ public class interactionScript : MonoBehaviour
                     //Debug.Log(UnityEngine);
                     //Debug.Log(UnityEngine.Object);
                     UnityEngine.Object.Destroy(this.gameObject.GetComponent<AIHub2>());
+                    UnityEngine.Object.Destroy(this.gameObject.GetComponent<interactionScript>());
                 }
 
 
@@ -111,5 +112,15 @@ public class interactionScript : MonoBehaviour
     }
 
 
+
+    public void clonify(interactionScript blankScriptToFill)
+    {
+        foreach (string thisKey in dictOfInteractions.Keys)
+        {
+            blankScriptToFill.dictOfInteractions[thisKey] = dictOfInteractions[thisKey];
+        }
+
+
+    }
 
 }
