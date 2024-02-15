@@ -37,6 +37,11 @@ public class interactionScript : MonoBehaviour
             //Debug.Log("2222222222222the interaction type is:  " + theAuthorScript.interactionType);
             if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType))
             {
+                //      quick way to see effects from far away for testing:
+                //this.gameObject.transform.localScale = new Vector3(1f, 44, 1f);
+
+
+
                 string theDictEntry = dictOfInteractions[theAuthorScript.interactionType];
                 
                 //Debug.Log("the corrosponding interaction dictionary entry is:  " + theDictEntry);
@@ -46,9 +51,16 @@ public class interactionScript : MonoBehaviour
                     if (theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") == true)
                     {
                         this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 1f);
+                        Vector3 p1 = this.gameObject.transform.position;
+                        Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                        Debug.DrawLine(p1, p2, new Color(1f, 0f, 1f), 9999f);
+
+                        //Debug.DrawLine(this.gameObject.transform.position, enactionTarget.transform.position, Color.blue, 0.9f);
 
                         enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                         theEnactionScript.availableEnactions.Add("shoot1");
+
+                        //theAuthorScript.theAuthor.transform.localScale = new Vector3(1f, 22, 1f);
 
                         if (true == false)
                         {
@@ -66,13 +78,21 @@ public class interactionScript : MonoBehaviour
                 if (theDictEntry == "grabKey")
                 {
                     this.gameObject.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
+                    Vector3 p1 = this.gameObject.transform.position;
+                    Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                    Debug.DrawLine(p1, p2, new Color(0f, 1f, 0f), 9999f);
 
                     theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
+                    
                 }
 
                 if (theDictEntry == "die")
                 {
                     Debug.Log("this SHOULD destroy the AI...................................................................................................................................................");
+                    Vector3 p1 = this.gameObject.transform.position;
+                    Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                    Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
+
                     //Debug.Log(UnityEngine);
                     //Debug.Log(UnityEngine.Object);
                     UnityEngine.Object.Destroy(this.gameObject.GetComponent<AIHub2>());

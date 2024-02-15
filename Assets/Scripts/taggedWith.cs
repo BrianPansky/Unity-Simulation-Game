@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class taggedWith : MonoBehaviour
 {
@@ -1243,6 +1244,248 @@ public class taggedWith : MonoBehaviour
     }
 
 
-    
+    public List<List<GameObject>> nearestXNumberOfYToZExceptYAndTheRemainder(int howManyCloseOnesWeWant, List<GameObject> listOfALLObjects, GameObject objectWeWantItClosestTo)
+    {
+        //Debug.Log(":::::::::::::::::::::::::::::::::nearestXNumberOfYToZExceptYAndTheRemainder:::::::::::::::::::::::::::::::::::");
+        //Debug.Log("listOfALLObjects.Count:  " + listOfALLObjects.Count);
+        //Debug.Log("howManyCloseOnesWeWant:  " + howManyCloseOnesWeWant);
+        //  returns a list with ONLY TWO items:
+        //          item#1 is a list of the near objects
+        //          item#2 is a list of the far objects
+        List<List<GameObject>> twoLists = new List<List<GameObject>>();
+        List<GameObject> listOfNearObjects = new List<GameObject>();
+        List<GameObject> listOfFarObjects = new List<GameObject>();
+
+        //Dictionary<float, GameObject> dictionaryOfObjectsByDistance = new Dictionary<float, GameObject>();
+        //Dictionary<GameObject, float> dictionaryOfObjectsByDistance = new Dictionary<GameObject, float>();
+        Dictionary<int, GameObject> dictionaryOfObjects = new Dictionary<int, GameObject>();
+        Dictionary<int, float> dictionaryOfDistances = new Dictionary<int, float>();
+
+
+
+        int currentObjectNumber = 0;
+
+        foreach (GameObject thisObject in listOfALLObjects)
+        {
+            //dictionaryOfObjectsByDistance.Add(thisObject, distanceBetween(thisObject, objectWeWantItClosestTo));
+
+            dictionaryOfObjects.Add(currentObjectNumber, thisObject);
+            dictionaryOfDistances.Add(currentObjectNumber, distanceBetween(thisObject, objectWeWantItClosestTo));
+
+            currentObjectNumber++;
+        }
+        //Debug.Log("dictionaryOfObjects.Keys.Count:  " + dictionaryOfObjects.Keys.Count);
+        //Debug.Log("dictionaryOfDistances.Keys.Count:  " + dictionaryOfDistances.Keys.Count);
+
+        //List<int> theDictKeys = new List<int>().AddRange();
+
+        List<int> theRanking = rankThisMess(dictionaryOfObjects,dictionaryOfDistances);
+        
+        //Debug.Log("theRanking.Count:  " + theRanking.Count);
+
+        //      so, now we should have the list of keys ranked in order of which corrosponding object is closest
+        //      now, split the list
+        //          but also need to exclude specific object IF it appears ANYWHERE on either list.  just skip it.  easy
+
+        currentObjectNumber = 0;
+        foreach (int thisKey in theRanking)
+        {
+            if (dictionaryOfObjects[thisKey] != objectWeWantItClosestTo)
+            {
+                currentObjectNumber++;
+                //Debug.Log("currentObjectNumber:  " + currentObjectNumber);
+                //Debug.Log("howManyCloseOnesWeWant:  " + howManyCloseOnesWeWant);
+                //Debug.Log("howManyCloseOnesWeWant + 1:  " + (howManyCloseOnesWeWant + 1));
+                if (currentObjectNumber < howManyCloseOnesWeWant + 1)
+                {
+                    listOfNearObjects.Add(dictionaryOfObjects[thisKey]);
+                }
+                else
+                {
+                    listOfFarObjects.Add(dictionaryOfObjects[thisKey]);
+                }
+            }
+        }
+
+
+
+        //Debug.Log("listOfNearObjects.Count:  " + listOfNearObjects.Count);
+        //Debug.Log("listOfFarObjects.Count:  " + listOfFarObjects.Count);
+
+        twoLists.Add(listOfNearObjects);
+        twoLists.Add(listOfFarObjects);
+
+        return twoLists;
+    }
+
+    public List<int> rankThisMess(Dictionary<int, GameObject> dictionaryOfObjects, Dictionary<int, float> dictionaryOfDistances)
+    {
+        List<int> theRanking = new List<int>();
+        int numberOfRanks = 0;
+
+        foreach (int thisKey in dictionaryOfDistances.Keys)
+        {
+            //Debug.Log("current dict key:  " + thisKey);
+            numberOfRanks++;  //is this NOT redundant?  don't i just need to know the count of "theRanking"?
+
+            if (theRanking.Count == 0)
+            {
+                //it's the first rank by default
+                theRanking.Add(thisKey);
+            }
+            else
+            {
+                //have to actaully rank this....key....
+                theRanking = thisMess(theRanking, dictionaryOfObjects, dictionaryOfDistances, thisKey);
+
+            }
+        }
+
+        return theRanking;
+    }
+
+    public List<int> thisMess(List<int> theRanking, Dictionary<int, GameObject> dictionaryOfObjects, Dictionary<int, float> dictionaryOfDistances, int thisKey)
+    {
+        //this function determines where the "current" distance [grabbed from the "dictionaryOfDistances", using the "thisKey"]
+        //ranks among all of the other distances that have been ranked so far.
+        //if it's worse than any of the ones ranked so far, it is added to the END of the ranking
+        bool lookingForPosition = true;
+
+        //create one index for each entry in "theRanking" [the list of keys ranked by object distance]
+        List<int> listOfRankIndexes = new List<int>();
+        int indexCounter = 0;
+        while (indexCounter < theRanking.Count)
+        {
+            listOfRankIndexes.Add(indexCounter);
+            indexCounter++;
+        }
+        if (true == false)
+        {
+            //while (indexCounter < numberOfRanks - 1)
+            {
+                //listOfRankIndexes.Add(indexCounter);
+                //indexCounter++;
+            }
+        }
+        
+
+
+
+        //Debug.Log("66666666666666666 numberOfRanks:  " + numberOfRanks);
+        //Debug.Log("66666666666666666 listOfRankIndexes.Count:  " + listOfRankIndexes.Count);
+        //foreach (int index in listOfRankIndexes)
+        {
+            //Debug.Log("7777777777777777 thisIndex:  " + index);
+        }
+        //Debug.Log("66666666666666666 numberOfRanks:  " + theRanking.Count);
+        //foreach (int rank in theRanking)
+        {
+            //Debug.Log("7777777777777777 this rank:  " + rank);
+        }
+        //Debug.Log("listOfRankIndexes:  " + thisIndex);
+
+        //Debug.Log("88888888888888888 ok this part 88888888888888888");
+
+
+
+        //      so.....compare current distance (dictionaryOfDistances[thisKey]) against every single other distance that has been ranked so far,
+        //      until i find one it is better than [then STOP the loop!]
+        int needToKnowTheIndexForTheTheRankingList = 0;
+        foreach (int otherDistanceThatHasBeenRankedSoFarKey in theRanking)
+        {
+            //Debug.Log("dictionaryOfDistances[thisKey]:  " + dictionaryOfDistances[thisKey]);
+            //Debug.Log("dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey]:  " + dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey]);
+            if (dictionaryOfDistances[thisKey] < dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey])
+            {
+                
+
+                //theRanking[thisIndex]
+                theRanking.Insert(needToKnowTheIndexForTheTheRankingList, thisKey);
+                lookingForPosition = false;
+                break;
+            }
+
+            needToKnowTheIndexForTheTheRankingList++;
+        }
+
+        if(true == false)
+        {
+            foreach (int thisIndex in listOfRankIndexes)
+            {
+                //Debug.Log("9999999999999999999999 thisIndex:  " + thisIndex);
+                //Debug.Log("9999999999999999999999 listOfRankIndexes.Count:  " + listOfRankIndexes.Count);
+
+                //new List<int>.AddRange(theRanking.Count)
+                //Debug.Log("dictionaryOfDistances[thisKey]:  " + dictionaryOfDistances[thisKey]);
+                //Debug.Log("thisIndex:  " + thisIndex);
+                //Debug.Log("theRanking[thisIndex]:  " + theRanking[thisIndex]);//        THIS is the one that is out of range!  for index = 1
+                //Debug.Log("dictionaryOfDistances[theRanking[thisIndex]]:  " + dictionaryOfDistances[theRanking[thisIndex]]);
+                if (dictionaryOfDistances[thisKey] < dictionaryOfDistances[theRanking[thisIndex]])
+                {
+                    //theRanking[thisIndex]
+                    theRanking.Insert(thisIndex, thisKey);
+                    lookingForPosition = false;
+                }
+            }
+        }
+        
+
+        //if it wasn't better than any of the ones ranked so far, add it to the end of the list:
+        if (lookingForPosition)
+        {
+            //no position was found, append this key to the end of list
+            theRanking.Add(thisKey);
+        }
+
+        return theRanking;
+    }
+
+    public float distanceBetween(GameObject object1, GameObject object2)
+    {
+        Vector3 theVectorBetweenXandZ = object1.transform.position - object2.transform.position;
+        return theVectorBetweenXandZ.sqrMagnitude;
+    }
+
+
+    public GameObject semiRandomUsuallyNearTargetPicker(GameObject objectWeWantItClosestTo)
+    {
+        List<GameObject> potentialTargets = ALLTaggedWithMultiple("interactable");
+        potentialTargets = nearestXNumberOfYToZExceptYAndTheRemainder(4, potentialTargets, objectWeWantItClosestTo)[0];
+
+        //just to allow a far away one sometimes:
+        potentialTargets.Add(pickRandomObjectFromListEXCEPT(potentialTargets, objectWeWantItClosestTo));
+        GameObject theTarget = randomObjectFromList(potentialTargets);
+        return theTarget;
+
+
+
+        //theWorldScript.theTagScript
+        //List<GameObject> ALLTaggedWithMultiple
+        //nearestXNumberOfYToZExceptYAndTheRemainder
+        //randomObjectFromList
+    }
+
+    public GameObject semiRandomUsuallyNearTargetPickerFromList(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
+    {
+        //List<GameObject> potentialTargets = ALLTaggedWithMultiple("interactable");
+        List<GameObject> potentialTargets = new List<GameObject>();
+        List<List<GameObject>> nearAndFarTargets = nearestXNumberOfYToZExceptYAndTheRemainder(6, listOfObjects, objectWeWantItClosestTo);
+
+        //just to allow a far away one sometimes:
+        potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[0], objectWeWantItClosestTo));
+        potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[1], objectWeWantItClosestTo));
+        potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[1], objectWeWantItClosestTo));
+        potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[1], objectWeWantItClosestTo));
+        GameObject theTarget = randomObjectFromList(potentialTargets);
+        //GameObject theTarget = randomObjectFromList(listOfObjects);
+        return theTarget;
+
+
+
+        //theWorldScript.theTagScript
+        //List<GameObject> ALLTaggedWithMultiple
+        //nearestXNumberOfYToZExceptYAndTheRemainder
+        //randomObjectFromList
+    }
 
 }

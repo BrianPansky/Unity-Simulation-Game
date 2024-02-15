@@ -12,6 +12,7 @@ public class repository2 : MonoBehaviour
     public GameObject placeHolderCubePrefab;
     public GameObject invisibleCubePrefab;
     public GameObject interactionSphere;
+    public GameObject invisiblePoint;
     public GameObject mapZone2;
     public GameObject prefab4;
     public GameObject prefab5;
@@ -380,15 +381,10 @@ public class repository2 : MonoBehaviour
 
     public bool isXCloserThanYToZ(GameObject objectX, GameObject objectY, GameObject objectZ)
     {
-        Vector3 theVectorBetweenXandZ = objectX.transform.position - objectZ.transform.position;
-        float distanceToX = theVectorBetweenXandZ.sqrMagnitude;
+        float distanceToX = distanceBetween(objectX, objectZ);
 
-        Vector3 theVectorBetweenYandZ = objectY.transform.position - objectZ.transform.position;
-        float distanceToY = theVectorBetweenYandZ.sqrMagnitude;
+        float distanceToY = distanceBetween(objectY, objectZ);
 
-        Debug.Log("distances");
-        Debug.Log(distanceToX);
-        Debug.Log(distanceToY);
 
         if (distanceToX > distanceToY)
         {
@@ -402,6 +398,11 @@ public class repository2 : MonoBehaviour
     }
 
 
+    public float distanceBetween(GameObject object1, GameObject object2)
+    {
+        Vector3 theVectorBetweenXandZ = object1.transform.position - object2.transform.position;
+        return theVectorBetweenXandZ.sqrMagnitude;
+    }
 
 
 }

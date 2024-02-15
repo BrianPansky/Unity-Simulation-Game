@@ -17,34 +17,39 @@ public class body1 : MonoBehaviour
     //grab?  i guess.  without a body, even an NPC can't grab anything?
     //use items?
 
+    //public GameObject pointerPoint;
+    //public Vector3 pointerOrigin;
 
     public Vector3 lookingVector;
     public Ray lookingRay;
 
-
+    public float standardClickDistance = 7.0f;
 
     public worldScript theWorldScript;
-    public enactionScript enactionScript;
+    public enactionScript theEnactionScript;
     public interactionScript theInteractionScript;
+    public mapZoneScript theLocalMapZoneScript;
 
 
     void Awake()
     {
-        this.gameObject.AddComponent<enactionScript>();
-        enactionScript = this.gameObject.GetComponent<enactionScript>();
-        enactionScript.availableEnactions.Add("walk");
-        enactionScript.availableEnactions.Add("navMeshWalk");
-        enactionScript.availableEnactions.Add("aim");
-        enactionScript.availableEnactions.Add("standardClick");
-
-        //"bullet1"
-        this.gameObject.AddComponent<interactionScript>();
-        theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-        theInteractionScript.dictOfInteractions.Add("bullet1", "die");
-        //.Add("walk");
 
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+
+
+
+
+
+
+        this.gameObject.AddComponent<enactionScript>();
+        theEnactionScript = this.gameObject.GetComponent<enactionScript>();
+        theEnactionScript.theBody = this;
+        //enactionScript.availableEnactions.Add("walk");
+        theEnactionScript.availableEnactions.Add("navMeshWalk");
+        theEnactionScript.availableEnactions.Add("aim");
+        theEnactionScript.availableEnactions.Add("standardClick");
+
 
         if (true == false)
         {
@@ -83,21 +88,39 @@ public class body1 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
+        //Debug.Log("pointerPoint:  " + pointerPoint);
+
+        //GameObject myTest2 = theWorldScript.theRespository.createAndReturnPrefabAtPointWITHNAME(theWorldScript.theRespository.invisiblePoint, this.gameObject.transform.position + new Vector3(0, 0, 0.8f), this.gameObject.name + "pointer");
+
+        //myTest2.transform.SetParent(this.gameObject.transform, true);
+        //pointerPoint = myTest2;
+        //pointerOrigin = this.gameObject.transform.position + new Vector3(0, 0, 0.8f);
+
+        //Debug.Log("pointerPoint:  " + pointerPoint);
+
+        //"bullet1"
+        this.gameObject.AddComponent<interactionScript>();
+        theInteractionScript = this.gameObject.GetComponent<interactionScript>();
+        theInteractionScript.dictOfInteractions = new Dictionary<string, string>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+        theInteractionScript.dictOfInteractions.Add("bullet1", "die");
+        //.Add("walk");
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-
-
 
 
     }
 
 
 
+    public Vector3 pointerOrigin()
+    {
+        //couldn't store this relative position, soooo just generate it when needed >.<
+        return this.gameObject.transform.position + new Vector3(0, 0, 0.69f);
+    }
 
 
 }

@@ -9,16 +9,21 @@ using static UnityEngine.GraphicsBuffer;
 
 public class AIHub2 : MonoBehaviour
 {
+    public bool printWTFThisNPCDoin = false;
+
     private worldScript theWorldScript;
     public NavMeshAgent thisNavMeshAgent;
+    public GameObject savedNavMeshTarget;
     public planningAndImagination thePlanner;
 
     public body1 body;
+    int myDelay = 0;
 
     //i should move these to the BODY:
     public sensorySystem theSensorySystem;
     public inventory1 theInventory;
 
+    public List<enactionMate> currentPlan = new List<enactionMate>();
 
     private Vector3 mytest;
     public GameObject testTarget;
@@ -33,13 +38,27 @@ public class AIHub2 : MonoBehaviour
 
     GameObject randomInteractionTarget;
 
-    public int forgetfulnessTimerEndpoint = 3;
+    int forgetfulnessTimerEndpoint = 1112;
+    int triesBeforeDeletingClickActionsEndPoint = 812;
+    int currentTry = 0;
     public int forgetfulnessTimerCurrent = 0;
+    int framesNOTinTransitBeforeDumpingAction = 2;  //super ad hoc, just don't want them sitting there if they targeted an NPC to click on, but the NPC has since moved to a different location.  yes maybe they should follow, but whatever
+    int currentFramesNOTinTransit = 0;
+
+    int shortPeriodicalEndpoint = 7;
+    int currentPeriodicalPoint = 0;
 
 
     //          NO LONGER USED:
-    public int forgetfulnessTimer = 10;
+    public int forgetfulnessTimer = 1;
 
+
+    void Awake()
+    {
+        this.gameObject.AddComponent<body1>();
+        body = this.gameObject.GetComponent<body1>();
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -53,6 +72,7 @@ public class AIHub2 : MonoBehaviour
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
+        //body.pointerPoint = pointerPointToPutOnBody;
 
 
         //no, no, no, don't "get" component, CREATE it!
@@ -69,8 +89,7 @@ public class AIHub2 : MonoBehaviour
         this.gameObject.AddComponent<inventory1>();
         theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
 
-        this.gameObject.AddComponent<body1>();
-        body = this.gameObject.GetComponent<body1>();
+        
 
         if(true == false)
         {
@@ -95,7 +114,16 @@ public class AIHub2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(true == false)
+        //navmeshStopping1();
+        //Debug.Log("body:  " + body);
+        //Debug.Log("body.theLocalMapZoneScript:  " + body.theLocalMapZoneScript);
+        //if (body.theLocalMapZoneScript != null && body.theLocalMapZoneScript.isItThisZonesTurn)
+        {
+            //Debug.Log("???????????????????????????????????????????????????????????????????");
+            //callableUpdate();
+        }
+
+        if (true == false)
         {
             //Debug.Log("==================AAAAAAAAAAAA====================     START update for:  " + this.gameObject.name + "     ==================AAAAAAAAA=====================");
 
@@ -120,7 +148,7 @@ public class AIHub2 : MonoBehaviour
             }
 
             //then enact it:
-            body.enactionScript.stringEnaction(stringListToEnact[0]);
+            body.theEnactionScript.stringEnaction(stringListToEnact[0]);
 
 
 
@@ -264,9 +292,41 @@ public class AIHub2 : MonoBehaviour
     }
 
 
-    public void callableUpdate()
+    public void navmeshStopping1()
     {
 
+        if (myDelay == 0)
+        {
+            thisNavMeshAgent.acceleration = 8;
+            thisNavMeshAgent.speed = 7;
+            myDelay = 2;
+        }
+        else if (myDelay == 4)
+        {
+            thisNavMeshAgent.ResetPath();
+            thisNavMeshAgent.isStopped = true;
+            myDelay = 0;
+        }
+        myDelay--;
+
+    }
+
+    public void navmeshSpeeding1()
+    {
+        thisNavMeshAgent.isStopped = false;
+        myDelay = 6;
+        thisNavMeshAgent.acceleration = 180;
+        thisNavMeshAgent.speed = 70;
+    }
+
+    public void callableUpdate()
+    {
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("$$$$$$$$$$$$$$$$$$$$$$       BEGIN CALLABLE UPDATE       $$$$$$$$$$$$$$$$$$$$$$$$");
+        }
+
+        //navmeshSpeeding1();
         if (forgetfulnessTimerCurrent == 0)
         {
             //forget whole plan, start again:
@@ -274,6 +334,15 @@ public class AIHub2 : MonoBehaviour
 
             //reset timer:
             forgetfulnessTimerCurrent = forgetfulnessTimerEndpoint;
+            //ya, ad-hoc:
+            if(currentPlan.Count > 0)
+            {
+                if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
+                {
+                    Debug.Log("forgetfulnessTimerCurrent hit zero           for standardClick on returnTestLOCK1(Clone)");
+                }
+                currentPlan.RemoveAt(0);
+            }
         }
         else
         {
@@ -281,6 +350,239 @@ public class AIHub2 : MonoBehaviour
         }
 
 
+
+        
+
+        //justPickAnAbilityAndFireIt();
+
+        //Debug.Log("do planFiller1");
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("do planFiller1");
+        }
+        planFiller1();
+
+        //Debug.Log("do enactNext");
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("do enactNext");
+        }
+        enactNext();
+        //navmeshStopping1();
+    }
+
+    public void planFiller1()
+    {
+        //Debug.Log("planFiller1 START");
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("planFiller1 START");
+        }
+
+
+        if (currentPlan.Count == 0)
+        {
+            currentPlan = pickSomethingToInteractWithAndPlanToTryIt();
+        }
+
+        //Debug.Log("planFiller1 END");
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("planFiller1 END");
+        }
+    }
+
+    public void enactNext()
+    {
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("enactNext START");
+            Debug.Log("currentPlan:  " + currentPlan);
+            Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+        }
+        //Debug.Log("enactNext START");
+
+        //Debug.Log("currentPlan:  " + currentPlan);
+        //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+
+        if (currentPlan[0] != null)
+        {
+
+            //int shortPeriodicalEndpoint = 5;
+            //int currentPeriodicalPoint = 0;
+            
+
+            //if (currentPlan[0].inTransit == true)
+            
+            
+
+            if (printWTFThisNPCDoin)
+            {
+                Debug.Log("currentPlan[0] != null, so go ahead and enact it");
+            }
+            currentPlan[0].enact();
+            if (printWTFThisNPCDoin)
+            {
+                Debug.Log("should be done enacting, deleteThisEnaction? " + currentPlan[0].deleteThisEnaction);
+            }
+            //triesBeforeDeletingClickActions
+            if (currentPlan[0].deleteThisEnaction == true)
+            {
+                if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
+                {
+                    Debug.Log("currentPlan[0].deleteThisEnaction == true           for standardClick on returnTestLOCK1(Clone)");
+                }
+                
+                if (printWTFThisNPCDoin)
+                {
+                    Debug.Log("yes");
+                    Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+                }
+                currentPlan.RemoveAt(0);
+                currentPeriodicalPoint = 0;
+                if (printWTFThisNPCDoin)
+                {
+                    Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+                }
+            }
+            else if (currentPlan[0].didATry == true) 
+            {
+                currentPlan[0].didATry = false;
+                currentTry++;
+                if(currentTry == triesBeforeDeletingClickActionsEndPoint)
+                {
+                    if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
+                    {
+                        Debug.Log("currentTry == triesBeforeDeletingClickActionsEndPoint           for standardClick on returnTestLOCK1(Clone)");
+                    }
+
+                    currentTry = 0;
+                    currentPlan.RemoveAt(0);
+                    currentPeriodicalPoint = 0;
+                    
+                }
+                //int triesBeforeDeletingClickActionsEndPoint = 12;
+                //int currentTry = 0;
+            }
+        }
+
+
+
+        if (currentPeriodicalPoint == shortPeriodicalEndpoint)
+        {
+            currentPeriodicalPoint = 0;
+            if (thisNavMeshAgent.velocity.sqrMagnitude == 0)
+            {
+                currentFramesNOTinTransit++;
+                if (currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction)
+                {
+
+                    if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
+                    {
+                        Debug.Log("currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction           for standardClick on returnTestLOCK1(Clone)");
+                    }
+
+                    currentPlan.RemoveAt(0);
+
+
+
+
+                    currentFramesNOTinTransit = 0;
+                    //currentPlan[0].deleteThisEnaction = true;
+                }
+            }
+        }
+        else
+        {
+            currentPeriodicalPoint++;
+        }
+
+
+        //Debug.Log("currentPlan:  " + currentPlan);
+        //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+        //Debug.Log("enactNext END");
+        if (printWTFThisNPCDoin)
+        {
+            Debug.Log("enactNext END");
+            Debug.Log("currentPlan:  " + currentPlan);
+            Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+        }
+    }
+
+
+    public List<enactionMate> pickSomethingToInteractWithAndPlanToTryIt()
+    {
+        GameObject theTarget = semiRandomTargetPicker();
+        List<enactionMate> newPlan = new List<enactionMate>();
+
+        //how to know if it has a proximity "prereq"?
+        
+        //for now, don't know.  just stick POINTING at that?
+
+        //whatever, very ad-hoc for now:
+        if(theWorldScript.theTagScript.distanceBetween(theTarget, this.gameObject) > (body.standardClickDistance)*0.7f)
+        {
+            //so, plan to walk there FIRST, thennnn click
+            newPlan.Add(makeSimpleEnactionMate("navMeshWalk", theTarget));
+            newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+            newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
+        }
+        else
+        {
+            //so, easy, just click it
+            newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+            newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
+        }
+
+        return newPlan;
+    }
+
+
+    public enactionMate makeSimpleEnactionMate(string enactThis, GameObject enactionTarget)
+    {
+        enactionMate newEnactionMate = new enactionMate();
+        newEnactionMate.enactionAuthor = this.gameObject;
+        newEnactionMate.enactionBody = body;
+        newEnactionMate.enactThis = enactThis;
+        newEnactionMate.enactionTarget = enactionTarget;
+
+        return newEnactionMate;
+    }
+
+
+    public GameObject semiRandomTargetPicker()
+    {
+        //List<GameObject> potentialTargets = theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable");
+
+        List<List<GameObject>> ALLpotentialTargetsSORTED = theWorldScript.theTagScript.nearestXNumberOfYToZExceptYAndTheRemainder(4, body.theLocalMapZoneScript.theList, this.gameObject);
+        //theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
+        List<GameObject> potentialTargets = new List<GameObject>();
+        //potentialTargets = theWorldScript.theTagScript.nearestXNumberOfYToZExceptYAndTheRemainder(4, potentialTargets, this.gameObject)[0];
+
+        //just to allow a far away one sometimes:
+
+        //potentialTargets.Add(theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(potentialTargets, this.gameObject));
+        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[0]));
+        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[0]));
+        //potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
+        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
+        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
+        GameObject theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
+        //GameObject theTarget = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
+        return theTarget;
+
+
+        //Debug.Log("body.theLocalMapZoneScript:  " + body.theLocalMapZoneScript);
+        //theWorldScript.theTagScript
+        //List<GameObject> ALLTaggedWithMultiple
+        //nearestXNumberOfYToZExceptYAndTheRemainder
+        //randomObjectFromList
+    }
+
+
+
+    void justPickAnAbilityAndFireIt()
+    {
         if (stringListToEnact.Count == 0)
         {
             //need to randomly pick something to enact
@@ -288,15 +590,9 @@ public class AIHub2 : MonoBehaviour
         }
 
         //then enact it:
-        body.enactionScript.stringEnaction(stringListToEnact[0]);
-
-
-
+        body.theEnactionScript.stringEnaction(stringListToEnact[0]);
 
     }
-
-
-
 
 
 
