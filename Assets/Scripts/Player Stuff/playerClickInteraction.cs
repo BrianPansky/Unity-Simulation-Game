@@ -46,6 +46,7 @@ public class playerClickInteraction : MonoBehaviour
     public functionsForAI theFunctions;
     public premadeStuffForAI premadeStuff;
     public inventory1 theInventory;
+    public worldScript theWorldScript;
 
 
     //bit ad hoc:
@@ -84,8 +85,9 @@ public class playerClickInteraction : MonoBehaviour
         theNonAIScript = GetComponent<nonAIScript>();
         theFunctions = GetComponent<functionsForAI>();
         premadeStuff = GetComponent<premadeStuffForAI>();
+        GameObject theWorldObject = GameObject.Find("World");
+        theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
-        
         inMenu = false;
         recruitingMenu.SetActive(false);
 
@@ -107,6 +109,8 @@ public class playerClickInteraction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        findNearZones();
 
         //update body ray variable:
         body.lookingRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -135,7 +139,10 @@ public class playerClickInteraction : MonoBehaviour
     }
 
 
+    public void findNearZones()
+    {
 
+    }
 
     public void handleAnyClick()
     {
