@@ -267,13 +267,13 @@ public class repository2 : MonoBehaviour
     }
 
 
-    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue)
+    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0)
     {
         bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
 
         foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
         {
-            Vector3 fullPosition = thisPosition + new Vector3(xValue, 0, 0);
+            Vector3 fullPosition = thisPosition + new Vector3(xValue, 0, startZlocation);
 
             if(needADuplicate == false)
             {

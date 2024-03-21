@@ -7,7 +7,9 @@ public class mapZoneScript : MonoBehaviour
     public bool isItThisZonesTurn = false;
     public int howManyUpdatesPerEntity = 1; //GETS SET BY WORLD SCRIPT
 
+    //public List<GameObject> theMapZoneListOfGameObjects = new List<GameObject>();
     public List<GameObject> theList = new List<GameObject>();
+    public List<GameObject> threatList;
 
     public worldScript theWorldScript;
 
@@ -69,6 +71,7 @@ public class mapZoneScript : MonoBehaviour
         if (other.gameObject.tag != "interactionType1")
         {
             theList.Remove(other.gameObject);
+            Debug.Log("removed this object from map zone list:  " + other.gameObject);
         }
     }
 

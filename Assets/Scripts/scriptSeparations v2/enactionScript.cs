@@ -136,7 +136,8 @@ public class enactionScript : MonoBehaviour
                 authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
                 theAuthorScript.theAuthor = this.gameObject;
                 //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
-                theAuthorScript.interactionType = "bullet1";
+                //theAuthorScript.interactionType = "bullet1";
+                theAuthorScript.interactionType = "shoot1";
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
 
 
@@ -338,11 +339,11 @@ public class enactionMate
                     {
                         if (enactionTarget.name == "returnTestLOCK1(Clone)")
                         {
-                            Debug.Log("click worked            enactionTarget.name == returnTestLOCK1(Clone)");
+                            //Debug.Log("click worked            enactionTarget.name == returnTestLOCK1(Clone)");
                             //if (myHit.name == "returnTestLOCK1(Clone)")
                             if (myHit.transform.gameObject.name == "returnTestLOCK1(Clone)")
                             {
-                                Debug.Log("click worked            myHit.transform.gameObject.name == returnTestLOCK1(Clone)");
+                                //Debug.Log("click worked            myHit.transform.gameObject.name == returnTestLOCK1(Clone)");
 
                             }
                         }
@@ -472,15 +473,22 @@ public class enactionMate
                 projectile1 projectileScript = thisObject.AddComponent<projectile1>();
                 projectileScript.Direction = enactionBody.lookingRay.direction;
                 selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
-                killScript.delay = 130;
+                killScript.delay = 830;
 
                 //      should this use "interactionMate" isntead?
+                
                 authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
                 theAuthorScript.theAuthor = enactionAuthor;
                 //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
-                theAuthorScript.interactionType = "bullet1";
+                //theAuthorScript.interactionType = "bullet1";
+                theAuthorScript.interactionType = "shoot1";
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
+                theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
 
+                threatAlert(theAuthorScript.theAuthor);
+                //Vector3 p1 = theAuthorScript.theAuthor.transform.position;
+                //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
 
             }
             else
@@ -489,6 +497,32 @@ public class enactionMate
             }
 
 
+        }
+
+
+    }
+
+
+    void threatAlert(GameObject theThreat)
+    {
+        //take the threat object, add them to the threat list in this/their "map zone"
+        //try not to add them as duplicate if they are already added
+
+        //      #1, access their map zone:
+        AIHub2 thisHub = theThreat.GetComponent<AIHub2>();
+        //hmm, lists like this always go bad though if the object is destryed......but....ad-hoc.....[and i have such a list on map zones ALREADY]
+        List<GameObject> thisThreatList = thisHub.body.theLocalMapZoneScript.threatList;
+
+        //      #2, add them to a "list of threats" if they aren't already
+        //[hmmmm, would be easier to use tags?  easier to code it, but that system KILLS game performance.....]
+        //[what about adding a child object, with a UNITY tag that is relevant?  is that faster?  one way to find out.......?]
+        if (thisThreatList.Contains(theThreat))
+        {
+            //do nothing, they are already on the list
+        }
+        else
+        {
+            thisThreatList.Add(theThreat);
         }
 
 

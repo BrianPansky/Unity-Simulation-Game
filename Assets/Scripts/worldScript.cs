@@ -118,24 +118,31 @@ public class worldScript : MonoBehaviour
         //printDeltaTime();
 
 
-        if (currentZoneFrame == framesPerZone)
-        {
-            currentMapZone++;
-            currentZoneFrame = 1;
-
-        }
-        else
-        {
-            currentZoneFrame++;
-        }
+        
 
 
-        //      we should be looking at [current?] FAR map zones.  
+        //      we should be looking at [current?] FAR map zones.
+        //Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
+        //Debug.Log("currentMapZone" + currentMapZone);
+        //Debug.Log("numberOfFARMapZones" + numberOfFARMapZones);
         if (currentMapZone > numberOfFARMapZones - 1)
         {
             currentMapZone = 1;
             //numberOfMapZones = listOfMapZoneScripts.Count;
             refreshNearAndFarLists();
+        }
+        else
+        {
+            if (currentZoneFrame == framesPerZone)
+            {
+                currentMapZone++;
+                currentZoneFrame = 1;
+
+            }
+            else
+            {
+                currentZoneFrame++;
+            }
         }
         //printDeltaTime();
 
@@ -147,6 +154,9 @@ public class worldScript : MonoBehaviour
         //updateNearOneframeTheFarNextFrameEtc();
 
         //updateNearAndFarEveryFrameByZoneTurn();
+
+
+        
     }
 
     public void updateNearAndFarEveryFrameByZoneTurn()
@@ -232,6 +242,26 @@ public class worldScript : MonoBehaviour
 
     }
 
+    void printTheDamnNPCScripts(List<AIHub2> listOfNPCs)
+    {
+        Debug.Log("listOfNPCs.Count:  " + listOfNPCs.Count);
+        int numberThatAreNotNull = 0;
+        //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        //printDeltaTime();
+        foreach (AIHub2 thisNPCHub in listOfNPCs)
+        {
+            //Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+            //Debug.Log("is this null?:  " + thisNPCHub);
+            if (thisNPCHub != null)
+            {
+                //Debug.Log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+                numberThatAreNotNull++;
+            }
+        }
+        Debug.Log("numberThatAreNotNull:  " + numberThatAreNotNull);
+
+
+    }
 
     public void updateNearAndFarEveryFrame()
     {
@@ -245,25 +275,36 @@ public class worldScript : MonoBehaviour
         //Debug.Log("currentMapZone:  " + currentMapZone);
         //Debug.Log("(currentMapZone - 1):  " + (currentMapZone - 1));
         //updateOneZone(listOfFARMapZoneScripts[currentMapZone - 1], callableUpdatesPerZoneFrame);
-        //Debug.Log("listOfFARAIHub2ScriptsPerZone.Count):  " + listOfFARAIHub2ScriptsPerZone.Count);
 
+        //Debug.Log("/////////////////////////////     START printouts for updating near and far every frame    ///////////////////////////////");
+        //Debug.Log("listOfFARAIHub2ScriptsPerZone.Count:  " + listOfFARAIHub2ScriptsPerZone.Count);
+        //Debug.Log("listOfFARAIHub2ScriptsPerZone[currentMapZone - 1].Count:  " + listOfFARAIHub2ScriptsPerZone[currentMapZone - 1].Count);
+        //printTheDamnNPCScripts(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1]);
         updateOneZoneFromListOfAIHub2s(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
 
         //printDeltaTime();
 
         //Debug.Log("DO NEAR!!!!!!!!!!!!!" + listOfNEARMapZoneScripts.Count);
 
+        
+        //updateOneZone(listOfNEARMapZoneScripts[currentNEARMapZone - 1], callableUpdatesPerZoneFrame);
+        //updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
+        updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentNEARMapZone - 1], 1);
+        
+
+        //printDeltaTime();
+        //Debug.Log("-----------------------------     END printouts for updating near and far every frame    -------------------------------");
+        //Debug.Log("-----------------------------     END printouts for updating near and far every frame    -------------------------------");
+        //Debug.Log("currentNEARMapZone" + currentNEARMapZone);
+        //Debug.Log("listOfNEARMapZoneScripts.Count" + listOfNEARMapZoneScripts.Count);
         if (currentNEARMapZone > listOfNEARMapZoneScripts.Count - 1)
         {
             currentNEARMapZone = 1;
         }
-
-        //updateOneZone(listOfNEARMapZoneScripts[currentNEARMapZone - 1], callableUpdatesPerZoneFrame);
-        //updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
-        updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentNEARMapZone - 1], 1);
-        currentNEARMapZone++;
-
-        //printDeltaTime();
+        else
+        {
+            currentNEARMapZone++;
+        }
 
     }
 
@@ -286,6 +327,7 @@ public class worldScript : MonoBehaviour
         //int farIndex = 0;
 
         //public List<List<AIHub2>> listOfNEARAIHub2ScriptsPerZone = new List<List<AIHub2>>();
+        //Debug.Log("refreshing lists, splitZones[0].Count:  " + splitZones[0].Count);
         foreach (GameObject thisObject in splitZones[0])
         {
             //listOfNEARMapZoneScripts.Add(thisObject.GetComponent<mapZoneScript>());
@@ -294,12 +336,36 @@ public class worldScript : MonoBehaviour
             theMapZoneScript.howManyUpdatesPerEntity = callableUpdatesPerZoneFrame;
             listOfNEARMapZoneScripts.Add(theMapZoneScript);
 
+            //Debug.Log("refreshing lists, theMapZoneScript.theList.Count:  " + theMapZoneScript.theList.Count);
+            int numberOfAgents = 0;
+            int numberOfNonAgents = 0;
             List < AIHub2 > newBatchOfNPCsPerZone = new List<AIHub2>();
             foreach (GameObject thisObject2 in theMapZoneScript.theList)
             {
-                AIHub2 theHub = thisObject2.GetComponent<AIHub2>();
-                newBatchOfNPCsPerZone.Add(theHub);
+
+                AIHub2 thisNPCHub = thisObject2.GetComponent<AIHub2>();
+                if(thisObject2.name == "returnTestAgent1(Clone)" || thisObject2.name == "returnTestAgent1")
+                {
+                    numberOfAgents++;
+                    //Debug.Log("is this null?:  " + thisNPCHub + "for this object:  " + thisObject2);
+                    if (thisNPCHub != null)
+                    {
+                        //Debug.Log("no, it is not null");
+                        newBatchOfNPCsPerZone.Add(thisNPCHub);
+                    }
+                    else
+                    {
+                        //Debug.Log("yes, it is null");
+                    }
+                }
+                else
+                {
+                    numberOfNonAgents++;
+                }
             }
+            //Debug.Log("numberOfAgents:  " + numberOfAgents);
+            //Debug.Log("numberOfNonAgents:  " + numberOfNonAgents);
+            //printTheDamnNPCScripts(newBatchOfNPCsPerZone);
             listOfNEARAIHub2ScriptsPerZone.Add(newBatchOfNPCsPerZone);
             //nearIndex++;
         }
@@ -314,10 +380,16 @@ public class worldScript : MonoBehaviour
             {
                 //Debug.Log("thisObject2:  " + thisObject2);
 
-                AIHub2 theHub = thisObject2.GetComponent<AIHub2>();
+                AIHub2 thisNPCHub = thisObject2.GetComponent<AIHub2>();
                 //listOfFARAIHub2ScriptsPerZone[farIndex].Add(theHub);
-                newBatchOfNPCsPerZone.Add(theHub);
+                //Debug.Log("is this null?:  " + thisNPCHub + "for this object:  " + thisObject2);
+                if (thisNPCHub != null)
+                {
+                    newBatchOfNPCsPerZone.Add(thisNPCHub);
+                }
+                    
             }
+            //printTheDamnNPCScripts(newBatchOfNPCsPerZone);
             listOfFARAIHub2ScriptsPerZone.Add(newBatchOfNPCsPerZone);
             //farIndex++;
         }
@@ -373,13 +445,18 @@ public class worldScript : MonoBehaviour
 
     public void updateOneZoneFromListOfAIHub2s(List<AIHub2> listOfNPCs, int howManyUpdatesPerEntity)
     {
+        //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         //printDeltaTime();
         foreach (AIHub2 thisNPCHub in listOfNPCs)
         {
+            //Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
             if (thisNPCHub != null)
             {
+
+                //Debug.Log("ccccccccccccccccccccccccccccccccccccccccccccccc");
                 while (callableUpdateCounter < howManyUpdatesPerEntity)
                 {
+                    //Debug.Log("dddddddddddddddddddddddddddddddddddddddddddddddd");
                     //printDeltaTime();
                     callableUpdateCounter++;
                     thisNPCHub.callableUpdate();

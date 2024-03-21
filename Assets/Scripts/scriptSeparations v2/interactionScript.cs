@@ -53,10 +53,11 @@ public class interactionScript : MonoBehaviour
                         this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 1f);
                         Vector3 p1 = this.gameObject.transform.position;
                         Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                        Debug.DrawLine(p1, p2, new Color(1f, 0f, 1f), 9999f);
+                        //Debug.DrawLine(p1, p2, new Color(1f, 0f, 1f), 9999f);
 
                         //Debug.DrawLine(this.gameObject.transform.position, enactionTarget.transform.position, Color.blue, 0.9f);
 
+                        
                         enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                         theEnactionScript.availableEnactions.Add("shoot1");
 
@@ -80,7 +81,7 @@ public class interactionScript : MonoBehaviour
                     this.gameObject.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
                     Vector3 p1 = this.gameObject.transform.position;
                     Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                    Debug.DrawLine(p1, p2, new Color(0f, 1f, 0f), 9999f);
+                    //Debug.DrawLine(p1, p2, new Color(0f, 1f, 0f), 9999f);
 
                     theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
                     
@@ -88,15 +89,19 @@ public class interactionScript : MonoBehaviour
 
                 if (theDictEntry == "die")
                 {
-                    Debug.Log("this SHOULD destroy the AI...................................................................................................................................................");
-                    Vector3 p1 = this.gameObject.transform.position;
-                    Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                    Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
+                    //Debug.Log("this SHOULD destroy the AI...................................................................................................................................................");
+                    
+                    
+                    //Vector3 p1 = this.gameObject.transform.position;
+                    //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                    //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
 
                     //Debug.Log(UnityEngine);
                     //Debug.Log(UnityEngine.Object);
-                    UnityEngine.Object.Destroy(this.gameObject.GetComponent<AIHub2>());
-                    UnityEngine.Object.Destroy(this.gameObject.GetComponent<interactionScript>());
+
+                    //          NEED TO STOP THEIR NAVMESH AGENT TOO!!!!!!!!!!!!!!
+                    //      UnityEngine.Object.Destroy(this.gameObject.GetComponent<AIHub2>());
+                    //      UnityEngine.Object.Destroy(this.gameObject.GetComponent<interactionScript>());
                 }
 
 

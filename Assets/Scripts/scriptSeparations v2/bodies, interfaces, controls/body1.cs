@@ -103,7 +103,8 @@ public class body1 : MonoBehaviour
         this.gameObject.AddComponent<interactionScript>();
         theInteractionScript = this.gameObject.GetComponent<interactionScript>();
         theInteractionScript.dictOfInteractions = new Dictionary<string, string>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
-        theInteractionScript.dictOfInteractions.Add("bullet1", "die");
+        //theInteractionScript.dictOfInteractions.Add("bullet1", "die");  shoot1
+        theInteractionScript.dictOfInteractions.Add("shoot1", "die");
         //.Add("walk");
     }
 

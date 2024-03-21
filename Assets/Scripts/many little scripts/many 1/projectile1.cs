@@ -11,8 +11,10 @@ public class projectile1 : MonoBehaviour
 
     void Awake()
     {
-        speed = 0.11f;
-        Direction = new Vector3(0, 0, 1);
+        //float speed = 0.11f;
+        float speed;
+        //Vector3 Direction = new Vector3(0, 0, 1);
+        Vector3 Direction;
     }
 
     // Update is called once per frame

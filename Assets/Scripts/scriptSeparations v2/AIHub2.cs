@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
+using System.Threading;
+using System.Xml.Linq;
 using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,6 +14,12 @@ public class AIHub2 : MonoBehaviour
 {
     public bool printWTFThisNPCDoin = false;
 
+
+
+    public UnityEngine.Vector3 adHocThreatAvoidanceVector = new UnityEngine.Vector3(0,0,0);
+
+
+
     private worldScript theWorldScript;
     public NavMeshAgent thisNavMeshAgent;
     public GameObject savedNavMeshTarget;
@@ -18,6 +27,7 @@ public class AIHub2 : MonoBehaviour
 
     public body1 body;
     int myDelay = 0;
+    int graphCooldown = 0;
 
     //i should move these to the BODY:
     public sensorySystem theSensorySystem;
@@ -25,10 +35,10 @@ public class AIHub2 : MonoBehaviour
 
     public List<enactionMate> currentPlan = new List<enactionMate>();
 
-    private Vector3 mytest;
+    private UnityEngine.Vector3 mytest;
     public GameObject testTarget;
-    
-    
+
+
     public List<interactionMate> adhocPrereqFillerTest = new List<interactionMate>();
 
 
@@ -48,10 +58,12 @@ public class AIHub2 : MonoBehaviour
     int shortPeriodicalEndpoint = 7;
     int currentPeriodicalPoint = 0;
 
+    enactionScript theEnactionScript;
 
     //          NO LONGER USED:
     public int forgetfulnessTimer = 1;
 
+    public int cooldownTimer = 0;
 
     void Awake()
     {
@@ -67,7 +79,7 @@ public class AIHub2 : MonoBehaviour
 
 
         thisNavMeshAgent = GetComponent<NavMeshAgent>();
-        mytest = this.transform.position + new Vector3(0, 0, -15);
+        mytest = this.transform.position + new UnityEngine.Vector3(0, 0, -15);
 
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
@@ -89,9 +101,9 @@ public class AIHub2 : MonoBehaviour
         this.gameObject.AddComponent<inventory1>();
         theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
 
-        
+        theEnactionScript = this.gameObject.GetComponent<enactionScript>();
 
-        if(true == false)
+        if (true == false)
         {
             //this should be moved to a "regular human body" script:
             interactionEffects1 interactionScriptOnThisObject = this.gameObject.AddComponent<interactionEffects1>();
@@ -108,12 +120,25 @@ public class AIHub2 : MonoBehaviour
                     0
                     );
         }
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (cooldownTimer > 91 && theEnactionScript.availableEnactions.Contains("shoot1"))
+        {
+            cooldownTimer = 0;
+            doingAThreatThing();
+            
+
+        }
+        else
+        {
+            cooldownTimer++;
+        }
+        this.gameObject.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 0.2f;
+
         //navmeshStopping1();
         //Debug.Log("body:  " + body);
         //Debug.Log("body.theLocalMapZoneScript:  " + body.theLocalMapZoneScript);
@@ -335,11 +360,11 @@ public class AIHub2 : MonoBehaviour
             //reset timer:
             forgetfulnessTimerCurrent = forgetfulnessTimerEndpoint;
             //ya, ad-hoc:
-            if(currentPlan.Count > 0)
+            if (currentPlan.Count > 0)
             {
                 if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
                 {
-                    Debug.Log("forgetfulnessTimerCurrent hit zero           for standardClick on returnTestLOCK1(Clone)");
+                    //Debug.Log("forgetfulnessTimerCurrent hit zero           for standardClick on returnTestLOCK1(Clone)");
                 }
                 currentPlan.RemoveAt(0);
             }
@@ -351,7 +376,7 @@ public class AIHub2 : MonoBehaviour
 
 
 
-        
+
 
         //justPickAnAbilityAndFireIt();
 
@@ -361,6 +386,9 @@ public class AIHub2 : MonoBehaviour
             Debug.Log("do planFiller1");
         }
         planFiller1();
+
+
+        //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
 
         //Debug.Log("do enactNext");
         if (printWTFThisNPCDoin)
@@ -382,8 +410,14 @@ public class AIHub2 : MonoBehaviour
 
         if (currentPlan.Count == 0)
         {
+
+            //doingAThreatThing();
+
+
             currentPlan = pickSomethingToInteractWithAndPlanToTryIt();
         }
+
+        //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
 
         //Debug.Log("planFiller1 END");
         if (printWTFThisNPCDoin)
@@ -391,6 +425,117 @@ public class AIHub2 : MonoBehaviour
             Debug.Log("planFiller1 END");
         }
     }
+
+
+    public void doingAThreatThing()
+    {
+        //testing for threat detection:
+        //Vector3 p1 = this.gameObject.transform.position;
+        //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+        //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
+        List<GameObject> thisThreatList = body.theLocalMapZoneScript.threatList;
+        if(thisThreatList.Count > 0)
+        {
+            List<GameObject> threatListWithoutSelf = new List<GameObject>();
+            foreach (GameObject threat in thisThreatList)
+            {
+                //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
+                //UnityEngine.Vector3 p2 = threat.gameObject.transform.position;
+                //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 1f);
+                if(threat != null && threat != this.gameObject)
+                {
+                    threatListWithoutSelf.Add(threat);
+                }
+            }
+
+
+            spatialData1 myData = new spatialData1();
+
+            myData.location = this.gameObject.transform.position;
+            //myData.generateValidNearPoints1(myData.location);
+            //      myData.gatherALLThreatDataTypes(thisThreatList);
+            //myData.graphLookingAnglesSq1(myData.location);
+            //      myData.combine2into1();
+            myData.NEWgatherALLThreatDataTypes(threatListWithoutSelf);
+            //myData.graphLookingAnglesSq1(myData.location);
+            myData.NEWcombine2into1();
+            if (graphCooldown < 15)
+            {
+                graphCooldown++;
+            }
+            else
+            {
+                graphCooldown = 0;
+                //myData.general8DirectionGraphEXAGGERATED(myData.location, myData.lookingAngleSamples);
+                myData.general8DirectionGraphEXAGGERATED(myData.location, myData.combinedMeasures);
+            }
+
+            //myData.graphBetweenTwoPoints(myData.location, myData.pointAwayFromThreats(thisThreatList));
+            //adHocThreatAvoidanceVector = (this.gameObject.transform.position - myData.pointAwayFromThreats(thisThreatList));
+            adHocThreatAvoidanceVector = (this.gameObject.transform.position - myData.thePoints[myData.whichIndexIsHighest(myData.combinedMeasures)]);
+            //adHocThreatAvoidanceVector = (this.gameObject.transform.position + myData.pointAwayFromThreats(thisThreatList)).normalized;
+
+
+
+
+            //now, some kind of sampling of points:
+            //List<UnityEngine.Vector3> listOfSamplePoints = new List<UnityEngine.Vector3>();
+            //listOfSamplePoints = theSensorySystem.returnPossibleNearMeshPoints();
+
+            //      List<UnityEngine.Vector3> listOfSamplePoints = theSensorySystem.returnPossibleNearMeshPoints();
+            //Debug.Log("listOfSamplePoints.Count:  " + listOfSamplePoints.Count);
+            //foreach (UnityEngine.Vector3 aPoint in listOfSamplePoints)
+            {
+                //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
+                //UnityEngine.Vector3 p2 = aPoint;
+                //Debug.DrawLine(p1, p2, new Color(0f, 0f, 1f), 1f);
+            }
+
+
+
+            //      spatialData1 myData = theSensorySystem.shooterThreatInfoSetBetterFunction(listOfSamplePoints, thisThreatList);
+
+            //Debug.Log("myData.distancePointsSq.Count:  " + myData.distancePointsSq.Count);
+
+            //Debug.Log("myData.thePoints.Count:  " + myData.thePoints.Count);
+
+            //Debug.Log("myData.lookingAnglesSq.Count:  " + myData.lookingAnglesSq.Count);
+
+            //myData.graphLineOfSightData1(this.gameObject.transform.position);
+            //myData.graphLookingAnglesSq1(this.gameObject.transform.position);
+            //myData.graphDistanceSq1(this.gameObject.transform.position);
+            //      myData.pickBestPointFromData1();
+            //myData.graphBetweenTwoPoints(this.gameObject.transform.position, myData.bestPoint[0]);
+
+            //UnityEngine.Vector3 finalPoint = pickBestPointFromData1(myData);
+
+            //super ad hoc test:
+            //this.gameObject.transform.position = this.gameObject.transform.position + myData.bestPoint[0].normalized * 1;
+            //      adHocThreatAvoidanceVector = myData.bestPoint[0].normalized;
+
+            //myData.pickBestPointFromData1();
+
+            //Debug.Log("myData.distancePointsSq.Count:  " + myData.distancePointsSq.Count);
+            //myData.graphBetweenTwoPoints(this.gameObject.transform.position, myData.bestPoint[0]);
+
+
+        }
+
+    }
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
 
     public void enactNext()
     {
@@ -404,22 +549,30 @@ public class AIHub2 : MonoBehaviour
 
         //Debug.Log("currentPlan:  " + currentPlan);
         //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
+        if (currentPlan == null || currentPlan.Count == 0)
+        {
+            //Debug.Log("no plan for enaction phase");
+            return; //no plan
+        }
 
-        if (currentPlan[0] != null)
+            if (currentPlan[0] != null)
         {
 
             //int shortPeriodicalEndpoint = 5;
             //int currentPeriodicalPoint = 0;
-            
+
 
             //if (currentPlan[0].inTransit == true)
-            
-            
+
+
+            //Debug.Log("currentPlan.Count:  " + currentPlan.Count);
 
             if (printWTFThisNPCDoin)
             {
                 Debug.Log("currentPlan[0] != null, so go ahead and enact it");
             }
+
+            //Debug.Log("currentPlan[0].enactThis:  " + currentPlan[0].enactThis);
             currentPlan[0].enact();
             if (printWTFThisNPCDoin)
             {
@@ -430,9 +583,9 @@ public class AIHub2 : MonoBehaviour
             {
                 if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
                 {
-                    Debug.Log("currentPlan[0].deleteThisEnaction == true           for standardClick on returnTestLOCK1(Clone)");
+                    //Debug.Log("currentPlan[0].deleteThisEnaction == true           for standardClick on returnTestLOCK1(Clone)");
                 }
-                
+
                 if (printWTFThisNPCDoin)
                 {
                     Debug.Log("yes");
@@ -445,21 +598,21 @@ public class AIHub2 : MonoBehaviour
                     Debug.Log("currentPlan.Count:  " + currentPlan.Count);
                 }
             }
-            else if (currentPlan[0].didATry == true) 
+            else if (currentPlan[0].didATry == true)
             {
                 currentPlan[0].didATry = false;
                 currentTry++;
-                if(currentTry == triesBeforeDeletingClickActionsEndPoint)
+                if (currentTry == triesBeforeDeletingClickActionsEndPoint)
                 {
                     if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
                     {
-                        Debug.Log("currentTry == triesBeforeDeletingClickActionsEndPoint           for standardClick on returnTestLOCK1(Clone)");
+                        //Debug.Log("currentTry == triesBeforeDeletingClickActionsEndPoint           for standardClick on returnTestLOCK1(Clone)");
                     }
 
                     currentTry = 0;
                     currentPlan.RemoveAt(0);
                     currentPeriodicalPoint = 0;
-                    
+
                 }
                 //int triesBeforeDeletingClickActionsEndPoint = 12;
                 //int currentTry = 0;
@@ -479,7 +632,7 @@ public class AIHub2 : MonoBehaviour
 
                     if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
                     {
-                        Debug.Log("currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction           for standardClick on returnTestLOCK1(Clone)");
+                        //Debug.Log("currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction           for standardClick on returnTestLOCK1(Clone)");
                     }
 
                     currentPlan.RemoveAt(0);
@@ -515,27 +668,153 @@ public class AIHub2 : MonoBehaviour
         GameObject theTarget = semiRandomTargetPicker();
         List<enactionMate> newPlan = new List<enactionMate>();
 
-        //how to know if it has a proximity "prereq"?
-        
-        //for now, don't know.  just stick POINTING at that?
 
-        //whatever, very ad-hoc for now:
-        if(theWorldScript.theTagScript.distanceBetween(theTarget, this.gameObject) > (body.standardClickDistance)*0.7f)
-        {
-            //so, plan to walk there FIRST, thennnn click
-            newPlan.Add(makeSimpleEnactionMate("navMeshWalk", theTarget));
-            newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-            newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
-        }
-        else
-        {
-            //so, easy, just click it
-            newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-            newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
-        }
+
+
+        //it’s picking TARGETS
+        //so, then pick an interaction ON that target
+        //then plan a way to do that interaction
+
+
+        //pick an interaction ON that target
+        //i have "pickRandomInteractionONObject", but that is for old system.  need NEW system.....
+        //what ARE the interactions now?  just strings?  yes, there is a dictionary with TWO strings.  one is interaction TYPE, the other is basically EFFECT
+        //so right now i'm lookijng for interaction TYPES, not effects:
+        string randomInteractionTypeOnTarget = NEWpickRandomInteractionONObject(theTarget);
+
+        //      then plan a way to do that interaction.................
+        newPlan = planToDoInterActionWithObject(theTarget, randomInteractionTypeOnTarget);
+
+        //Debug.Log("newPlan.Count:  " + newPlan.Count);
 
         return newPlan;
     }
+
+
+    public List<enactionMate> planToDoInterActionWithObject(GameObject theTarget, string randomInteractionTypeOnTarget)
+    {
+        List<enactionMate> newPlan = new List<enactionMate>();
+
+        //so, planning should depend on which type of interaction, and context [and any other criteria, etc.]
+        //      wait a second, i have some things conflated!
+        //      interaction script is currently putting EVERYTHING under the "interactionType1" category
+        //      clicking key, dieing etc, all lumped together.
+        //need to sort out:
+        //      1) different interaction types [heat is different from being pushed, which is different from contact with a sharp object]
+        //      2) the EFFECTS of those types [could hypothetically make fire cause burning/damage, water puts it out]
+        //      3) but i want to SIMPLIFY with "ctandardClick".  it automatically picks some specific interaction, EVEN THOUGH in real life they would be quite different
+        //soooooo, sort that out.....................
+        //well, for now, let's keep it at "simplified interface" level.  ALL WE CARE ABOUT is game descision-making
+        //that means, for interactions, we lump "standardClick" together.
+        //so "interactionType1" probably shouldn't exist?  except as a useless shell i ignore all of the time.
+        //but "clcikLock"???? that isn't an interaction type!  it's enaction!  i tried splitting interaction from enaction, and apparently FAILED?
+        //i don't know, where the fuck is "standardClick"??????  i'm not seeing it there ANYWHERE????  i guess it's an ENACTION now?  ok....uhhhhh ok.....
+        //but i need a way to separate "click on this" from "shoot this with a gun".  where is that distinction?  it's somehow only appears in ENACTION, i think?  or who knows.
+        //what a mess.
+        //so, i need two things.  somewhere , somehow:
+        //      things you will need to click on
+        //      things you will need to shoot with gun
+        //and this difference should obviously be stored in their fucking interaction scripts!  but be "legible" to planning!
+        //i THINK this is supposed to be the KEY of the dictionary i have in there.  just print those out and see what they are?
+        //yes, that's what it is.  i see printouts of "standardClick" and "bullet1".  precisely.
+        //so i can use those, for now.
+
+        //Debug.Log("randomInteractionTypeOnTarget:  " + randomInteractionTypeOnTarget);
+        if (randomInteractionTypeOnTarget == "standardClick")
+        {
+            //      [OLD ad hoc stuff making them ONLY go and do "Standard click" on things]
+            //how to know if it has a proximity "prereq"?
+            //for now, don't know.  just click POINTING at that?
+            //whatever, very ad-hoc for now:
+            if (theWorldScript.theTagScript.distanceBetween(theTarget, this.gameObject) > (body.standardClickDistance) * 0.7f)
+            {
+                //so, plan to walk there FIRST, thennnn click
+                newPlan.Add(makeSimpleEnactionMate("navMeshWalk", theTarget));
+                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+                newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
+            }
+            else
+            {
+                //so, easy, just click it
+                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+                newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
+            }
+
+        }
+        //else if (randomInteractionTypeOnTarget == "bullet1")
+        else if (randomInteractionTypeOnTarget == "shoot1")
+        {
+            //do they have ability to shoot?  super hand-crafted ad-hoc....
+            //enactionScript theEnactionScript = this.gameObject.GetComponent<enactionScript>();
+            //theEnactionScript.availableEnactions.Add("shoot1");
+
+            //Debug.Log("do they have shoot1?");
+            if (theEnactionScript.availableEnactions.Contains("shoot1"))
+            {
+                //Debug.Log("yes they have shoot1");
+                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+                //newPlan.Add(makeSimpleEnactionMate("shoot", theTarget));
+                newPlan.Add(makeSimpleEnactionMate("shoot1", theTarget));
+
+                //Debug.Log("newPlan[0].enactThis:  " + newPlan[0].enactThis);
+                //Debug.Log("newPlan[1].enactThis:  " + newPlan[1].enactThis);
+            }
+            else
+            {
+                //Debug.Log("no they don't have shoot1");
+            }
+
+        }
+
+
+        //Debug.Log("newPlan.Count:  " + newPlan.Count);
+
+
+
+        return newPlan;
+    }
+
+
+
+    public string NEWpickRandomInteractionONObject(GameObject randomInteractionTarget)
+    {
+        //Debug.Log("looking at all available interactions on object");
+        List<string> availableIntertactions = new List<string>();
+        interactionScript anInteractionScript = randomInteractionTarget.GetComponent<interactionScript>();
+        //Debug.Log("randomInteractionTarget:  " + randomInteractionTarget);
+        //Debug.Log("anInteractionScript:  " + anInteractionScript);
+        //Debug.Log("anInteractionScript.dictOfInteractions:  " + anInteractionScript.dictOfInteractions);
+        //Debug.Log("anInteractionScript.dictOfInteractions.Keys:  " + anInteractionScript.dictOfInteractions.Keys);
+
+        if (anInteractionScript == null)
+        {
+            Debug.Log("anInteractionScript is null on randomInteractionTarget");
+            return null;
+        }
+
+
+        foreach (string thisKey in anInteractionScript.dictOfInteractions.Keys)
+        {
+            //Debug.Log(thisKey);
+            availableIntertactions.Add(thisKey);  //effing dictionary.Keys gives a weird data type, not a regular list, so i'm converting
+        }
+
+
+
+
+        if (availableIntertactions.Count > 0)
+        {
+            return availableIntertactions[UnityEngine.Random.Range(0, availableIntertactions.Count)];
+        }
+        else
+        {
+            //does this happen when an NPC try to interact with an NPC that is DEAD, has no interactions anymore?  hmmm, i dunno, i thought that only gets rid of their "aihub2", not interaction script, oddly enough.....
+            Debug.Log("there are zero items on the interactions available list for this object, but it's supposed to have interactions:  " + randomInteractionTarget.name);
+            Debug.DrawLine(this.gameObject.GetComponent<Transform>().position, randomInteractionTarget.GetComponent<Transform>().position, Color.red, 0.1f);
+            return null;
+        }
+    }
+
 
 
     public enactionMate makeSimpleEnactionMate(string enactThis, GameObject enactionTarget)
@@ -569,6 +848,24 @@ public class AIHub2 : MonoBehaviour
         potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
         GameObject theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
         //GameObject theTarget = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
+
+        int loopTries = 4;
+        while(loopTries > 0)
+        {
+            loopTries--;
+            interactionScript anInteractionScript = theTarget.GetComponent<interactionScript>();
+            if( anInteractionScript != null )
+            {
+                break;
+            }
+            else
+            {
+                theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
+            }
+        }
+
+
+
         return theTarget;
 
 
@@ -649,7 +946,7 @@ public class AIHub2 : MonoBehaviour
 
         GameObject randomInteractableObject = pickRandomNearbyInteractableObject();
 
-        if(randomInteractableObject != null)
+        if (randomInteractableObject != null)
         {
             //Debug.Log("33333333333333333333333333333333333333333333333333333");
             if (randomInteractableObject.name == this.gameObject.name)
@@ -719,7 +1016,7 @@ public class AIHub2 : MonoBehaviour
         testInteraction thisInteraction = pickRandomInteractionONObject(randomInteractableObject);
 
         interactionMate thisMate = createBasicInteractionMate(this.gameObject, randomInteractableObject, thisInteraction);
-        
+
 
         return thisMate;
     }
@@ -736,7 +1033,7 @@ public class AIHub2 : MonoBehaviour
 
 
         //super ad-hoc nonsense for now:
-        if(theInteractionToEnact.name == "walkSomewhere")
+        if (theInteractionToEnact.name == "walkSomewhere")
         {
             //literally just look for a random interactable BESIDES themselves to walk to:
             //theWorldScript.taggedStuff.ALLTaggedWithMultiple("intera");
@@ -758,31 +1055,31 @@ public class AIHub2 : MonoBehaviour
 
         List<interactionMate> listOfActions = planForPrereqsIfNeeded(thisMate);
 
-        if(areThereAnyErrorsWithThisListOfActions(listOfActions) == false)
+        if (areThereAnyErrorsWithThisListOfActions(listOfActions) == false)
         {
             listOfActions[0].doThisInteraction();
         }
 
     }
 
-    
+
 
 
     public bool areThereAnyErrorsWithThisListOfActions(List<interactionMate> listOfActions)
     {
         //returns TRUE if there's an ERROR
 
-        if(listOfActions == null)
+        if (listOfActions == null)
         {
             Debug.Log("apparently we don't have a plan to fill the unfilled prereq here  (it's NULL)");
             return true;
         }
-        else if(listOfActions.Count == 0)
+        else if (listOfActions.Count == 0)
         {
             Debug.Log("apparently we don't have a plan to fill the unfilled prereq here (it's count is ZERO)");
             return true;
         }
-        else if(listOfActions[0].enactThisInteraction == null)
+        else if (listOfActions[0].enactThisInteraction == null)
         {
             Debug.Log("the first item in the prereq filling plan has the ''enactThisInteraction'' variable = NULL");
             return true;
@@ -805,7 +1102,7 @@ public class AIHub2 : MonoBehaviour
         if (thisMate.checkInteractionMatePrereqs())
         {
             //Debug.Log("prereqs met for this interaction:  " + thisInteraction.name);
-            
+
             thePlan.Add(thisMate);
             return thePlan;
         }
@@ -904,7 +1201,7 @@ public class AIHub2 : MonoBehaviour
     public testInteraction pickRandomInteractionONObject(GameObject randomInteractionTarget)
     {
         List<testInteraction> availableIntertactions = randomInteractionTarget.GetComponent<interactionEffects1>().interactionsAvailable;
-        
+
 
 
 
@@ -932,7 +1229,7 @@ public class AIHub2 : MonoBehaviour
         prereqFillers.AddRange(privatePrereqFillers(unfilledPrereq, thisMate));
         prereqFillers.AddRange(onPersonPrereqFillers(unfilledPrereq, thisMate));
 
-        if(prereqFillers == null || prereqFillers.Count == 0)
+        if (prereqFillers == null || prereqFillers.Count == 0)
         {
             prereqFillers.AddRange(worldPrereqFillers(unfilledPrereq, thisMate));
         }
