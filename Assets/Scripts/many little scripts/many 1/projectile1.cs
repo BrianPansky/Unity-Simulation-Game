@@ -11,8 +11,8 @@ public class projectile1 : MonoBehaviour
 
     void Awake()
     {
-        //float speed = 0.11f;
-        float speed;
+        speed = 1.61f;
+        //float speed;
         //Vector3 Direction = new Vector3(0, 0, 1);
         Vector3 Direction;
     }

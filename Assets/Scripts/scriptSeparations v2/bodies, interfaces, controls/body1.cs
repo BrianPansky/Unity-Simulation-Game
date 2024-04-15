@@ -111,7 +111,18 @@ public class body1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //      Vector3 startV = lookingRay.origin;
 
+        //Vector3 diffV = (endV - startV);
+        //Vector3 drawV = endV + diffV * lengthMultiplier * lengthMultiplier * diffV.sqrMagnitude * diffV.sqrMagnitude / 10;
+
+
+
+
+
+        //Vector3 startV = this.gameObject.transform.position;
+        //Vector3 endV = startV + lookingRay.direction;//.operator(2);// * someBoolsAdded[thePointIndex];
+        //Debug.DrawLine(startV, endV, new Color(0f, 1f, 0f), 1f);
 
     }
 

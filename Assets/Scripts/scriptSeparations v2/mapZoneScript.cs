@@ -52,6 +52,7 @@ public class mapZoneScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        //add objects to this zone's list, and update their body to reference this zone
         if (other.gameObject.tag != "interactionType1")
         {
             theList.Add(other.gameObject);

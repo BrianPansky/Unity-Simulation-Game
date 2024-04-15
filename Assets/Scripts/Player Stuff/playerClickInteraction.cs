@@ -425,8 +425,22 @@ public class playerClickInteraction : MonoBehaviour
         //hmm, Unity graphics are too glitchy, can't handle light placement, will do it later
         //theNonAIScript.raycastFromCameraPrefabPlacement(theNonAIScript.gunFlash1);
 
-        theNonAIScript.basicFiringWithInnacuracy(vectorFromPlayerCamera()*40);
-        
+        //      [old shooting]
+        //      theNonAIScript.basicFiringWithInnacuracy(vectorFromPlayerCamera()*40);
+
+        //do “shoot1” enaction [body aim direction should already be updated]
+        //body.theEnactionScript
+
+
+        //AIhub2 has "makeSimpleEnactionMate" to do this.  should move it to enaction script
+        enactionMate newEnactionMate = new enactionMate();
+        newEnactionMate.enactionAuthor = this.gameObject;
+        newEnactionMate.enactionBody = body;
+        newEnactionMate.enactThis = "shoot1";
+        //newEnactionMate.enactionTarget = enactionTarget;
+
+        newEnactionMate.enact();
+
         //blank out mouse click each frame:
         clickedOn = null;
 

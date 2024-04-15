@@ -129,8 +129,8 @@ public class enactionScript : MonoBehaviour
                 //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
                 projectile1 projectileScript = thisObject.AddComponent<projectile1>();
                 projectileScript.Direction = authorBody.lookingRay.direction;
-                selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
-                killScript.delay = 130;
+                //selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
+                //killScript.delay = 30;
 
                 //      should this use "interactionMate" isntead?
                 authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
@@ -456,7 +456,12 @@ public class enactionMate
             {
                 firingCooldown = 5;
 
-                enactionAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
+                Renderer objectsRenderer = enactionAuthor.GetComponent<Renderer>();
+                if(objectsRenderer != null)
+                {
+                    objectsRenderer.material.color = new Color(1f, 0f, 0f);
+                }
+                
                 //this.gameObject.transform.scale = new Vector3(1f, 22, 1f);
                 //this.gameObject.transform.
 
@@ -483,7 +488,7 @@ public class enactionMate
                 //theAuthorScript.interactionType = "bullet1";
                 theAuthorScript.interactionType = "shoot1";
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
-                theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
+                //theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
 
                 threatAlert(theAuthorScript.theAuthor);
                 //Vector3 p1 = theAuthorScript.theAuthor.transform.position;
@@ -509,9 +514,10 @@ public class enactionMate
         //try not to add them as duplicate if they are already added
 
         //      #1, access their map zone:
-        AIHub2 thisHub = theThreat.GetComponent<AIHub2>();
+        //AIHub2 thisHub = theThreat.GetComponent<AIHub2>();
+        body1 thisBody = theThreat.GetComponent<body1>();
         //hmm, lists like this always go bad though if the object is destryed......but....ad-hoc.....[and i have such a list on map zones ALREADY]
-        List<GameObject> thisThreatList = thisHub.body.theLocalMapZoneScript.threatList;
+        List<GameObject> thisThreatList = thisBody.theLocalMapZoneScript.threatList;
 
         //      #2, add them to a "list of threats" if they aren't already
         //[hmmmm, would be easier to use tags?  easier to code it, but that system KILLS game performance.....]

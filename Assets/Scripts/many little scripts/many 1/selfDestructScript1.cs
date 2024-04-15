@@ -8,7 +8,7 @@ public class selfDestructScript1 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        delay = 30;
     }
 
     // Update is called once per frame

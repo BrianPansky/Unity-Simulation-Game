@@ -106,13 +106,46 @@ public class initialGenerator2 : MonoBehaviour
 
     void generateScene3()
     {
-        
-        //generateWIDEZonesAndAgentsEtc();
-        generateWIDEZonesAndAgentsEtcMANYAgentsPerZone();
 
+        //generateWIDEZonesAndAgentsEtc();
+        //generateWIDEZonesAndAgentsEtcMANYAgentsPerZone();
+
+
+        generateWIDEZonesAndAgentsEtcMANYAgentsPerZoneWithGuns();
+        //generateJustOneNPC();
     }
 
 
+    void generateJustOneNPC()
+    {
+        List<GameObject> objectList = new List<GameObject>();
+        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+
+        //objectList.Add(returnTestKey1());
+
+        objectList.Add(returnTestAgent2());
+        
+        //objectList.Add(theZoneObject); 
+        //objectList.Add(returnTestKey1());
+
+
+        //returnTestKey1
+        //objectList.Add(testCube);
+        //objectList.Add(testCube);
+        //Debug.Log("=====================    begin generation    =====================");
+        int thisInitialXValue = -44;
+        int thisXValueSpaxing = 10;
+        int loopNumber = 0;
+        foreach (GameObject thisObject in objectList)
+        {
+            //Debug.Log(thisObject);
+            theRespository.placeOnLineAndDuplicate(thisObject, 1, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            loopNumber++;
+        }
+        
+        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        theZoneObject.transform.localScale = new Vector3(400f, 100f, 145f);
+    }
 
 
     void generateWIDEZonesAndAgentsEtc()
@@ -168,6 +201,58 @@ public class initialGenerator2 : MonoBehaviour
 
 
     }
+
+    void generateWIDEZonesAndAgentsEtcMANYAgentsPerZoneWithGuns()
+    {
+        List<GameObject> objectList = new List<GameObject>();
+        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+
+        //objectList.Add(returnTestKey1());
+
+
+
+        objectList.Add(returnTestAgent2());
+        objectList.Add(returnTestAgent2());
+
+
+        //objectList.Add(returnTestKey1());
+
+
+        //returnTestKey1
+        //objectList.Add(testCube);
+        //objectList.Add(testCube);
+        //Debug.Log("=====================    begin generation    =====================");
+        int nonZoneOffset = -15;  //so that objects in zones aren't on the edge of the zone, they are inside it
+        int thisInitialXValue = -64;
+        int thisXValueSpaxing = 10;
+        int theZSpacing = 25;
+        int howManyZones = 18;
+        int loopNumber = 0;
+        foreach (GameObject thisObject in objectList)
+        {
+            //Debug.Log(thisObject);
+            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
+            loopNumber++;
+        }
+
+
+        List<GameObject> zoneList = new List<GameObject>();
+        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        theZoneObject.transform.localScale = new Vector3(800f, 10f, 50f);
+        zoneList.Add(theZoneObject);
+
+        loopNumber = 0;
+        foreach (GameObject thisObject in zoneList)
+        {
+            //Debug.Log(thisObject);
+            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing * 2, thisXValueSpaxing * 2 * loopNumber);
+            loopNumber++;
+        }
+
+
+
+    }
+
 
     void generateWIDEZonesAndAgentsEtcMANYAgentsPerZone()
     {
@@ -620,12 +705,32 @@ public class initialGenerator2 : MonoBehaviour
 
     }
 
+
+    GameObject returnTestAgent2()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
+
+        myTest.AddComponent<NavMeshAgent>();
+        myTest.AddComponent<AIHub2>();
+
+        //AIcontroller
+
+        enactionScript theEnactionScript = myTest.GetComponent<enactionScript>();
+        theEnactionScript.availableEnactions.Add("shoot1");
+
+        return myTest;
+    }
+
     GameObject returnTestAgent1()
     {
         GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0,0,0), "returnTestAgent1");
         
         myTest.AddComponent<NavMeshAgent>();
         myTest.AddComponent<AIHub2>();
+
+
+        //enactionScript theEnactionScript = myTest.GetComponent<enactionScript>();
+        //theEnactionScript.availableEnactions.Add("shoot1");
 
         return myTest;
     }

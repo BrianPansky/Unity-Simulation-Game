@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
+//using System.Numerics;
 using System.Threading;
 using System.Xml.Linq;
 using UnityEditor.Presets;
@@ -14,7 +14,7 @@ public class AIHub2 : MonoBehaviour
 {
     public bool printWTFThisNPCDoin = false;
 
-
+    //public CharacterController AIcontroller;
 
     public UnityEngine.Vector3 adHocThreatAvoidanceVector = new UnityEngine.Vector3(0,0,0);
 
@@ -69,6 +69,16 @@ public class AIHub2 : MonoBehaviour
     {
         this.gameObject.AddComponent<body1>();
         body = this.gameObject.GetComponent<body1>();
+        //body = this.gameObject.AddComponent<body1>();
+
+        //AddComponent<AIHub2>();
+
+
+        //if (this.gameObject.GetComponent<CharacterController>() == null)
+        {
+            //this.gameObject.AddComponent<CharacterController>();
+            //AIcontroller = this.gameObject.GetComponent<CharacterController>();
+        }
 
     }
 
@@ -77,8 +87,8 @@ public class AIHub2 : MonoBehaviour
     {
 
 
-
         thisNavMeshAgent = GetComponent<NavMeshAgent>();
+        thisNavMeshAgent.speed = 13f;
         mytest = this.transform.position + new UnityEngine.Vector3(0, 0, -15);
 
         GameObject theWorldObject = GameObject.Find("World");
@@ -93,6 +103,7 @@ public class AIHub2 : MonoBehaviour
         /// theSensorySystem = myTest2.GetComponent("sensorySystem") as sensorySystem;
         this.gameObject.AddComponent<sensorySystem>();
         theSensorySystem = this.gameObject.GetComponent("sensorySystem") as sensorySystem;
+        theSensorySystem.body = body;
         //same for planning:
         this.gameObject.AddComponent<planningAndImagination>();
         thePlanner = this.gameObject.GetComponent("planningAndImagination") as planningAndImagination;
@@ -126,19 +137,30 @@ public class AIHub2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (cooldownTimer > 91 && theEnactionScript.availableEnactions.Contains("shoot1"))
-        {
-            cooldownTimer = 0;
-            doingAThreatThing();
-            
 
-        }
-        else
-        {
-            cooldownTimer++;
-        }
-        this.gameObject.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 0.2f;
 
+        spatialDataSet myData = new spatialDataSet();
+        myData.threatList = threatListWithoutSelf();
+        myData.middlePoint = this.transform.position;
+        //                      myData.thePoints = myData.generate2Xby2YNearPoints(myData.middlePoint, 15, 15);
+        //                      myData.gatherData(myData.listOfStringsWithoutNulls("distancesToThreats", "threatAngles", "linesOfSight"));
+        //myData.combineData(myData.listOfStringsWithoutNulls("distancesToThreats", "threatAngles", "linesOfSight"));
+        //          myData.adhocVectorCreationForAttackDodge1();
+        adHocThreatAvoidanceVector = myData.bestMiddlePoint();
+        Debug.DrawLine(myData.middlePoint, myData.middlePoint+ adHocThreatAvoidanceVector, Color.green, 0.1f);
+
+        //                      myData.appleField();
+        //myData.torusField1();
+        //myData.graphFeild("default");
+        //                      myData.graphFeildAdHoc();
+
+
+
+
+
+
+
+        //              thisNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized*8f);
         //navmeshStopping1();
         //Debug.Log("body:  " + body);
         //Debug.Log("body.theLocalMapZoneScript:  " + body.theLocalMapZoneScript);
@@ -316,6 +338,25 @@ public class AIHub2 : MonoBehaviour
 
     }
 
+    public List<GameObject> threatListWithoutSelf()
+    {
+        List<GameObject> threatListWithoutSelf = new List<GameObject>();
+        List<GameObject> thisThreatList = body.theLocalMapZoneScript.threatList;
+
+        foreach (GameObject threat in thisThreatList)
+        {
+            //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
+            //UnityEngine.Vector3 p2 = threat.gameObject.transform.position;
+            //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 1f);
+            if (threat != null && threat != this.gameObject)
+            {
+                threatListWithoutSelf.Add(threat);
+            }
+        }
+        return threatListWithoutSelf;
+    }
+
+
 
     public void navmeshStopping1()
     {
@@ -346,6 +387,25 @@ public class AIHub2 : MonoBehaviour
 
     public void callableUpdate()
     {
+
+        if (cooldownTimer > 11 && theEnactionScript.availableEnactions.Contains("shoot1"))
+        {
+            cooldownTimer = 0;
+            doingAThreatThing();
+
+
+        }
+        else
+        {
+            cooldownTimer++;
+        }
+        Vector3 newFinalPosition = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized  * 8f;// * 0.2f;
+        //          this.gameObject.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 0.2f;
+        //AIcontroller.Move(adHocThreatAvoidanceVector.normalized * 0.2f);
+        //                  thisNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 8f);
+        thisNavMeshAgent.SetDestination(newFinalPosition);//for some reason it doesn't work if you put the *8f here, even though it works in the comparable "SetDestination" line above, so i had to put that into the "newFinalPosition" variable....
+
+
         if (printWTFThisNPCDoin)
         {
             Debug.Log("$$$$$$$$$$$$$$$$$$$$$$       BEGIN CALLABLE UPDATE       $$$$$$$$$$$$$$$$$$$$$$$$");
@@ -450,16 +510,17 @@ public class AIHub2 : MonoBehaviour
 
 
             spatialData1 myData = new spatialData1();
-
+            //combineVectorForOnePoint2
             myData.location = this.gameObject.transform.position;
+            //myData.combineVectorForOnePoint2(myData.location);
             //myData.generateValidNearPoints1(myData.location);
             //      myData.gatherALLThreatDataTypes(thisThreatList);
             //myData.graphLookingAnglesSq1(myData.location);
             //      myData.combine2into1();
-            myData.NEWgatherALLThreatDataTypes(threatListWithoutSelf);
+            //      myData.NEWgatherALLThreatDataTypes(threatListWithoutSelf);
             //myData.graphLookingAnglesSq1(myData.location);
-            myData.NEWcombine2into1();
-            if (graphCooldown < 15)
+            //      myData.NEWcombine2into1();
+            if (graphCooldown < 0)
             {
                 graphCooldown++;
             }
@@ -467,12 +528,14 @@ public class AIHub2 : MonoBehaviour
             {
                 graphCooldown = 0;
                 //myData.general8DirectionGraphEXAGGERATED(myData.location, myData.lookingAngleSamples);
-                myData.general8DirectionGraphEXAGGERATED(myData.location, myData.combinedMeasures);
+                //      myData.general8DirectionGraphEXAGGERATED(myData.location, myData.combinedMeasures);
             }
 
             //myData.graphBetweenTwoPoints(myData.location, myData.pointAwayFromThreats(thisThreatList));
             //adHocThreatAvoidanceVector = (this.gameObject.transform.position - myData.pointAwayFromThreats(thisThreatList));
-            adHocThreatAvoidanceVector = (this.gameObject.transform.position - myData.thePoints[myData.whichIndexIsHighest(myData.combinedMeasures)]);
+            //      adHocThreatAvoidanceVector = (this.gameObject.transform.position - myData.thePoints[myData.whichIndexIsHighest(myData.combinedMeasures)]);
+            //          adHocThreatAvoidanceVector = myData.combineVectorForOnePoint2(myData.location, threatListWithoutSelf);
+            //adHocThreatAvoidanceVector = myData.combineVectorForOnePoint2(myData.location, thisThreatList);
             //adHocThreatAvoidanceVector = (this.gameObject.transform.position + myData.pointAwayFromThreats(thisThreatList)).normalized;
 
 
@@ -668,7 +731,10 @@ public class AIHub2 : MonoBehaviour
         GameObject theTarget = semiRandomTargetPicker();
         List<enactionMate> newPlan = new List<enactionMate>();
 
-
+        if (theTarget == null)
+        {
+            return newPlan;
+        }
 
 
         //it’s picking TARGETS
@@ -819,6 +885,7 @@ public class AIHub2 : MonoBehaviour
 
     public enactionMate makeSimpleEnactionMate(string enactThis, GameObject enactionTarget)
     {
+        //should move this function to enaction script, so player can use it etc.
         enactionMate newEnactionMate = new enactionMate();
         newEnactionMate.enactionAuthor = this.gameObject;
         newEnactionMate.enactionBody = body;
@@ -849,10 +916,25 @@ public class AIHub2 : MonoBehaviour
         GameObject theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
         //GameObject theTarget = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
 
+        //Debug.Log("theTarget:  " + theTarget);
+        
+
         int loopTries = 4;
         while(loopTries > 0)
         {
             loopTries--;
+            if (theTarget == null)
+            {
+                //Debug.Log("this is null:  " + theTarget);
+                return null;
+            }
+            else
+            {
+                //Debug.Log("this is NOT null:  " + theTarget);
+            }
+            //Debug.Log("loopTries:  " + loopTries);
+            //Debug.Log("theTarget:  " + theTarget);
+            //Debug.Log("theTarget:  " + theTarget.GetComponent<interactionScript>());
             interactionScript anInteractionScript = theTarget.GetComponent<interactionScript>();
             if( anInteractionScript != null )
             {

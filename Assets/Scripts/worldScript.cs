@@ -280,13 +280,17 @@ public class worldScript : MonoBehaviour
         //Debug.Log("listOfFARAIHub2ScriptsPerZone.Count:  " + listOfFARAIHub2ScriptsPerZone.Count);
         //Debug.Log("listOfFARAIHub2ScriptsPerZone[currentMapZone - 1].Count:  " + listOfFARAIHub2ScriptsPerZone[currentMapZone - 1].Count);
         //printTheDamnNPCScripts(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1]);
-        updateOneZoneFromListOfAIHub2s(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
+        if(numberOfFARMapZones > 0)
+        {
+            updateOneZoneFromListOfAIHub2s(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
+        }
 
         //printDeltaTime();
 
         //Debug.Log("DO NEAR!!!!!!!!!!!!!" + listOfNEARMapZoneScripts.Count);
+        //Debug.Log("currentNEARMapZone:  " + currentNEARMapZone);
+        //Debug.Log("(currentNEARMapZone - 1):  " + (currentNEARMapZone - 1));
 
-        
         //updateOneZone(listOfNEARMapZoneScripts[currentNEARMapZone - 1], callableUpdatesPerZoneFrame);
         //updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
         updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentNEARMapZone - 1], 1);
