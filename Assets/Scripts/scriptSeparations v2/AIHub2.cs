@@ -139,15 +139,24 @@ public class AIHub2 : MonoBehaviour
     {
 
 
-        spatialDataSet myData = new spatialDataSet();
-        myData.threatList = threatListWithoutSelf();
-        myData.middlePoint = this.transform.position;
+        //spatialDataSet myData = new spatialDataSet();
+        //myData.threatList = threatListWithoutSelf();
+        //myData.middlePoint = this.transform.position;
         //                      myData.thePoints = myData.generate2Xby2YNearPoints(myData.middlePoint, 15, 15);
         //                      myData.gatherData(myData.listOfStringsWithoutNulls("distancesToThreats", "threatAngles", "linesOfSight"));
         //myData.combineData(myData.listOfStringsWithoutNulls("distancesToThreats", "threatAngles", "linesOfSight"));
         //          myData.adhocVectorCreationForAttackDodge1();
-        adHocThreatAvoidanceVector = myData.bestMiddlePoint();
-        Debug.DrawLine(myData.middlePoint, myData.middlePoint+ adHocThreatAvoidanceVector, Color.green, 0.1f);
+        //adHocThreatAvoidanceVector = myData.bestMiddlePoint();
+        //Debug.DrawLine(myData.middlePoint, myData.middlePoint+ adHocThreatAvoidanceVector, Color.green, 0.1f);
+
+
+
+        spatialDataPoint myData = new spatialDataPoint();
+        myData.initializeDataPoint(threatListWithoutSelf(), this.transform.position);
+
+        adHocThreatAvoidanceVector = myData.applePattern();
+        Debug.DrawLine(myData.thisPoint, myData.thisPoint + adHocThreatAvoidanceVector, Color.green, 0.1f);
+
 
         //                      myData.appleField();
         //myData.torusField1();

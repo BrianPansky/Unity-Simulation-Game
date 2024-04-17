@@ -348,262 +348,58 @@ public class sensorySystem : MonoBehaviour
     }
 }
 
-public class spatialDataPoint
+
+
+
+public class spatialDataPointFragment
 {
-    //this code should only ever be about one single point
-    //anything plural [like "distances"] should still be about one sample point, and how far away other things [like threats] are from that one point
+    //basically, i hate having anything significant nested inside of my "foreach" loops.
+    //and if there IS much in there, it should be easy to "find" when i'm debugging.  not digging through layers of functions.
+    //so put stuff HERE, in a different class object.  a base level, where i will know to look if that's what the error seems to be
+    //[same for adding or modifying stuff, not just debugging]
 
-    public List<float> distancesAsFloats = new List<float>();
-    public List<float> lookingAngles = new List<float>();
-    public List<bool> lineOfSightBools = new List<bool>();  //a LIST of BOOL....i don't think i've ever seen such a thing
+    //so, right now "spatialDataPoint" has multiple "threat" gameobjects.
+    //i'm replacing that with a list of THIS class object.  each of these will have one of those possible targets.
+    //could i go the other way?  START with something like this, THEN gather them and even RE-USE them for different npcs?  i dunno.
 
-    public List<Vector3> distancesAsVectors = new List<Vector3>();
-    public List<Vector3> lookingAnglePerpendiculars = new List<Vector3>();
-    public List<GameObject> threatList;
+    public GameObject targetObject;
+    public Vector3 originLocation;
+    public Vector3 lineBetweenTargetAndThisPoint = new Vector3();
 
-    public int listLenghts = 0;
+    public float distanceAsFloat = 0f;
+    public float lookingAngle = 0f;
+    public bool lineOfSightBool = true;  //initialize as true???
 
-    //public List<float> combinedMeasures = new List<float>();
+    public Vector3 distanceAsVector = new Vector3();
+    public Vector3 lookingAnglePerpendicular = new Vector3();  //should i have one left AND right???
+
+
+    //????????????????
     public float combinedMeasures = 0;  //hmmmm....don't i want a VECTOR i can GRAPH?
-    public Vector3 thisPoint;
+    
     public Vector3 dontIneedACOMBINEDEndpoint;
 
 
-    public void graphBetweenThisPointAndCOMBINEDpoint()
+
+
+
+
+    //      graphing
+
+
+
+
+
+
+    //useful "patterns" etc.
+    public Vector3 applePattern()
     {
-        graphBetweenTwoPoints2(thisPoint, (thisPoint+dontIneedACOMBINEDEndpoint.normalized), 0.01f);
-    }
-
-    public void graphBetweenTwoPoints2(Vector3 whereToStart, Vector3 whereToEnd, float lengthMultiplier)
-    {
-        Vector3 startV = whereToStart;
-        Vector3 endV = whereToEnd;//.operator(2);// * someBoolsAdded[thePointIndex];
-        //      Vector3 diffV = (endV - startV);
-        //      Vector3 drawV = endV + diffV * lengthMultiplier * diffV.sqrMagnitude * diffV.sqrMagnitude / 10;
-        //      Debug.DrawLine(startV, drawV, new Color(0f, 0f, 1f), 1f);
-        Debug.DrawLine(startV, endV, new Color(0f, 0f, 1f), 1f);
-    }
+        //need to make it easy to make versions for UNARMED npcs simply FLEEING from threat.
+        //that shouldn’t require making much new stuff.
+        //indeed, it should be BUILT IN somehow, INHERENT to WHAT is even CALCULATED at each point.
+        //an inflection point where “risk of death” is LOWER if you go in for the kill?  or something.  
 
 
-
-
-
-
-    public void gatherDistanceData(List<GameObject> objectList)
-    {
-        listLengthSet(objectList.Count);
-
-        foreach (GameObject thisObject in objectList)
-        {
-            Vector3 thisDistance =  thisObject.transform.position - thisPoint;
-            distancesAsVectors.Add(thisDistance);
-            distancesAsFloats.Add(thisDistance.magnitude);
-        }
-    }
-
-    public void gatherLookingAngleData(List<GameObject> objectList)
-    {
-        listLengthSet(objectList.Count);
-
-        foreach (GameObject thisObject in objectList)
-        {
-            Ray threatLookingRay = thisObject.GetComponent<body1>().lookingRay;
-            Vector3 lineBetweenThreatAndPoint = thisPoint - thisObject.transform.position;
-            float theAngle = Vector3.Angle(threatLookingRay.direction, lineBetweenThreatAndPoint);
-
-            lookingAngles.Add(theAngle);
-            //lookingAnglePerpendiculars.Add();
-        }
-    }
-
-    public void gatherLineOfSightData(List<GameObject> objectList)
-    {
-        listLengthSet(objectList.Count);
-
-        foreach (GameObject thisObject in objectList)
-        {
-            bool theBool = false;
-            RaycastHit myHit;
-
-            //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
-            Vector3 theDirection = thisObject.transform.position - thisPoint;
-            Ray myRay = new Ray(thisPoint, theDirection);
-
-
-            if (Physics.Raycast(myRay, out myHit, 60f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                if(myHit.collider.gameObject == thisObject)
-                {
-                    theBool = true;
-                }
-            }
-
-            lineOfSightBools.Add(theBool);
-        }
-    }
-
-    public void listLengthSet(int newNumber)
-    {
-        //have an error if there are numbers that dissagree???
-
-        //for now:
-        if(listLenghts == 0)
-        {
-            listLenghts = newNumber;
-        }
-        else if (listLenghts != newNumber)
-        {
-            //this should never happen if i do things right
-            Debug.Log("data list lengths do not agree for some reason, have you used different threat lists for different data you gathered?");
-        }
-    }
-
-
-    public void findIntermediateDataModularly(List<GameObject> threatList)
-    {
-        //so i should already have basic data [distances, angles, lines of sight]
-        //now i want to get:
-        //      perpendiculars [symmetrical]
-        
-        //FINDING THE LENGTH OF THE DATA SET:
-        int numberOfDataInEachList = listLenghts;// listLenghtsAll();
-        int currentIndex = 0;
-        while (currentIndex < numberOfDataInEachList)
-        {
-            lookingAnglePerpendiculars.Add(findOnePerpendicularVectorSYMMETRICAL(thisPoint, threatList[currentIndex]));
-            currentIndex++;
-        }
-    }
-
-
-    public void combineTheDataModularly(List<string> treatmentList)
-    {
-        //input different things you want to combine [such as "distances" and "linesOfSight" or whatever] for each point
-        //could just have a set formula at the end, and initialize variables so they don't alter results UNLESS they are called in the treatmentList?
-
-        //NO WAIT it's more complicated.  because i can't combine each data type separately and then put them all together
-        //i have to do each threat one at a time, basically.
-        //so....what do i loop through?  i need to know how many data points, but some lists might be empty
-        //need somewhere in this data point to either store all of the threats, OR store an integer COUNTING the threats or whatever.
-
-
-        //so....i have all the data here that i want to combine...i just don't know which all the time.  sometimes some data lists will be empty.
-
-        //whatever.  awful terrible ad-hoc garbage for now just to get it working.
-        //just go through each of them until i find one that isn't empty.  OR just assume the treatment list correctly tells us which will not be empty, and return an error if that's not the case [well, index out of range errors are automatic]
-
-        //FINDING THE LENGTH OF THE DATA SET:
-        int numberOfDataInEachList = listLenghts;// listLenghtsAll();
-        int currentIndex = 0;
-        while(currentIndex < numberOfDataInEachList)
-        {
-            float distanceContribution = 0;
-            float threatAngleContribution = 0;
-            float linesOfSightContribution = 1; //if there's no line of sight data, we'll still compute a value, so this one starts as one
-
-
-            foreach (string thisDataToCombine in treatmentList)
-            {
-                if (thisDataToCombine == "distancesToThreats")
-                {
-
-                }
-                if (thisDataToCombine == "threatAngles")
-                {
-
-                }
-                if (thisDataToCombine == "linesOfSight")
-                {
-
-                }
-            }
-
-            //here's the formula:
-            float theCombinedFloat = linesOfSightContribution*(distanceContribution* threatAngleContribution);  //default:  higher distance = higher result.  same with higher angle between 0 and 180 degrees?
-
-            //combinedMeasures.Add(theCombinedFloat);
-            combinedMeasures += theCombinedFloat;
-            //dontIneedACOMBINEDEndpoint += ;
-        }
-
-
-
-        
-    }
-
-
-    public void makeAllPerpendicularVectors()
-    {
-        foreach(Vector3 thisVevtor in distancesAsVectors)
-        {
-            lookingAnglePerpendiculars.Add(findOnePerpendicularVector(thisVevtor));
-        }
-    }
-
-    public Vector3 findOnePerpendicularVector(Vector3 inputVector)
-    {
-        Vector3 outputPerpendicular = new Vector3();
-        //Ray threatLookingRay = theThreat.GetComponent<body1>().lookingRay;
-        //Vector3 lineBetweenThreatAndPoint = thePoint - theThreat.transform.position;
-
-        //float theAngle = Vector3.SignedAngle(threatLookingRay.direction, lineBetweenThreatAndPoint, Vector3.up);
-        //Debug.Log("theAngle:  " + theAngle);
-
-        outputPerpendicular = Quaternion.Euler(0, 90, 0) * inputVector;
-
-        return outputPerpendicular;
-    }
-
-    public Vector3 findOnePerpendicularVectorSYMMETRICAL(Vector3 thePoint, GameObject theThreat)
-    {
-        Vector3 perpendicular = new Vector3();
-        Ray threatLookingRay = theThreat.GetComponent<body1>().lookingRay;
-        Vector3 lineBetweenThreatAndPoint = thePoint - theThreat.transform.position;
-
-        float theAngle = Vector3.SignedAngle(threatLookingRay.direction, lineBetweenThreatAndPoint, Vector3.up);
-        //Debug.Log("theAngle:  " + theAngle);
-
-        if (theAngle < 0f)
-        {
-            if (theAngle > -120f)
-            {
-                //Vector3 perpendicular = Quaternion.Euler(0, 90, 0) * threatLookingRay.direction;
-                //Vector3 perpendicular = Quaternion.AngleAxis(90, Vector3.up) * threatLookingRay.direction;
-                //      	perpendicular = Quaternion.AngleAxis(-90, Vector3.up + location) * lineBetweenThreatAndPoint;
-                perpendicular = Quaternion.Euler(0, -90, 0) * lineBetweenThreatAndPoint;
-                //Debug.Log("perpendicular.z:  " + perpendicular.z);
-            }
-            else
-            {
-                //so from -120 tp - 180
-                //      perpendicular = -lineBetweenThreatAndPoint;
-                //perpendicular = Quaternion.AngleAxis(-theAngle, Vector3.up + location) * lineBetweenThreatAndPoint;
-            }
-        }
-        else
-        {
-            if (theAngle < 120f)
-            {
-                //perpendicular = Quaternion.AngleAxis(90, Vector3.up + location) * lineBetweenThreatAndPoint;
-                perpendicular = Quaternion.Euler(0, 90, 0) * lineBetweenThreatAndPoint;
-            }
-            else
-            {
-                //      perpendicular = lineBetweenThreatAndPoint;
-                //perpendicular = Quaternion.AngleAxis(theAngle, Vector3.up + location) * lineBetweenThreatAndPoint;
-            }
-        }
-
-
-
-
-
-        return perpendicular;
-    }
-
-
-    public Vector3 pattern1ForFightingArmedThreat()
-    {
         //return zero length / no direction if there is no line of sight
         //but if there IS a line of sight, do the following:
         //      when in front of enemy:
@@ -615,48 +411,218 @@ public class spatialDataPoint
         //              simply combine both of these
         Vector3 theOutputVector = new Vector3();
 
-        if(lookingAnglePerpendiculars.Count == 0)
+        generalFragmentData1();
+
+
+        //          Vector3 awayOrTowardsUndecided = distanceAsVector;
+        //          Vector3 theOrbitUndecided = lookingAnglePerpendicular;
+
+        Vector3 awayOrTowardsFinal = towardsIfBehindAwayIfInFront();
+        Vector3 theOrbitFinal = orbitAwayFromLookingLine();
+
+        float orbitCoefficient = 1;
+        float entryCoefficient = 1;
+
+        float crossoverAngle = 110;
+
+        if (lookingAngle < crossoverAngle)
         {
-            makeAllPerpendicularVectors();
+            //have i made sure these andles only go between 0 and 180 degrees??  is that the default?
+
+            //entryCoefficient = lookingAngles[currentIndex]/120;
+            entryCoefficient = 0;
+            orbitCoefficient = 1;
+
+            theOutputVector += (entryCoefficient * awayOrTowardsFinal + orbitCoefficient * theOrbitFinal);
         }
-
-
-        int currentIndex = 0;
-
-        //um, just assume we HAVE all the bools.  because otherwise this function makes no sense.
-        foreach (bool thisLineOfSight in lineOfSightBools)
+        else
         {
-            if(thisLineOfSight == true)
-            {
-                //....public List<float> distancesAsFloats = new List<float>();
-                //public List<float> lookingAngles = new List<float>();
-                //public List<bool> lineOfSightBools = new List<bool>();  //a LIST of BOOL....i don't think i've ever seen such a thing
-
-                //public List<Vector3> distancesAsVectors = new List<Vector3>();
-                //public List<Vector3> lookingAnglePerpendiculars = new List<Vector3>();
-
-                //public int listLenghts = 0;
-
-
-                //public float combinedMeasures = 0;  //hmmmm....don't i want a VECTOR i can GRAPH?
-                //public Vector3 thisPoint;
-
-                Vector3 awayOrTowardsUndecided = distancesAsVectors[currentIndex];
-                Vector3 theOrbitUndecided = lookingAnglePerpendiculars[currentIndex];
-
-                Vector3 awayOrTowardsFinal = towardsIfBehindAwayIfInFront(currentIndex);
-                Vector3 theOrbitFinal = new Vector3();  //orbitAwayFromLookingLine(currentIndex);
-
-                theOutputVector += (awayOrTowardsFinal + theOrbitFinal);
-            }
-
-            currentIndex++;
+            //entryCoefficient = lookingAngles[currentIndex] / 180;
+            //orbitCoefficient = (180 - lookingAngles[currentIndex])/180;
+            //entryCoefficient = 1;
+            //orbitCoefficient = 0;
+            entryCoefficient = (lookingAngle - crossoverAngle) / (180 - crossoverAngle);
+            orbitCoefficient = (180 - lookingAngle) / 180;
+            theOutputVector += (entryCoefficient * awayOrTowardsFinal + orbitCoefficient * theOrbitFinal);
         }
 
 
         return theOutputVector;
     }
 
+
+    //      initializing
+
+    public void initializeFragment(GameObject target, Vector3 location)
+    {
+        targetObject = target;
+        originLocation = location;
+        generalFragmentData1();
+    }
+
+    public void generalFragmentData1()
+    {
+        gatherLookingAngleData();
+        gatherDistanceData();
+        gatherLineOfSightData();
+        findIntermediateDataModularly();
+    }
+
+
+    public void gatherDistanceData()
+    {
+        Vector3 thisDistance = targetObject.transform.position - originLocation;
+        distanceAsFloat = thisDistance.magnitude;
+        distanceAsVector = thisDistance;
+    }
+    public void gatherLookingAngleData()
+    {
+        Ray targetLookingRay = targetObject.GetComponent<body1>().lookingRay;
+        Vector3 lineBetweenThreatAndPoint = originLocation - targetObject.transform.position;
+        float theAngle = Vector3.Angle(targetLookingRay.direction, lineBetweenThreatAndPoint);
+
+        lookingAngle = theAngle;
+    }
+    public void gatherLineOfSightData()
+    {
+        bool theBool = false;
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = targetObject.transform.position - originLocation;
+        Ray myRay = new Ray(originLocation, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, 60f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject == targetObject)
+            {
+                theBool = true;
+            }
+        }
+
+        lineOfSightBool = theBool;
+    }
+    public void findIntermediateDataModularly()
+    {
+        //so i should already have basic data [distances, angles, lines of sight]
+        //now i want to get:
+        //      perpendiculars [symmetrical]
+
+        lookingAnglePerpendicular = findOnePerpendicularVectorSYMMETRICAL();
+    }
+    public Vector3 findOnePerpendicularVectorSYMMETRICAL()
+    {
+        Vector3 perpendicular = new Vector3();
+        Ray threatLookingRay = targetObject.GetComponent<body1>().lookingRay;
+        lineBetweenTargetAndThisPoint = originLocation - targetObject.transform.position;
+
+        float theAngle = Vector3.SignedAngle(threatLookingRay.direction, lineBetweenTargetAndThisPoint, Vector3.up);
+        //Debug.Log("theAngle:  " + theAngle);
+
+        if (theAngle < 0f)
+        {
+            if (theAngle > -120f)
+            {
+                perpendicular = Quaternion.Euler(0, -90, 0) * lineBetweenTargetAndThisPoint;
+            }
+            else
+            {
+            }
+        }
+        else
+        {
+            if (theAngle < 120f)
+            {
+                perpendicular = Quaternion.Euler(0, 90, 0) * lineBetweenTargetAndThisPoint;
+            }
+            else
+            {
+            }
+        }
+
+
+
+
+
+        return perpendicular;
+    }
+
+
+
+    //      utility
+    public Vector3 towardsIfBehindAwayIfInFront()
+    {
+        //      when in front of enemy:
+        //              use vector pointing AWAY from enemy
+        //      when BEHIND an enemy
+        //              vector points TOWARDS enemy
+
+        //so, need to FIRST determine whether we are in front of or behind enemy.  we should have the angles for that:
+        if (lookingAngle < 110)
+        {
+            //have i made sure these andles only go between 0 and 180 degrees??  is that the default?
+
+            return -distanceAsVector;
+        }
+        else
+        {
+            return distanceAsVector;
+        }
+    }
+    public Vector3 orbitAwayFromLookingLine()
+    {
+        //not sure i know how to ensure these point the correct direction:
+        return lookingAnglePerpendicular;
+    }
+
+
+
+
+    //      ad-hoc, try to get rid of
+
+}
+
+public class spatialDataPoint
+{
+    //this code should only ever be about one single point
+    //anything plural [like "distances"] should still be about one sample point, and how far away other things [like threats] are from that one point
+
+    public List<spatialDataPointFragment> fragmentList = new List<spatialDataPointFragment>();
+
+    public int listLenghts = 0;
+
+    //public List<float> combinedMeasures = new List<float>();
+    public float combinedMeasures = 0;  //hmmmm....don't i want a VECTOR i can GRAPH?
+    public Vector3 thisPoint;
+    public Vector3 dontIneedACOMBINEDEndpoint;
+
+
+
+    //          user manual?
+    //      when to add threat list?  is it ALWAYS necessary?  well, i might use this for something other than "threats"...
+    //      
+
+
+
+
+    //      graphing
+    public void graphBetweenThisPointAndCOMBINEDpoint()
+    {
+        graphBetweenTwoPoints2(thisPoint, (thisPoint + dontIneedACOMBINEDEndpoint.normalized), 0.01f);
+    }
+    public void graphBetweenTwoPoints2(Vector3 whereToStart, Vector3 whereToEnd, float lengthMultiplier)
+    {
+        Vector3 startV = whereToStart;
+        Vector3 endV = whereToEnd;//.operator(2);// * someBoolsAdded[thePointIndex];
+        //      Vector3 diffV = (endV - startV);
+        //      Vector3 drawV = endV + diffV * lengthMultiplier * diffV.sqrMagnitude * diffV.sqrMagnitude / 10;
+        //      Debug.DrawLine(startV, drawV, new Color(0f, 0f, 1f), 1f);
+        Debug.DrawLine(startV, endV, new Color(0f, 0f, 1f), 1f);
+    }
+
+
+    //useful "patterns" etc.
     public Vector3 applePattern()
     {
         //return zero length / no direction if there is no line of sight
@@ -670,117 +636,47 @@ public class spatialDataPoint
         //              simply combine both of these
         Vector3 theOutputVector = new Vector3();
 
-        if (lookingAngles.Count == 0)
-        {
-            gatherLookingAngleData(threatList);
-            //makeAllPerpendicularVectors();
-        }
-        if (distancesAsVectors.Count == 0)
-        {
-            gatherDistanceData(threatList);
-            //makeAllPerpendicularVectors();
-        }
-        if (lookingAnglePerpendiculars.Count == 0)
-        {
-            findIntermediateDataModularly(threatList);
-            //makeAllPerpendicularVectors();
-        }
-        if (lineOfSightBools.Count == 0)
-        {
-            gatherLineOfSightData(threatList);
-            //makeAllPerpendicularVectors();
-        }
+        //generalPointData1();
 
-
-        int currentIndex = 0;
-
-        //um, just assume we HAVE all the bools.  because otherwise this function makes no sense.
-        foreach (bool thisLineOfSight in lineOfSightBools)
+        foreach (spatialDataPointFragment thisFragment in fragmentList)
         {
-            if (thisLineOfSight == true)
+            if (thisFragment.lineOfSightBool == true)
             {
-                //....public List<float> distancesAsFloats = new List<float>();
-                //public List<float> lookingAngles = new List<float>();
-                //public List<bool> lineOfSightBools = new List<bool>();  //a LIST of BOOL....i don't think i've ever seen such a thing
-
-                //public List<Vector3> distancesAsVectors = new List<Vector3>();
-                //public List<Vector3> lookingAnglePerpendiculars = new List<Vector3>();
-
-                //public int listLenghts = 0;
-
-
-                //public float combinedMeasures = 0;  //hmmmm....don't i want a VECTOR i can GRAPH?
-                //public Vector3 thisPoint;
-
-                Vector3 awayOrTowardsUndecided = distancesAsVectors[currentIndex];
-                Vector3 theOrbitUndecided = lookingAnglePerpendiculars[currentIndex];
-
-                Vector3 awayOrTowardsFinal = towardsIfBehindAwayIfInFront(currentIndex);
-                Vector3 theOrbitFinal = orbitAwayFromLookingLine(currentIndex);
-
-                float orbitCoefficient = 1;
-                float entryCoefficient = 1;
-
-                float crossoverAngle = 110;
-
-                if (lookingAngles[currentIndex] < crossoverAngle)
-                {
-                    //have i made sure these andles only go between 0 and 180 degrees??  is that the default?
-
-                    //entryCoefficient = lookingAngles[currentIndex]/120;
-                    entryCoefficient = 0;
-                    orbitCoefficient = 1;
-
-                    theOutputVector += (entryCoefficient*awayOrTowardsFinal + orbitCoefficient*theOrbitFinal);
-                }
-                else
-                {
-                    //entryCoefficient = lookingAngles[currentIndex] / 180;
-                    //orbitCoefficient = (180 - lookingAngles[currentIndex])/180;
-                    //entryCoefficient = 1;
-                    //orbitCoefficient = 0;
-                    entryCoefficient = (lookingAngles[currentIndex] - crossoverAngle) / (180 - crossoverAngle);
-                    orbitCoefficient = (180 - lookingAngles[currentIndex])/180;
-                    theOutputVector += (entryCoefficient * awayOrTowardsFinal + orbitCoefficient * theOrbitFinal);
-                }
-
                 
+                theOutputVector += thisFragment.applePattern();
             }
-
-            currentIndex++;
         }
-
 
         return theOutputVector;
     }
 
+
+
+    //      initializing
+
+    public void initializeDataPoint(List<GameObject> targetList, Vector3 inputPoint)
+    {
+        thisPoint = inputPoint;
+
+        foreach (GameObject thisTarget in targetList)
+        {
+            spatialDataPointFragment newFragment = new spatialDataPointFragment();
+            newFragment.initializeFragment(thisTarget, thisPoint);
+            fragmentList.Add(newFragment);
+        }
+    }
+
+
+
+
+
+
+    //      utility
+
+    //      ad-hoc, try to get rid of
+   
     
 
-    public Vector3 towardsIfBehindAwayIfInFront(int listIndex)
-    {
-        //      when in front of enemy:
-        //              use vector pointing AWAY from enemy
-        //      when BEHIND an enemy
-        //              vector points TOWARDS enemy
-
-        //so, need to FIRST determine whether we are in front of or behind enemy.  we should have the angles for that:
-        if (lookingAngles[listIndex] < 110)
-        {
-            //have i made sure these andles only go between 0 and 180 degrees??  is that the default?
-
-            return -distancesAsVectors[listIndex];
-        }
-        else
-        {
-            return distancesAsVectors[listIndex];
-        }
-    }
-
-    public Vector3 orbitAwayFromLookingLine(int listIndex)
-    {
-        //not sure i know how to ensure these point the correct direction:
-        return lookingAnglePerpendiculars[listIndex];
-    }
 }
 
 public class spatialDataSet
@@ -796,52 +692,32 @@ public class spatialDataSet
     public Vector3 middlePoint;
 
 
-    public Vector3 bestMiddlePoint()
+
+
+    //      graphing
+    public void graphFeild(string graphInBlue, string graphInGreen = null, string graphInRed = null, string graphInYellow = null, string graphInMagenta = null)
     {
-        spatialDataPoint middleDataPoint = new spatialDataPoint();
-        middleDataPoint.thisPoint = middlePoint;
-        middleDataPoint.threatList = threatList;
+        //what are the strings supposed to be?  tell it what data to graph?  something?  i guess?
+        //so how to do this?
+        //first, use the string to set up the data to graph
+        //then graph it in the corrosponding color
+        //and be able to graph multiple things at once
+        List<string> treatmentList = new List<string>();
+        treatmentList = listOfStringsWITHNulls(graphInBlue, graphInGreen, graphInRed, graphInYellow, graphInMagenta);
 
+        int treatmentCounter = 0;
 
-        //myData.threatList = threatListWithoutSelf();
-        //myData.middlePoint = this.transform.position;
-        //myData.thePoints = myData.generate2Xby2YNearPoints(myData.middlePoint, 15, 15);
-        //myData.gatherData(myData.listOfStringsWithoutNulls("distancesToThreats", "threatAngles", "linesOfSight"));
-
-
-
-
-
-        //middleDataPoint.applePattern();
-        //return middleDataPoint.dontIneedACOMBINEDEndpoint.normalized;
-        middleDataPoint.dontIneedACOMBINEDEndpoint = middleDataPoint.applePattern();
-        return middleDataPoint.applePattern();
-    }
-
-    public void appleField()
-    {
-        int currentIndex = 0;
-
-        foreach (spatialDataPoint thisDataPoint in theDataSet)
+        foreach (string thisTreatment in treatmentList)
         {
-            //endPointsToGraph.Add(thisDataPoint.pattern1ForFightingArmedThreat());
-            thisDataPoint.dontIneedACOMBINEDEndpoint = thisDataPoint.applePattern();
-            currentIndex++;
+
         }
+
     }
 
-    public void adhocVectorCreationForAttackDodge1()
-    {
-        int currentIndex = 0;
 
-        foreach(spatialDataPoint thisDataPoint in theDataSet)
-        {
-            //endPointsToGraph.Add(thisDataPoint.pattern1ForFightingArmedThreat());
-            thisDataPoint.dontIneedACOMBINEDEndpoint = thisDataPoint.pattern1ForFightingArmedThreat();
-            currentIndex++;
-        }
-    }
+    
 
+    //      initializing
     public List<Vector3> generate2Xby2YNearPoints(Vector3 theMiddlePoint, int X, int Y)
     {
         List<Vector3> xByYpointsAroundMiddle = new List<Vector3>();
@@ -880,70 +756,14 @@ public class spatialDataSet
         foreach (Vector3 thisPoint in thePoints)
         {
             spatialDataPoint aDataPoint = new spatialDataPoint();
-            aDataPoint.thisPoint = thisPoint;
-            aDataPoint.threatList = threatList;
+            aDataPoint.initializeDataPoint(threatList, thisPoint);
             theDataSet.Add(aDataPoint);
         }
     }
-    public void gatherData(List<string> treatmentList)
-    {
-        //input different things you want to gather data about [such as "distances" or whatever] for each point
-
-        if(theDataSet == null)
-        {
-            createBlankDataSetFromPoints();
-        }
 
 
 
-        foreach (string thisDataToGather in treatmentList)
-        {
-            //so how does this work?  i have points, i have threats.
-            //for each point, i should already have a "spatialDataPoint"
-            //so operate on those
-            //for each one of those, call a function to do this
-            //get data for all distances to all threats
-
-            //"distancesToThreats", "threatAngles", "linesOfSight"
-            if (thisDataToGather == "distancesToThreats")
-            {
-                foreach(spatialDataPoint thisDataPoint in theDataSet)
-                {
-                    thisDataPoint.gatherDistanceData(threatList);
-                }
-            }
-            if (thisDataToGather == "threatAngles")
-            {
-                foreach (spatialDataPoint thisDataPoint in theDataSet)
-                {
-                    thisDataPoint.gatherLookingAngleData(threatList);
-                }
-            }
-            if (thisDataToGather == "linesOfSight")
-            {
-                foreach (spatialDataPoint thisDataPoint in theDataSet)
-                {
-                    thisDataPoint.gatherLineOfSightData(threatList);
-                }
-            }
-
-        }
-
-    }
-    public void combineData(List<string> treatmentList)
-    {
-        //input different things you want to combine [such as "distances" and "linesOfSight" or whatever] for each point
-        //could just have a set formula at the end, and initialize variables so they don't alter results UNLESS they are called in the treatmentList?
-        //buuuuuut i have to do it "for" multiple data types AND multiple points.  so that's TWO for loops i guess?  just put the end formula in the 2nd loop?  sure?
-        //no, wait....all...um....ya all the data combining here is happening at individual points.  so this functino just calls each of them to combine the data.....can probalby move one entire for loop over there for that.  ya ok.
-
-
-        foreach(spatialDataPoint thisDataPoint in theDataSet)
-        {
-            thisDataPoint.combineTheDataModularly(treatmentList);
-        }
-    }
-
+    //      utility
     public List<string> listOfStringsWithoutNulls(string s1, string s2 = null, string s3 = null, string s4 = null, string s5 = null)
     {
         List<string> inputList = new List<string>();
@@ -979,34 +799,41 @@ public class spatialDataSet
     }
 
 
+
+
+
+    //      ad-hoc, try to get rid of
+    public Vector3 bestMiddlePoint()
+    {
+        spatialDataPoint middleDataPoint = new spatialDataPoint();
+        middleDataPoint.initializeDataPoint(threatList, middlePoint);
+
+        return middleDataPoint.applePattern();
+    }
+    public void appleField()
+    {
+        int currentIndex = 0;
+
+        foreach (spatialDataPoint thisDataPoint in theDataSet)
+        {
+            //endPointsToGraph.Add(thisDataPoint.pattern1ForFightingArmedThreat());
+            thisDataPoint.dontIneedACOMBINEDEndpoint = thisDataPoint.applePattern();
+            currentIndex++;
+        }
+    }
+
+
     public void graphFeildAdHoc()
     {
         //just do regular blue vector feild of the "end points" for now.
 
-        foreach(spatialDataPoint thisDataPoint in theDataSet)
+        foreach (spatialDataPoint thisDataPoint in theDataSet)
         {
             thisDataPoint.graphBetweenThisPointAndCOMBINEDpoint();
         }
     }
 
-    public void graphFeild(string graphInBlue, string graphInGreen = null, string graphInRed = null, string graphInYellow = null, string graphInMagenta = null)
-    {
-        //what are the strings supposed to be?  tell it what data to graph?  something?  i guess?
-        //so how to do this?
-        //first, use the string to set up the data to graph
-        //then graph it in the corrosponding color
-        //and be able to graph multiple things at once
-        List<string> treatmentList = new List<string>();
-        treatmentList = listOfStringsWITHNulls(graphInBlue,graphInGreen, graphInRed, graphInYellow, graphInMagenta);
 
-        int treatmentCounter = 0;
-
-        foreach(string thisTreatment in treatmentList)
-        {
-
-        }
-
-    }
 
 }
 
