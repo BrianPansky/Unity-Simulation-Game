@@ -505,22 +505,17 @@ public class AIHub2 : MonoBehaviour
         List<GameObject> thisThreatList = body.theLocalMapZoneScript.threatList;
         if(thisThreatList.Count > 0)
         {
-            List<GameObject> threatListWithoutSelf = new List<GameObject>();
-            foreach (GameObject threat in thisThreatList)
-            {
-                //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
-                //UnityEngine.Vector3 p2 = threat.gameObject.transform.position;
-                //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 1f);
-                if(threat != null && threat != this.gameObject)
-                {
-                    threatListWithoutSelf.Add(threat);
-                }
-            }
 
 
-            spatialData1 myData = new spatialData1();
+
+
+
+
+
+
+            //                          spatialData1 myData = new spatialData1();
             //combineVectorForOnePoint2
-            myData.location = this.gameObject.transform.position;
+            //                          myData.location = this.gameObject.transform.position;
             //myData.combineVectorForOnePoint2(myData.location);
             //myData.generateValidNearPoints1(myData.location);
             //      myData.gatherALLThreatDataTypes(thisThreatList);
@@ -535,7 +530,32 @@ public class AIHub2 : MonoBehaviour
             }
             else
             {
-                graphCooldown = 0;
+                graphCooldown = -2;
+
+
+                List<GameObject> threatListWithoutSelf = new List<GameObject>();
+                foreach (GameObject threat in thisThreatList)
+                {
+                    //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
+                    //UnityEngine.Vector3 p2 = threat.gameObject.transform.position;
+                    //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 1f);
+                    if (threat != null && threat != this.gameObject)
+                    {
+                        threatListWithoutSelf.Add(threat);
+                    }
+                }
+
+
+                if (threatListWithoutSelf.Count > 0)
+                {
+                    //spatialDataSet mySpatialDataSet = new spatialDataSet();
+                    //mySpatialDataSet.InitializeFeild(this.gameObject.transform.position, threatListWithoutSelf, 9);
+                    //mySpatialDataSet.appleGraph();
+                }
+
+
+
+
                 //myData.general8DirectionGraphEXAGGERATED(myData.location, myData.lookingAngleSamples);
                 //      myData.general8DirectionGraphEXAGGERATED(myData.location, myData.combinedMeasures);
             }

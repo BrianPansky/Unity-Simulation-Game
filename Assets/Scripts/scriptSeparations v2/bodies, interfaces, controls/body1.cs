@@ -121,7 +121,7 @@ public class body1 : MonoBehaviour
 
 
         //Vector3 startV = this.gameObject.transform.position;
-        //Vector3 endV = startV + lookingRay.direction;//.operator(2);// * someBoolsAdded[thePointIndex];
+        //Vector3 endV = startV + (4*lookingRay.direction);//.operator(2);// * someBoolsAdded[thePointIndex];
         //Debug.DrawLine(startV, endV, new Color(0f, 1f, 0f), 1f);
 
     }
