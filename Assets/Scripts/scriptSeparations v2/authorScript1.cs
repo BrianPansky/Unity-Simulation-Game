@@ -9,7 +9,6 @@ public class authorScript1 : MonoBehaviour
 
     public GameObject theAuthor;
     public string interactionType;
-    public testInteraction enactThisInteraction;
 
 
     // Start is called before the first frame update

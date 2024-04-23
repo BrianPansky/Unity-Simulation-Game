@@ -444,7 +444,7 @@ public class enactionMate
                 projectile1 projectileScript = thisObject.AddComponent<projectile1>();
                 projectileScript.Direction = enactionBody.lookingRay.direction;
                 selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
-                killScript.delay = 830;
+                killScript.timeUntilSelfDestruct = 830;
 
                 //      should this use "interactionMate" isntead?
                 
@@ -469,8 +469,65 @@ public class enactionMate
 
 
         }
+        else if (enactThis == "shootFlamethrower1")
+        {
+            //Debug.Log("shootFlamethrower1");
+            if (firingCooldown == 0)
+            {
+                firingCooldown = 3;
+
+                Renderer objectsRenderer = enactionAuthor.GetComponent<Renderer>();
+                if (objectsRenderer != null)
+                {
+                    //objectsRenderer.material.color = new Color(1f, 0f, 0f);
+                }
+
+                //this.gameObject.transform.scale = new Vector3(1f, 22, 1f);
+                //this.gameObject.transform.
+
+                //body1 authorBody = this.gameObject.GetComponent<body1>();
+                //GameObject makeThis = authorBody.theWorldScript.theRespository.placeHolderCubePrefab;
+                GameObject makeThis = enactionBody.theWorldScript.theRespository.interactionSphere;
 
 
+                GameObject thisObject = enactionBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, enactionAuthor.transform.position);
+                //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
+                thisObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                thisObject.transform.position += enactionBody.lookingRay.direction;
+                //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
+                projectile1 projectileScript = thisObject.AddComponent<projectile1>();
+                projectileScript.Direction = enactionBody.lookingRay.direction;
+                projectileScript.selfDestructOnCollision = false;
+                selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
+                killScript.timeUntilSelfDestruct = 10;
+                //killScript.
+
+                growScript1 growScript = thisObject.AddComponent<growScript1>();
+                growScript.growthSpeed = 0.3f;
+
+                //      should this use "interactionMate" isntead?
+
+                authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+                theAuthorScript.theAuthor = enactionAuthor;
+                //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
+                //theAuthorScript.interactionType = "bullet1";
+                theAuthorScript.interactionType = "shootFlamethrower1";
+                //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
+                //theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
+
+                threatAlert(theAuthorScript.theAuthor);
+                //Vector3 p1 = theAuthorScript.theAuthor.transform.position;
+                //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
+
+            }
+            else
+            {
+                firingCooldown -= 1;
+            }
+
+
+        }
     }
 
 

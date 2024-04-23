@@ -24,7 +24,6 @@ public class repository2 : MonoBehaviour
     public interactive1 theInteractive1Script;
     public legibstration theLegibstrata;
     public planningAndImagination thePlanner;
-    public interactionEffects1 theInteractionEffects1;
 
     //public premadeStuffForAI stateGrabber;
     //public AI1 theHub;
@@ -343,14 +342,6 @@ public class repository2 : MonoBehaviour
 
         //assume "Quaternion.identity" for now.
         GameObject theNewObject = Instantiate(objectToDuplify, thePoint, Quaternion.identity);
-
-        interactionEffects1 thisInteractionEffects1 = theNewObject.GetComponent<interactionEffects1>();
-        if(thisInteractionEffects1 != null)
-        {
-            //now clonify it.
-            //call from old one, input new one.
-            objectToDuplify.GetComponent<interactionEffects1>().clonify(thisInteractionEffects1);
-        }
 
         interactionScript thisinteractionScript = theNewObject.GetComponent<interactionScript>();
         if (thisinteractionScript != null)

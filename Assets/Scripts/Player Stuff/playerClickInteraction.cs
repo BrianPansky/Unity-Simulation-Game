@@ -374,10 +374,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //AIhub2 has "makeSimpleEnactionMate" to do this.  should move it to enaction script
-        enactionMate newEnactionMate = new enactionMate();
-        newEnactionMate.enactionAuthor = this.gameObject;
-        newEnactionMate.enactionBody = body;
-        newEnactionMate.enactThis = "shoot1";
+        enactionMate newEnactionMate = firingFlamethrowerEnactionMate();// firingRegularGunEnactionMate();
         //newEnactionMate.enactionTarget = enactionTarget;
 
         newEnactionMate.enact();
@@ -386,6 +383,28 @@ public class playerClickInteraction : MonoBehaviour
         clickedOn = null;
 
     }
+
+    public enactionMate firingRegularGunEnactionMate()
+    {
+        enactionMate newEnactionMate = new enactionMate();
+        newEnactionMate.enactionAuthor = this.gameObject;
+        newEnactionMate.enactionBody = body;
+        newEnactionMate.enactThis = "shoot1";
+
+        return newEnactionMate;
+    }
+
+    public enactionMate firingFlamethrowerEnactionMate()
+    {
+        enactionMate newEnactionMate = new enactionMate();
+        newEnactionMate.enactionAuthor = this.gameObject;
+        newEnactionMate.enactionBody = body;
+        newEnactionMate.enactThis = "shootFlamethrower1";
+
+        return newEnactionMate;
+    }
+
+
 
     public void doStuffAfterWorldClick(GameObject clickedOn)
     {

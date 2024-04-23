@@ -20,8 +20,6 @@ public class legibstration : MonoBehaviour
     //still, i don't have full perspective on wtf i'm doing.  continue with ad-hoc methods, figure out system AFTER some of "it" is working
     //NO WAIT, i should have something more like my action/actionItem class objects?  and set up for modular condition/trigger implementation?
 
-    public Dictionary<string, List<testInteraction>> globalInteractionLegibstration;
-
     worldScript theWorldScript;
 
 
@@ -31,7 +29,6 @@ public class legibstration : MonoBehaviour
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
-        globalInteractionLegibstration = theWorldScript.interactionLegibstration;
     }
 
     // Update is called once per frame
@@ -39,39 +36,6 @@ public class legibstration : MonoBehaviour
     {
         
     }
-
-    public void legibstrate(GameObject theObject, testInteraction theInteraction)
-    {
-        //globalInteractionLebistration
-
-        //update "global" legibstrata, don't bother with a "local" one for now?
-        //[basically, "local" one is the "interactionsAvailable" on an object's interaction script, which it can update itself?
-
-        if(globalInteractionLegibstration == null)
-        {
-            Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb this is dumb that i need to do this here");
-
-            GameObject theWorldObject = GameObject.Find("World");
-            theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
-
-            globalInteractionLegibstration = theWorldScript.interactionLegibstration;
-        }
-
-        //but dictionaries are tricky objects, and must be checked and all that:
-        if (globalInteractionLegibstration.ContainsKey(theObject.name))
-        {
-            //add the game object to the list of objects tagged with that tag:
-            globalInteractionLegibstration[theObject.name].Add(theInteraction);
-        }
-        else
-        {
-            //sigh, need to add the key first, which means the list it unlocks as well...
-            List<testInteraction> needsList = new List<testInteraction>();
-            needsList.Add(theInteraction);
-            globalInteractionLegibstration.Add(theObject.name, needsList);
-        }
-    }
-
 
 
 }

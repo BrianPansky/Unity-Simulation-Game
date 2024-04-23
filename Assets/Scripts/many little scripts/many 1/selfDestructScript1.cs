@@ -4,26 +4,28 @@ using UnityEngine;
 
 public class selfDestructScript1 : MonoBehaviour
 {
-    public int delay = 1;
+    public int currentCounter = 1;
+
+    public int timeUntilSelfDestruct = 1;
     // Start is called before the first frame update
     void Start()
     {
-        delay = 30;
+        //delay = 30;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (delay == 0)
+        if (currentCounter == 0)
         {
             //this.gameObject.transform.position = new Vector3(0, -500, 0);
             //Destroy(this.gameObject);
         }
-        if (delay == -33)
+        if (currentCounter > timeUntilSelfDestruct)
         {
             Destroy(this.gameObject);
         }
-        delay -= 1;
+        currentCounter += 1;
     }
 
 }

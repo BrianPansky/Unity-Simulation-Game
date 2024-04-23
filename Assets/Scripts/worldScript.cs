@@ -12,7 +12,6 @@ public class worldScript : MonoBehaviour
 
     public GameObject thePlayer;
     public Dictionary<string, List<GameObject>> taggedStuff = new Dictionary<string, List<GameObject>>();
-    public Dictionary<string, List<testInteraction>> interactionLegibstration = new Dictionary<string, List<testInteraction>>();
     //public List<GameObject> interactionLegibstration = new List<GameObject>();
     public int theTime;
 
