@@ -344,11 +344,17 @@ public class worldScript : MonoBehaviour
             int numberOfAgents = 0;
             int numberOfNonAgents = 0;
             List < AIHub2 > newBatchOfNPCsPerZone = new List<AIHub2>();
-            foreach (GameObject thisObject2 in theMapZoneScript.theList)
+            foreach (GameObject thisItem2 in theMapZoneScript.theList)
             {
+                //if(thisObject2 == null) {  continue; } //shouldn't be happening, but it is.....
+                if (thisItem2 == null) 
+                {
+                    Debug.Log("gameObject is null");
+                }
+                AIHub2 thisNPCHub = thisItem2.GetComponent<AIHub2>();
 
-                AIHub2 thisNPCHub = thisObject2.GetComponent<AIHub2>();
-                if(thisObject2.name == "returnTestAgent1(Clone)" || thisObject2.name == "returnTestAgent1")
+                //oh................should this be changed if i'm using test agent TWO now?
+                if(thisItem2.name == "returnTestAgent1(Clone)" || thisItem2.name == "returnTestAgent1")
                 {
                     numberOfAgents++;
                     //Debug.Log("is this null?:  " + thisNPCHub + "for this object:  " + thisObject2);
@@ -380,11 +386,13 @@ public class worldScript : MonoBehaviour
             listOfFARMapZoneScripts.Add(theMapZoneScript);
 
             List<AIHub2> newBatchOfNPCsPerZone = new List<AIHub2>();
-            foreach (GameObject thisObject2 in theMapZoneScript.theList)
+            foreach (GameObject thisItem2 in theMapZoneScript.theList)
             {
-                //Debug.Log("thisObject2:  " + thisObject2);
 
-                AIHub2 thisNPCHub = thisObject2.GetComponent<AIHub2>();
+                //if (thisObject2 == null) { continue; } //shouldn't be happening, but it is.....
+
+                //Debug.Log("thisObject2:  " + thisObject2);
+                AIHub2 thisNPCHub = thisItem2.GetComponent<AIHub2>();
                 //listOfFARAIHub2ScriptsPerZone[farIndex].Add(theHub);
                 //Debug.Log("is this null?:  " + thisNPCHub + "for this object:  " + thisObject2);
                 if (thisNPCHub != null)
@@ -398,52 +406,6 @@ public class worldScript : MonoBehaviour
             //farIndex++;
         }
         //Debug.Log("22222222222222222222222numberOfNEARMapZones:  " + numberOfNEARMapZones);
-    }
-
-    public void updateNearOneframeTheFarNextFrameEtc()
-    {
-
-        //Debug.Log("which to do???????????????????????????? (true = near)" + nearORfar);
-        if (nearORfar == true)
-        {
-
-            //Debug.Log("DO NEAR!!!!!!!!!!!!!" + listOfNEARMapZoneScripts.Count);
-
-            if (currentNEARMapZone > listOfNEARMapZoneScripts.Count - 1)
-            {
-                currentNEARMapZone = 1;
-            }
-
-            //updateOneZone(listOfNEARMapZoneScripts[currentNEARMapZone - 1], callableUpdatesPerZoneFrame);
-            updateOneZoneFromListOfAIHub2s(listOfNEARAIHub2ScriptsPerZone[currentNEARMapZone - 1], callableUpdatesPerZoneFrame);
-            currentNEARMapZone++;
-            nearORfar = false;
-        }
-        else
-        {
-            //Debug.Log("DO FAR!!!!!!!!!!!!!" + listOfFARMapZoneScripts.Count);
-            if (currentZoneFrame == framesPerZone)
-            {
-                currentMapZone++;
-                currentZoneFrame = 1;
-
-            }
-            else
-            {
-                currentZoneFrame++;
-            }
-
-
-            //Debug.Log(listOfNEARMapZoneScripts.Count);
-            //Debug.Log(listOfFARMapZoneScripts.Count);
-            Debug.Log(currentMapZone - 1);
-            //updateOneZone(listOfFARMapZoneScripts[currentMapZone - 1], callableUpdatesPerZoneFrame);
-            updateOneZoneFromListOfAIHub2s(listOfFARAIHub2ScriptsPerZone[currentMapZone - 1], callableUpdatesPerZoneFrame);
-            nearORfar = true;
-        }
-
-
-
     }
 
 
@@ -472,87 +434,7 @@ public class worldScript : MonoBehaviour
 
 
 
-    public void oldUpdateV1()
-    {
-
-        numberOfMapZones = listOfMapZoneScripts.Count;
-        timeIncrement();
-
-        Debug.Log(currentMapZone);
-        Debug.Log(numberOfMapZones);
-
-        if (currentMapZone == numberOfMapZones)
-        {
-            currentMapZone = 1;
-            //numberOfMapZones = listOfMapZoneScripts.Count;
-        }
-        else
-        {
-            foreach (GameObject thisObject in listOfMapZoneScripts[currentMapZone - 1].theList)
-            {
-                AIHub2 theHub = thisObject.GetComponent<AIHub2>();
-                if (theHub != null)
-                {
-                    while (callableUpdateCounter < callableUpdatesPerZoneFrame)
-                    {
-                        callableUpdateCounter++;
-                        theHub.callableUpdate();
-                    }
-                    callableUpdateCounter = 0;
-
-                }
-            }
-        }
-
-
-        if (currentZoneFrame == framesPerZone)
-        {
-            currentMapZone++;
-            currentZoneFrame = 0;
-            //nearestXNumberOfYToZExceptYAndTheRemainder
-        }
-        else
-        {
-            currentZoneFrame++;
-        }
-
-    }
-
-    public void farUpdateUNISED(mapZoneScript currentZone)
-    {
-        //updateOneZone(currentZone, callableUpdatesPerZoneFrame);
-    }
-
-
-
-    public void updateOneZoneByGettingEachAIHub2(mapZoneScript currentZone, int howManyUpdatesPerEntity)
-    {
-        foreach (GameObject thisObject in currentZone.theList)
-        {
-            AIHub2 theHub = thisObject.GetComponent<AIHub2>();
-            if (theHub != null)
-            {
-                while (callableUpdateCounter < howManyUpdatesPerEntity)
-                {
-                    callableUpdateCounter++;
-                    theHub.callableUpdate();
-                }
-                callableUpdateCounter = 0;
-            }
-        }
-    }
-    public void nearUpdateUNUSED(mapZoneScript currentZone)
-    {
-        //updateOneZone(currentZone, callableUpdatesPerZoneFrame);
-    }
-
-    public void OLDnearUpdateUNUSED(List<mapZoneScript> listOfZones)
-    {
-        foreach(mapZoneScript thisZone in listOfZones)
-        {
-            //updateOneZone(thisZone, 1);
-        }
-    }
+   
 
     public void timeIncrement()
     {

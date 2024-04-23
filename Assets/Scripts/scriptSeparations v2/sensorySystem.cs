@@ -67,23 +67,6 @@ public class sensorySystem : MonoBehaviour
         //Debug.Log("xxxxxxxxxxxxxxxxxxx END of sensory update xxxxxxxxxxxxxxxxxxxxx");
     }
 
-    public List<GameObject> threatListWithoutSelf()
-    {
-        List<GameObject> threatListWithoutSelf = new List<GameObject>();
-        List<GameObject> thisThreatList = body.theLocalMapZoneScript.threatList;
-
-        foreach (GameObject threat in thisThreatList)
-        {
-            //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
-            //UnityEngine.Vector3 p2 = threat.gameObject.transform.position;
-            //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 1f);
-            if (threat != null && threat != this.gameObject)
-            {
-                threatListWithoutSelf.Add(threat);
-            }
-        }
-        return threatListWithoutSelf;
-    }
 
 
 
@@ -354,6 +337,7 @@ public class spatialDataPointFragment
         generalFragmentData1();
     }
 
+
     public void generalFragmentData1()
     {
         gatherLookingAngleData();
@@ -371,6 +355,12 @@ public class spatialDataPointFragment
     }
     public void gatherLookingAngleData()
     {
+        if (targetObject == null)
+        {
+            Debug.Log("gameObject is null");
+            
+        }
+
         Ray targetLookingRay = targetObject.GetComponent<body1>().lookingRay;
         Vector3 lineBetweenThreatAndPoint = originLocation - targetObject.transform.position;
         float theAngle = Vector3.Angle(targetLookingRay.direction, lineBetweenThreatAndPoint);
@@ -547,6 +537,7 @@ public class spatialDataPoint
     {
         thisPoint = inputPoint;
 
+        //printAllIdNumbers(targetList);
 
         foreach (GameObject thisTarget in targetList)
         {
@@ -557,6 +548,18 @@ public class spatialDataPoint
     }
 
 
+    public void printAllIdNumbers(List<GameObject> listOfGameObjects)
+    {
+
+        string X = "printAllIdNumbers:  ";
+
+        foreach (GameObject thisItem in listOfGameObjects)
+        {
+            X += thisItem + ", ";
+        }
+
+        Debug.Log(X);
+    }
 
 
 
@@ -564,8 +567,8 @@ public class spatialDataPoint
     //      utility
 
     //      ad-hoc, try to get rid of
-   
-    
+
+
 
 }
 
@@ -626,13 +629,6 @@ public class spatialDataSet
 
 
     //      initializing
-    public void InitializeFeild(Vector3 theMiddlePoint, List<GameObject> targetList, int halfOfSideLength)
-    {
-        middlePoint = theMiddlePoint;
-        threatList = targetList;
-        thePoints = generate2Xby2YNearPoints(theMiddlePoint, halfOfSideLength, halfOfSideLength);
-        createBlankDataSetFromPoints();
-    }
 
     public List<Vector3> generate2Xby2YNearPoints(Vector3 theMiddlePoint, int X, int Y)
     {

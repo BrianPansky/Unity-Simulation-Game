@@ -326,69 +326,10 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
-
-        //.....newer "old"
-        if (true == false)
-        {
-            //body.interactionScript.interactionDictionary
-            //      make interactionMate (or get one from dictionary, and fill in any details it leaves out)
-            string nameOfCurrentClickInteraction = "standardInteraction1";  //this should be generalized, so it always plugs in the right one
-                                                                            //interactionMate theInteractionMate = body.interactionScript.interactionDictionary[nameOfCurrentClickInteraction];
-            interactionMate theInteractionMate = new interactionMate();
-            theInteractionMate.interactionAuthor = this.gameObject;
-
-
-
-
-            //          NEEDS TO BE FIXED
-            //theInteractionMate.enactThisInteraction = body.interactionScript.interactionDictionary["doARegularClick"];
-
-
-
-
-
-            //theInteractionMate.printMate();
-            theInteractionMate.enactThisInteraction.doInteraction(theInteractionMate);
-
-
-            return theInteractionMate.clickedOn;
-
-        }
-
-
-        //old:
-        if (true == false)
-        {
-
-
-            //RaycastHit myHit;
-            //Ray myRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-
-
-            if (Physics.Raycast(myRay, out myHit, 7.0f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                if (myHit.transform != null)
-                {
-                    //Debug.Log(myHit.transform.gameObject);
-                    clickedOn = myHit.transform.gameObject;
-                    GameObject thisObject = createPrefabAtPointAndRETURN(theInteractionSphere, myHit.point);
-
-                    //      should this use "interactionMate" isntead?
-                    thisObject.GetComponent<authorScript1>().theAuthor = this.gameObject;
-
-                }
-            }
-
-
-            return clickedOn;
-        }
-
-
-
         
     }
-    
+
+
     void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)
     {
         //GameObject newBuilding = new GameObject();

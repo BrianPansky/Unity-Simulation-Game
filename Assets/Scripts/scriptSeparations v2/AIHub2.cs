@@ -67,9 +67,12 @@ public class AIHub2 : MonoBehaviour
 
     void Awake()
     {
-        this.gameObject.AddComponent<body1>();
-        body = this.gameObject.GetComponent<body1>();
-        //body = this.gameObject.AddComponent<body1>();
+        if(body == null)
+        {
+            this.gameObject.AddComponent<body1>();
+            body = this.gameObject.GetComponent<body1>();
+            //body = this.gameObject.AddComponent<body1>();
+        }
 
         //AddComponent<AIHub2>();
 
@@ -100,17 +103,28 @@ public class AIHub2 : MonoBehaviour
         //no, no, no, don't "get" component, CREATE it!
         //an AIHub2 should probably come with a sensory system by DEFAULT,
         //so why not build that into its initialization?
-        /// theSensorySystem = myTest2.GetComponent("sensorySystem") as sensorySystem;
-        this.gameObject.AddComponent<sensorySystem>();
-        theSensorySystem = this.gameObject.GetComponent("sensorySystem") as sensorySystem;
-        theSensorySystem.body = body;
+        if(theSensorySystem == null)
+        {
+            /// theSensorySystem = myTest2.GetComponent("sensorySystem") as sensorySystem;
+            this.gameObject.AddComponent<sensorySystem>();
+            theSensorySystem = this.gameObject.GetComponent("sensorySystem") as sensorySystem;
+            theSensorySystem.body = body;
+        } 
+        
         //same for planning:
-        this.gameObject.AddComponent<planningAndImagination>();
-        thePlanner = this.gameObject.GetComponent("planningAndImagination") as planningAndImagination;
+        if(thePlanner == null)
+        {
+            this.gameObject.AddComponent<planningAndImagination>();
+            thePlanner = this.gameObject.GetComponent("planningAndImagination") as planningAndImagination;
+        }
 
         //inventory1
-        this.gameObject.AddComponent<inventory1>();
-        theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
+        if(theInventory == null)
+        {
+            this.gameObject.AddComponent<inventory1>();
+            theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
+        }
+        
 
         theEnactionScript = this.gameObject.GetComponent<enactionScript>();
 
@@ -347,10 +361,19 @@ public class AIHub2 : MonoBehaviour
 
     }
 
+    //void OnDestroy()
+    //{
+        //does work when they die! .......but ALSO when you stop program.  which could be....a bit much.......
+        //Debug.Log("does this do anything when they die?  or only when you stop the whole game or whatever???????????");
+    //}
+
     public List<GameObject> threatListWithoutSelf()
     {
         List<GameObject> threatListWithoutSelf = new List<GameObject>();
         List<GameObject> thisThreatList = body.theLocalMapZoneScript.threatList;
+
+        //Debug.Log("body.theLocalMapZoneScript.threatList.Count:  " + body.theLocalMapZoneScript.threatList.Count);
+        //printAllIdNumbers(body.theLocalMapZoneScript.threatList);
 
         foreach (GameObject threat in thisThreatList)
         {
@@ -362,8 +385,11 @@ public class AIHub2 : MonoBehaviour
                 threatListWithoutSelf.Add(threat);
             }
         }
+        //Debug.Log("threatListWithoutSelf.Count:  " + threatListWithoutSelf.Count);
+        //printAllIdNumbers(threatListWithoutSelf);
         return threatListWithoutSelf;
     }
+
 
 
 
@@ -431,6 +457,14 @@ public class AIHub2 : MonoBehaviour
             //ya, ad-hoc:
             if (currentPlan.Count > 0)
             {
+
+                if (currentPlan[0].enactionTarget == null) 
+                {
+                    //this happens if game object is destroyed, but still referenced in this variable
+                    //ad-hoc solution for now is to do this!
+                    currentPlan.Remove(currentPlan[0]);
+                    return; 
+                }
                 if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
                 {
                     //Debug.Log("forgetfulnessTimerCurrent hit zero           for standardClick on returnTestLOCK1(Clone)");
@@ -721,16 +755,7 @@ public class AIHub2 : MonoBehaviour
                 currentFramesNOTinTransit++;
                 if (currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction)
                 {
-
-                    if (currentPlan[0].enactionTarget.name == "returnTestLOCK1(Clone)" && currentPlan[0].enactThis == "standardClick")
-                    {
-                        //Debug.Log("currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction           for standardClick on returnTestLOCK1(Clone)");
-                    }
-
                     currentPlan.RemoveAt(0);
-
-
-
 
                     currentFramesNOTinTransit = 0;
                     //currentPlan[0].deleteThisEnaction = true;
@@ -757,7 +782,7 @@ public class AIHub2 : MonoBehaviour
 
     public List<enactionMate> pickSomethingToInteractWithAndPlanToTryIt()
     {
-        GameObject theTarget = semiRandomTargetPicker();
+        GameObject theTarget = semiRandomTargetPickerMZ();
         List<enactionMate> newPlan = new List<enactionMate>();
 
         if (theTarget == null)
@@ -883,7 +908,7 @@ public class AIHub2 : MonoBehaviour
 
         if (anInteractionScript == null)
         {
-            Debug.Log("anInteractionScript is null on randomInteractionTarget");
+            //Debug.Log("anInteractionScript is null on randomInteractionTarget");
             return null;
         }
 
@@ -925,59 +950,22 @@ public class AIHub2 : MonoBehaviour
     }
 
 
-    public GameObject semiRandomTargetPicker()
+    public GameObject semiRandomTargetPickerMZ()
     {
-        //List<GameObject> potentialTargets = theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable");
-
-        List<List<GameObject>> ALLpotentialTargetsSORTED = theWorldScript.theTagScript.nearestXNumberOfYToZExceptYAndTheRemainder(4, body.theLocalMapZoneScript.theList, this.gameObject);
         //theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
-        List<GameObject> potentialTargets = new List<GameObject>();
+        List<GameObject> potentialTargets = body.theLocalMapZoneScript.theList;
         //potentialTargets = theWorldScript.theTagScript.nearestXNumberOfYToZExceptYAndTheRemainder(4, potentialTargets, this.gameObject)[0];
 
-        //just to allow a far away one sometimes:
-
-        //potentialTargets.Add(theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(potentialTargets, this.gameObject));
-        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[0]));
-        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[0]));
-        //potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
-        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
-        potentialTargets.Add(theWorldScript.theTagScript.randomObjectFromList(ALLpotentialTargetsSORTED[1]));
-        GameObject theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
         //GameObject theTarget = theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(body.theLocalMapZoneScript.theList, this.gameObject);
 
         //Debug.Log("theTarget:  " + theTarget);
-        
-
-        int loopTries = 4;
-        while(loopTries > 0)
-        {
-            loopTries--;
-            if (theTarget == null)
-            {
-                //Debug.Log("this is null:  " + theTarget);
-                return null;
-            }
-            else
-            {
-                //Debug.Log("this is NOT null:  " + theTarget);
-            }
-            //Debug.Log("loopTries:  " + loopTries);
-            //Debug.Log("theTarget:  " + theTarget);
-            //Debug.Log("theTarget:  " + theTarget.GetComponent<interactionScript>());
-            interactionScript anInteractionScript = theTarget.GetComponent<interactionScript>();
-            if( anInteractionScript != null )
-            {
-                break;
-            }
-            else
-            {
-                theTarget = theWorldScript.theTagScript.randomObjectFromList(potentialTargets);
-            }
-        }
 
 
-
+        int randomIndex = UnityEngine.Random.Range(0, potentialTargets.Count);
+        GameObject theTarget = potentialTargets[randomIndex];
+        //GameObject theTarget = randomObjectFromList(listOfObjects);
         return theTarget;
+
 
 
         //Debug.Log("body.theLocalMapZoneScript:  " + body.theLocalMapZoneScript);
@@ -986,6 +974,8 @@ public class AIHub2 : MonoBehaviour
         //nearestXNumberOfYToZExceptYAndTheRemainder
         //randomObjectFromList
     }
+
+
 
 
 

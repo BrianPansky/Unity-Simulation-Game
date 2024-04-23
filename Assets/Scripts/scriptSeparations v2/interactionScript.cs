@@ -32,8 +32,10 @@ public class interactionScript : MonoBehaviour
 
         if (other.tag == "interactionType1")
         {
-
+            
             authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
+
+            if (theAuthorScript.theAuthor == null) { return; }
             //Debug.Log("2222222222222the interaction type is:  " + theAuthorScript.interactionType);
             if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType))
             {
@@ -63,17 +65,6 @@ public class interactionScript : MonoBehaviour
 
                         //theAuthorScript.theAuthor.transform.localScale = new Vector3(1f, 22, 1f);
 
-                        if (true == false)
-                        {
-                            interactionEffects1 authorInteractionScript = theAuthorScript.theAuthor.GetComponent<interactionEffects1>();
-
-
-                            if (authorInteractionScript.interactionDictionary.ContainsKey("doAShootingEnaction") == false)
-                            {
-                                testInteraction mainInteraction = authorInteractionScript.generateInteraction("aShootingEnaction");
-                                authorInteractionScript.interactionDictionary.Add("doAShootingEnaction", mainInteraction);
-                            }
-                        }
                     }
                 }
                 if (theDictEntry == "grabKey")
@@ -89,46 +80,23 @@ public class interactionScript : MonoBehaviour
 
                 if (theDictEntry == "die")
                 {
-                    //Debug.Log("this SHOULD destroy the AI...................................................................................................................................................");
-                    
-                    
-                    //Vector3 p1 = this.gameObject.transform.position;
-                    //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                    //Debug.DrawLine(p1, p2, new Color(1f, 0f, 0f), 9999f);
 
-                    //Debug.Log(UnityEngine);
-                    //Debug.Log(UnityEngine.Object);
-
-                    //          NEED TO STOP THEIR NAVMESH AGENT TOO!!!!!!!!!!!!!!
-                    //      UnityEngine.Object.Destroy(this.gameObject.GetComponent<AIHub2>());
-                    //      UnityEngine.Object.Destroy(this.gameObject.GetComponent<interactionScript>());
-                }
+                    body1 thisBody = this.gameObject.GetComponent<body1>();
+                    thisBody.currentHealth -= 555;
 
 
+                    this.gameObject.GetComponent<Renderer>().material.color = new Color(((thisBody.currentHealth + 10) / (thisBody.maxHealth + 10)), 0f, 0f);
 
-                if (true == false)
-                {
-                    interactionMate thisMate = new interactionMate();
-
-
-                    thisMate.interactionAuthor = theAuthorScript.theAuthor;
-                    thisMate.enactThisInteraction = theAuthorScript.enactThisInteraction;
-                    thisMate.target1 = this.gameObject;
-                    thisMate.enactOn = this.gameObject;
-                    //Debug.Log("my interaction type:  " + theAuthorScript.interactionType);
-
-                    //interactionDictionary[theAuthorScript.interactionType].doInteraction(thisMate);
-                }
-            }
-            if(true == false)
-            {
-                //foreach (string aaaaa in interactionDictionary.Keys)
-                {
-                    //if (aaaaa == theAuthorScript.interactionType)
+                    if (thisBody.currentHealth < 0 && this.gameObject.name != "Player 1")
                     {
-
+                        thisBody.killThisBody();
                     }
+
+
                 }
+
+
+
             }
         }
 

@@ -31,9 +31,13 @@ public class body1 : MonoBehaviour
     public mapZoneScript theLocalMapZoneScript;
 
 
+    public float maxHealth = 100f;
+    public float currentHealth = 0f;  //set to max health in "awake"
+
+
     void Awake()
     {
-
+        currentHealth = maxHealth;
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
@@ -41,10 +45,13 @@ public class body1 : MonoBehaviour
 
 
 
-
-        this.gameObject.AddComponent<enactionScript>();
-        theEnactionScript = this.gameObject.GetComponent<enactionScript>();
-        theEnactionScript.theBody = this;
+        if(theEnactionScript == null)
+        {
+            this.gameObject.AddComponent<enactionScript>();
+            theEnactionScript = this.gameObject.GetComponent<enactionScript>();
+            theEnactionScript.theBody = this;
+        }
+        
         //enactionScript.availableEnactions.Add("walk");
         theEnactionScript.availableEnactions.Add("navMeshWalk");
         theEnactionScript.availableEnactions.Add("aim");
@@ -100,9 +107,13 @@ public class body1 : MonoBehaviour
         //Debug.Log("pointerPoint:  " + pointerPoint);
 
         //"bullet1"
-        this.gameObject.AddComponent<interactionScript>();
-        theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-        theInteractionScript.dictOfInteractions = new Dictionary<string, string>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+        if(theInteractionScript == null)
+        {
+            this.gameObject.AddComponent<interactionScript>();
+            theInteractionScript = this.gameObject.GetComponent<interactionScript>();
+            theInteractionScript.dictOfInteractions = new Dictionary<string, string>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+        }
+
         //theInteractionScript.dictOfInteractions.Add("bullet1", "die");  shoot1
         theInteractionScript.dictOfInteractions.Add("shoot1", "die");
         //.Add("walk");
@@ -126,6 +137,21 @@ public class body1 : MonoBehaviour
 
     }
 
+    public void killThisBody()
+    {
+        //this.gameObject.SetActive(false);
+
+        theLocalMapZoneScript.theList.Remove(this.gameObject);
+        theLocalMapZoneScript.threatList.Remove(this.gameObject);
+
+
+
+        theWorldScript.theTagScript.foreignRemoveALLtags(this.gameObject);
+
+        Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
+        UnityEngine.Object.Destroy(this.gameObject);
+
+    }
 
 
     public Vector3 pointerOrigin()

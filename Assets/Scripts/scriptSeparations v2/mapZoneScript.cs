@@ -8,8 +8,11 @@ public class mapZoneScript : MonoBehaviour
     public int howManyUpdatesPerEntity = 1; //GETS SET BY WORLD SCRIPT
 
     //public List<GameObject> theMapZoneListOfGameObjects = new List<GameObject>();
+    //              public List<GameObject> theList = new List<GameObject>();
+    //              public List<GameObject> threatList;
+
     public List<GameObject> theList = new List<GameObject>();
-    public List<GameObject> threatList;
+    public List<GameObject> threatList = new List<GameObject>();
 
     public worldScript theWorldScript;
 
@@ -61,8 +64,15 @@ public class mapZoneScript : MonoBehaviour
             body1 aBody = other.gameObject.GetComponent<body1>();
             if (aBody != null) 
             {
+                if (aBody.theLocalMapZoneScript != null)
+                {
+                    aBody.theLocalMapZoneScript.theList.Remove(other.gameObject);
+                    aBody.theLocalMapZoneScript.threatList.Remove(other.gameObject);
+                }
+                
                 aBody.theLocalMapZoneScript = this;
             }
+
 
             
         }
@@ -71,11 +81,10 @@ public class mapZoneScript : MonoBehaviour
     {
         if (other.gameObject.tag != "interactionType1")
         {
-            theList.Remove(other.gameObject);
-            Debug.Log("removed this object from map zone list:  " + other.gameObject);
+            
+
         }
     }
 
-
-
 }
+

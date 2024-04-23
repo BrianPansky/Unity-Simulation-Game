@@ -199,6 +199,8 @@ public class taggedWith : MonoBehaviour
         
         taggedWith foreignGameObjectsTagScript = foreignGameObject.GetComponent<taggedWith>();
 
+        if(foreignGameObjectsTagScript == null) { return; }
+
         //remove object from all global tag lists:
         foreach (string tag in foreignGameObjectsTagScript.tags)
         {
@@ -1477,6 +1479,21 @@ public class taggedWith : MonoBehaviour
         potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[1], objectWeWantItClosestTo));
         potentialTargets.Add(pickRandomObjectFromListEXCEPT(nearAndFarTargets[1], objectWeWantItClosestTo));
         GameObject theTarget = randomObjectFromList(potentialTargets);
+        //GameObject theTarget = randomObjectFromList(listOfObjects);
+        return theTarget;
+
+
+
+        //theWorldScript.theTagScript
+        //List<GameObject> ALLTaggedWithMultiple
+        //nearestXNumberOfYToZExceptYAndTheRemainder
+        //randomObjectFromList
+    }
+
+    public GameObject semiRandomUsuallyNearTargetPickerFromListMZ(List<GameObject> listOfObjects, GameObject objectWeWantItClosestTo)
+    {
+        int randomIndex = Random.Range(0, listOfObjects.Count);
+        GameObject theTarget = listOfObjects[randomIndex];
         //GameObject theTarget = randomObjectFromList(listOfObjects);
         return theTarget;
 

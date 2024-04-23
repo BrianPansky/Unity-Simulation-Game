@@ -216,74 +216,6 @@ public class interactionEffects1 : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //      [move this to interactonScript]
-        if(true == false)
-        {
-            Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
-
-
-            //Debug.Log(other.gameObject.name);
-            if (other.tag == "interactionType1")
-            {
-
-                //      or should these "author" and "target" be reversed?????
-                interactionMate thisMate = new interactionMate();
-
-                authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
-                thisMate.interactionAuthor = theAuthorScript.theAuthor;
-                thisMate.enactThisInteraction = theAuthorScript.enactThisInteraction;
-                //thisMate.target1 = other.gameObject;
-                thisMate.target1 = this.gameObject;
-                thisMate.enactOn = this.gameObject;
-
-                Debug.Log("my interaction type:  " + theAuthorScript.interactionType);
-
-                //doInteraction1(other.GetComponent<authorScript1>().theAuthor, thisMate);
-
-                //thisMate.enactThisInteraction = interactionsAvailable[0];
-
-                //sigh
-                Debug.Log(interactionDictionary.Keys.Count());
-                foreach (string aaaaa in interactionDictionary.Keys)
-                {
-                    //Debug.Log("the dictionary key:  " + aaaaa);
-                    if (aaaaa == "walkSomewhere")
-                    {
-                        Debug.Log("the dictionary key:  " + aaaaa);
-                    }
-                    if (aaaaa == theAuthorScript.interactionType)
-                    {
-                        Debug.Log("yes good, the dictionary key is the same as the interaction type.  now DO it");
-                        Debug.Log("so do this:  " + interactionDictionary[theAuthorScript.interactionType].name);
-                        //nteractionDictionary[theAuthorScript.interactionType].
-
-                        Debug.Log("on this object:  " + this.gameObject.name);
-                        Debug.Log("targeted by this author:  " + theAuthorScript.theAuthor.name);
-                        interactionDictionary[theAuthorScript.interactionType].doInteraction(thisMate);
-                    }
-                    if (aaaaa == thisMate.enactThisInteraction.name)
-                    {
-                        //thisMate.printMate();
-                        //thisMate.doThisInteractionIfPrereqsMet(thisMate);
-                    }
-
-                    Debug.Log(interactionDictionary.Keys.Count());
-                }
-
-
-            }
-            if (other.tag == "inputOutput1")
-            {
-                //Destroy(this.gameObject);
-
-
-            }
-
-
-
-            //Debug.Log("ZZZZZZZ     END onTriggerEnter for:  " + this.gameObject.name + "     ZZZZZZZ");
-
-        }
-
     }
 
 
@@ -662,6 +594,8 @@ public class interactionSubAtom
             theInteractionMate.target1.GetComponent<Renderer>().material.color = new Color(55, 111, 222);
         }
     }
+
+
 
     public List<string> listUnfilledPrereqs(interactionMate thisMate)
     {

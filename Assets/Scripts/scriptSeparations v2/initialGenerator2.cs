@@ -226,7 +226,7 @@ public class initialGenerator2 : MonoBehaviour
         int thisInitialXValue = -64;
         int thisXValueSpaxing = 10;
         int theZSpacing = 25;
-        int howManyZones = 18;
+        int howManyZones = 11;
         int loopNumber = 0;
         foreach (GameObject thisObject in objectList)
         {

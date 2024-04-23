@@ -66,7 +66,7 @@ public class enactionScript : MonoBehaviour
             
             //theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position - this.transform.position));
             //semiRandomUsuallyNearTargetPicker
-            theBody.lookingRay = new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+            theBody.lookingRay = new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromListMZ(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
 
             //new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
 
@@ -101,7 +101,7 @@ public class enactionScript : MonoBehaviour
             //theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject).transform.position - this.transform.position));
 
             //Vector3 targetVector = theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position;
-            Vector3 targetVector = theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position;
+            Vector3 targetVector = theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromListMZ(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position;
 
             this.gameObject.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
             
@@ -113,7 +113,7 @@ public class enactionScript : MonoBehaviour
             {
                 firingCooldown = 5;
 
-                this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
+                //this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
                 //this.gameObject.transform.scale = new Vector3(1f, 22, 1f);
                 //this.gameObject.transform.
 
@@ -121,6 +121,7 @@ public class enactionScript : MonoBehaviour
                 //GameObject makeThis = authorBody.theWorldScript.theRespository.placeHolderCubePrefab;
                 GameObject makeThis = authorBody.theWorldScript.theRespository.interactionSphere;
 
+                //this.gameObject.GetComponent<Renderer>().material.color = new Color((authorBody.currentHealth/ authorBody.maxHealth), 0f, 0f);
 
                 GameObject thisObject = authorBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, this.gameObject.transform.position);
                 //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
@@ -152,6 +153,10 @@ public class enactionScript : MonoBehaviour
 
 
     }
+
+
+
+
 
 }
 
@@ -278,45 +283,6 @@ public class enactionMate
             //Debug.Log("standardClick");
 
 
-            //if (firingCooldown == 0)
-            if (true == false)
-            {
-                firingCooldown = 5;
-
-                GameObject makeThis = enactionBody.theWorldScript.theRespository.interactionSphere;
-
-
-                GameObject thisObject2 = enactionBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, enactionBody.pointerOrigin());
-                
-                
-                
-                
-                
-                
-                //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
-                thisObject2.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                //thisObject2.transform.position += enactionBody.lookingRay.direction;
-
-
-
-                //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
-                projectile1 projectileScript = thisObject2.AddComponent<projectile1>();
-
-                projectileScript.Direction = enactionBody.lookingRay.direction;
-                selfDestructScript1 killScript = thisObject2.GetComponent<selfDestructScript1>();
-                killScript.delay = 53;
-
-                //      should this use "interactionMate" isntead?
-                authorScript1 theAuthorScript2 = thisObject2.GetComponent<authorScript1>();
-                theAuthorScript2.theAuthor = enactionAuthor;
-                //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
-                theAuthorScript2.interactionType = "standardClick";
-
-
-
-
-            }
-            
 
 
             if (true == true)
@@ -459,7 +425,7 @@ public class enactionMate
                 Renderer objectsRenderer = enactionAuthor.GetComponent<Renderer>();
                 if(objectsRenderer != null)
                 {
-                    objectsRenderer.material.color = new Color(1f, 0f, 0f);
+                    //objectsRenderer.material.color = new Color(1f, 0f, 0f);
                 }
                 
                 //this.gameObject.transform.scale = new Vector3(1f, 22, 1f);
@@ -508,6 +474,7 @@ public class enactionMate
     }
 
 
+
     void threatAlert(GameObject theThreat)
     {
         //take the threat object, add them to the threat list in this/their "map zone"
@@ -522,7 +489,7 @@ public class enactionMate
         //      #2, add them to a "list of threats" if they aren't already
         //[hmmmm, would be easier to use tags?  easier to code it, but that system KILLS game performance.....]
         //[what about adding a child object, with a UNITY tag that is relevant?  is that faster?  one way to find out.......?]
-        if (thisThreatList.Contains(theThreat))
+        if (isFuckingThingOnListAlready(theThreat,thisThreatList))
         {
             //do nothing, they are already on the list
         }
@@ -532,6 +499,20 @@ public class enactionMate
         }
 
 
+    }
+
+    public bool isFuckingThingOnListAlready(GameObject fuckingThing, List<GameObject> theList)
+    {
+
+        foreach (GameObject thisItem in theList)
+        {
+            if(thisItem == fuckingThing)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
