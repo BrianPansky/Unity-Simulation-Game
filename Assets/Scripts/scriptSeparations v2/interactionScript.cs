@@ -12,6 +12,10 @@ public class interactionScript : MonoBehaviour
     public Dictionary<string, List<string>> dictOfInteractions = new Dictionary<string, List<string>>();
 
 
+    int cooldown = 0;
+
+
+
     public worldScript theWorldScript;
     void Start()
     {
@@ -87,6 +91,27 @@ public class interactionScript : MonoBehaviour
                         {
                             thisBody.killThisBody();
                         }
+
+
+                    }
+                    if (thisEffect == "burn")
+                    {
+                        GameObject makeThis = theWorldScript.theRespository.interactionSphere;
+
+
+                        GameObject thisObject = theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, this.transform.position);
+                        //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
+                        thisObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                        //thisObject.transform.position += lookingRay.direction;
+                        //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
+                        projectile1 projectileScript = thisObject.AddComponent<projectile1>();
+                        projectileScript.Direction = Vector3.up;
+                        projectileScript.selfDestructOnCollision = false;
+                        selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
+                        killScript.timeUntilSelfDestruct = 30;
+
+                        growScript1 growScript = thisObject.AddComponent<growScript1>();
+                        growScript.growthSpeed = 0.3f;
 
 
                     }
