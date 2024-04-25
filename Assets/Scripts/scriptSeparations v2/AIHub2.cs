@@ -174,38 +174,6 @@ public class AIHub2 : MonoBehaviour
             //callableUpdate();
         }
 
-        if (true == false)
-        {
-            //Debug.Log("==================AAAAAAAAAAAA====================     START update for:  " + this.gameObject.name + "     ==================AAAAAAAAA=====================");
-
-            if (forgetfulnessTimer == 0)
-            {
-                //forget whole plan, start again:
-                stringListToEnact = new List<string>();
-
-                //reset timer:
-                forgetfulnessTimer = 10;
-            }
-            else
-            {
-                forgetfulnessTimer -= 1;
-            }
-
-
-            if (stringListToEnact.Count == 0)
-            {
-                //need to randomly pick something to enact
-                stringListToEnact.Add(pickRandomEnactionONObject(this.gameObject));
-            }
-
-            //then enact it:
-            body.theEnactionScript.stringEnaction(stringListToEnact[0]);
-
-
-
-
-            //Debug.Log("-----------////////////////////////-----------     END update for:  " + this.gameObject.name + "     -------------////////////////////////----------");
-        }
 
     }
 
@@ -733,6 +701,29 @@ public class AIHub2 : MonoBehaviour
             }
 
         }
+        else if (randomInteractionTypeOnTarget == "shootFlamethrower1")
+        {
+            //do they have ability to shoot?  super hand-crafted ad-hoc....
+            //enactionScript theEnactionScript = this.gameObject.GetComponent<enactionScript>();
+            //theEnactionScript.availableEnactions.Add("shoot1");
+
+            //Debug.Log("do they have shoot1?");
+            if (theEnactionScript.availableEnactions.Contains("shootFlamethrower1"))
+            {
+                //Debug.Log("yes they have shoot1");
+                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
+                //newPlan.Add(makeSimpleEnactionMate("shoot", theTarget));
+                newPlan.Add(makeSimpleEnactionMate("shootFlamethrower1", theTarget));
+
+                //Debug.Log("newPlan[0].enactThis:  " + newPlan[0].enactThis);
+                //Debug.Log("newPlan[1].enactThis:  " + newPlan[1].enactThis);
+            }
+            else
+            {
+                //Debug.Log("no they don't have shoot1");
+            }
+
+        }
 
 
         //Debug.Log("newPlan.Count:  " + newPlan.Count);
@@ -823,22 +814,6 @@ public class AIHub2 : MonoBehaviour
         //randomObjectFromList
     }
 
-
-
-
-
-    void justPickAnAbilityAndFireIt()
-    {
-        if (stringListToEnact.Count == 0)
-        {
-            //need to randomly pick something to enact
-            stringListToEnact.Add(pickRandomEnactionONObject(this.gameObject));
-        }
-
-        //then enact it:
-        body.theEnactionScript.stringEnaction(stringListToEnact[0]);
-
-    }
 
 
 

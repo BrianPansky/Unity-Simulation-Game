@@ -14,6 +14,8 @@ public class repository2 : MonoBehaviour
     public GameObject interactionSphere;
     public GameObject invisiblePoint;
     public GameObject mapZone2;
+    public GameObject pineTree1;
+    public GameObject burntPineTree1;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;
@@ -21,12 +23,11 @@ public class repository2 : MonoBehaviour
     //SCRIPTS:
     public patternScript2 patterns;
     public selfDestructScript1 theSelfDestructScript;
-    public interactive1 theInteractive1Script;
     public legibstration theLegibstrata;
     public planningAndImagination thePlanner;
 
     //public premadeStuffForAI stateGrabber;
-    //public AI1 theHub;
+    //public AIHub2 theHub;
 
     void Awake()
     {
@@ -34,7 +35,7 @@ public class repository2 : MonoBehaviour
 
         //MAYBE JUNK:
         //stateGrabber = GetComponent<premadeStuffForAI>();
-        //theHub = GetComponent<AI1>();
+        //theHub = GetComponent<AIHub2>();
         // Start is called before the first frame update
 
     }

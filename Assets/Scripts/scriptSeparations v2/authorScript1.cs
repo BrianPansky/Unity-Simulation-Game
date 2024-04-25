@@ -10,6 +10,8 @@ public class authorScript1 : MonoBehaviour
     public GameObject theAuthor;
     public string interactionType;
 
+    public float magnitudeOfInteraction = 1f;
+
 
     // Start is called before the first frame update
     void Start()

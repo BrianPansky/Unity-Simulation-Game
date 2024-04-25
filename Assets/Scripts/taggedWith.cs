@@ -358,11 +358,6 @@ public class taggedWith : MonoBehaviour
         //should return ONE random GameObject that is tagged with ALL inputted tags
 
 
-        //ad-hoc for debug
-        functionsForAI theFunctions = GetComponent<functionsForAI>();
-        //theFunctions.print("---------------------------- start randomTaggedWithMultiple -----------------------------");
-        //theFunctions.print(theTag + ", " + tag2  + ", " + tag3  + ", " + tag4);
-
 
 
 

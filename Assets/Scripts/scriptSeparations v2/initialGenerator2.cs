@@ -170,8 +170,10 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        objectList.Add(returnTestAgent2());
-        objectList.Add(returnTestAgent2());
+        objectList.Add(returnFlamethrowerNPC());
+
+        objectList.Add(returnPineTree1());
+        objectList.Add(returnFlamethrowerNPC());
 
 
         //objectList.Add(returnTestKey1());
@@ -676,6 +678,34 @@ public class initialGenerator2 : MonoBehaviour
 
         enactionScript theEnactionScript = myTest.GetComponent<enactionScript>();
         theEnactionScript.availableEnactions.Add("shoot1");
+        
+        return myTest;
+    }
+
+    GameObject returnFlamethrowerNPC()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
+
+        myTest.AddComponent<NavMeshAgent>();
+        myTest.AddComponent<AIHub2>();
+
+        //AIcontroller
+
+        enactionScript theEnactionScript = myTest.GetComponent<enactionScript>();
+        theEnactionScript.availableEnactions.Add("shootFlamethrower1");
+        //shootFlamethrower1
+        return myTest;
+    }
+
+    GameObject returnPineTree1()
+    {
+        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.pineTree1, new Vector3(0, 0, 0), "returnPineTree1");
+
+
+        myTest.AddComponent<interactionScript>();
+        interactionScript theInteractionScript = myTest.GetComponent<interactionScript>();
+
+        theInteractionScript.addInteraction("shootFlamethrower1", "burn");
 
         return myTest;
     }
@@ -754,7 +784,7 @@ public class initialGenerator2 : MonoBehaviour
         myTest.transform.position += new Vector3(0, 3, 3);
 
         //theInteractionScript.listOfInteractions.Add("grabKey");
-        theInteractionScript.dictOfInteractions.Add("standardClick", "grabKey");
+        theInteractionScript.addInteraction("standardClick", "grabKey");
 
 
     }
@@ -766,7 +796,7 @@ public class initialGenerator2 : MonoBehaviour
         myTest.transform.position += new Vector3(0, 0, -8);
 
         //theInteractionScript.listOfInteractions.Add("clickLock");
-        theInteractionScript.dictOfInteractions.Add("standardClick", "clickLock");
+        theInteractionScript.addInteraction("standardClick", "clickLock");
 
 
 
@@ -781,7 +811,7 @@ public class initialGenerator2 : MonoBehaviour
         //myTest.transform.position += new Vector3(0, 3, 3);
 
         //theInteractionScript.listOfInteractions.Add("grabKey");
-        theInteractionScript.dictOfInteractions.Add("standardClick", "grabKey");
+        theInteractionScript.addInteraction("standardClick", "grabKey");
 
         return myTest;
 
@@ -795,7 +825,7 @@ public class initialGenerator2 : MonoBehaviour
         //myTest.transform.position += new Vector3(0, 0, -8);
 
         //theInteractionScript.listOfInteractions.Add("clickLock");
-        theInteractionScript.dictOfInteractions.Add("standardClick", "clickLock");
+        theInteractionScript.addInteraction("standardClick", "clickLock");
 
 
 

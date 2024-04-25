@@ -58,37 +58,6 @@ public class body1 : MonoBehaviour
         theEnactionScript.availableEnactions.Add("standardClick");
 
 
-        if (true == false)
-        {
-            //this.gameObject.AddComponent<interactionEffects1>();
-            //interactionScript = this.gameObject.GetComponent<interactionEffects1>();
-
-            //GameObject theWorldObject = GameObject.Find("World");
-            //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
-            //interactionScript
-
-
-            //interactionMate mainInteractionMate = new interactionMate();
-
-            //mainInteractionMate.interactionAuthor = this.gameObject;
-            //initialGenerator2 theGeneratorScript = theWorldObject.GetComponent("initialGenerator2") as initialGenerator2;
-
-
-            //mainInteractionMate.enactThisInteraction = interactionScript.generateInteractionFULL("standardInteraction1", theGeneratorScript.atomLister(theGeneratorScript.atoms["standardInteraction1Atom"]));
-
-            //testInteraction mainInteraction = interactionScript.generateInteraction("standardInteraction1");
-
-            //interactionScript.interactionDictionary.Add("doARegularClick", mainInteraction);
-
-            //testInteraction walkInteraction = interactionScript.generateInteraction("walkSomewhere");
-
-            //interactionScript.interactionDictionary.Add("walkSomewhere", walkInteraction);
-
-
-            //testInteraction hitByBullet = interactionScript.generateInteraction("hitByBullet");
-
-            //interactionScript.interactionDictionary.Add("bullet1", hitByBullet);
-        }
         
     }
 
@@ -111,11 +80,12 @@ public class body1 : MonoBehaviour
         {
             this.gameObject.AddComponent<interactionScript>();
             theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-            theInteractionScript.dictOfInteractions = new Dictionary<string, string>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+            theInteractionScript.dictOfInteractions = new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
         }
 
         //theInteractionScript.dictOfInteractions.Add("bullet1", "die");  shoot1
-        theInteractionScript.dictOfInteractions.Add("shoot1", "die");
+        theInteractionScript.addInteraction("shoot1", "damage");
+        theInteractionScript.addInteraction("shootFlamethrower1", "damage");
         //.Add("walk");
     }
 

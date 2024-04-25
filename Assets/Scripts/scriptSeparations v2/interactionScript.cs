@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,7 +9,7 @@ public class interactionScript : MonoBehaviour
 
     //public Dictionary<string, testInteraction> interactionDictionary = new Dictionary<string, testInteraction>();
     //public List<string> listOfInteractions = new List<string>();
-    public Dictionary<string, string> dictOfInteractions = new Dictionary<string, string>();
+    public Dictionary<string, List<string>> dictOfInteractions = new Dictionary<string, List<string>>();
 
 
     public worldScript theWorldScript;
@@ -36,65 +37,62 @@ public class interactionScript : MonoBehaviour
             authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
 
             if (theAuthorScript.theAuthor == null) { return; }
-            //Debug.Log("2222222222222the interaction type is:  " + theAuthorScript.interactionType);
+
             if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType))
             {
-                //      quick way to see effects from far away for testing:
-                //this.gameObject.transform.localScale = new Vector3(1f, 44, 1f);
 
 
-
-                string theDictEntry = dictOfInteractions[theAuthorScript.interactionType];
-                
-                //Debug.Log("the corrosponding interaction dictionary entry is:  " + theDictEntry);
-
-                if (theDictEntry == "clickLock")
+                foreach (string thisEffect in dictOfInteractions[theAuthorScript.interactionType])
                 {
-                    if (theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") == true)
+                    if (thisEffect == "clickLock")
                     {
-                        this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 1f);
+                        if (theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Contains("testKey1") == true)
+                        {
+                            this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 1f);
+                            Vector3 p1 = this.gameObject.transform.position;
+                            Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
+                            //Debug.DrawLine(p1, p2, new Color(1f, 0f, 1f), 9999f);
+
+                            //Debug.DrawLine(this.gameObject.transform.position, enactionTarget.transform.position, Color.blue, 0.9f);
+
+
+                            enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
+                            theEnactionScript.availableEnactions.Add("shoot1");
+
+                            //theAuthorScript.theAuthor.transform.localScale = new Vector3(1f, 22, 1f);
+
+                        }
+                    }
+                    if (thisEffect == "grabKey")
+                    {
+                        this.gameObject.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
                         Vector3 p1 = this.gameObject.transform.position;
                         Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                        //Debug.DrawLine(p1, p2, new Color(1f, 0f, 1f), 9999f);
+                        //Debug.DrawLine(p1, p2, new Color(0f, 1f, 0f), 9999f);
 
-                        //Debug.DrawLine(this.gameObject.transform.position, enactionTarget.transform.position, Color.blue, 0.9f);
-
-                        
-                        enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
-                        theEnactionScript.availableEnactions.Add("shoot1");
-
-                        //theAuthorScript.theAuthor.transform.localScale = new Vector3(1f, 22, 1f);
+                        theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
 
                     }
-                }
-                if (theDictEntry == "grabKey")
-                {
-                    this.gameObject.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
-                    Vector3 p1 = this.gameObject.transform.position;
-                    Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
-                    //Debug.DrawLine(p1, p2, new Color(0f, 1f, 0f), 9999f);
 
-                    theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
-                    
-                }
-
-                if (theDictEntry == "die")
-                {
-
-                    body1 thisBody = this.gameObject.GetComponent<body1>();
-                    thisBody.currentHealth -= 555;
-
-
-                    this.gameObject.GetComponent<Renderer>().material.color = new Color(((thisBody.currentHealth + 10) / (thisBody.maxHealth + 10)), 0f, 0f);
-
-                    if (thisBody.currentHealth < 0 && this.gameObject.name != "Player 1")
+                    if (thisEffect == "damage")
                     {
-                        thisBody.killThisBody();
+
+                        body1 thisBody = this.gameObject.GetComponent<body1>();
+                        thisBody.currentHealth -= theAuthorScript.magnitudeOfInteraction;
+
+
+                        this.gameObject.GetComponent<Renderer>().material.color = new Color(((thisBody.currentHealth + 10) / (thisBody.maxHealth + 10)), 0f, 0f);
+
+                        if (thisBody.currentHealth < 0 && this.gameObject.name != "Player 1")
+                        {
+                            thisBody.killThisBody();
+                        }
+
+
                     }
 
 
                 }
-
 
 
             }
@@ -116,4 +114,44 @@ public class interactionScript : MonoBehaviour
 
     }
 
+    internal void addInteraction(string interactionType, string effect)
+    {
+        //dictOfInteractions
+
+        if (dictOfInteractions.ContainsKey(interactionType))
+        {
+            //add the game object to the list of objects tagged with that tag:
+            dictOfInteractions[interactionType].Add(effect);
+        }
+        else
+        {
+            //sigh, need to add the key first, which means the list it unlocks as well...
+            dictOfInteractions.Add(interactionType, makeStringsIntoList(effect));
+        }
+    }
+
+
+    public List<string> makeStringsIntoList(string s1, string s2 = null, string s3 = null, string s4 = null)
+    {
+        //input 4 strings
+        //get backa  list of all of them that are NOT null
+
+        List<string> allStrings = new List<string>();
+        allStrings.Add(s1);
+        allStrings.Add(s2);
+        allStrings.Add(s3);
+        allStrings.Add(s4);
+
+        List<string> nonNullStrings = new List<string>();
+
+        foreach (string thisString in allStrings)
+        {
+            if (thisString != null)
+            {
+                nonNullStrings.Add(thisString);
+            }
+        }
+
+        return nonNullStrings;
+    }
 }

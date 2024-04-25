@@ -16,18 +16,18 @@ public class playerHUD : MonoBehaviour
     public GameObject NPC0FakeGameReadout;
     public GameObject NPC0printout2;
     public GameObject NPC0GameObject;
-    public AI1 theNPC0Hub;
+    //public AIHub2 theNPC0Hub;
 
-    public AI1 theHub;
+    //public AIHub2 theHub;
 
     // Start is called before the first frame update
     void Start()
     {
-        theHub = GetComponent<AI1>();
+        //theHub = GetComponent<AIHub2>();
 
 
         //      some NPC stuff is null error in scene 2, so removing for now:
-        //theNPC0Hub = NPC0GameObject.GetComponent<AI1>();
+        //theNPC0Hub = NPC0GameObject.GetComponent<AIHub2>();
     }
 
     // Update is called once per frame
@@ -49,6 +49,7 @@ public class playerHUD : MonoBehaviour
     {
         //change text to be items from inventory
         
+        /*
         if(theHub.state["inventory"].Count > 0)
         {
             //string inventoryItem;
@@ -72,13 +73,13 @@ public class playerHUD : MonoBehaviour
         {
             myText.GetComponent<Text>().text = "[]";
         }
-        
+        */
     }
 
     void displayToDoList()
     {
         //change text to be items from inventory
-
+        /*
         if (theHub.inputtedToDoList.Count > 0)
         {
             
@@ -99,33 +100,33 @@ public class playerHUD : MonoBehaviour
         {
             myToDoListText.GetComponent<Text>().text = "[]";
         }
-
+        */
     }
 
     void displayPlayerFakeGameReadout()
     {
-        displayXFakeGameReadout(theHub, playerFakeGameReadout);
+        //displayXFakeGameReadout(theHub, playerFakeGameReadout);
     }
 
     void displayNPC0FakeGameReadout()
     {
-        displayXFakeGameReadout(theNPC0Hub, NPC0FakeGameReadout);
+        //displayXFakeGameReadout(theNPC0Hub, NPC0FakeGameReadout);
     }
 
-    void displayXFakeGameReadout(AI1 hub, GameObject textBox)
+    void displayXFakeGameReadout(AIHub2 hub, GameObject textBox)
     {
         string thePrintOut = "";
 
         thePrintOut += "[";
 
-        foreach (string categoryName in hub.factionState.Keys)
+        //foreach (string categoryName in hub.factionState.Keys)
         {
-            thePrintOut += "[";
-            foreach (stateItem item in hub.factionState[categoryName])
+            //thePrintOut += "[";
+            //foreach (stateItem item in hub.factionState[categoryName])
             {
-                thePrintOut += "(" + item.name.ToString() + ": " + item.quantity.ToString() + ")";
+                //thePrintOut += "(" + item.name.ToString() + ": " + item.quantity.ToString() + ")";
             }
-            thePrintOut += "] ";
+            //thePrintOut += "] ";
         }
 
         thePrintOut += "]";
@@ -136,7 +137,7 @@ public class playerHUD : MonoBehaviour
     void displayNPC0Inventory()
     {
         
-
+        /*
         if (theNPC0Hub.state["inventory"].Count > 0)
         {
             //string inventoryItem;
@@ -160,5 +161,6 @@ public class playerHUD : MonoBehaviour
         {
             NPC0printout2.GetComponent<Text>().text = "[]";
         }
+        */
     }
 }

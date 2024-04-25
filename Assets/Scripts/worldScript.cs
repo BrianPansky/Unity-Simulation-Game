@@ -47,13 +47,9 @@ public class worldScript : MonoBehaviour
     public int effingTimer = 0;
 
     //other scripts:
-    //public AI1 thisAI;
-    public premadeStuffForAI premadeStuff;
     public taggedWith theTagScript;
-    public nonAIScript theNonAIScript;
-    //public social theSocialScript;
-    //public repositoryOfScriptsAndPrefabs theRespository;
     public repository2 theRespository;
+
     void Awake()
     {
         //numberOfNEARMapZones = 9;

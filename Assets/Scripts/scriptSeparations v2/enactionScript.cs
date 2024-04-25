@@ -34,130 +34,6 @@ public class enactionScript : MonoBehaviour
 
 
 
-
-
-
-
-
-    public void stringEnaction(string stringToEnact)
-    {
-        //"walk"
-        //"aim"
-        //"standardClick"
-
-
-        if(stringToEnact == "walk")
-        {
-            float speed = 0f;
-            //Vector3 Direction = new Vector3(0, 0, 0);
-            speed = 0.11f;
-            //Ray myRay = this.gameObject.GetComponent<body1>().lookingRay;
-            //theBody
-            Ray myRay = theBody.lookingRay;
-            //Direction = this.gameObject.GetComponent<body1>();
-            Vector3 Direction = new Vector3(myRay.direction.x, 0, myRay.direction.z);
-            this.gameObject.transform.position = this.gameObject.transform.position + Direction * speed;
-
-        }
-        else if (stringToEnact == "aim")
-        {
-            //set lookingRay to a random target
-            body1 theBody = this.gameObject.GetComponent<body1>();
-            
-            //theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position - this.transform.position));
-            //semiRandomUsuallyNearTargetPicker
-            theBody.lookingRay = new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromListMZ(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
-
-            //new Ray(this.transform.position, (adhocPrereqFillerTest[0].target1.transform.position - this.transform.position));
-
-        }
-        else if (stringToEnact == "standardClick")
-        {
-
-            RaycastHit myHit;
-            //body1 theBody = this.gameObject.GetComponent<body1>();
-            Ray myRay = theBody.lookingRay;
-
-            if (Physics.Raycast(myRay, out myHit, theBody.standardClickDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-            {
-                if (myHit.transform != null)
-                {
-
-                    GameObject anInteractionSphere = theBody.theWorldScript.theRespository.interactionSphere;
-
-                    GameObject thisObject = theBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
-
-                    //      should this use "interactionMate" isntead?
-                    authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
-                    theAuthorScript.theAuthor = this.gameObject;
-                    theAuthorScript.interactionType = "standardClick";
-
-                }
-            }
-        }
-        else if (stringToEnact == "navMeshWalk")
-        {
-            //body1 theBody = this.gameObject.GetComponent<body1>();
-            //theBody.lookingRay = new Ray(this.transform.position, (theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.ALLTaggedWithMultiple("interactable"), this.gameObject).transform.position - this.transform.position));
-
-            //Vector3 targetVector = theBody.theWorldScript.theTagScript.pickRandomObjectFromListEXCEPT(theBody.theWorldScript.theTagScript.findXNearestToY("mapZone", this.gameObject).GetComponent<mapZoneScript>().theList, this.gameObject).transform.position;
-            Vector3 targetVector = theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromListMZ(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position;
-
-            this.gameObject.GetComponent<AIHub2>().thisNavMeshAgent.SetDestination(targetVector);
-            
-            //this.gameObject.GetComponent<AIHub2>().thisNavMeshAgent.isStopped = true;
-        }
-        else if (stringToEnact == "shoot1")
-        {
-            if(firingCooldown == 0)
-            {
-                firingCooldown = 5;
-
-                //this.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
-                //this.gameObject.transform.scale = new Vector3(1f, 22, 1f);
-                //this.gameObject.transform.
-
-                body1 authorBody = this.gameObject.GetComponent<body1>();
-                //GameObject makeThis = authorBody.theWorldScript.theRespository.placeHolderCubePrefab;
-                GameObject makeThis = authorBody.theWorldScript.theRespository.interactionSphere;
-
-                //this.gameObject.GetComponent<Renderer>().material.color = new Color((authorBody.currentHealth/ authorBody.maxHealth), 0f, 0f);
-
-                GameObject thisObject = authorBody.theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, this.gameObject.transform.position);
-                //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
-                thisObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                thisObject.transform.position += authorBody.lookingRay.direction;
-                //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
-                projectile1 projectileScript = thisObject.AddComponent<projectile1>();
-                projectileScript.Direction = authorBody.lookingRay.direction;
-                //selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
-                //killScript.delay = 30;
-
-                //      should this use "interactionMate" isntead?
-                authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
-                theAuthorScript.theAuthor = this.gameObject;
-                //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
-                //theAuthorScript.interactionType = "bullet1";
-                theAuthorScript.interactionType = "shoot1";
-                //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
-
-
-            }
-            else
-            {
-                firingCooldown -= 1;
-            }
-            
-
-        }
-
-
-    }
-
-
-
-
-
 }
 
 public class enactionMate
@@ -453,6 +329,8 @@ public class enactionMate
                 //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
                 //theAuthorScript.interactionType = "bullet1";
                 theAuthorScript.interactionType = "shoot1";
+
+                theAuthorScript.magnitudeOfInteraction = 100;
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
                 //theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
 
@@ -512,6 +390,7 @@ public class enactionMate
                 //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
                 //theAuthorScript.interactionType = "bullet1";
                 theAuthorScript.interactionType = "shootFlamethrower1";
+                theAuthorScript.magnitudeOfInteraction = 10;
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
                 //theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
 
