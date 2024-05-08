@@ -12,6 +12,16 @@ public class playerClickInteraction : MonoBehaviour
     public GameObject clickedOn;
 
 
+    public sensorySystem theSensorySystem;
+
+
+    public bool glueGunFirstShotDoneBool = false;
+    public GameObject currentGlueStartPoint = null;
+
+
+
+
+
     public body1 body;
 
     //selection
@@ -60,11 +70,41 @@ public class playerClickInteraction : MonoBehaviour
     void Start()
     {
 
-        this.gameObject.AddComponent<inventory1>();
-        theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
 
-        this.gameObject.AddComponent<body1>();
-        body = this.gameObject.GetComponent<body1>();
+        if (theSensorySystem == null)
+        {
+            // theSensorySystem = myTest2.GetComponent("sensorySystem") as sensorySystem;
+            theSensorySystem = this.GetComponent<sensorySystem>();
+            if(theSensorySystem == null)
+            {
+                theSensorySystem = this.gameObject.AddComponent<sensorySystem>();
+            }
+
+            theSensorySystem.body = body;
+        }
+
+
+
+        if (theInventory == null)
+        {
+            theInventory = this.GetComponent<inventory1>();
+            if (theInventory == null)
+            {
+                theInventory = this.gameObject.AddComponent<inventory1>();
+            }
+        }
+
+
+        if (body == null)
+        {
+
+            body = this.GetComponent<body1>();
+            if (body == null)
+            {
+                body = this.gameObject.AddComponent<body1>();
+            }
+
+        }
 
         haveStore = false;
         weapon = false;
@@ -100,7 +140,7 @@ public class playerClickInteraction : MonoBehaviour
         findNearZones();
 
         //update body ray variable:
-        body.lookingRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        theSensorySystem.lookingRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         
 
 
@@ -323,7 +363,8 @@ public class playerClickInteraction : MonoBehaviour
     {
         //GameObject newBuilding = new GameObject();
         //newBuilding = Instantiate(thePrefab, thePoint, Quaternion.identity);
-        return Instantiate(thePrefab, thePoint, Quaternion.identity);
+        //return Instantiate(thePrefab, thePoint, Quaternion.identity);
+        return Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
     }
 
 
@@ -356,7 +397,10 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //AIhub2 has "makeSimpleEnactionMate" to do this.  should move it to enaction script
-        enactionMate newEnactionMate = firingFlamethrowerEnactionMate();// firingRegularGunEnactionMate();
+
+        //enactionMate newEnactionMate = firingFlamethrowerEnactionMate();
+        enactionMate newEnactionMate = firingGlueGunEnactionMate();
+        //enactionMate newEnactionMate = firingGlueGunEnactionMate();//firingFlamethrowerEnactionMate();// firingRegularGunEnactionMate();
         //newEnactionMate.enactionTarget = enactionTarget;
 
         newEnactionMate.enact();
@@ -370,7 +414,9 @@ public class playerClickInteraction : MonoBehaviour
     {
         enactionMate newEnactionMate = new enactionMate();
         newEnactionMate.enactionAuthor = this.gameObject;
-        newEnactionMate.enactionBody = body;
+        //newEnactionMate.enactionBody = body;
+        //authorSensorySystem
+        newEnactionMate.authorSensorySystem = theSensorySystem;
         newEnactionMate.enactThis = "shoot1";
 
         return newEnactionMate;
@@ -380,12 +426,27 @@ public class playerClickInteraction : MonoBehaviour
     {
         enactionMate newEnactionMate = new enactionMate();
         newEnactionMate.enactionAuthor = this.gameObject;
-        newEnactionMate.enactionBody = body;
+        //newEnactionMate.enactionBody = body;
+
+        newEnactionMate.authorSensorySystem = theSensorySystem;
         newEnactionMate.enactThis = "shootFlamethrower1";
 
         return newEnactionMate;
     }
+    public enactionMate firingGlueGunEnactionMate()
+    {
+        enactionMate newEnactionMate = new enactionMate();
+        newEnactionMate.enactionAuthor = this.gameObject;
+        //newEnactionMate.enactionBody = body;
+        newEnactionMate.enactThis = "glueGun";
 
+        newEnactionMate.authorSensorySystem = theSensorySystem;
+
+        newEnactionMate.currentGlueStartPoint = currentGlueStartPoint;
+        newEnactionMate.glueGunFirstShotDoneBool = glueGunFirstShotDoneBool;
+
+        return newEnactionMate;
+    }
 
 
     public void doStuffAfterWorldClick(GameObject clickedOn)

@@ -10,12 +10,16 @@ public class repository2 : MonoBehaviour
     //OBJECTS:
     public GameObject npc2Prefab;
     public GameObject placeHolderCubePrefab;
+    public GameObject placeHolderCylinderPrefab;
     public GameObject invisibleCubePrefab;
     public GameObject interactionSphere;
     public GameObject invisiblePoint;
     public GameObject mapZone2;
     public GameObject pineTree1;
     public GameObject burntPineTree1;
+    public GameObject simpleTankBottom;
+    public GameObject simpleTankTurretWITHBarrel;
+    public GameObject simpleTankBarrel;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;
@@ -78,7 +82,10 @@ public class repository2 : MonoBehaviour
     {
         //GameObject newBuilding = new GameObject();
         //newBuilding = Instantiate(thePrefab, thePoint, Quaternion.identity);
-        return Instantiate(thePrefab, thePoint, Quaternion.identity);
+        //return Instantiate(thePrefab, thePoint, Quaternion.identity);
+
+        //just so i can keep the rotation of the object i input, for now:
+        return Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
     }
 
 
@@ -267,13 +274,13 @@ public class repository2 : MonoBehaviour
     }
 
 
-    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0)
+    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0, float startYlocation = 0f)
     {
         bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
 
         foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
         {
-            Vector3 fullPosition = thisPosition + new Vector3(xValue, 0, startZlocation);
+            Vector3 fullPosition = thisPosition + new Vector3(xValue, startYlocation, startZlocation);
 
             if(needADuplicate == false)
             {
@@ -291,6 +298,33 @@ public class repository2 : MonoBehaviour
 
     }
 
+    public void VERTICALplaceOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0, float startYlocation = 0f)
+    {
+        bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
+
+        int currentOne = 0;
+
+        foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
+        {
+            Vector3 fullPosition = new Vector3(xValue, startYlocation + currentOne, startZlocation);
+
+            currentOne++;
+
+            if (needADuplicate == false)
+            {
+                theGameObject.transform.position = fullPosition;
+                needADuplicate = true;
+            }
+            else
+            {
+                //Debug.Log("fullPosition x:  "+ fullPosition.x);
+                //Debug.Log("fullPosition y:  " + fullPosition.z);
+                createPrefabAtPoint(theGameObject, fullPosition);
+            }
+
+        }
+
+    }
 
 
 
@@ -342,7 +376,9 @@ public class repository2 : MonoBehaviour
         //      each script will have a "clonify" function/method to take the input script from new copy, and deep copy old one 
 
         //assume "Quaternion.identity" for now.
-        GameObject theNewObject = Instantiate(objectToDuplify, thePoint, Quaternion.identity);
+        //GameObject theNewObject = Instantiate(objectToDuplify, thePoint, Quaternion.identity);
+        //NO!  now i'm using the input object rotation
+        GameObject theNewObject = Instantiate(objectToDuplify, thePoint, objectToDuplify.transform.rotation);
 
         interactionScript thisinteractionScript = theNewObject.GetComponent<interactionScript>();
         if (thisinteractionScript != null)

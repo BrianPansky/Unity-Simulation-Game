@@ -1129,7 +1129,7 @@ public class taggedWith : MonoBehaviour
 
 
 
-            if (thisObject.name != objectWeWantItClosestTo.name)
+            if (thisObject.GetInstanceID() != objectWeWantItClosestTo.GetInstanceID())
             {
                 if (theClosestSoFar != null)
                 {

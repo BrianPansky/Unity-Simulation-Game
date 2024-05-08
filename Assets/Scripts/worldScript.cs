@@ -80,6 +80,8 @@ public class worldScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
         //if (behaviourUpdateRecorder.isValid)
         {
             //printDeltaTime();

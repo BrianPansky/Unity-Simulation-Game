@@ -61,13 +61,13 @@ public class interactionScript : MonoBehaviour
 
 
                             enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
-                            theEnactionScript.availableEnactions.Add("shoot1");
+                            //              theEnactionScript.availableEnactions.Add("shoot1");
 
                             //theAuthorScript.theAuthor.transform.localScale = new Vector3(1f, 22, 1f);
 
                         }
                     }
-                    if (thisEffect == "grabKey")
+                    else if (thisEffect == "grabKey")
                     {
                         this.gameObject.GetComponent<Renderer>().material.color = new Color(0f, 1f, 0f);
                         Vector3 p1 = this.gameObject.transform.position;
@@ -77,8 +77,7 @@ public class interactionScript : MonoBehaviour
                         theAuthorScript.theAuthor.GetComponent<inventory1>().testInventory1.Add("testKey1");
 
                     }
-
-                    if (thisEffect == "damage")
+                    else if (thisEffect == "damage")
                     {
 
                         body1 thisBody = this.gameObject.GetComponent<body1>();
@@ -94,7 +93,7 @@ public class interactionScript : MonoBehaviour
 
 
                     }
-                    if (thisEffect == "burn")
+                    else if (thisEffect == "burn")
                     {
                         GameObject makeThis = theWorldScript.theRespository.interactionSphere;
 
@@ -115,8 +114,36 @@ public class interactionScript : MonoBehaviour
 
 
                     }
+                    else if (thisEffect == "useVehicle")
+                    {
+                        theAuthorScript.theAuthor.transform.position = this.transform.position;
+                        theAuthorScript.theAuthor.transform.rotation = this.transform.rotation;
+
+                        body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
+
+                        //ad hoc for now
+                        tank1 theTank = this.GetComponent<tank1>();
+                        theTank.pilot = theAuthorScript.theAuthor;
+
+                        //this is probably great, but it also disables my camera.  will need to re-arrange things...
+                        //      theBodyScript.theBodyGameObject.active = false;
+
+                        //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
+                        theAuthorScript.theAuthor.transform.SetParent(this.gameObject.transform, true);
+
+                        enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
+                        theEnactionScript.enactionBody = this.gameObject;
+                        theEnactionScript.currentlyUsable.Remove("humanBody");
+                        theEnactionScript.currentlyUsable.Add("tank");
 
 
+
+                    }
+                    else if(thisEffect == "activateMotor")
+                    {
+                        moveByForce motorScript = this.gameObject.GetComponent<moveByForce>();
+                        motorScript.turnedOn = true;
+                    }
                 }
 
 

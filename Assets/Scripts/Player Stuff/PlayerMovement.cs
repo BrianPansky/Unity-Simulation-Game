@@ -17,6 +17,20 @@ public class PlayerMovement : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
+
+    void Start()
+    {
+        if(controller == null)
+        {
+            controller = gameObject.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                controller = gameObject.AddComponent<CharacterController>();
+            }
+        }
+    }
+
+
     // Update is called once per frame
     void Update()
     {

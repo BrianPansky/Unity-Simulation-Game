@@ -17,10 +17,9 @@ public class AIHub2 : MonoBehaviour
 
     public UnityEngine.Vector3 adHocThreatAvoidanceVector = new UnityEngine.Vector3(0,0,0);
 
-
+    public NavMeshAgent currentNavMeshAgent;
 
     private worldScript theWorldScript;
-    public NavMeshAgent thisNavMeshAgent;
     public GameObject savedNavMeshTarget;
     public planningAndImagination thePlanner;
 
@@ -65,11 +64,15 @@ public class AIHub2 : MonoBehaviour
 
     void Awake()
     {
-        if(body == null)
+
+
+        if (body == null)
         {
-            this.gameObject.AddComponent<body1>();
-            body = this.gameObject.GetComponent<body1>();
-            //body = this.gameObject.AddComponent<body1>();
+            body = this.GetComponent<body1>();
+            if (body == null)
+            {
+                body = this.gameObject.AddComponent<body1>();
+            }
         }
 
         //AddComponent<AIHub2>();
@@ -86,10 +89,11 @@ public class AIHub2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if(currentNavMeshAgent == null)
+        {
+            currentNavMeshAgent = this.gameObject.GetComponent<NavMeshAgent>();
+        }
 
-
-        thisNavMeshAgent = GetComponent<NavMeshAgent>();
-        thisNavMeshAgent.speed = 13f;
         mytest = this.transform.position + new UnityEngine.Vector3(0, 0, -15);
 
         GameObject theWorldObject = GameObject.Find("World");
@@ -101,28 +105,38 @@ public class AIHub2 : MonoBehaviour
         //no, no, no, don't "get" component, CREATE it!
         //an AIHub2 should probably come with a sensory system by DEFAULT,
         //so why not build that into its initialization?
-        if(theSensorySystem == null)
-        {
-            /// theSensorySystem = myTest2.GetComponent("sensorySystem") as sensorySystem;
-            this.gameObject.AddComponent<sensorySystem>();
-            theSensorySystem = this.gameObject.GetComponent("sensorySystem") as sensorySystem;
-            theSensorySystem.body = body;
-        } 
         
-        //same for planning:
-        if(thePlanner == null)
+        if (theSensorySystem == null)
         {
-            this.gameObject.AddComponent<planningAndImagination>();
-            thePlanner = this.gameObject.GetComponent("planningAndImagination") as planningAndImagination;
+            theSensorySystem = this.GetComponent<sensorySystem>();
+            if (theSensorySystem == null)
+            {
+                theSensorySystem = this.gameObject.AddComponent<sensorySystem>();
+            }
+
+            theSensorySystem.body = body;
+        }
+
+        //same for planning:
+        if (thePlanner == null)
+        {
+            thePlanner = this.GetComponent<planningAndImagination>();
+            if (thePlanner == null)
+            {
+                thePlanner = this.gameObject.AddComponent<planningAndImagination>();
+            }
         }
 
         //inventory1
-        if(theInventory == null)
+        if (theInventory == null)
         {
-            this.gameObject.AddComponent<inventory1>();
-            theInventory = this.gameObject.GetComponent("inventory1") as inventory1;
+            theInventory = this.GetComponent<inventory1>();
+            if (theInventory == null)
+            {
+                theInventory = this.gameObject.AddComponent<inventory1>();
+            }
         }
-        
+
 
         theEnactionScript = this.gameObject.GetComponent<enactionScript>();
 
@@ -209,38 +223,14 @@ public class AIHub2 : MonoBehaviour
 
 
 
-    public void navmeshStopping1()
-    {
-
-        if (myDelay == 0)
-        {
-            thisNavMeshAgent.acceleration = 8;
-            thisNavMeshAgent.speed = 7;
-            myDelay = 2;
-        }
-        else if (myDelay == 4)
-        {
-            thisNavMeshAgent.ResetPath();
-            thisNavMeshAgent.isStopped = true;
-            myDelay = 0;
-        }
-        myDelay--;
-
-    }
-
-    public void navmeshSpeeding1()
-    {
-        thisNavMeshAgent.isStopped = false;
-        myDelay = 6;
-        thisNavMeshAgent.acceleration = 180;
-        thisNavMeshAgent.speed = 70;
-    }
-
     public void callableUpdate()
     {
-
-        if (cooldownTimer > 11 && theEnactionScript.availableEnactions.Contains("shoot1"))
+        //Debug.Log("==============================================================");
+        
+        //if (cooldownTimer > 11 && theEnactionScript.availableEnactions.Contains("shoot1"))
+        if (cooldownTimer > 11)
         {
+            //Debug.Log("111111111111111111111111111111111");
             cooldownTimer = 0;
             doingAThreatThing();
 
@@ -254,7 +244,8 @@ public class AIHub2 : MonoBehaviour
         //          this.gameObject.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 0.2f;
         //AIcontroller.Move(adHocThreatAvoidanceVector.normalized * 0.2f);
         //                  thisNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 8f);
-        thisNavMeshAgent.SetDestination(newFinalPosition);//for some reason it doesn't work if you put the *8f here, even though it works in the comparable "SetDestination" line above, so i had to put that into the "newFinalPosition" variable....
+        //NavMeshAgent thisNavMeshAgent = this.gameObject.GetComponent<NavMeshAgent>();
+        currentNavMeshAgent.SetDestination(newFinalPosition);//for some reason it doesn't work if you put the *8f here, even though it works in the comparable "SetDestination" line above, so i had to put that into the "newFinalPosition" variable....
 
 
         if (printWTFThisNPCDoin)
@@ -316,6 +307,9 @@ public class AIHub2 : MonoBehaviour
         }
         enactNext();
         //navmeshStopping1();
+
+
+        //Debug.Log("//////////////////////////////////////");
     }
 
     public void planFiller1()
@@ -566,7 +560,7 @@ public class AIHub2 : MonoBehaviour
         if (currentPeriodicalPoint == shortPeriodicalEndpoint)
         {
             currentPeriodicalPoint = 0;
-            if (thisNavMeshAgent.velocity.sqrMagnitude == 0)
+            if (currentNavMeshAgent.velocity.sqrMagnitude == 0)
             {
                 currentFramesNOTinTransit++;
                 if (currentFramesNOTinTransit == framesNOTinTransitBeforeDumpingAction)
@@ -619,116 +613,11 @@ public class AIHub2 : MonoBehaviour
         string randomInteractionTypeOnTarget = NEWpickRandomInteractionONObject(theTarget);
 
         //      then plan a way to do that interaction.................
-        newPlan = planToDoInterActionWithObject(theTarget, randomInteractionTypeOnTarget);
+        
+        
+        //                  newPlan = planToDoInterActionWithObject(theTarget, randomInteractionTypeOnTarget);
 
         //Debug.Log("newPlan.Count:  " + newPlan.Count);
-
-        return newPlan;
-    }
-
-
-    public List<enactionMate> planToDoInterActionWithObject(GameObject theTarget, string randomInteractionTypeOnTarget)
-    {
-        List<enactionMate> newPlan = new List<enactionMate>();
-
-        //so, planning should depend on which type of interaction, and context [and any other criteria, etc.]
-        //      wait a second, i have some things conflated!
-        //      interaction script is currently putting EVERYTHING under the "interactionType1" category
-        //      clicking key, dieing etc, all lumped together.
-        //need to sort out:
-        //      1) different interaction types [heat is different from being pushed, which is different from contact with a sharp object]
-        //      2) the EFFECTS of those types [could hypothetically make fire cause burning/damage, water puts it out]
-        //      3) but i want to SIMPLIFY with "ctandardClick".  it automatically picks some specific interaction, EVEN THOUGH in real life they would be quite different
-        //soooooo, sort that out.....................
-        //well, for now, let's keep it at "simplified interface" level.  ALL WE CARE ABOUT is game descision-making
-        //that means, for interactions, we lump "standardClick" together.
-        //so "interactionType1" probably shouldn't exist?  except as a useless shell i ignore all of the time.
-        //but "clcikLock"???? that isn't an interaction type!  it's enaction!  i tried splitting interaction from enaction, and apparently FAILED?
-        //i don't know, where the fuck is "standardClick"??????  i'm not seeing it there ANYWHERE????  i guess it's an ENACTION now?  ok....uhhhhh ok.....
-        //but i need a way to separate "click on this" from "shoot this with a gun".  where is that distinction?  it's somehow only appears in ENACTION, i think?  or who knows.
-        //what a mess.
-        //so, i need two things.  somewhere , somehow:
-        //      things you will need to click on
-        //      things you will need to shoot with gun
-        //and this difference should obviously be stored in their fucking interaction scripts!  but be "legible" to planning!
-        //i THINK this is supposed to be the KEY of the dictionary i have in there.  just print those out and see what they are?
-        //yes, that's what it is.  i see printouts of "standardClick" and "bullet1".  precisely.
-        //so i can use those, for now.
-
-        //Debug.Log("randomInteractionTypeOnTarget:  " + randomInteractionTypeOnTarget);
-        if (randomInteractionTypeOnTarget == "standardClick")
-        {
-            //      [OLD ad hoc stuff making them ONLY go and do "Standard click" on things]
-            //how to know if it has a proximity "prereq"?
-            //for now, don't know.  just click POINTING at that?
-            //whatever, very ad-hoc for now:
-            if (theWorldScript.theTagScript.distanceBetween(theTarget, this.gameObject) > (body.standardClickDistance) * 0.7f)
-            {
-                //so, plan to walk there FIRST, thennnn click
-                newPlan.Add(makeSimpleEnactionMate("navMeshWalk", theTarget));
-                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-                newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
-            }
-            else
-            {
-                //so, easy, just click it
-                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-                newPlan.Add(makeSimpleEnactionMate("standardClick", theTarget));
-            }
-
-        }
-        //else if (randomInteractionTypeOnTarget == "bullet1")
-        else if (randomInteractionTypeOnTarget == "shoot1")
-        {
-            //do they have ability to shoot?  super hand-crafted ad-hoc....
-            //enactionScript theEnactionScript = this.gameObject.GetComponent<enactionScript>();
-            //theEnactionScript.availableEnactions.Add("shoot1");
-
-            //Debug.Log("do they have shoot1?");
-            if (theEnactionScript.availableEnactions.Contains("shoot1"))
-            {
-                //Debug.Log("yes they have shoot1");
-                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-                //newPlan.Add(makeSimpleEnactionMate("shoot", theTarget));
-                newPlan.Add(makeSimpleEnactionMate("shoot1", theTarget));
-
-                //Debug.Log("newPlan[0].enactThis:  " + newPlan[0].enactThis);
-                //Debug.Log("newPlan[1].enactThis:  " + newPlan[1].enactThis);
-            }
-            else
-            {
-                //Debug.Log("no they don't have shoot1");
-            }
-
-        }
-        else if (randomInteractionTypeOnTarget == "shootFlamethrower1")
-        {
-            //do they have ability to shoot?  super hand-crafted ad-hoc....
-            //enactionScript theEnactionScript = this.gameObject.GetComponent<enactionScript>();
-            //theEnactionScript.availableEnactions.Add("shoot1");
-
-            //Debug.Log("do they have shoot1?");
-            if (theEnactionScript.availableEnactions.Contains("shootFlamethrower1"))
-            {
-                //Debug.Log("yes they have shoot1");
-                newPlan.Add(makeSimpleEnactionMate("aim", theTarget));
-                //newPlan.Add(makeSimpleEnactionMate("shoot", theTarget));
-                newPlan.Add(makeSimpleEnactionMate("shootFlamethrower1", theTarget));
-
-                //Debug.Log("newPlan[0].enactThis:  " + newPlan[0].enactThis);
-                //Debug.Log("newPlan[1].enactThis:  " + newPlan[1].enactThis);
-            }
-            else
-            {
-                //Debug.Log("no they don't have shoot1");
-            }
-
-        }
-
-
-        //Debug.Log("newPlan.Count:  " + newPlan.Count);
-
-
 
         return newPlan;
     }
@@ -776,18 +665,6 @@ public class AIHub2 : MonoBehaviour
 
 
 
-    public enactionMate makeSimpleEnactionMate(string enactThis, GameObject enactionTarget)
-    {
-        //should move this function to enaction script, so player can use it etc.
-        enactionMate newEnactionMate = new enactionMate();
-        newEnactionMate.enactionAuthor = this.gameObject;
-        newEnactionMate.enactionBody = body;
-        newEnactionMate.enactThis = enactThis;
-        newEnactionMate.enactionTarget = enactionTarget;
-
-        return newEnactionMate;
-    }
-
 
     public GameObject semiRandomTargetPickerMZ()
     {
@@ -820,9 +697,9 @@ public class AIHub2 : MonoBehaviour
 
 
 
-    public string pickRandomEnactionONObject(GameObject objectWithEnactions)
+    public enactionMate pickRandomEnactionONObject(GameObject objectWithEnactions)
     {
-        List<string> theAvailableEnactions = objectWithEnactions.GetComponent<enactionScript>().availableEnactions;
+        List<enactionMate> theAvailableEnactions = objectWithEnactions.GetComponent<enactionScript>().availableEnactions;
 
 
 

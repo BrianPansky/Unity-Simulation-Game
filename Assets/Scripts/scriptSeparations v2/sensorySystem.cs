@@ -18,9 +18,9 @@ using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class sensorySystem : MonoBehaviour
 {
-    private worldScript theWorldScript;
+    public worldScript theWorldScript;
     public GameObject target;
-
+    public Ray lookingRay;
 
     public body1 body;
 
@@ -82,6 +82,18 @@ public class sensorySystem : MonoBehaviour
         //Debug.DrawLine(this.gameObject.GetComponent<Transform>().position, other.gameObject.GetComponent<Transform>().position, Color.white, 6f);
         sensedObjects.Add(other.gameObject);
     }
+
+
+
+
+    public Vector3 pointerOrigin()
+    {
+        //couldn't store this relative position, soooo just generate it when needed >.<
+        return this.gameObject.transform.position + new Vector3(0, 0, 0.69f);
+    }
+
+
+
 
 
 
@@ -361,7 +373,7 @@ public class spatialDataPointFragment
             
         }
 
-        Ray targetLookingRay = targetObject.GetComponent<body1>().lookingRay;
+        Ray targetLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
         Vector3 lineBetweenThreatAndPoint = originLocation - targetObject.transform.position;
         float theAngle = Vector3.Angle(targetLookingRay.direction, lineBetweenThreatAndPoint);
 
@@ -398,7 +410,7 @@ public class spatialDataPointFragment
     public Vector3 findOnePerpendicularVectorSYMMETRICAL()
     {
         Vector3 perpendicular = new Vector3();
-        Ray threatLookingRay = targetObject.GetComponent<body1>().lookingRay;
+        Ray threatLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
         lineBetweenTargetAndThisPoint = originLocation - targetObject.transform.position;
 
         //do i have these correct?
