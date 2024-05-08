@@ -10,16 +10,14 @@ GameObject:
   m_Component:
   - component: {fileID: 6387413386904728686}
   - component: {fileID: 6387413386904728681}
-  - component: {fileID: 6387413386904728680}
   - component: {fileID: 6387413386904728683}
   - component: {fileID: 6387413386904728682}
   - component: {fileID: 6387413386904728672}
   - component: {fileID: 6387413386904728678}
-  - component: {fileID: 6387413386904728676}
   - component: {fileID: 6387413386904728677}
   - component: {fileID: 6387413386904728679}
-  - component: {fileID: 6387413386904728675}
   - component: {fileID: 6387413386904728673}
+  - component: {fileID: 2828260937855393001}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -53,23 +51,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 523f737a48c122c4fbfcd0c75809d689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thePlayer: {fileID: 0}
   theTime: 0
-  premadeStuff: {fileID: 0}
+  listOfMapZoneObjects: []
+  listOfMapZoneScripts: []
+  listOfNEARMapZoneScripts: []
+  listOfFARMapZoneScripts: []
+  numberOfMapZones: 0
+  numberOfFARMapZones: 0
+  nearORfar: 1
+  currentMapZone: 1
+  currentNEARMapZone: 1
+  currentZoneFrame: 0
+  callableUpdateCounter: 0
+  effingTimer: 0
   theTagScript: {fileID: 6387413386904728679}
-  theNonAIScript: {fileID: 0}
   theRespository: {fileID: 6387413386904728683}
---- !u!114 &6387413386904728680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6387413386904728687}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11195772ead2daa45a80dbc9bba2ecb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &6387413386904728683
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,21 +83,31 @@ MonoBehaviour:
     type: 3}
   placeHolderCubePrefab: {fileID: 8620951049736949961, guid: ef0686372dde93640a567e5d2d594b88,
     type: 3}
+  placeHolderCylinderPrefab: {fileID: 8919460830259755840, guid: f9c24fd08ffdbae44802ff86b044a097,
+    type: 3}
   invisibleCubePrefab: {fileID: 832784894304381542, guid: 36b136b60ff1c2b44a7a3ceb1bd11060,
     type: 3}
   interactionSphere: {fileID: 5953803115850116078, guid: 1a8a8b7ee725f3f42896f2e6d08dce8b,
     type: 3}
+  invisiblePoint: {fileID: 0}
   mapZone2: {fileID: 6233897664412132075, guid: b39e19cf45edbd24f81287656652bc43,
+    type: 3}
+  pineTree1: {fileID: 5596812273393034981, guid: 8724356a3a4601a488c08b74a6f317ce,
+    type: 3}
+  burntPineTree1: {fileID: 0}
+  simpleTankBottom: {fileID: 7365174163795493584, guid: 903b74f3ed5369647a0ea835b99ad260,
+    type: 3}
+  simpleTankTurretWITHBarrel: {fileID: 1432907445591864999, guid: 78963154b692fbc478259ee6d236530b,
+    type: 3}
+  simpleTankBarrel: {fileID: 6742334954144941906, guid: 7e14df7cf8b2b064b9d14ae9c1d348b3,
     type: 3}
   prefab4: {fileID: 0}
   prefab5: {fileID: 0}
   prefab6: {fileID: 0}
   patterns: {fileID: 6387413386904728678}
   theSelfDestructScript: {fileID: 6387413386904728677}
-  theInteractive1Script: {fileID: 6387413386904728676}
   theLegibstrata: {fileID: 6387413386904728673}
   thePlanner: {fileID: 6387413386904728672}
-  theInteractionEffects1: {fileID: 6387413386904728675}
 --- !u!114 &6387413386904728682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,24 +149,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beaa32ea44e56ab4a8ee5ee3bbf9f2cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6387413386904728676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6387413386904728687}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f15b3ec7fa3e21488d75b44d9832c72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainGameObject: {fileID: 0}
-  secondaryGameObject: {fileID: 0}
-  input1: {fileID: 0}
-  connectedObjects: []
-  inOutBoolSignal: 0
-  docked: 0
 --- !u!114 &6387413386904728677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,7 +161,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62eadb461b96b7f43870674b68c4013d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  delay: 1
+  currentCounter: 1
+  timeUntilSelfDestruct: 1
 --- !u!114 &6387413386904728679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,24 +180,6 @@ MonoBehaviour:
   tag2: 
   tag3: 
   tag4: 
---- !u!114 &6387413386904728675
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6387413386904728687}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 948f84b91de0a8f41b351d4c6c1b3b8f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputBoolSignal: 0
-  preselectedHost: {fileID: 0}
-  slotObjects: []
-  targetToSelect: 
-  targetPriority: 
-  typeOfInteractionOutcome: 
 --- !u!114 &6387413386904728673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,3 +192,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ae534a8511d83b47927736bbf5797df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2828260937855393001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6387413386904728687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: badd08b4fd4b47d449a9f79aa6932ebb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoGlue: 0
+  masterScript: 1
+  masterGlueList: []
+  otherGlue: {fileID: 0}
