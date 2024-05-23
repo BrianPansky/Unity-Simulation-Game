@@ -11,7 +11,8 @@ public class worldScript : MonoBehaviour
 
 
     public GameObject thePlayer;
-    public Dictionary<string, List<GameObject>> taggedStuff = new Dictionary<string, List<GameObject>>();
+    //      public Dictionary<string, List<int>> taggedStuff = new Dictionary<string, List<int>>();
+    public Dictionary<string, List<objectIdPair>> taggedStuff = new Dictionary<string, List<objectIdPair>>();
     //public List<GameObject> interactionLegibstration = new List<GameObject>();
     public int theTime;
 
@@ -48,10 +49,17 @@ public class worldScript : MonoBehaviour
 
     //other scripts:
     public taggedWith theTagScript;
-    public repository2 theRespository;
+    public repository2 theRepository;
 
     void Awake()
     {
+
+        if (theRepository == null)
+        {
+            theRepository = this.GetComponent<repository2>();
+        }
+
+
         //numberOfNEARMapZones = 9;
         theTime = 0;
         //I'M JUST PLUGGING THIS IN [in the editor, right hand side] INSTEAD   theTagScript = this.gameObject.GetComponent<taggedWith>();

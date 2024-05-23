@@ -18,7 +18,7 @@ public class repository2 : MonoBehaviour
     public GameObject pineTree1;
     public GameObject burntPineTree1;
     public GameObject simpleTankBottom;
-    public GameObject simpleTankTurretWITHBarrel;
+    public GameObject simpleTankTurretWITHOUTBarrel;
     public GameObject simpleTankBarrel;
     public GameObject prefab4;
     public GameObject prefab5;

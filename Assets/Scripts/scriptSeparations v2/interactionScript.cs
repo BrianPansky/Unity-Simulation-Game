@@ -95,10 +95,10 @@ public class interactionScript : MonoBehaviour
                     }
                     else if (thisEffect == "burn")
                     {
-                        GameObject makeThis = theWorldScript.theRespository.interactionSphere;
+                        GameObject makeThis = theWorldScript.theRepository.interactionSphere;
 
 
-                        GameObject thisObject = theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, this.transform.position);
+                        GameObject thisObject = theWorldScript.theRepository.createPrefabAtPointAndRETURN(makeThis, this.transform.position);
                         //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
                         thisObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
                         //thisObject.transform.position += lookingRay.direction;

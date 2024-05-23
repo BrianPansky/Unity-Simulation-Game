@@ -14,6 +14,8 @@ public class enactionScript : MonoBehaviour
 
     public List<string> currentlyUsable = new List<string>();
 
+    public List<intSpherAtor> interactionSphereList = new List<intSpherAtor>();
+
     public bool bodyCanBeUsed = false;
 
     //ad-hoc inputs:
@@ -30,6 +32,7 @@ public class enactionScript : MonoBehaviour
 
 
 
+    public List<string> availableEnactionsAsString = new List<string>();
 
     public List<enactionMate> availableEnactions = new List<enactionMate>();
 
@@ -53,6 +56,27 @@ public class enactionScript : MonoBehaviour
 
         //transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         return Quaternion.identity;
+    }
+
+    public void addEnactionSphere(GameObject author, string interactionType, bool sdOnCollision = true, float magnitudeOfInteraction = 1f, int timeUntilSelfDestruct = 99, float growthSpeed = 0f)
+    {
+        //adds interaction sphere generator to list of sphere enactions
+
+        //      interesting idea:  note the FUNCTION generating input "projectileStartPoint1()":
+        //projectileGenerator(enactionAuthor, "shootFlamethrower1", projectileStartPoint1(), authorSensorySystem.lookingRay.direction, false, 10, 0.3f, 10);
+
+        intSpherAtor newIntSpherAtor = new intSpherAtor();
+        newIntSpherAtor.enactionAuthor = author;
+        newIntSpherAtor.interactionType = interactionType;
+        newIntSpherAtor.sdOnCollision = sdOnCollision;
+        newIntSpherAtor.magnitudeOfInteraction = magnitudeOfInteraction;
+
+        //Debug.Log("timeUntilSelfDestructzzzzzzzzzzzzzzzzzzz:  " + timeUntilSelfDestruct);
+        newIntSpherAtor.timeUntilSelfDestruct = timeUntilSelfDestruct;
+        newIntSpherAtor.growthSpeed = growthSpeed;
+
+
+        interactionSphereList.Add(newIntSpherAtor);
     }
 
 
@@ -83,12 +107,23 @@ public class enactionScript : MonoBehaviour
 
     }
 
+    public intSpherAtor matchInteractionType(string randomInteractionTypeOnTarget)
+    {
+        //looks at its own enaction list to find 
+        //one that has the same interaction type [as the inputed interaction type]
+        //          it returns THAT one
 
+        foreach(intSpherAtor thisInteraction in interactionSphereList)
+        {
+            if(thisInteraction.interactionType == randomInteractionTypeOnTarget )
+            {
 
+                return thisInteraction;
+            }
+        }
 
-
-
-
+        return null;
+    }
 }
 
 public class enactionMate
@@ -180,7 +215,7 @@ public class enactionMate
             if (firingCooldown == 0)
             {
                 firingCooldown = firingCooldownMax;
-                projectileGenerator(enactionAuthor, enactThis, projectileStartPoint1(), authorSensorySystem.lookingRay.direction, projectileSelfDestructOnCollision, timeUntilProjectileSelfDestruct, growthSpeed, magnitudeOfInteraction);
+                projectileGenerator(enactionAuthor, enactThis, projectileStartPoint1(), authorSensorySystem.lookingRay.direction, projectileSelfDestructOnCollision, magnitudeOfInteraction, timeUntilProjectileSelfDestruct, growthSpeed);
             }
         }
 
@@ -226,11 +261,11 @@ public class enactionMate
                 //this.gameObject.transform.
 
                 //body1 authorBody = this.gameObject.GetComponent<body1>();
-                //GameObject makeThis = authorBody.theWorldScript.theRespository.placeHolderCubePrefab;
-                GameObject makeThis = authorSensorySystem.theWorldScript.theRespository.interactionSphere;
+                //GameObject makeThis = authorBody.theWorldScript.theRepository.placeHolderCubePrefab;
+                GameObject makeThis = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
 
 
-                GameObject thisObject = authorSensorySystem.theWorldScript.theRespository.createPrefabAtPointAndRETURN(makeThis, enactionAuthor.transform.position);
+                GameObject thisObject = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(makeThis, enactionAuthor.transform.position);
                 //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
                 thisObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                 thisObject.transform.position += authorSensorySystem.lookingRay.direction;
@@ -282,13 +317,13 @@ public class enactionMate
                 //this.gameObject.transform.
 
                 //body1 authorBody = this.gameObject.GetComponent<body1>();
-                //GameObject makeThis = authorBody.theWorldScript.theRespository.placeHolderCubePrefab;
+                //GameObject makeThis = authorBody.theWorldScript.theRepository.placeHolderCubePrefab;
 
                 //Debug.Log("11111111111111the interaction type is:  " + theAuthorScript.interactionType);
                 //theAuthorScript.theAuthor.GetComponent<Renderer>().material.color = new Color(1f, 0f, 0f);
 
 
-                projectileGenerator(enactionAuthor, "shootFlamethrower1", projectileStartPoint1(), authorSensorySystem.lookingRay.direction, false, 10, 0.3f, 10);
+                projectileGenerator(enactionAuthor, "shootFlamethrower1", projectileStartPoint1(), authorSensorySystem.lookingRay.direction, false, 0.3f, 10, 10);
 
                 //Vector3 p1 = theAuthorScript.theAuthor.transform.position;
                 //Vector3 p2 = new Vector3(p1.x, p1.y + 22, p1.z);
@@ -417,8 +452,8 @@ public class enactionMate
         {
             if (myHit.transform != null && myHit.transform.gameObject == enactionTarget)
             {
-                GameObject anInteractionSphere = authorSensorySystem.theWorldScript.theRespository.interactionSphere;
-                GameObject thisObject = authorSensorySystem.theWorldScript.theRespository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+                GameObject anInteractionSphere = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
+                GameObject thisObject = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
 
                 //      should this use "interactionMate" isntead?
                 authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
@@ -457,10 +492,10 @@ public class enactionMate
     public GameObject newGlueGlob(Vector3 startPoint, GameObject otherGLue)
     {
 
-        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRespository.interactionSphere;
+        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
 
 
-        GameObject newGlue = authorSensorySystem.theWorldScript.theRespository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+        GameObject newGlue = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
         selfDestructScript1 killScript = newGlue.GetComponent<selfDestructScript1>();
         UnityEngine.Object.Destroy(killScript);
 
@@ -471,12 +506,12 @@ public class enactionMate
     }
 
 
-    public void projectileGenerator(GameObject author, string interactionType, Vector3 startPoint, Vector3 direction, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
+    public void projectileGenerator(GameObject author, string interactionType, Vector3 startPoint, Vector3 direction, bool sdOnCollision = true, float magnitudeOfInteraction = 1f, int timeUntilSelfDestruct = 99, float growthSpeed = 0f)
     {
-        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRespository.interactionSphere;
+        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
 
 
-        GameObject newProjectile = authorSensorySystem.theWorldScript.theRespository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+        GameObject newProjectile = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
         //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
         
         //newProjectile.transform.position += enactionBody.lookingRay.direction;
@@ -571,12 +606,13 @@ public class enactionMate
     }
 
 
-    void mastLine(Vector3 startPoint, Color theColor, float theHeight)
+    void mastLine(Vector3 startPoint, Color theColor, float theHeight = 10f)
     {
         Vector3 p1 = startPoint;
         Vector3 p2 = new Vector3(p1.x, p1.y + theHeight, p1.z);
         Debug.DrawLine(p1, p2, theColor, 22f);
     }
+
 
     public float distanceBetween(GameObject object1, GameObject object2)
     {
@@ -599,5 +635,235 @@ public class enactionMate
         Debug.Log("enactThis:  " + enactThis);
         Debug.Log("WWWWWWWWWWWWWWWWW    END printing enaction mate    WWWWWWWWWWWWWWWWW");
     }
+
+}
+
+
+public class intSpherAtor
+{
+    //short for "interaction sphere generator"
+    
+    //types:
+    //      regular [bullet]
+    //      area of effect/splash/growth [explosion or standardclick]
+    //          which has subtype that is ranged and instant, like standard click
+
+
+    public GameObject enactionAuthor;
+
+
+    public string interactionType;
+    public float magnitudeOfInteraction = 1f;
+
+
+    public float range = 0f;
+    //public Ray firingRay;  //has to be filled RIGHT at moment of firing, so i will have it as an INPUT variable, not permanent
+    public bool sdOnCollision  = true; //"projectileSelfDestructOnCollision"
+    public int timeUntilSelfDestruct = 99; //"timeUntilProjectileSelfDestruct"
+    public bool affectedByGravity = false;
+
+    public float growthSpeed = 0f;
+
+
+    //need to put these somewhere else?  no, this class object basically IS the gun [or at least this relevant PART of the gun]?
+    public int firingCooldown = 0;
+    public int firingCooldownMax = 0;
+    //      can i do without the following?
+    public float enactionCost = 1f;  //maybe like ammo?
+
+
+    //unsure i want/need these:
+    public GameObject enactionTarget;
+    public sensorySystem authorSensorySystem;
+    public GameObject returnClickedOn;
+
+
+
+
+
+
+    public void enact(Ray firingRay, sensorySystem inputAuthorSensorySystem)
+    {
+        authorSensorySystem = inputAuthorSensorySystem;
+        projectileGenerator(enactionAuthor, interactionType, firingRay.origin, firingRay.direction, sdOnCollision, timeUntilSelfDestruct, growthSpeed, magnitudeOfInteraction);
+    }
+
+    public void updateMainVariables()
+    {
+
+    }
+
+
+    public void firingByRaycastHit(string theInteractionType, float theRange)
+    {
+        //Vector3 startPoint = authorSensorySystem.pointerOrigin();
+        //Vector3 endPoint = enactionTarget.gameObject.transform.position;
+        //authorSensorySystem.lookingRay = new Ray(startPoint, (endPoint - startPoint));
+
+
+        RaycastHit myHit;
+        Ray myRay = authorSensorySystem.lookingRay;
+
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.transform != null && myHit.transform.gameObject == enactionTarget)
+            {
+                GameObject anInteractionSphere = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
+                GameObject thisObject = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+
+                //      should this use "interactionMate" isntead?
+                authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+                theAuthorScript.theAuthor = enactionAuthor;
+                theAuthorScript.interactionType = theInteractionType;
+
+
+                //see how far interactionSphere is from it's supposed target:
+                //Debug.DrawLine(thisObject.transform.position, enactionTarget.transform.position, Color.red, 0.9f);
+                //                  deleteThisEnaction = true;
+            }
+
+
+        }
+
+
+        firingCooldown--;
+    }
+
+    public void projectileGenerator(GameObject author, string interactionType, Vector3 startPoint, Vector3 direction, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
+    {
+
+        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
+
+        //Debug.Log("startPoint:  " + startPoint);
+
+        GameObject newProjectile = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+        //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
+
+        //Debug.Log("newProjectile.transform.position:  " + newProjectile.transform.position);
+
+        //newProjectile.transform.position += enactionBody.lookingRay.direction;
+        //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
+        projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
+        projectileScript.speed = 1f;
+        projectileScript.Direction = direction;
+        projectileScript.selfDestructOnCollision = sdOnCollision;
+        selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
+        killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
+        //killScript.
+
+        if (growthSpeed > 0f)
+        {
+            newProjectile.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+            growScript1 growScript = newProjectile.AddComponent<growScript1>();
+            growScript.growthSpeed = growthSpeed;
+        }
+
+        //      should this use "interactionMate" isntead?
+
+        authorScript1 theAuthorScript = newProjectile.GetComponent<authorScript1>();
+        theAuthorScript.theAuthor = author;
+        //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
+        //theAuthorScript.interactionType = "bullet1";
+        theAuthorScript.interactionType = interactionType;
+        theAuthorScript.magnitudeOfInteraction = magnitudeOfInteraction;
+
+        //Debug.Log("projectile made supposedly");
+        //mastLine(startPoint, Color.red);
+        //mastLine(newProjectile.transform.position, Color.blue);
+
+        threatAlert(theAuthorScript.theAuthor);
+    }
+
+    void mastLine(Vector3 startPoint, Color theColor, float theHeight = 10f)
+    {
+        Vector3 p1 = startPoint;
+        Vector3 p2 = new Vector3(p1.x, p1.y + theHeight, p1.z);
+        Debug.DrawLine(p1, p2, theColor, 22f);
+    }
+
+    public Vector3 projectileStartPoint1()
+    {
+
+
+
+        Debug.Log("enactionAuthor:  " + enactionAuthor);
+        Debug.Log("enactionAuthor.transform.position:  " + enactionAuthor.transform.position);
+        Debug.Log("authorSensorySystem:  " + authorSensorySystem);
+        Debug.Log("authorSensorySystem.lookingRay:  " + authorSensorySystem.lookingRay);
+        Debug.Log("authorSensorySystem.lookingRay.direction:  " + authorSensorySystem.lookingRay.direction);
+        Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
+
+
+
+
+
+        Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
+        return enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction;
+    }
+
+    public float distanceBetween(GameObject object1, GameObject object2)
+    {
+        //for now, just use "horizontal" distance
+        Vector3 v1 = object1.transform.position;
+        Vector3 v2 = object2.transform.position;
+        //Vector3 theVectorBetweenXandZ = object1.transform.position - object2.transform.position;
+        Vector3 theHorizontalVectorBetweenXandZ = new Vector3(v1.x - v2.x, 0, v1.z - v2.z);
+        return theHorizontalVectorBetweenXandZ.sqrMagnitude;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    void threatAlert(GameObject theThreat)
+    {
+        //take the threat object, add them to the threat list in this/their "map zone"
+        //try not to add them as duplicate if they are already added
+
+        //      #1, access their map zone:
+        //AIHub2 thisHub = theThreat.GetComponent<AIHub2>();
+        body1 thisBody = theThreat.GetComponent<body1>();
+        //hmm, lists like this always go bad though if the object is destryed......but....ad-hoc.....[and i have such a list on map zones ALREADY]
+        List<GameObject> thisThreatList = thisBody.theLocalMapZoneScript.threatList;
+
+        //      #2, add them to a "list of threats" if they aren't already
+        //[hmmmm, would be easier to use tags?  easier to code it, but that system KILLS game performance.....]
+        //[what about adding a child object, with a UNITY tag that is relevant?  is that faster?  one way to find out.......?]
+        if (isFuckingThingOnListAlready(theThreat, thisThreatList))
+        {
+            //do nothing, they are already on the list
+        }
+        else
+        {
+            thisThreatList.Add(theThreat);
+        }
+
+
+    }
+
+    public bool isFuckingThingOnListAlready(GameObject fuckingThing, List<GameObject> theList)
+    {
+
+        foreach (GameObject thisItem in theList)
+        {
+            if (thisItem == fuckingThing)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
 
 }

@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEditor.PlayerSettings;
 using static UnityEngine.GraphicsBuffer;
 
 public class AIHub2 : MonoBehaviour
@@ -140,7 +141,12 @@ public class AIHub2 : MonoBehaviour
 
         theEnactionScript = this.gameObject.GetComponent<enactionScript>();
 
+        theSensorySystem.lookingRay = startLookingRay();
+    }
 
+    public Ray startLookingRay()
+    {
+        return new Ray(this.transform.position + this.transform.forward, this.transform.forward);
     }
 
     // Update is called once per frame
@@ -226,7 +232,20 @@ public class AIHub2 : MonoBehaviour
     public void callableUpdate()
     {
         //Debug.Log("==============================================================");
-        
+
+
+
+
+        quickNewEnactionTestingEtc();
+
+
+
+
+
+
+
+
+
         //if (cooldownTimer > 11 && theEnactionScript.availableEnactions.Contains("shoot1"))
         if (cooldownTimer > 11)
         {
@@ -311,6 +330,56 @@ public class AIHub2 : MonoBehaviour
 
         //Debug.Log("//////////////////////////////////////");
     }
+
+
+
+    public void quickNewEnactionTestingEtc()
+    {
+        //for now:
+        //      the NPC looks for other objects 
+        //      it picks one
+        //      it looks at the interactions on the object
+        //      it picks one
+        //      Then it looks at its own actions to find
+        //          which has the same interaction type as
+        //              the interaction of the one from the object
+        //      it picks THAT one
+        //      And does it
+
+
+        //I should already have the basic outline of this in a different function right now that just uses a different data type or something. 
+
+
+        GameObject theTarget = pickRandomNearbyInteractable();
+        string randomInteractionTypeOnTarget = NEWpickRandomInteractionONObject(theTarget);
+        intSpherAtor thing = theEnactionScript.matchInteractionType(randomInteractionTypeOnTarget);
+
+        if(thing !=null)
+        {
+            thing.enact(startLookingRay(), theSensorySystem);
+        }
+        
+
+
+        if (true == false)
+        {
+
+            //SUPER ad hoc for now:
+            //theEnactionScript.interactionSphereList[0].enact(theSensorySystem.lookingRay, theSensorySystem);
+            //mastLine(startLookingRay().origin, Color.white);
+            //mastLine(startLookingRay().direction, Color.green);
+            theEnactionScript.interactionSphereList[0].enact(startLookingRay(), theSensorySystem);
+        }
+
+
+    }
+    void mastLine(Vector3 startPoint, Color theColor, float theHeight = 10f)
+    {
+        Vector3 p1 = startPoint;
+        Vector3 p2 = new Vector3(p1.x, p1.y + theHeight, p1.z);
+        Debug.DrawLine(p1, p2, theColor, 22f);
+    }
+
 
     public void planFiller1()
     {

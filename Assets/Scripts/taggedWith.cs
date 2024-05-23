@@ -7,6 +7,10 @@ public class taggedWith : MonoBehaviour
 {
     //my own tagging system, not using the unity tagging system
 
+
+    //                 [no wait, the following won't work becsuse unity CAN'T get an object from its id number, sighhhh] !!!!! SHOULD SWITCH TO USING ID NUMBERS IN DICTIONARY INSTEAD OF GAME OBJECT!  MAKES IT EASIER TO TRACK DOWN ERRORS WHEN OBJECT IS DESTROYED!  BECAUSE I CAN PRING id NUMBER EVERYYYYY TIME I DESTROY ANY OBJECT!!!!!!!!!!!!!
+
+
     public List<string> tags = new List<string>();
 
     //public GameObject theWorldObject;
@@ -23,8 +27,8 @@ public class taggedWith : MonoBehaviour
 
     worldScript theWorldScript;
 
-
-    public Dictionary<string, List<GameObject>> globalTags = new Dictionary<string, List<GameObject>>();
+    //wait, why is this HERE?  how/when does it get updated???
+    public Dictionary<string, List<objectIdPair>> globalTags = new Dictionary<string, List<objectIdPair>>();
 
     // Start is called before the first frame update
     void Awake()
@@ -65,32 +69,34 @@ public class taggedWith : MonoBehaviour
         }
     }
 
-    
+
     //funcitons that modify current object's tags [the object this script is attached to]
     public void addTag(string tag)
     {
         //this funciton updates BOTH lists of tags
-        //the "local" list, and the "global"...Dicitonary of objects
+        //the "local" list, and the "global"...Dicitonary of .....objectIdPairs
 
         //update "local" tags
         tags.Add(tag);
 
+        //int idNumberrrr = this.gameObject.GetInstanceID();
+
         //update "global" tags...
         //but dictionaries are tricky objects, and must be checked and all that:
-        if(globalTags.ContainsKey(tag))
+        if (globalTags.ContainsKey(tag))
         {
             //add the game object to the list of objects tagged with that tag:
-            globalTags[tag].Add(gameObject);
+            globalTags[tag].Add(makeTaggedObjectFromObject(this.gameObject));
         }
         else
         {
             //sigh, need to add the key first, which means the list it unlocks as well...
-            List<GameObject> needsList = new List<GameObject>();
-            needsList.Add(gameObject);
+            List<objectIdPair> needsList = new List<objectIdPair>();
+            needsList.Add(makeTaggedObjectFromObject(this.gameObject));
             globalTags.Add(tag, needsList);
         }
 
-        
+
     }
 
     public void removeTag(string tag)
@@ -106,7 +112,41 @@ public class taggedWith : MonoBehaviour
 
         //update "global" tags...
         //remove the game object to the list of objects tagged with that tag:
-        globalTags[tag].Remove(gameObject);
+        //          globalTags[tag].Remove(idNumberrrr);
+
+        trickyGlobalTagDictionaryRemoval(tag);
+    }
+
+    public void trickyGlobalTagDictionaryRemoval(string tag)
+    {
+        //          globalTags[tag].Remove(idNumberrrr);
+
+        if(globalTags[tag] == null || globalTags[tag].Count == 0) { return; }
+
+        int lengthOfList = globalTags[tag].Count;
+        int currentIndex = 0;
+
+        //need to find THIS object in the list of tagged objects, then remove this object from that list
+        foreach(objectIdPair pair in globalTags[tag])
+        {
+
+            //if (pair.theObject == null)
+
+            if (pair.theObject == this.gameObject)
+            {
+                //.............wait, can't modify because we are using it in for loop?
+                //solution:
+                //      have the list of pairs
+                //      the "foreach" can go through a range of indexes
+                //      find the index.....no wait, that won't delete it from the...yes it will?
+                //      it will work if i use the list that is in the dictionary, NOT a new different list.  yes.
+                break;
+            }
+
+            currentIndex++;
+        }
+
+        globalTags[tag].RemoveAt(currentIndex);
     }
 
     public void removeALLtags()
@@ -115,80 +155,86 @@ public class taggedWith : MonoBehaviour
         //necessary when destroying objects, 
         //otherwise there will be "null" object references on those lists!
 
+        //can't modify list while using it in a for loop, so need to make a copy list:
+        List<string> copyListOfTags = new List<string>();
+
         foreach(string tag in tags)
+        {
+            copyListOfTags.Add(tag);
+        }
+
+        foreach (string tag in copyListOfTags)
         {
             removeTag(tag);
         }
     }
 
 
+
+
+
+
+
     //funcitons that modify a foreign object's tags
     public void foreignAddTag(string tag, GameObject addToThis)
     {
+        //JUST USE ADD/REMOVE ON **THEIR** TAG SCRIPT!  add one to them if they don't have one, they need it now [unless i switch to doing this all through a world script]
+
+        taggedWith theOtherTagScript = getOtherTagScript(addToThis);
+
+        theOtherTagScript.addTag(tag);
+
+
+        if (true == false)
+        {
+            //this funciton updates BOTH lists of tags
+            //the "local" list [ON THE "FOREIGN OBJECT", NOT ON "THIS.GAMEOBJECT"], and the "global"...Dicitonary of objects
+
+
+            //FIRST, make sure the object HAS a tag script:
+            taggedWith theTagScript = addToThis.GetComponent("taggedWith") as taggedWith;
+            if (theTagScript == null)
+            {
+                addToThis.AddComponent<taggedWith>();
+                Debug.Log("we were trying to add tags to an object with no tag script!  so, we added a tag script to it");
+            }
+
+
+            //update "local" tags
+            theTagScript.tags.Add(tag);
+
+            int idNumberrrr = addToThis.GetInstanceID();
+
+            //update "global" tags...
+            //but dictionaries are tricky objects, and must be checked and all that:
+            if (globalTags.ContainsKey(tag))
+            {
+                //add the game object to the list of objects tagged with that tag:
+                //                  globalTags[tag].Add(idNumberrrr);
+            }
+            else
+            {
+                //sigh, need to add the key first, which means the list it unlocks as well...
+                List<int> needsList = new List<int>();
+                needsList.Add(idNumberrrr);
+                //              globalTags.Add(tag, needsList);
+            }
+
+        }
+
+
+    }
+
+    public void foreignRemoveTag(string tag, GameObject foreignGameObject)
+    {
         //this funciton updates BOTH lists of tags
         //the "local" list, and the "global"...Dicitonary of objects
 
-        //update "local" tags
-        tags.Add(tag);
 
-        //update "global" tags...
-        //but dictionaries are tricky objects, and must be checked and all that:
-        if (globalTags.ContainsKey(tag))
-        {
-            //add the game object to the list of objects tagged with that tag:
-            globalTags[tag].Add(addToThis);
-        }
-        else
-        {
-            //sigh, need to add the key first, which means the list it unlocks as well...
-            List<GameObject> needsList = new List<GameObject>();
-            needsList.Add(addToThis);
-            globalTags.Add(tag, needsList);
-        }
+        taggedWith foreignGameObjectsTagScript = getOtherTagScript(foreignGameObject);
 
-
+        foreignGameObjectsTagScript.removeTag(tag);
     }
-
-    public void foreignRemoveGlobalTag(string tag, GameObject removeFromThis)
-    {
-        //update "global" tags...
-        //the "global"...Dicitonary of objects
-
-        //should I add checks here to make sure the tag is present?
-        //because it will have errors if I try to remove a tag that's basicaly already removed...
-        if (globalTags.ContainsKey(tag))
-        {
-            //remove the game object from the list of objects tagged with that tag:
-            globalTags[tag].Remove(removeFromThis);
-        }
-
-        
-        
-    }
-
-    public void foreignRemoveBOTHTags(string tag, GameObject foreignGameObject)
-    {
-        //this funciton updates BOTH lists of tags
-        //the "local" list, and the "global"...Dicitonary of objects
-
-
-        taggedWith foreignGameObjectsTagScript = foreignGameObject.GetComponent<taggedWith>();
-
-        //update "local" tags
-        foreignGameObjectsTagScript.tags.Remove(tag);
-
-        //should I add checks here to make sure the tag is present?
-        //because it will have errors if I try to remove a tag that's basicaly already removed...
-        if (globalTags.ContainsKey(tag))
-        {
-            //remove the game object from the list of objects tagged with that tag:
-            globalTags[tag].Remove(foreignGameObject);
-        }
-
-
-
-    }
-
 
     public void foreignRemoveALLtags(GameObject foreignGameObject)
     {
@@ -197,22 +243,41 @@ public class taggedWith : MonoBehaviour
         //necessary when destroying objects, 
         //otherwise there will be "null" object references on those lists!
         
-        taggedWith foreignGameObjectsTagScript = foreignGameObject.GetComponent<taggedWith>();
+        taggedWith foreignGameObjectsTagScript = getOtherTagScript(foreignGameObject);
 
-        if(foreignGameObjectsTagScript == null) { return; }
-
-        //remove object from all global tag lists:
-        foreach (string tag in foreignGameObjectsTagScript.tags)
-        {
-            foreignRemoveGlobalTag(tag, foreignGameObject);
-            //globalTags[tag].Remove(thisGameObject);
-        }
-
-        //delete local tags:
-        foreignGameObjectsTagScript.tags.Clear();
+        foreignGameObjectsTagScript.removeALLtags();
     }
 
+
+
+
+    public taggedWith getOtherTagScript(GameObject theGameObject)
+    {
+
+        //FIRST, make sure the object HAS a tag script:
+        taggedWith theOtherTagScript = theGameObject.GetComponent("taggedWith") as taggedWith;
+        if (theOtherTagScript == null)
+        {
+            theOtherTagScript = theGameObject.AddComponent<taggedWith>();
+            //Debug.Log("we were trying to add tags to an object with no tag script!  so, we added a tag script to it");
+        }
+
+        return theOtherTagScript;
+    }
+
+
+
+
     //diagnostic:
+    public objectIdPair makeTaggedObjectFromObject(GameObject theObject)
+    {
+        objectIdPair newTaggedfObject = new objectIdPair();
+        newTaggedfObject.theObjectIdNumber = theObject.GetHashCode();  //???  or use "GetInstanceID()"???
+        newTaggedfObject.theObject = theObject;
+
+        return newTaggedfObject;
+    }
+
     public void printAllTags()
     {
 
@@ -264,8 +329,52 @@ public class taggedWith : MonoBehaviour
 
 
 
+
+
+
+
+
+
     //find objects using tags:
     
+    public List<objectIdPair> allTaggedWithX(string tagX)
+    {
+        List<objectIdPair> newList = new List<objectIdPair>();
+
+        if (globalTags.ContainsKey(tagX))
+        {
+            //.......do i need to ''deep copy'' this?
+            newList = globalTags[tagX];
+        }
+
+        return newList;
+    }
+
+    public List<GameObject> listInObjectFormat(List<objectIdPair> pairFormatList)
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach(objectIdPair thisPair in pairFormatList)
+        {
+            if(thisPair.theObject != null)
+            {
+                newList.Add(thisPair.theObject);
+            }
+            else
+            {
+                Debug.Log("this object was deleted without being removed from the list!  id# = " + thisPair.theObjectIdNumber);
+            }
+        }
+
+        return newList;
+    }
+
+
+
+
+
+
+
     public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
     {
         //use with my "ALLTaggedWithMultiple" funcitons etc., they return a list of objects
@@ -276,7 +385,7 @@ public class taggedWith : MonoBehaviour
             //Debug.Log(obj.name);
         }
 
-        if(theList.Count == 0)
+        if (theList.Count == 0)
         {
             Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
             return null;
@@ -302,24 +411,19 @@ public class taggedWith : MonoBehaviour
 
             numberOfTries--;
         }
-        
-        
+
+
 
 
         return thisObject;
 
     }
-    
+
     public GameObject randomTaggedWith(string theTag)
     {
         //should return ONE random GameObject that is tagged with the inputted tag
 
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        if (globalTags.ContainsKey(theTag))
-        {
-            allPotentialTargets = globalTags[theTag];
-        }
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(theTag));
 
 
         /*
@@ -360,14 +464,8 @@ public class taggedWith : MonoBehaviour
 
 
 
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(theTag));
 
-        List<GameObject> allPotentialTargets = new List<GameObject>();
-
-        if (globalTags.ContainsKey(theTag))
-        {
-            allPotentialTargets = globalTags[theTag];
-        }
-        
         //foreach(GameObject thisListItem in allPotentialTargets)
         {
             //theFunctions.print(thisListItem.name);
@@ -500,11 +598,7 @@ public class taggedWith : MonoBehaviour
     {
         //INPUTS setup
         //STARTING place for contructing answer to return
-        List<GameObject> starterList = new List<GameObject>();
-        if (globalTags.ContainsKey(theTag))
-        {
-            starterList = globalTags[theTag];
-        }
+        List<GameObject> starterList = listInObjectFormat(allTaggedWithX(theTag));
 
         //put the optional other tags in a list:
         List<string> otherTags = new List<string>();
@@ -585,7 +679,9 @@ public class taggedWith : MonoBehaviour
         {
             if (globalTags.ContainsKey(thisTag))
             {
-                foreach (GameObject thisObject in globalTags[thisTag])
+                List<GameObject> batch = listInObjectFormat(allTaggedWithX(thisTag));
+
+                foreach (GameObject thisObject in batch)
                 {
                     //only add it if we don't already have it:
                     if (objectList.Contains(thisObject) != true)
@@ -1022,7 +1118,7 @@ public class taggedWith : MonoBehaviour
 
         //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
         //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(tagToLookFor));
         //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         return whichObjectOnListIsNearest(allPotentialTargets);
@@ -1037,7 +1133,7 @@ public class taggedWith : MonoBehaviour
 
         //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
         //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(tagToLookFor));
         //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         return whichObjectOnListIsNearestToInputtedObject(allPotentialTargets, objectWeWantItClosestTo);
@@ -1053,7 +1149,7 @@ public class taggedWith : MonoBehaviour
 
         //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
         //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(tagToLookFor));
         //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         return whichObjectOnListIsNearestToInputtedObjectExceptThatObject(allPotentialTargets, objectWeWantItClosestTo);
@@ -1150,7 +1246,7 @@ public class taggedWith : MonoBehaviour
             {
                 //Debug.Log("333333333333333333333333333333333333333333333");
             }
-            
+
         }
 
         return theClosestSoFar;
@@ -1165,8 +1261,8 @@ public class taggedWith : MonoBehaviour
 
         //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
         //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        List<GameObject> allPotentialTargets = ALLTaggedWithMultiple(tagToLookFor);
-        foreach(GameObject obj in allPotentialTargets)
+        List<GameObject> allPotentialTargets = listInObjectFormat(allTaggedWithX(tagToLookFor));
+        foreach (GameObject obj in allPotentialTargets)
         {
             Debug.Log(obj);
         }
@@ -1204,7 +1300,7 @@ public class taggedWith : MonoBehaviour
                 }
                 else if (theSECONDClosestSoFar == null)
                 {
-                    if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
+                    if (theWorldScript.theRepository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
                     {
                         theSECONDClosestSoFar = theClosestSoFar;
                         theClosestSoFar = thisObject;
@@ -1214,10 +1310,10 @@ public class taggedWith : MonoBehaviour
                         theSECONDClosestSoFar = thisObject;
                     }
                 }
-                else if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theSECONDClosestSoFar, objectWeWantItClosestTo))
+                else if (theWorldScript.theRepository.isXCloserThanYToZ(thisObject, theSECONDClosestSoFar, objectWeWantItClosestTo))
                 {
 
-                    if (theWorldScript.theRespository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
+                    if (theWorldScript.theRepository.isXCloserThanYToZ(thisObject, theClosestSoFar, objectWeWantItClosestTo))
                     {
                         theSECONDClosestSoFar = theClosestSoFar;
                         theClosestSoFar = thisObject;
@@ -1276,8 +1372,8 @@ public class taggedWith : MonoBehaviour
 
         //List<int> theDictKeys = new List<int>().AddRange();
 
-        List<int> theRanking = rankThisMess(dictionaryOfObjects,dictionaryOfDistances);
-        
+        List<int> theRanking = rankThisMess(dictionaryOfObjects, dictionaryOfDistances);
+
         //Debug.Log("theRanking.Count:  " + theRanking.Count);
 
         //      so, now we should have the list of keys ranked in order of which corrosponding object is closest
@@ -1364,7 +1460,7 @@ public class taggedWith : MonoBehaviour
                 //indexCounter++;
             }
         }
-        
+
 
 
 
@@ -1394,7 +1490,7 @@ public class taggedWith : MonoBehaviour
             //Debug.Log("dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey]:  " + dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey]);
             if (dictionaryOfDistances[thisKey] < dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey])
             {
-                
+
 
                 //theRanking[thisIndex]
                 theRanking.Insert(needToKnowTheIndexForTheTheRankingList, thisKey);
@@ -1405,7 +1501,7 @@ public class taggedWith : MonoBehaviour
             needToKnowTheIndexForTheTheRankingList++;
         }
 
-        if(true == false)
+        if (true == false)
         {
             foreach (int thisIndex in listOfRankIndexes)
             {
@@ -1425,7 +1521,7 @@ public class taggedWith : MonoBehaviour
                 }
             }
         }
-        
+
 
         //if it wasn't better than any of the ones ranked so far, add it to the end of the list:
         if (lookingForPosition)
@@ -1500,4 +1596,14 @@ public class taggedWith : MonoBehaviour
         //randomObjectFromList
     }
 
+
+
+}
+
+public class objectIdPair
+{
+    //      !!!!! SHOULD SWITCH TO USING ID NUMBERS IN DICTIONARY INSTEAD OF GAME OBJECT!  MAKES IT EASIER TO TRACK DOWN ERRORS WHEN OBJECT IS DESTROYED!  BECAUSE I CAN PRING id NUMBER EVERYYYYY TIME I DESTROY ANY OBJECT!!!!!!!!!!!!!
+    //buuuuuuuuuuut you can't get object if you have ID!!!!!  very annoying.  so use this instead
+    public int theObjectIdNumber = 0;
+    public GameObject theObject;
 }

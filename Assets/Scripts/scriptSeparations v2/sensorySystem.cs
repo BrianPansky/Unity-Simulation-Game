@@ -25,11 +25,19 @@ public class sensorySystem : MonoBehaviour
     public body1 body;
 
     List<GameObject> sensedObjects = new List<GameObject>();
-    // Start is called before the first frame update
-    void Start()
+
+
+    void Awake()
     {
         GameObject theWorldObject = GameObject.Find("World");
         theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        
     }
 
     // Update is called once per frame

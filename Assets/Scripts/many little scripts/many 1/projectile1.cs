@@ -31,6 +31,8 @@ public class projectile1 : MonoBehaviour
 
         if (selfDestructOnCollision && other.gameObject.tag != "aMapZone")
         {
+            //Debug.Log("projectile1, selfDestructOnCollision, this.gameObject.name:  " + this.gameObject.name);
+
             Destroy(this.gameObject);
 
             //if (delay == 0)

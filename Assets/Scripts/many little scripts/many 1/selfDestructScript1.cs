@@ -6,7 +6,7 @@ public class selfDestructScript1 : MonoBehaviour
 {
     public int currentCounter = 1;
 
-    public int timeUntilSelfDestruct = 1;
+    public int timeUntilSelfDestruct = 100;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +23,8 @@ public class selfDestructScript1 : MonoBehaviour
         }
         if (currentCounter > timeUntilSelfDestruct)
         {
+            //Debug.Log("selfDestructScript1, currentCounter > timeUntilSelfDestruct, this.gameObject.name:  " + currentCounter +" > "+ timeUntilSelfDestruct + ", name: " + this.gameObject.name);
+
             Destroy(this.gameObject);
         }
         currentCounter += 1;

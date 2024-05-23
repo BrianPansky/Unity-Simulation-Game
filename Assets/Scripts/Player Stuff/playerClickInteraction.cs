@@ -398,8 +398,9 @@ public class playerClickInteraction : MonoBehaviour
 
         //AIhub2 has "makeSimpleEnactionMate" to do this.  should move it to enaction script
 
-        //enactionMate newEnactionMate = firingFlamethrowerEnactionMate();
-        enactionMate newEnactionMate = firingGlueGunEnactionMate();
+        //      enactionMate newEnactionMate = firingFlamethrowerEnactionMate();
+        enactionMate newEnactionMate = firingRegularGunEnactionMate();
+        //              enactionMate newEnactionMate = firingGlueGunEnactionMate();
         //enactionMate newEnactionMate = firingGlueGunEnactionMate();//firingFlamethrowerEnactionMate();// firingRegularGunEnactionMate();
         //newEnactionMate.enactionTarget = enactionTarget;
 
@@ -433,6 +434,7 @@ public class playerClickInteraction : MonoBehaviour
 
         return newEnactionMate;
     }
+
     public enactionMate firingGlueGunEnactionMate()
     {
         enactionMate newEnactionMate = new enactionMate();

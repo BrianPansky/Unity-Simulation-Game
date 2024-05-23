@@ -8,6 +8,7 @@ public class authorScript1 : MonoBehaviour
     //      should this use "interactionMate" isntead?
 
     public GameObject theAuthor;
+    public bool isInteractionTypeLiteral = true; //literal is like "fire" and "water".  non-literal is like "standardClick" etc.
     public string interactionType;
 
     public float magnitudeOfInteraction = 1f;

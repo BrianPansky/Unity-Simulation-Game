@@ -53,9 +53,30 @@ public class MouseLook : MonoBehaviour
         if (thePlayerClickInteractionScript.inMenu == false)
         {
             //letsSeeIfICanFuckingTranslateThisGarbage();
-            soMyModifiedVersion();
+            
         }
+
+        if(conditionsMet()==false)
+        {
+            return;
+        }
+
+
         
+    }
+
+    bool conditionsMet()
+    {
+        if (thePlayerClickInteractionScript.inMenu == false)
+        {
+            //letsSeeIfICanFuckingTranslateThisGarbage();
+            return false;
+
+        }
+
+
+
+        return true;
     }
 
 

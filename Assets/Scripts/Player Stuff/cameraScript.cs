@@ -27,9 +27,33 @@ public class cameraScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (conditionsMet() == false)
+        {
+            return;
+        }
+
+
         updatePitch();
         //theEnactionScript.updateLookingVector();
         //                          this.transform.rotation = theEnactionScript.rotationFromLookingVector();
+    }
+
+
+    bool conditionsMet()
+    {
+        //if (thePlayerClickInteractionScript.inMenu == false)
+        {
+            //letsSeeIfICanFuckingTranslateThisGarbage();
+            //return false;
+
+        }
+
+        //if (theEnactionScript.currentlyUsable.Contains("humanBody") != true)
+        {
+            //return false;
+        }
+
+        return true;
     }
 
 

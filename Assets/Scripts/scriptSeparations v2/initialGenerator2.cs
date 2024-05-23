@@ -12,7 +12,7 @@ public class initialGenerator2 : MonoBehaviour
 
 
     public GameObject startPoint;
-    public repository2 theRespository;
+    public repository2 theRepository;
 
     public GameObject testTarget;
 
@@ -22,10 +22,22 @@ public class initialGenerator2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        GameObject theWorldObject = GameObject.Find("World");
+        //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+
+
+        if (theRepository == null)
+        {
+            theRepository = theWorldObject.GetComponent<repository2>();
+        }
+
+
         //generateScene2();
         generateScene3();
-        //generateFlex();
-
+        
+        
+        
         //Time.timeScale = 0f;
     }
 
@@ -71,7 +83,10 @@ public class initialGenerator2 : MonoBehaviour
         //generateWIDEZonesAndAgentsEtcMANYAgentsPerZone();
 
 
-        returnSimpleTank1();
+        GameObject t1 = returnSimpleTank1();
+        t1.transform.position += t1.transform.forward * 10;
+        GameObject t2 = returnSimpleTank1();
+        t2.transform.position += t1.transform.right * -10;
 
         generateWIDEZonesAndAgentsEtcMANYAgentsPerZoneWithGuns();
         //generateJustOneNPC();
@@ -131,25 +146,26 @@ public class initialGenerator2 : MonoBehaviour
             {
                 currentSlab++;
                 //Debug.Log(thisObject);
-                //theRespository.VERTICALplaceOnLineAndDuplicate(thisObject, howManySlabs, thisInitialXValue + thisXValueSpaxing * loopNumber, theZSpacing * currentLocation, nonZoneOffset, 18.4f);
+                //theRepository.VERTICALplaceOnLineAndDuplicate(thisObject, howManySlabs, thisInitialXValue + thisXValueSpaxing * loopNumber, theZSpacing * currentLocation, nonZoneOffset, 18.4f);
 
                 float theX = thisInitialXValue + 4.3f + currentSlab * slightHorizontalOffset;
                 float theY = vertStart + (vertSpacing * currentSlab);
                 float theZ = nonZoneOffset + (theZSpacing * (currentLocation - 1));
 
-                //theRespository.createPrefabAtPoint(slabStack[0], new Vector3(theX, theY, theZ));
+                //theRepository.createPrefabAtPoint(slabStack[0], new Vector3(theX, theY, theZ));
 
 
                 float halfSize = 1.2f;
 
-                GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "slab1");
+                GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "slab1");
                 //myTest.transform.localScale = new Vector3(3f, 0.4f, 3f);
                 myTest.transform.localScale = new Vector3(0.2f, halfSize * 2, 3f);
 
 
                 Rigidbody theRigid = myTest.AddComponent<Rigidbody>();
                 theRigid.mass = 111;
-                theRigid.angularDrag = 2f;
+                theRigid.angularDrag = 0f;
+                theRigid.isKinematic = true;
 
                 newton1 theNewton = myTest.AddComponent<newton1>();
                 theNewton.thisMass = 111;
@@ -165,7 +181,6 @@ public class initialGenerator2 : MonoBehaviour
                 aGlue1.transform.SetParent(myTest.transform);
 
 
-
                 GameObject aGlue2 = glueGlob(new Vector3(0f, -halfSize, halfSize));
                 aGlue2.transform.SetParent(myTest.transform);
 
@@ -178,6 +193,12 @@ public class initialGenerator2 : MonoBehaviour
 
                 GameObject aGlue4 = glueGlob(new Vector3(0f, -halfSize, -halfSize));
                 aGlue4.transform.SetParent(myTest.transform);
+
+
+                if (true == false)
+                {
+
+                }
 
 
 
@@ -214,7 +235,7 @@ public class initialGenerator2 : MonoBehaviour
     {
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -236,7 +257,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset, 18.4f);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset, 18.4f);
             loopNumber++;
         }
 
@@ -246,7 +267,7 @@ public class initialGenerator2 : MonoBehaviour
     {
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -269,7 +290,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing, thisInitialXValue + thisXValueSpaxing, nonZoneOffset, vertHeight);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing, thisInitialXValue + thisXValueSpaxing, nonZoneOffset, vertHeight);
 
         }
 
@@ -286,7 +307,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateJustOneNPC()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -306,11 +327,11 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 1, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 1, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
         
-        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        GameObject theZoneObject = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
         theZoneObject.transform.localScale = new Vector3(400f, 100f, 145f);
     }
 
@@ -318,7 +339,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateWIDEZonesAndAgentsEtc()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -347,13 +368,13 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howMany * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
+            theRepository.placeOnLineAndDuplicate(thisObject, howMany * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
             loopNumber++;
         }
 
 
         List<GameObject> zoneList = new List<GameObject>();
-        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        GameObject theZoneObject = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
         theZoneObject.transform.localScale = new Vector3(400f, 10f, 45f);
         zoneList.Add(theZoneObject);
 
@@ -361,7 +382,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in zoneList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howMany, theZSpacing * 2, thisInitialXValue + thisXValueSpaxing * 2 * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, howMany, theZSpacing * 2, thisInitialXValue + thisXValueSpaxing * 2 * loopNumber);
             loopNumber++;
         }
 
@@ -372,7 +393,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateWIDEZonesAndAgentsEtcMANYAgentsPerZoneWithGuns()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -402,13 +423,13 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
             loopNumber++;
         }
 
 
         List<GameObject> zoneList = new List<GameObject>();
-        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        GameObject theZoneObject = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
         theZoneObject.transform.localScale = new Vector3(800f, 10f, 50f);
         zoneList.Add(theZoneObject);
 
@@ -416,7 +437,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in zoneList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing * 2, thisXValueSpaxing * 2 * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing * 2, thisXValueSpaxing * 2 * loopNumber);
             loopNumber++;
         }
 
@@ -428,7 +449,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateWIDEZonesAndAgentsEtcMANYAgentsPerZone()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -484,13 +505,13 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones * 2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber, nonZoneOffset);
             loopNumber++;
         }
 
 
         List<GameObject> zoneList = new List<GameObject>();
-        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        GameObject theZoneObject = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
         theZoneObject.transform.localScale = new Vector3(400f, 10f, 45f);
         zoneList.Add(theZoneObject);
 
@@ -498,7 +519,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in zoneList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing * 2,  thisXValueSpaxing * 2 * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, howManyZones, theZSpacing * 2,  thisXValueSpaxing * 2 * loopNumber);
             loopNumber++;
         }
 
@@ -512,7 +533,7 @@ public class initialGenerator2 : MonoBehaviour
     void wellThisHasEachZoneRightBEsideEAchOtherWithZeroSpaceInBetweenNeat()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -538,13 +559,13 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howMany*2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, howMany*2, theZSpacing, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
 
 
         List<GameObject> zoneList = new List<GameObject>();
-        GameObject theZoneObject = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
+        GameObject theZoneObject = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2");
         theZoneObject.transform.localScale = new Vector3(200f, 1f, 50f);
         zoneList.Add(theZoneObject);
 
@@ -552,7 +573,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in zoneList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, howMany, theZSpacing*2, thisInitialXValue + thisXValueSpaxing*2 * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, howMany, theZSpacing*2, thisInitialXValue + thisXValueSpaxing*2 * loopNumber);
             loopNumber++;
         }
 
@@ -569,7 +590,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateOneNPCPerZone()
     {
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
 
@@ -578,7 +599,7 @@ public class initialGenerator2 : MonoBehaviour
         objectList.Add(returnTestAgent1());
 
         objectList.Add(returnTestKey1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
 
         //objectList.Add(returnTestKey1());
@@ -594,7 +615,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 111, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 111, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -614,7 +635,7 @@ public class initialGenerator2 : MonoBehaviour
         //generateTestLOCK1();
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestAgent1());
@@ -629,7 +650,7 @@ public class initialGenerator2 : MonoBehaviour
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
         objectList.Add(returnTestAgent1());
@@ -653,7 +674,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 111, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 111, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -673,7 +694,7 @@ public class initialGenerator2 : MonoBehaviour
         //generateTestLOCK1();
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestAgent1());
@@ -690,7 +711,7 @@ public class initialGenerator2 : MonoBehaviour
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
         objectList.Add(returnTestAgent1());
@@ -716,7 +737,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 201, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 201, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -737,7 +758,7 @@ public class initialGenerator2 : MonoBehaviour
         //generateTestLOCK1();
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestAgent1());
@@ -745,7 +766,7 @@ public class initialGenerator2 : MonoBehaviour
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
         objectList.Add(returnTestAgent1());
@@ -763,7 +784,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 202, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 202, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -783,13 +804,13 @@ public class initialGenerator2 : MonoBehaviour
         //generateTestLOCK1();
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
 
         objectList.Add(returnTestAgent1());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
         objectList.Add(returnTestAgent1());
@@ -805,7 +826,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 33, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 33, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -825,13 +846,13 @@ public class initialGenerator2 : MonoBehaviour
         //generateTestLOCK1();
 
         List<GameObject> objectList = new List<GameObject>();
-        //GameObject testCube = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+        //GameObject testCube = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
 
         //objectList.Add(returnTestAgent1());
         objectList.Add(returnTestKey1());
         objectList.Add(returnTestLOCK1());
-        objectList.Add(theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
+        objectList.Add(theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.mapZone2, new Vector3(0, 0, 0), "mapZone2")); //objectList.Add(returnTestLocation2());
         objectList.Add(returnTestKey1());
 
 
@@ -845,7 +866,7 @@ public class initialGenerator2 : MonoBehaviour
         foreach (GameObject thisObject in objectList)
         {
             //Debug.Log(thisObject);
-            theRespository.placeOnLineAndDuplicate(thisObject, 3, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
+            theRepository.placeOnLineAndDuplicate(thisObject, 3, 11, thisInitialXValue + thisXValueSpaxing * loopNumber);
             loopNumber++;
         }
     }
@@ -868,10 +889,10 @@ public class initialGenerator2 : MonoBehaviour
     {
 
 
-        GameObject prefabToUse = theRespository.interactionSphere;
+        GameObject prefabToUse = theRepository.interactionSphere;
 
 
-        GameObject newGlue = theRespository.createAndReturnPrefabAtPointWITHNAME(prefabToUse, new Vector3(0, 0, 0), "glue");
+        GameObject newGlue = theRepository.createAndReturnPrefabAtPointWITHNAME(prefabToUse, new Vector3(0, 0, 0), "glue");
         selfDestructScript1 killScript = newGlue.GetComponent<selfDestructScript1>();
         UnityEngine.Object.Destroy(killScript);
 
@@ -894,7 +915,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject slab1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "slab1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "slab1");
         //myTest.transform.localScale = new Vector3(3f, 0.4f, 3f);
         //          myTest.transform.localScale = new Vector3(0.3f, 1f, 3f);
 
@@ -945,7 +966,7 @@ public class initialGenerator2 : MonoBehaviour
     GameObject motor1()
     {
 
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCylinderPrefab, new Vector3(0, 0, 0), "motor");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCylinderPrefab, new Vector3(0, 0, 0), "motor");
         myTest.transform.localScale = new Vector3(1f, 3f, 1f);
         myTest.transform.rotation = Quaternion.Euler(90, 0, 0);
 
@@ -977,7 +998,8 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject anchor1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "anchor");
+
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "anchor");
         myTest.transform.localScale = new Vector3(5f, 11f, 5f);
         //myTest.transform.position += new Vector3(0, 3, 3);
 
@@ -1007,9 +1029,9 @@ public class initialGenerator2 : MonoBehaviour
 
     void generateTestAgent1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestAgent1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "generateTestAgent1");
 
-        //GameObject myTest2 = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.invisiblePoint, startPoint.transform.position + new Vector3(0, 0, 0.8f), "generateTestAgent1 pointer");
+        //GameObject myTest2 = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.invisiblePoint, startPoint.transform.position + new Vector3(0, 0, 0.8f), "generateTestAgent1 pointer");
 
         //myTest2.transform.SetParent(myTest.transform, true);
 
@@ -1033,7 +1055,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject returnTestAgent2()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
 
         myTest.AddComponent<NavMeshAgent>();
         myTest.AddComponent<AIHub2>();
@@ -1051,7 +1073,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject returnFlamethrowerNPC()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestAgent1");
 
         myTest.AddComponent<NavMeshAgent>();
         myTest.AddComponent<AIHub2>();
@@ -1066,7 +1088,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject returnPineTree1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.pineTree1, new Vector3(0, 0, 0), "returnPineTree1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.pineTree1, new Vector3(0, 0, 0), "returnPineTree1");
 
 
         myTest.AddComponent<interactionScript>();
@@ -1079,7 +1101,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject returnTestAgent1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0,0,0), "returnTestAgent1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0,0,0), "returnTestAgent1");
         
         myTest.AddComponent<NavMeshAgent>();
         myTest.AddComponent<AIHub2>();
@@ -1093,25 +1115,33 @@ public class initialGenerator2 : MonoBehaviour
 
     public GameObject returnSimpleTank1()
     {
-        GameObject bottomBit = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.simpleTankBottom, new Vector3(0, 0, 0), "returnSimpleTank1");
+        GameObject bottomBit = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.simpleTankBottom, new Vector3(0, 0, 0), "returnSimpleTank1");
 
         //bottomBit.AddComponent<NavMeshAgent>();
         //bottomBit.AddComponent<AIHub2>();
 
 
-        bottomBit.AddComponent<interactionScript>();
-        interactionScript theInteractionScript = bottomBit.GetComponent<interactionScript>();
+        //  bottomBit.AddComponent<interactionScript>();
+        //  interactionScript theInteractionScript = bottomBit.GetComponent<interactionScript>();
 
-        theInteractionScript.addInteraction("standardClick", "useVehicle");
+        //  theInteractionScript.addInteraction("standardClick", "useVehicle");
 
+        Rigidbody rigidbody = bottomBit.AddComponent<Rigidbody>();
+        rigidbody.isKinematic = true;
 
+        //  interactionScript theInteractions = bottomBit.AddComponent<interactionScript>();
+        //  theInteractions.addInteraction("tankShot", "burn");
 
         //bottomBit.AddComponent<tank1>();
         tank1 theTank1Script = bottomBit.GetComponent<tank1>();
-        theTank1Script.tankHead = returnSimpleTankTurretAndBarrel();
+        theTank1Script.tankHead = returnSimpleTankTurretWithoutBarrel();
+        theTank1Script.tankHead.transform.rotation = Quaternion.identity;
         theTank1Script.tankHead.transform.SetParent(bottomBit.transform, true);
         //initializeAim(theTank1Script.tankHead.transform.GetChild(0).gameObject, theTank1Script.firingStartPoint, theTank1Script.firingDirectionPoint);
 
+        theTank1Script.tankBarrel = returnSimpleTankBarrel();
+        theTank1Script.tankBarrel.transform.rotation = Quaternion.identity;
+        theTank1Script.tankBarrel.transform.SetParent(theTank1Script.tankHead.transform, false);
 
         return bottomBit;
     }
@@ -1126,17 +1156,24 @@ public class initialGenerator2 : MonoBehaviour
         endpoint = startPoint.transform.GetChild(0).gameObject;
     }
 
-    GameObject returnSimpleTankTurretAndBarrel()
+    GameObject returnSimpleTankTurretWithoutBarrel()
     {
-        GameObject bottomBit = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.simpleTankTurretWITHBarrel, new Vector3(0, 0, 0), "returnSimpleTank1");
+        GameObject turret = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.simpleTankTurretWITHOUTBarrel, new Vector3(0, 0, 0), "returnSimpleTank1");
 
-        return bottomBit;
+        return turret;
+    }
+
+    GameObject returnSimpleTankBarrel()
+    {
+        GameObject barrel = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.simpleTankBarrel, new Vector3(0, 0, 0), "returnSimpleTank1");
+
+        return barrel;
     }
 
 
     GameObject returnTestLocation2()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestLocation2");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestLocation2");
 
         //myTest.AddComponent<NavMeshAgent>();
         //myTest.AddComponent<AIHub2>();
@@ -1151,7 +1188,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject generateTowerHoop(GameObject theTower)
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTowerHoop");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "generateTowerHoop");
         //Debug.Log("///////////////////////////////////////////////////////////////after creating object");
         //Debug.Log(myTest.name);
         myTest.transform.localScale = new Vector3(1.7f, 1.3f, 1.7f);
@@ -1188,7 +1225,7 @@ public class initialGenerator2 : MonoBehaviour
 
     void generateTestKey1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestKey1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "generateTestKey1");
         interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(0.5f, 2, 0.5f);
         myTest.transform.position += new Vector3(0, 3, 3);
@@ -1200,7 +1237,7 @@ public class initialGenerator2 : MonoBehaviour
     }
     void generateTestLOCK1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, startPoint.transform.position, "generateTestLOCK1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, startPoint.transform.position, "generateTestLOCK1");
         interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(1f, 2, 1f);
         myTest.transform.position += new Vector3(0, 0, -8);
@@ -1215,7 +1252,7 @@ public class initialGenerator2 : MonoBehaviour
 
     GameObject returnTestKey1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestKey1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestKey1");
         interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(0.5f, 2, 0.5f);
         //myTest.transform.position += new Vector3(0, 3, 3);
@@ -1228,7 +1265,7 @@ public class initialGenerator2 : MonoBehaviour
     }
     GameObject returnTestLOCK1()
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestLOCK1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, new Vector3(0, 0, 0), "returnTestLOCK1");
         interactionScript theInteractionScript = myTest.AddComponent<interactionScript>();
         myTest.transform.localScale = new Vector3(1f, 3, 1f);
         //myTest.transform.localScale = new Vector3(1f, 2, 1f);
@@ -1246,7 +1283,7 @@ public class initialGenerator2 : MonoBehaviour
 
     void generateInteractionSlot1(Vector3 theLocation)
     {
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, theLocation, "generateInteractionSlot1");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, theLocation, "generateInteractionSlot1");
         myTest.transform.localScale = new Vector3(0.7f, 0.3f, 0.7f);
 
 
@@ -1257,7 +1294,7 @@ public class initialGenerator2 : MonoBehaviour
     void generateRing(Vector3 theLocation)
     {
         //"ring", for now cube, whatever
-        GameObject myTest = theRespository.createAndReturnPrefabAtPointWITHNAME(theRespository.placeHolderCubePrefab, theLocation, "generateRing");
+        GameObject myTest = theRepository.createAndReturnPrefabAtPointWITHNAME(theRepository.placeHolderCubePrefab, theLocation, "generateRing");
         myTest.transform.localScale = new Vector3(1.7f, 0.5f, 1.7f);
 
 
@@ -1290,3 +1327,5 @@ public class generatorJob
 
     
 }
+
+

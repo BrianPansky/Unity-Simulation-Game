@@ -28,38 +28,12 @@ public class body1 : MonoBehaviour
 
 
     //      mouse look stuff
-    public float mouseSpeed = 290f;
-    public Transform playerBody;
-    float xRotation = 0f;
-
-    public Ray lookingRay;
-
-
-
-
-
-    public GameObject theBodyGameObject;
+    public float lookSpeed = 290f;
     public float standardClickDistance = 7.0f;
-
-    public worldScript theWorldScript;
-    public enactionScript theEnactionScript;
-    public interactionScript theInteractionScript;
-    public mapZoneScript theLocalMapZoneScript;
-
-
-    public NavMeshAgent thisNavMeshAgent;
-
-    public CharacterController controller;
-
     public float speed = 12f;
     public float gravity = -9.81f;
     public float jumpHeight = 3f;
-
-    public Transform groundCheck;
     public float groundDistance = 0.4f;
-    public LayerMask groundMask;
-
-    Vector3 velocity;
     public bool isGrounded;
 
 
@@ -70,7 +44,34 @@ public class body1 : MonoBehaviour
 
     public List<enactionMate> enactionSet = new List<enactionMate>();
 
+
+    public worldScript theWorldScript;
+    public enactionScript theEnactionScript;
+    public interactionScript theInteractionScript;
+    public mapZoneScript theLocalMapZoneScript;
+
+    public NavMeshAgent thisNavMeshAgent;
+
+
+    
+
+
+    //what are these?
+    public Transform playerBody;
+    public Transform groundCheck;
+    public GameObject theBodyGameObject;
+
+
+
+
+    //do i need these?
+    public CharacterController controller;
+    public LayerMask groundMask;
     public bool gamePadActive = true;
+    Vector3 velocity;
+
+
+
 
 
     void Awake()
@@ -90,10 +91,6 @@ public class body1 : MonoBehaviour
         }
 
 
-
-        //initializeNavmeshAgent();
-
-
         if (theEnactionScript == null)
         {
             theEnactionScript = this.GetComponent<enactionScript>();
@@ -105,11 +102,22 @@ public class body1 : MonoBehaviour
 
         theEnactionScript.currentlyUsable.Add("humanBody");  //partial implemention for now.  later need limbs and whatever else
 
-        //enactionScript.availableEnactions.Add("walk");
 
-        //      theEnactionScript.availableEnactions.Add("navMeshWalk");
-        //      theEnactionScript.availableEnactions.Add("aim");
-        //      theEnactionScript.availableEnactions.Add("standardClick");
+        theEnactionScript.addEnactionSphere(this.gameObject, "shoot1", default, 20f, 47, default);
+        Debug.Log("more i need to add/account for:");
+        //      firingCooldown = 5;
+        //      GameObject makeThis = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
+        //      GameObject thisObject = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(makeThis, enactionAuthor.transform.position);
+        //      thisObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        //killScript.timeUntilSelfDestruct = 830;
+        //  authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+        //  threatAlert(theAuthorScript.theAuthor);
+        //maybe not needed here?:
+        //      thisObject.transform.position += authorSensorySystem.lookingRay.direction;
+        //      projectileScript.Direction = authorSensorySystem.lookingRay.direction;
+
+
+
 
 
 
@@ -118,21 +126,6 @@ public class body1 : MonoBehaviour
         enactionSet.Add(aim());
         enactionSet.Add(standardClick());
 
-    }
-
-    void initializeNavmeshAgent()
-    {
-        if (thisNavMeshAgent == null)
-        {
-            thisNavMeshAgent = GetComponent<NavMeshAgent>();
-            if (thisNavMeshAgent == null)
-            {
-
-                thisNavMeshAgent = this.gameObject.AddComponent<NavMeshAgent>();
-            }
-
-            thisNavMeshAgent.speed = 13f;
-        }
     }
 
     enactionMate navMeshWalk()
@@ -293,7 +286,7 @@ public class body1 : MonoBehaviour
 
         //Debug.Log("pointerPoint:  " + pointerPoint);
 
-        //GameObject myTest2 = theWorldScript.theRespository.createAndReturnPrefabAtPointWITHNAME(theWorldScript.theRespository.invisiblePoint, this.gameObject.transform.position + new Vector3(0, 0, 0.8f), this.gameObject.name + "pointer");
+        //GameObject myTest2 = theWorldScript.theRepository.createAndReturnPrefabAtPointWITHNAME(theWorldScript.theRepository.invisiblePoint, this.gameObject.transform.position + new Vector3(0, 0, 0.8f), this.gameObject.name + "pointer");
 
         //myTest2.transform.SetParent(this.gameObject.transform, true);
         //pointerPoint = myTest2;
@@ -359,11 +352,15 @@ public class body1 : MonoBehaviour
         //Debug.Log("isGrounded:  " + isGrounded);
 
         //Debug.Log("theEnactionScript.jump:  " + theEnactionScript.jump);
-        if (theEnactionScript.jump && isGrounded)
+        if (theEnactionScript.jump == true)
         {
 
             //Debug.Log("ya, body is jumping");
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            if (isGrounded)
+            {
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+            
             theEnactionScript.jump = false;
         }
 
@@ -378,51 +375,17 @@ public class body1 : MonoBehaviour
 
     public bool conditionsMet()
     {
-        //      this can't work, because we'd never know when to add them back on after they are removed:  [unless....exiting a vehicle inherently KNOWS to add that back?  hmm, maybe]
         if (theEnactionScript.currentlyUsable.Contains("humanBody") != true)
         {
             return false;
         }
 
-
-        //ad hoc way to do this sorta:
-        //if (theEnactionScript.bodyCanBeUsed == false)
-        {
-            //return false;
-        }
-
         return true;
     }
-
     void updateYaw()
     {
-
-        //                  xRotation -= theEnactionScript.mouseY;
-        //                  xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         this.gameObject.transform.Rotate(Vector3.up * theEnactionScript.yawInput);
     }
-
-
-    public void killThisBody()
-    {
-        //this.gameObject.SetActive(false);
-
-        theLocalMapZoneScript.theList.Remove(this.gameObject);
-        theLocalMapZoneScript.threatList.Remove(this.gameObject);
-
-
-
-        theWorldScript.theTagScript.foreignRemoveALLtags(this.gameObject);
-
-        Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
-        UnityEngine.Object.Destroy(this.gameObject);
-
-    }
-
-
-
     public bool isThisGrounded()
     {
 
@@ -463,6 +426,23 @@ public class body1 : MonoBehaviour
         }
 
         return false;
+    }
+
+
+    public void killThisBody()
+    {
+        //this.gameObject.SetActive(false);
+
+        theLocalMapZoneScript.theList.Remove(this.gameObject);
+        theLocalMapZoneScript.threatList.Remove(this.gameObject);
+
+
+
+        theWorldScript.theTagScript.foreignRemoveALLtags(this.gameObject);
+
+        //Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject.name + this.gameObject);
+        UnityEngine.Object.Destroy(this.gameObject);
+
     }
 
 }
