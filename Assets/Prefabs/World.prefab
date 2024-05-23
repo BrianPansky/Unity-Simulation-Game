@@ -97,7 +97,7 @@ MonoBehaviour:
   burntPineTree1: {fileID: 0}
   simpleTankBottom: {fileID: 7365174163795493584, guid: 903b74f3ed5369647a0ea835b99ad260,
     type: 3}
-  simpleTankTurretWITHBarrel: {fileID: 1432907445591864999, guid: 78963154b692fbc478259ee6d236530b,
+  simpleTankTurretWITHOUTBarrel: {fileID: 3190879108886832838, guid: 755aac088337f9940a62f5520e37281c,
     type: 3}
   simpleTankBarrel: {fileID: 6742334954144941906, guid: 7e14df7cf8b2b064b9d14ae9c1d348b3,
     type: 3}
@@ -207,4 +207,6 @@ MonoBehaviour:
   autoGlue: 0
   masterScript: 1
   masterGlueList: []
+  sameObjectGlueList: []
+  forceFromOthers: {x: 0, y: 0, z: 0}
   otherGlue: {fileID: 0}
