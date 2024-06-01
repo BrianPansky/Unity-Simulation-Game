@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 284237302895610163}
   - component: {fileID: 7132975931887640639}
   - component: {fileID: 1679280799684621594}
+  - component: {fileID: 9142553827997022821}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: anNPC
@@ -211,26 +212,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f7bc4f1fbfcef841bdb1e532b466508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSpeed: 290
-  playerBody: {fileID: 0}
-  theBodyGameObject: {fileID: 859809950099632578}
+  lookSpeed: 290
   standardClickDistance: 7
+  speed: 12
+  gravity: -9.81
+  jumpHeight: 3
+  groundDistance: 0.4
+  isGrounded: 0
+  maxHealth: 100
+  currentHealth: 0
   theWorldScript: {fileID: 0}
   theEnactionScript: {fileID: 0}
   theInteractionScript: {fileID: 0}
   theLocalMapZoneScript: {fileID: 0}
   thisNavMeshAgent: {fileID: 0}
-  controller: {fileID: 0}
-  speed: 12
-  gravity: -9.81
-  jumpHeight: 3
+  playerBody: {fileID: 0}
   groundCheck: {fileID: 0}
-  groundDistance: 0.4
+  theBodyGameObject: {fileID: 859809950099632578}
+  controller: {fileID: 0}
   groundMask:
     serializedVersion: 2
     m_Bits: 0
-  maxHealth: 100
-  currentHealth: 0
+  gamePadActive: 1
 --- !u!114 &1679280799684621594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,6 +249,24 @@ MonoBehaviour:
   mouseSpeed: 290
   playerBody: {fileID: 0}
   thePlayerClickInteractionScript: {fileID: 0}
+--- !u!114 &9142553827997022821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 859809950099632578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a16cc8fa141e1f341bcbf2966ffc82dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  primary: 0
+  x: 0
+  z: 0
+  yawInput: 0
+  pitchInput: 0
+  jump: 0
 --- !u!1 &859809950337065639
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,7 +365,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10336d47a06eab64fa3a3b9bf5b9424e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  theEnactionScript: {fileID: 0}
+  theVirtualGamePad: {fileID: 0}
+  limitedPitchRotation: 0
 --- !u!1 &859809950391672179
 GameObject:
   m_ObjectHideFlags: 0
@@ -1518,15 +1540,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9e158d92f21ce2408feb8efa2a99999, type: 3}
---- !u!4 &2087951476826348360 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8928057846489955663, guid: d9e158d92f21ce2408feb8efa2a99999,
-    type: 3}
-  m_PrefabInstance: {fileID: 7430712339203139079}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7957934546916301543 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 679888297988848864, guid: d9e158d92f21ce2408feb8efa2a99999,
+    type: 3}
+  m_PrefabInstance: {fileID: 7430712339203139079}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2087951476826348360 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8928057846489955663, guid: d9e158d92f21ce2408feb8efa2a99999,
     type: 3}
   m_PrefabInstance: {fileID: 7430712339203139079}
   m_PrefabAsset: {fileID: 0}
