@@ -21,6 +21,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
 
+    enactionScript theEnactionScript;
 
     public body1 body;
 
@@ -69,6 +70,7 @@ public class playerClickInteraction : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        theEnactionScript = this.gameObject.GetComponent<enactionScript>();
 
 
         if (theSensorySystem == null)
@@ -145,7 +147,7 @@ public class playerClickInteraction : MonoBehaviour
 
 
         //check for mouse click:
-        handleAnyClick();
+        //              handleAnyClick();
 
         //handle other buttons the player has pressed:
         handleOtherButtons();
@@ -399,13 +401,15 @@ public class playerClickInteraction : MonoBehaviour
         //AIhub2 has "makeSimpleEnactionMate" to do this.  should move it to enaction script
 
         //      enactionMate newEnactionMate = firingFlamethrowerEnactionMate();
-        enactionMate newEnactionMate = firingRegularGunEnactionMate();
+        //                          enactionMate newEnactionMate = firingRegularGunEnactionMate();
         //              enactionMate newEnactionMate = firingGlueGunEnactionMate();
         //enactionMate newEnactionMate = firingGlueGunEnactionMate();//firingFlamethrowerEnactionMate();// firingRegularGunEnactionMate();
         //newEnactionMate.enactionTarget = enactionTarget;
 
-        newEnactionMate.enact();
+        //                          newEnactionMate.enact();
 
+        intSpherAtor firingThing = theEnactionScript.matchInteractionType("shoot1");
+        firingThing.enact(theEnactionScript);
         //blank out mouse click each frame:
         clickedOn = null;
 

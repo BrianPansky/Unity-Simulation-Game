@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEditor.Experimental.GraphView;
@@ -8,6 +9,9 @@ using static UnityEngine.GraphicsBuffer;
 
 public class body1 : MonoBehaviour
 {
+
+    public GameObject firePoint;
+
     //different things can be controlled in the game [human, vehicle, menu]
     //this is for a human body
     //it contains the actions that could be done if you press buttons on a controller
@@ -43,6 +47,7 @@ public class body1 : MonoBehaviour
 
 
     public List<enactionMate> enactionSet = new List<enactionMate>();
+    public List<IEnactable> enactableSet = new List<IEnactable>();
 
 
     public worldScript theWorldScript;
@@ -102,6 +107,9 @@ public class body1 : MonoBehaviour
 
         theEnactionScript.currentlyUsable.Add("humanBody");  //partial implemention for now.  later need limbs and whatever else
 
+        firePoint = this.gameObject;  //for now!
+        theEnactionScript.firePoint = firePoint;
+        theEnactionScript.addEnactionSphere(this.gameObject, "standardClick", default, 20f, 47, default);
 
         theEnactionScript.addEnactionSphere(this.gameObject, "shoot1", default, 20f, 47, default);
         Debug.Log("more i need to add/account for:");
@@ -318,7 +326,9 @@ public class body1 : MonoBehaviour
         //updatePitch();
         updateYaw();
 
-
+        //makeAllSpheresLookAtButtons();
+        theEnactionScript.makeAllSpheresLookAtButtons(theEnactionScript.theGamePad, theEnactionScript);
+        //primary();
         //      Vector3 startV = lookingRay.origin;
 
         //Vector3 diffV = (endV - startV);
@@ -344,7 +354,7 @@ public class body1 : MonoBehaviour
         }
 
 
-        Vector3 move = transform.right * theEnactionScript.x + transform.forward * theEnactionScript.z;
+        Vector3 move = transform.right * theEnactionScript.theGamePad.x + transform.forward * theEnactionScript.theGamePad.z;
 
         controller.Move(move * speed * Time.deltaTime);
 
@@ -352,7 +362,7 @@ public class body1 : MonoBehaviour
         //Debug.Log("isGrounded:  " + isGrounded);
 
         //Debug.Log("theEnactionScript.jump:  " + theEnactionScript.jump);
-        if (theEnactionScript.jump == true)
+        if (theEnactionScript.theGamePad.jump == true)
         {
 
             //Debug.Log("ya, body is jumping");
@@ -361,7 +371,7 @@ public class body1 : MonoBehaviour
                 velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
             
-            theEnactionScript.jump = false;
+            theEnactionScript.theGamePad.jump = false;
         }
 
         velocity.y += gravity * Time.deltaTime;
@@ -370,6 +380,25 @@ public class body1 : MonoBehaviour
 
 
 
+
+    }
+
+
+    private void primary()
+    {
+        if(theEnactionScript.theGamePad.primary != true)
+        {
+            return;
+        }
+        theEnactionScript.theGamePad.primary = false;
+
+        if (theEnactionScript.interactionSphereList.Count == 0)
+        {
+            return;
+        }
+
+        //Debug.Log("theEnactionScript.jump:  " + theEnactionScript.interactionSphereList[0].interactionType);
+        theEnactionScript.interactionSphereList[0].enact(theEnactionScript);
 
     }
 
@@ -384,7 +413,7 @@ public class body1 : MonoBehaviour
     }
     void updateYaw()
     {
-        this.gameObject.transform.Rotate(Vector3.up * theEnactionScript.yawInput);
+        this.gameObject.transform.Rotate(Vector3.up * theEnactionScript.theGamePad.yawInput);
     }
     public bool isThisGrounded()
     {

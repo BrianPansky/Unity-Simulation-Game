@@ -121,9 +121,12 @@ public class interactionScript : MonoBehaviour
 
                         body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
 
+
+                        enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                         //ad hoc for now
                         tank1 theTank = this.GetComponent<tank1>();
                         theTank.pilot = theAuthorScript.theAuthor;
+                        theTank.thePilotEnactionScript = theEnactionScript;
 
                         //this is probably great, but it also disables my camera.  will need to re-arrange things...
                         //      theBodyScript.theBodyGameObject.active = false;
@@ -131,7 +134,6 @@ public class interactionScript : MonoBehaviour
                         //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
                         theAuthorScript.theAuthor.transform.SetParent(this.gameObject.transform, true);
 
-                        enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                         theEnactionScript.enactionBody = this.gameObject;
                         theEnactionScript.currentlyUsable.Remove("humanBody");
                         theEnactionScript.currentlyUsable.Add("tank");

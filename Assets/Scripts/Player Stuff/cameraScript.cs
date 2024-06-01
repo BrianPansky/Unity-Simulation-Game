@@ -9,17 +9,17 @@ public class cameraScript : MonoBehaviour
     //it will listen to enactionscript for movement.
 
 
-    public enactionScript theEnactionScript;
+    public virtualGamepad theVirtualGamePad;
 
     public float limitedPitchRotation = 0f;
 
     // Start is called before the first frame update
     void Start()
     {
-        if (theEnactionScript == null)
+        if (theVirtualGamePad == null)
         {
             GameObject parent = this.transform.parent.gameObject;
-            theEnactionScript = parent.GetComponent<enactionScript>();
+            theVirtualGamePad = parent.GetComponent<virtualGamepad>();
         }
 
     }
@@ -34,8 +34,8 @@ public class cameraScript : MonoBehaviour
 
 
         updatePitch();
-        //theEnactionScript.updateLookingVector();
-        //                          this.transform.rotation = theEnactionScript.rotationFromLookingVector();
+        //theVirtualGamePad.updateLookingVector();
+        //                          this.transform.rotation = theVirtualGamePad.rotationFromLookingVector();
     }
 
 
@@ -48,7 +48,7 @@ public class cameraScript : MonoBehaviour
 
         }
 
-        //if (theEnactionScript.currentlyUsable.Contains("humanBody") != true)
+        //if (theVirtualGamePad.currentlyUsable.Contains("humanBody") != true)
         {
             //return false;
         }
@@ -59,22 +59,22 @@ public class cameraScript : MonoBehaviour
 
     void updatePitch()
     {
-        limitedPitchRotation -= theEnactionScript.pitchInput;
+        limitedPitchRotation -= theVirtualGamePad.pitchInput;
 
         //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
         limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
         
         transform.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
-        //                  playerBody.Rotate(Vector3.up * theEnactionScript.mouseX);
+        //                  playerBody.Rotate(Vector3.up * theVirtualGamePad.mouseX);
     }
 
     void updateMouseLook()
     {
 
-        //          xRotation -= theEnactionScript.mouseY;
+        //          xRotation -= theVirtualGamePad.mouseY;
         //          xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         //          transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        //          playerBody.Rotate(Vector3.up * theEnactionScript.mouseX);
+        //          playerBody.Rotate(Vector3.up * theVirtualGamePad.mouseX);
     }
 }

@@ -8,6 +8,20 @@ using static UnityEngine.GraphicsBuffer;
 
 public class enactionScript : MonoBehaviour
 {
+
+    public GameObject firePoint;
+
+
+
+    public Ray primaryRay = new Ray();
+
+    public GameObject primaryFiringPoint;
+
+    public worldScript theWorldScript;
+
+
+
+
     //      just make strings for now [can modularize into sub-atoms and all of that later]:
     //public List<string> availableEnactions = new List<string>();
 
@@ -17,18 +31,6 @@ public class enactionScript : MonoBehaviour
     public List<intSpherAtor> interactionSphereList = new List<intSpherAtor>();
 
     public bool bodyCanBeUsed = false;
-
-    //ad-hoc inputs:
-    public float x = 0f;
-    public float z = 0f;
-    public float yawInput = 0f;
-    public float pitchInput = 0f;
-    //public Vector3 lookingVector = Vector3.zero;
-
-    //could call it "primary auxilliary" or something?
-    public bool jump = false;
-
-
 
 
 
@@ -67,6 +69,7 @@ public class enactionScript : MonoBehaviour
 
         intSpherAtor newIntSpherAtor = new intSpherAtor();
         newIntSpherAtor.enactionAuthor = author;
+        newIntSpherAtor.firePoint = this.firePoint;
         newIntSpherAtor.interactionType = interactionType;
         newIntSpherAtor.sdOnCollision = sdOnCollision;
         newIntSpherAtor.magnitudeOfInteraction = magnitudeOfInteraction;
@@ -89,14 +92,20 @@ public class enactionScript : MonoBehaviour
 
     void Start()
     {
+        GameObject theWorldObject = GameObject.Find("World");
+        theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
+
+
         //theBody = this.gameObject.GetComponent<body1>();
 
         if (theGamePad == null)
         {
             //this.gameObject.AddComponent<virtualGamepad>();
-            //theGamePad = this.gameObject.GetComponent<virtualGamepad>();
-
-            theGamePad = this.gameObject.AddComponent<virtualGamepad>();
+            theGamePad = this.gameObject.GetComponent<virtualGamepad>();
+            if (theGamePad == null)
+            {
+                theGamePad = this.gameObject.AddComponent<virtualGamepad>();
+            }
         }
     }
 
@@ -105,7 +114,22 @@ public class enactionScript : MonoBehaviour
     {
         //Debug.Log("...................enactionScript...................");
 
+        foreach (intSpherAtor thisIntSpherAtor in interactionSphereList)
+        {
+            thisIntSpherAtor.callableUpdate(this);
+        }
     }
+
+
+
+    public void makeAllSpheresLookAtButtons(virtualGamepad gamePadToLookAt, enactionScript theAuthorEnactionScript)
+    {
+        foreach (intSpherAtor thisSphere in interactionSphereList)
+        {
+            thisSphere.lookForButton1(gamePadToLookAt, theAuthorEnactionScript);
+        }
+    }
+
 
     public intSpherAtor matchInteractionType(string randomInteractionTypeOnTarget)
     {
@@ -639,18 +663,26 @@ public class enactionMate
 }
 
 
-public class intSpherAtor
+public class intSpherAtor : IEnactable
 {
     //short for "interaction sphere generator"
-    
+
     //types:
     //      regular [bullet]
     //      area of effect/splash/growth [explosion or standardclick]
     //          which has subtype that is ranged and instant, like standard click
 
 
+    //have variables to save values that an NPC [or gamepad] will need to "read" to use it
+    //other values should be plugged in by the body/vehicle that has this enaction
+
+
     public GameObject enactionAuthor;
 
+    public GameObject firePoint;
+    //      public enactionScript theEnactionScript;  //looks at this script to see if "fire" button has been pressed, etc
+
+    public string gamepadButtonType;
 
     public string interactionType;
     public float magnitudeOfInteraction = 1f;
@@ -674,18 +706,31 @@ public class intSpherAtor
 
     //unsure i want/need these:
     public GameObject enactionTarget;
-    public sensorySystem authorSensorySystem;
+    //public sensorySystem authorSensorySystem;
     public GameObject returnClickedOn;
 
 
 
 
-
-
-    public void enact(Ray firingRay, sensorySystem inputAuthorSensorySystem)
+    public void lookForButton1(virtualGamepad theGamePad, enactionScript theEnactionScript)
     {
-        authorSensorySystem = inputAuthorSensorySystem;
-        projectileGenerator(enactionAuthor, interactionType, firingRay.origin, firingRay.direction, sdOnCollision, timeUntilSelfDestruct, growthSpeed, magnitudeOfInteraction);
+
+        if (theGamePad.primary != true)
+        {
+            return;
+        }
+
+        theGamePad.primary = false;
+
+        enact(theEnactionScript);
+    }
+
+    public void enact(enactionScript theEnactionScript)
+    {
+        //Debug.Log("enact this.  enactionAuthor, interactionType:  " + enactionAuthor + ", "  + interactionType);
+        //, sensorySystem inputAuthorSensorySystem
+        //authorSensorySystem = inputAuthorSensorySystem;
+        projectileGenerator(enactionAuthor, theEnactionScript, interactionType, sdOnCollision, timeUntilSelfDestruct, growthSpeed, magnitudeOfInteraction);
     }
 
     public void updateMainVariables()
@@ -694,7 +739,7 @@ public class intSpherAtor
     }
 
 
-    public void firingByRaycastHit(string theInteractionType, float theRange)
+    public void firingByRaycastHit(string theInteractionType, float theRange, enactionScript theEnactionScript)
     {
         //Vector3 startPoint = authorSensorySystem.pointerOrigin();
         //Vector3 endPoint = enactionTarget.gameObject.transform.position;
@@ -702,15 +747,15 @@ public class intSpherAtor
 
 
         RaycastHit myHit;
-        Ray myRay = authorSensorySystem.lookingRay;
-
+        //      Ray myRay = authorSensorySystem.lookingRay;
+        Ray myRay = theEnactionScript.primaryRay;
 
         if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             if (myHit.transform != null && myHit.transform.gameObject == enactionTarget)
             {
-                GameObject anInteractionSphere = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
-                GameObject thisObject = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+                GameObject anInteractionSphere = theEnactionScript.theWorldScript.theRepository.interactionSphere;
+                GameObject thisObject = theEnactionScript.theWorldScript.theRepository.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
 
                 //      should this use "interactionMate" isntead?
                 authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
@@ -730,14 +775,33 @@ public class intSpherAtor
         firingCooldown--;
     }
 
-    public void projectileGenerator(GameObject author, string interactionType, Vector3 startPoint, Vector3 direction, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
+    public void projectileGenerator(GameObject author, enactionScript theEnactionScript, string interactionType, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
     {
 
-        GameObject prefabToUse = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
+        //      GameObject prefabToUse = authorSensorySystem.theWorldScript.theRepository.interactionSphere;
 
         //Debug.Log("startPoint:  " + startPoint);
 
-        GameObject newProjectile = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+        //      GameObject newProjectile = authorSensorySystem.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+
+
+        GameObject prefabToUse = theEnactionScript.theWorldScript.theRepository.interactionSphere;
+
+        //Debug.Log("startPoint:  " + startPoint);
+
+        //Vector3 startPoint = theEnactionScript.primaryRay.origin;
+        //      Vector3 startPoint = theEnactionScript.primaryFiringPoint.transform.position;
+        //  Vector3 startPoint = author.transform.position + author.transform.forward;
+        Vector3 startPoint = this.firePoint.transform.position + this.firePoint.transform.forward;
+        
+        GameObject newProjectile = theEnactionScript.theWorldScript.theRepository.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
+
+
+
+
+
+
+
         //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
 
         //Debug.Log("newProjectile.transform.position:  " + newProjectile.transform.position);
@@ -746,7 +810,8 @@ public class intSpherAtor
         //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
         projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
         projectileScript.speed = 1f;
-        projectileScript.Direction = direction;
+        //              projectileScript.Direction = theEnactionScript.primaryRay.direction;
+        projectileScript.Direction = this.firePoint.transform.forward;
         projectileScript.selfDestructOnCollision = sdOnCollision;
         selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
         killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
@@ -773,6 +838,9 @@ public class intSpherAtor
         //mastLine(startPoint, Color.red);
         //mastLine(newProjectile.transform.position, Color.blue);
 
+
+        Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
+
         threatAlert(theAuthorScript.theAuthor);
     }
 
@@ -790,17 +858,18 @@ public class intSpherAtor
 
         Debug.Log("enactionAuthor:  " + enactionAuthor);
         Debug.Log("enactionAuthor.transform.position:  " + enactionAuthor.transform.position);
-        Debug.Log("authorSensorySystem:  " + authorSensorySystem);
-        Debug.Log("authorSensorySystem.lookingRay:  " + authorSensorySystem.lookingRay);
-        Debug.Log("authorSensorySystem.lookingRay.direction:  " + authorSensorySystem.lookingRay.direction);
-        Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
+        //Debug.Log("authorSensorySystem:  " + authorSensorySystem);
+        //Debug.Log("authorSensorySystem.lookingRay:  " + authorSensorySystem.lookingRay);
+        //Debug.Log("authorSensorySystem.lookingRay.direction:  " + authorSensorySystem.lookingRay.direction);
+        //Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
 
 
 
 
 
-        Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
-        return enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction;
+        //Debug.Log("enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction:  " + enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction);
+        //          return enactionAuthor.transform.position + authorSensorySystem.lookingRay.direction;
+        return enactionAuthor.transform.position;
     }
 
     public float distanceBetween(GameObject object1, GameObject object2)
@@ -826,25 +895,27 @@ public class intSpherAtor
 
     void threatAlert(GameObject theThreat)
     {
+        Debug.Log("need to fix threatAlert for TANK");
+
         //take the threat object, add them to the threat list in this/their "map zone"
         //try not to add them as duplicate if they are already added
 
         //      #1, access their map zone:
         //AIHub2 thisHub = theThreat.GetComponent<AIHub2>();
-        body1 thisBody = theThreat.GetComponent<body1>();
+        //              body1 thisBody = theThreat.GetComponent<body1>();
         //hmm, lists like this always go bad though if the object is destryed......but....ad-hoc.....[and i have such a list on map zones ALREADY]
-        List<GameObject> thisThreatList = thisBody.theLocalMapZoneScript.threatList;
+        //              List<GameObject> thisThreatList = thisBody.theLocalMapZoneScript.threatList;
 
         //      #2, add them to a "list of threats" if they aren't already
         //[hmmmm, would be easier to use tags?  easier to code it, but that system KILLS game performance.....]
         //[what about adding a child object, with a UNITY tag that is relevant?  is that faster?  one way to find out.......?]
-        if (isFuckingThingOnListAlready(theThreat, thisThreatList))
+        //              if (isFuckingThingOnListAlready(theThreat, thisThreatList))
         {
             //do nothing, they are already on the list
         }
-        else
+        //              else
         {
-            thisThreatList.Add(theThreat);
+            //              thisThreatList.Add(theThreat);
         }
 
 
@@ -866,4 +937,78 @@ public class intSpherAtor
 
 
 
+    public bool isButtonPressedForThis(enactionScript theEnactionScript)
+    {
+        //i don'y like these "if" skyscrapers!  but, whatev for now, ad hoc
+        if (gamepadButtonType == "primary")
+        {
+            if(theEnactionScript.theGamePad.primary == true)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void callableUpdate(enactionScript theEnactionScript)
+    {
+        //look for relevant button press, create the specified interactionSphere if the button is pressed:
+        Debug.Log("no, i'm ACTUALLY working on THIS now, to get NPCs to understand and be able to use tanks etc");
+
+
+        if (isButtonPressedForThis(theEnactionScript) == true)
+        {
+            enact(theEnactionScript);
+        }
+    }
+}
+
+
+public interface IEnactable
+{
+
+
+    void enact(enactionScript theEnactionScript);
+}
+
+
+
+public interface IbuttonObservable
+{
+    string ButtonTypeCategory { get; set; }
+
+    /*
+    private string buttonTypeCategory = "primary";// field
+
+    public string ButtonTypeCategory   // property
+    {
+        get { return buttonTypeCategory; }   // get method
+        set { buttonTypeCategory = value; }  // set method
+    }
+    */
+
+
+    void observeButton(enactionScript theEnactionScript, IEnactable theEnactable);
+}
+
+public class primaryEnactable: IbuttonObservable
+{
+    private string buttonTypeCategory = "primary";
+    //private string name; // field
+
+    public string ButtonTypeCategory   // property
+    {
+        get { return buttonTypeCategory; }   // get method
+        set { buttonTypeCategory = value; }  // set method
+    }
+    //void lookAtPrimaryButton(enactionScript theEnactionScript);
+
+    public void observeButton(enactionScript theEnactionScript, IEnactable theEnactable)
+    {
+        if(theEnactionScript.theGamePad.primary == true)
+        {
+            theEnactable.enact(theEnactionScript);
+        }
+    }
 }

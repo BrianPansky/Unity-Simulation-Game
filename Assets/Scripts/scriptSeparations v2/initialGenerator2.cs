@@ -88,6 +88,15 @@ public class initialGenerator2 : MonoBehaviour
         GameObject t2 = returnSimpleTank1();
         t2.transform.position += t1.transform.right * -10;
 
+        GameObject t3 = returnSimpleTank1();
+        t3.transform.position += t1.transform.forward * 20;
+        GameObject t4 = returnSimpleTank1();
+        t4.transform.position += t1.transform.right * -20;
+        GameObject t5 = returnSimpleTank1();
+        t5.transform.position += t1.transform.forward * 40;
+        GameObject t6 = returnSimpleTank1();
+        t6.transform.position += t1.transform.right * -40;
+
         generateWIDEZonesAndAgentsEtcMANYAgentsPerZoneWithGuns();
         //generateJustOneNPC();
     }
@@ -1140,6 +1149,7 @@ public class initialGenerator2 : MonoBehaviour
         //initializeAim(theTank1Script.tankHead.transform.GetChild(0).gameObject, theTank1Script.firingStartPoint, theTank1Script.firingDirectionPoint);
 
         theTank1Script.tankBarrel = returnSimpleTankBarrel();
+        theTank1Script.tankBarrel.transform.position += new Vector3(0, 2.1f, 1.2f);
         theTank1Script.tankBarrel.transform.rotation = Quaternion.identity;
         theTank1Script.tankBarrel.transform.SetParent(theTank1Script.tankHead.transform, false);
 

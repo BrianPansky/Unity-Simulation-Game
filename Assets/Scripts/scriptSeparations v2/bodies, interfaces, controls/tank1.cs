@@ -6,6 +6,7 @@ using UnityEngine.AI;
 
 public class tank1 : MonoBehaviour
 {
+    public GameObject firePoint;
 
     public float turnSpeed = 1f;
     float speed = 0.2f;
@@ -105,6 +106,10 @@ public class tank1 : MonoBehaviour
         Debug.Log("note to self:  this is what you were working on:");
         //                          theTANKEnactionScript.
 
+        //theTANKEnactionScript.firePoint = firePoint;
+        theTANKEnactionScript.firePoint = tankBarrel;
+        Debug.DrawLine(tankBarrel.transform.position, new Vector3(), Color.white, 555f);
+        theTANKEnactionScript.addEnactionSphere(this.gameObject, "tankShot", default, 20f, 47, default);
 
 
     }
@@ -150,6 +155,10 @@ public class tank1 : MonoBehaviour
         }
 
 
+        //Debug.Log("theTANKEnactionScript:  " + theTANKEnactionScript);
+        theTANKEnactionScript.makeAllSpheresLookAtButtons(thePilotEnactionScript.theGamePad, thePilotEnactionScript);
+
+
         fillPilotScriptReferences();
 
         updateTurretYaw();
@@ -157,14 +166,14 @@ public class tank1 : MonoBehaviour
         updateForwardBackwardMotion();
         updateBarrelPitch();
 
-        updateFiring();
+        //updateFiring();
 
     }
 
     void updateFiring()
     {
         //use jump button for now:
-        if (thePilotEnactionScript.jump && currentReloadTime > reloadTimeMax)
+        if (thePilotEnactionScript.theGamePad.jump && currentReloadTime > reloadTimeMax)
         {
             currentReloadTime = 0f;
             projectileGenerator(pilot, "tankShot", (tankBarrel.transform.position + tankBarrel.transform.forward*5 + tankBarrel.transform.up * 2), tankBarrel.transform.forward);
@@ -176,13 +185,13 @@ public class tank1 : MonoBehaviour
             currentReloadTime++;
         }
 
-        thePilotEnactionScript.jump = false;
+        thePilotEnactionScript.theGamePad.jump = false;
     }
 
     void updateForwardBackwardMotion()
     {
 
-        this.gameObject.transform.localPosition += this.gameObject.transform.forward*thePilotEnactionScript.z * speed;
+        this.gameObject.transform.localPosition += this.gameObject.transform.forward*thePilotEnactionScript.theGamePad.z * speed;
         //this.gameObject.transform.forward += new Vector3(0f, 0f, thePilotEnactionScript.z * speed);
         //Vector3 move = transform.right * theEnactionScript.x + transform.forward * theEnactionScript.z;
         //this.gameObject.transform.localPosition += new Vector3(0f, 0f, thePilotEnactionScript.z * speed);
@@ -206,7 +215,7 @@ public class tank1 : MonoBehaviour
 
         //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
-        tankHead.transform.Rotate(Vector3.up * thePilotEnactionScript.yawInput * turretTurnSpeed);
+        tankHead.transform.Rotate(Vector3.up * thePilotEnactionScript.theGamePad.yawInput * turretTurnSpeed);
     }
 
     void updateBottomYaw()
@@ -217,12 +226,12 @@ public class tank1 : MonoBehaviour
 
         //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
-        this.gameObject.transform.Rotate(Vector3.up * thePilotEnactionScript.x * turnSpeed);
+        this.gameObject.transform.Rotate(Vector3.up * thePilotEnactionScript.theGamePad.x * turnSpeed);
     }
 
     void updateBarrelPitch()
     {
-        barrelPitch -= thePilotEnactionScript.pitchInput * barrelPitchSpeed;
+        barrelPitch -= thePilotEnactionScript.theGamePad.pitchInput * barrelPitchSpeed;
         barrelPitch = Mathf.Clamp(barrelPitch, -pitchRange, pitchRange);
         //tankBarrel
         //tankHead.transform.Rotate(Vector3.up * thePilotEnactionScript.yawInput);

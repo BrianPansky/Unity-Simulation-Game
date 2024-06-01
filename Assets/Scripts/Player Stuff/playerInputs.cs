@@ -8,7 +8,7 @@ public class playerInputs : MonoBehaviour
 {
 
 
-    enactionScript theEnactionScript;
+    virtualGamepad theVirtualGamePad;
 
 
 
@@ -36,9 +36,9 @@ public class playerInputs : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
 
-        if (theEnactionScript == null)
+        if (theVirtualGamePad == null)
         {
-            theEnactionScript = this.gameObject.GetComponent<enactionScript>();
+            theVirtualGamePad = this.gameObject.GetComponent<virtualGamepad>();
         }
 
         initializeMouseLookStuff();
@@ -75,23 +75,25 @@ public class playerInputs : MonoBehaviour
 
     void keyboardUpdate()
     {
-        theEnactionScript.x = Input.GetAxis("Horizontal");
-        theEnactionScript.z = Input.GetAxis("Vertical");
+        theVirtualGamePad.x = Input.GetAxis("Horizontal");
+        theVirtualGamePad.z = Input.GetAxis("Vertical");
 
         if (Input.GetButtonDown("Jump"))
         {
             //Debug.Log("Input.GetButtonDown jump:  " + Input.GetButtonDown("Jump"));
-            theEnactionScript.jump = true;
+            theVirtualGamePad.jump = true;
 
-            //Debug.Log("theEnactionScript.jump:  " + theEnactionScript.jump);
+            //Debug.Log("theVirtualGamePad.jump:  " + theVirtualGamePad.jump);
         }
     }
 
     void mouseUpdate()
     {
         //Debug.Log("...................INPUTS...................");
-        theEnactionScript.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
-        theEnactionScript.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+        theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
+        theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+
+        theVirtualGamePad.primary = Input.GetMouseButtonDown(0);
     }
 
 }

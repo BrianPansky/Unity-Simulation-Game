@@ -31,6 +31,30 @@ public class virtualGamepad : MonoBehaviour
 
 
 
+    public bool primary = false;
+    //ad-hoc inputs:
+    public float x = 0f;
+    public float z = 0f;
+    public float yawInput = 0f;
+    public float pitchInput = 0f;
+    //public Vector3 lookingVector = Vector3.zero;
+
+    //could call it "primary auxilliary" or something?
+    public bool jump = false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //          some non-button stuff:
     bool transmitting = true;
     GameObject outputToObject;

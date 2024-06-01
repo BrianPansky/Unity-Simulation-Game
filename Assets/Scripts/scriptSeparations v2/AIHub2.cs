@@ -356,7 +356,8 @@ public class AIHub2 : MonoBehaviour
 
         if(thing !=null)
         {
-            thing.enact(startLookingRay(), theSensorySystem);
+            
+            thing.enact(theEnactionScript);
         }
         
 
@@ -368,7 +369,7 @@ public class AIHub2 : MonoBehaviour
             //theEnactionScript.interactionSphereList[0].enact(theSensorySystem.lookingRay, theSensorySystem);
             //mastLine(startLookingRay().origin, Color.white);
             //mastLine(startLookingRay().direction, Color.green);
-            theEnactionScript.interactionSphereList[0].enact(startLookingRay(), theSensorySystem);
+            //      theEnactionScript.interactionSphereList[0].enact(startLookingRay(), theSensorySystem);
         }
 
 
