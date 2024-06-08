@@ -40,13 +40,11 @@ GameObject:
   m_Component:
   - component: {fileID: 859809950099632636}
   - component: {fileID: 859809950099632637}
-  - component: {fileID: 613256714266973979}
-  - component: {fileID: 3222196905228189086}
   - component: {fileID: 9075997247080715077}
   - component: {fileID: 284237302895610163}
-  - component: {fileID: 7132975931887640639}
   - component: {fileID: 1679280799684621594}
   - component: {fileID: 9142553827997022821}
+  - component: {fileID: 425318520543297713}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: anNPC
@@ -89,60 +87,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &613256714266973979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 859809950099632578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4533ca9c1e944f45b6afcd8cdfd41bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tags: []
-  tag1: factionLeader
-  tag2: 
-  tag3: 
-  tag4: 
---- !u!114 &3222196905228189086
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 859809950099632578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de6e5efdc6c81948aaf829ee8556b68, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clickedOn: {fileID: 0}
-  theSensorySystem: {fileID: 0}
-  glueGunFirstShotDoneBool: 0
-  currentGlueStartPoint: {fileID: 0}
-  body: {fileID: 0}
-  currentPrefab: {fileID: 0}
-  theInteractionSphere: {fileID: 5953803115850116078, guid: 1a8a8b7ee725f3f42896f2e6d08dce8b,
-    type: 3}
-  ownershipTag: 
-  gunLaserSight: {fileID: 6565584306666633051}
-  recruitingMenu: {fileID: 859809951436279505}
-  myPrefabButton1: {fileID: 4713436592173846768, guid: 50b53323c0d2f6441aa7a8fb6434b12d,
-    type: 3}
-  myGridCanvas: {fileID: 859809950971492520}
-  currentGridButtons: []
-  personOfInterest: {fileID: 0}
-  inMenu: 0
-  buildMode: 0
-  myHUD: {fileID: 0}
-  theTagScript: {fileID: 0}
-  theInventory: {fileID: 0}
-  theWorldScript: {fileID: 0}
-  haveStore: 0
-  weapon: 0
-  swapDirection: 0
 --- !u!114 &9075997247080715077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,40 +144,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &7132975931887640639
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 859809950099632578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f7bc4f1fbfcef841bdb1e532b466508, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lookSpeed: 290
-  standardClickDistance: 7
-  speed: 12
-  gravity: -9.81
-  jumpHeight: 3
-  groundDistance: 0.4
-  isGrounded: 0
-  maxHealth: 100
-  currentHealth: 0
-  theWorldScript: {fileID: 0}
-  theEnactionScript: {fileID: 0}
-  theInteractionScript: {fileID: 0}
-  theLocalMapZoneScript: {fileID: 0}
-  thisNavMeshAgent: {fileID: 0}
-  playerBody: {fileID: 0}
-  groundCheck: {fileID: 0}
-  theBodyGameObject: {fileID: 859809950099632578}
-  controller: {fileID: 0}
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 0
-  gamePadActive: 1
 --- !u!114 &1679280799684621594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,7 +158,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseSpeed: 290
   playerBody: {fileID: 0}
-  thePlayerClickInteractionScript: {fileID: 0}
 --- !u!114 &9142553827997022821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -261,12 +170,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a16cc8fa141e1f341bcbf2966ffc82dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  primary: 0
   x: 0
   z: 0
   yawInput: 0
   pitchInput: 0
-  jump: 0
+--- !u!114 &425318520543297713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 859809950099632578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd46e03caf7b7294182119fee39334eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enactionPoint1: {fileID: 0}
+  lookSpeed: 290
+  standardClickDistance: 7
+  speed: 12
+  gravity: -9.81
+  jumpHeight: 3
+  groundDistance: 0.4
+  isGrounded: 0
+  maxHealth: 100
+  currentHealth: 0
+  theInteractionScript: {fileID: 0}
+  thisNavMeshAgent: {fileID: 0}
 --- !u!1 &859809950337065639
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,7 +493,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3222196905228189086}
+      - m_Target: {fileID: 0}
         m_MethodName: closeRecruitmentMenu
         m_Mode: 1
         m_Arguments:
