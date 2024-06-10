@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class enactionCreator : MonoBehaviour
 {
@@ -126,8 +127,11 @@ public interface IEnactaBool
 public interface IEnactaVector
 {
 
-    //only for bool inputs!
-    void enact(Vector3 inputVector);
+    virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+
+
+    //only for vector inputs!
+    void enact(Vector2 inputVector);
 }
 
 public class intSpherAtor : IEnactaBool
@@ -386,3 +390,48 @@ public void enact()
 
 }
 
+public class vecTranslation: IEnactaVector
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+    CharacterController controller;
+    Transform theTransform;
+
+    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+
+    bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
+
+    float speed = 0f;
+
+    public vecTranslation(float inputSpeed, Transform theTransform, virtualGamepad.buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        speed = inputSpeed;
+        this.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        this.theTransform = theTransform;
+        this.gamepadButtonType = gamepadButtonType;
+
+        controller = theTransform.GetComponent<CharacterController>();
+        if (controller == null )
+        {
+            controller = theTransform.gameObject.AddComponent<CharacterController>();
+        }
+
+        //maybe automatically add navmesh here too???  by default
+        if (navmeshToo && theTransform.GetComponent<NavMeshAgent>() == null)
+        {
+            theTransform.gameObject.AddComponent<NavMeshAgent>();
+        }
+    }
+
+    public void enact(Vector2 inputVector)
+    {
+
+        Debug.Log("inputVector:  " + inputVector);
+        Debug.Log("theTransform.:  " + theTransform.position);
+
+        Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
+
+        controller.Move(move * speed * Time.deltaTime);
+
+        Debug.Log("theTransform.:  " + theTransform.position);
+    }
+}

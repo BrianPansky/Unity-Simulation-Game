@@ -93,12 +93,16 @@ public class body2 : MonoBehaviour, Iplayable
             new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true)
             
             );
+
+        enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
     }
 
     public void plugIntoGamepadIfThereIsOne()
     {
         virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
         if(gamepad == null ){return; }
+
+        equip(gamepad.allCurrentBoolEnactables, gamepad.allCurrentVectorEnactables);
 
         equip(gamepad.allCurrentBoolEnactables, gamepad.allCurrentVectorEnactables);
     }
@@ -113,9 +117,9 @@ public class body2 : MonoBehaviour, Iplayable
             boolEnactablesDict[enactaBool.gamepadButtonType] = enactaBool;
         }
 
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        foreach (IEnactaVector enactaV in enactableVectorSet)
         {
-            boolEnactablesDict[enactaBool.gamepadButtonType] = enactaBool;
+            vectorEnactablesDict[enactaV.gamepadButtonType] = enactaV;
         }
 
 

@@ -64,7 +64,8 @@ public class virtualGamepad : MonoBehaviour
     public enum buttonCategories
     {
         primary,
-        aux1
+        aux1,
+        vector1,
     }
 
     
@@ -126,17 +127,32 @@ public class virtualGamepad : MonoBehaviour
 
     void initializeDictionaries()
     {
-        List<buttonCategories> allButtons = new List<buttonCategories>();
-        allButtons.Add(buttonCategories.primary);
-        allButtons.Add(buttonCategories.aux1);
+        List<buttonCategories> allBoolButtons = new List<buttonCategories>();
+        allBoolButtons.Add(buttonCategories.primary);
+        allBoolButtons.Add(buttonCategories.aux1);
 
 
 
 
-        foreach (buttonCategories thisButtonCategory in allButtons)
+        foreach (buttonCategories thisButtonCategory in allBoolButtons)
         {
             //allCurrentBoolInputs[thisButtonCategory] = false;
             allCurrentBoolEnactables[thisButtonCategory] = null;
+        }
+
+
+
+
+        List<buttonCategories> allVectorButtons = new List<buttonCategories>();
+        allVectorButtons.Add(buttonCategories.vector1);
+
+
+
+
+        foreach (buttonCategories thisButtonCategory in allVectorButtons)
+        {
+            //allCurrentBoolInputs[thisButtonCategory] = false;
+            allCurrentVectorEnactables[thisButtonCategory] = null;
         }
     }
 
@@ -199,7 +215,8 @@ public class virtualGamepad : MonoBehaviour
         {
             click1,
             space,
-            g
+            g,
+            wasd
         }
 
 
@@ -214,6 +231,7 @@ public class virtualGamepad : MonoBehaviour
         {
             buttonMapping[realButton.click1] = buttonCategories.primary;
             buttonMapping[realButton.space] = buttonCategories.aux1;
+            buttonMapping[realButton.wasd] = buttonCategories.vector1;
             //buttonMapping[realButton.g] = buttonCategories.aux...2???;
             //buttonMapping[realButton.click1] = buttonCategories.;
         }
@@ -237,8 +255,16 @@ public class virtualGamepad : MonoBehaviour
 
         void keyboardUpdate()
         {
-            theVirtualGamePad.x = Input.GetAxis("Horizontal");
-            theVirtualGamePad.z = Input.GetAxis("Vertical");
+            //theVirtualGamePad.x = Input.GetAxis("Horizontal");
+            //theVirtualGamePad.z = Input.GetAxis("Vertical");
+
+            Vector2 wasdVactor= new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+            
+            
+
+            theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
+
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -249,8 +275,8 @@ public class virtualGamepad : MonoBehaviour
         void mouseUpdate()
         {
             //Debug.Log("...................INPUTS...................");
-            theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
-            theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+            //      theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
+            //      theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
 
             //theVirtualGamePad.primary = Input.GetMouseButtonDown(0);
 
