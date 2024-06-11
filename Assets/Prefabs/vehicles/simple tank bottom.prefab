@@ -88,7 +88,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5795291842106667203}
   - component: {fileID: 6079150043852278374}
-  - component: {fileID: -4844473399905646}
   m_Layer: 0
   m_Name: simple tank bottom
   m_TagString: Untagged
@@ -125,38 +124,3 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_Mesh: {fileID: -2432090755550338912, guid: 82e33db6417901a45b600f00f18f8bd7, type: 3}
---- !u!114 &-4844473399905646
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7365174163795493584}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9389a012243134240b129f75b131bfa5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  controller: {fileID: 0}
-  turnSpeed: 1
-  rotationVector: {x: 0, y: 0, z: 0}
-  verticalAim: {x: 0, y: 0, z: 0}
-  tankTreadsDirection: {x: 0, y: 0, z: 0}
-  tankHead: {fileID: 3190879108886832838, guid: 755aac088337f9940a62f5520e37281c,
-    type: 3}
-  tankBarrel: {fileID: 0}
-  firingStartPoint: {fileID: 0}
-  firingDirectionPoint: {fileID: 0}
-  thisNavMeshAgent: {fileID: 0}
-  speed: 12
-  gravity: -9.81
-  groundCheck: {fileID: 0}
-  groundDistance: 0.4
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 0
-  maxHealth: 100
-  currentHealth: 0
-  pilot: {fileID: 0}
-  thePilotSensorySystem: {fileID: 0}
-  thePilotEnactionScript: {fileID: 0}
