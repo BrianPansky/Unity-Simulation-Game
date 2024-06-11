@@ -13,7 +13,8 @@ public class enactionCreator : MonoBehaviour
     {
         standardClick,
         shoot1,
-        shootFlamethrower1
+        shootFlamethrower1,
+        tankShot
     }
 
 
@@ -215,7 +216,7 @@ public class intSpherAtor : IEnactaBool
     }
 
 
-public void enact()
+    public void enact()
     {
         //Debug.Log("enact this.  enactionAuthor, interactionType:  " + enactionAuthor + ", "  + interactionType);
         //, sensorySystem inputAuthorSensorySystem
@@ -425,13 +426,12 @@ public class vecTranslation: IEnactaVector
     public void enact(Vector2 inputVector)
     {
 
-        Debug.Log("inputVector:  " + inputVector);
-        Debug.Log("theTransform.:  " + theTransform.position);
+        //Debug.Log("inputVector:  " + inputVector);
 
         Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
 
         controller.Move(move * speed * Time.deltaTime);
 
-        Debug.Log("theTransform.:  " + theTransform.position);
+
     }
 }

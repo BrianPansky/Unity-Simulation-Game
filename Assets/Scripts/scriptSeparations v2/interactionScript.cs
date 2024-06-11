@@ -41,10 +41,17 @@ public class interactionScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
+        Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
+
+
+        foreach (var key in dictOfInteractions.Keys)
+        {
+            Debug.Log(key);
+        }
 
         if (other.tag != "interactionType1")
         {
+
             return;
         }
 
@@ -55,6 +62,7 @@ public class interactionScript : MonoBehaviour
 
         if (dictOfInteractions.ContainsKey(theAuthorScript.enacting.interactionType) != true)
         {
+
             return;
         }
 
@@ -62,6 +70,42 @@ public class interactionScript : MonoBehaviour
 
         foreach (effect thisEffect in dictOfInteractions[theAuthorScript.enacting.interactionType])
         {
+
+            if (thisEffect == effect.useVehicle)
+            {
+                //Debug.Log("thisEffect == effect.useVehicle");
+                //Debug.Log("thisEffect == effect.useVehicle");
+                //Debug.Log("theAuthorScript.enacting.enactionAuthor.name:  " + theAuthorScript.enacting.enactionAuthor.name);
+                //Debug.Log("theAuthorScript.enacting.enactionAuthor.transform.position:  " + theAuthorScript.enacting.enactionAuthor.transform.position);
+
+                CharacterController controller = theAuthorScript.enacting.enactionAuthor.GetComponent<CharacterController>();
+                controller.enabled = false;
+                theAuthorScript.enacting.enactionAuthor.transform.position = this.transform.position;
+                theAuthorScript.enacting.enactionAuthor.transform.rotation = this.transform.rotation;
+
+                //body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
+
+                //enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
+                //ad hoc for now
+                virtualGamepad gamepad = theAuthorScript.enacting.enactionAuthor.GetComponent<virtualGamepad>();
+                tank2 theTank = this.GetComponent<tank2>();
+                theTank.equip(gamepad);
+                //theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
+                //      theTank.pilot = theAuthorScript.enacting.enactionAuthor;
+                //      theTank.thePilotEnactionScript = theEnactionScript;
+
+                //this is probably great, but it also disables my camera.  will need to re-arrange things...
+                //      theBodyScript.theBodyGameObject.active = false;
+
+                //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
+                theAuthorScript.enacting.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
+                //theEnactionScript.enactionBody = this.gameObject;
+                //theEnactionScript.currentlyUsable.Remove("humanBody");
+                //theEnactionScript.currentlyUsable.Add("tank");
+
+
+            }
+
             /*
             if (thisEffect == effect.damage)
             {

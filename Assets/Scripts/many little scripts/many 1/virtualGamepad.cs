@@ -261,9 +261,12 @@ public class virtualGamepad : MonoBehaviour
             Vector2 wasdVactor= new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
             
-            
+            if(wasdVactor.magnitude > 0.05f)
+            {
 
-            theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
+                theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
+            }
+
 
 
             if (Input.GetButtonDown("Jump"))
@@ -300,8 +303,7 @@ public interface Iplayable
 
 
     //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-    void equip(Dictionary<buttonCategories, IEnactaBool> boolEnactablesDict, Dictionary<buttonCategories, IEnactaVector> vectorEnactablesDict);
-
+    void equip(virtualGamepad gamepad);
 
 }
 

@@ -102,24 +102,26 @@ public class body2 : MonoBehaviour, Iplayable
         virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
         if(gamepad == null ){return; }
 
-        equip(gamepad.allCurrentBoolEnactables, gamepad.allCurrentVectorEnactables);
+        equip(gamepad);
 
-        equip(gamepad.allCurrentBoolEnactables, gamepad.allCurrentVectorEnactables);
     }
 
 
-    public void equip(Dictionary<buttonCategories, IEnactaBool> boolEnactablesDict, Dictionary<buttonCategories, IEnactaVector> vectorEnactablesDict)
-    {
+    public void equip(virtualGamepad gamepad)
+    { 
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+
 
         foreach(IEnactaBool enactaBool in enactableBoolSet)
         {
-            boolEnactablesDict[enactaBool.gamepadButtonType] = enactaBool;
+            enactaBool.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
         }
 
         foreach (IEnactaVector enactaV in enactableVectorSet)
         {
-            vectorEnactablesDict[enactaV.gamepadButtonType] = enactaV;
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
         }
 
 

@@ -68,14 +68,46 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
+        int howManyZones = 11;
+        int howManySetsPerZone = 2;
+        int theZSpacing = 25;
+        int theXSpacing = 25;
+        float sideOffset = 0;
 
-        makeAndFillZones(objectList1(), 11);
+        //create a line of points, spaced by multiples of "howManysetsPerZone"
+        makeEmptyZones(howManyZones, theZSpacing * howManySetsPerZone);
+
+        //makeAndFillZones(objectList1(), 11);
+
+
+        INVERSEmakeAndFillZones(
+            patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset)
+            );
+    }
+
+
+    void INVERSEmakeAndFillZones(List<Vector3> setsPositions, int theXSpacing = 25)
+    {
+        float sideOffset = 0f;
+
+        foreach (Vector3 point in  setsPositions)
+        {
+            //List<Vector3> setsPositions = patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset);
+            //makePrefabsAtListOfPoints(setsPositions, thisPrefab);
+            INVERSEobjectList1(point, theXSpacing);
+            //sideOffset += theZSpacing / 2;
+        }
 
 
 
     }
+
+
+
+
     void makeAndFillZones(List<GameObject> objectList, int howManyZones, int howManySetsPerZone = 2, int theZSpacing = 25)
     {
+        // no, this is bad, fails to "deep copy".  invert it
         //create a line of points, spaced by multiples of "howManysetsPerZone"
         makeEmptyZones(howManyZones, theZSpacing * howManySetsPerZone);
 
@@ -143,7 +175,7 @@ public class initialGenerator2 : MonoBehaviour
 
         //objectList.Add(returnTestKey1());
 
-        objectList.Add(genGen.singleton.returnSimpleTank1(this.transform.position));
+        objectList.Add(genGen.singleton.returnSimpleTank2(this.transform.position));
         objectList.Add(genGen.singleton.returnPineTree1(this.transform.position));
         objectList.Add(genGen.singleton.returnPineTree1(this.transform.position));
 
@@ -158,6 +190,28 @@ public class initialGenerator2 : MonoBehaviour
         return objectList;
     }
 
+    List<GameObject> INVERSEobjectList1(Vector3 startPosition, int theXSpacing = 25)
+    {
+
+        List<GameObject> objectList = new List<GameObject>();
+        //GameObject testCube = repository2.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+
+        //objectList.Add(returnTestKey1());
+
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0,0, theXSpacing)));
+        //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
+
+
+        //objectList.Add(returnTestKey1());
+
+
+        //returnTestKey1
+        //objectList.Add(testCube);
+        //objectList.Add(testCube);
+
+        return objectList;
+    }
 
 
 

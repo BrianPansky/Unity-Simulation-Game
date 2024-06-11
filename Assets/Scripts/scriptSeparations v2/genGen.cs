@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class genGen : MonoBehaviour
 {
@@ -46,38 +47,36 @@ public class genGen : MonoBehaviour
 
 
 
-    public GameObject returnSimpleTank1(Vector3 where)
+    public GameObject returnSimpleTank2(Vector3 where)
     {
 
         GameObject bottomBit = Instantiate(repository2.singleton.simpleTankBottom, where, Quaternion.identity);
 
-        //bottomBit.AddComponent<NavMeshAgent>();
+        tank2 tank2 = bottomBit.AddComponent<tank2>();
+        bottomBit.AddComponent<NavMeshAgent>();
+        bottomBit.AddComponent<CharacterController>();
         //bottomBit.AddComponent<AIHub2>();
-
-
-        //  bottomBit.AddComponent<interactionScript>();
-        //  interactionScript theInteractionScript = bottomBit.GetComponent<interactionScript>();
-        //  theInteractionScript.addInteraction("standardClick", "useVehicle");
+        
+        interactionScript theInteractionScript = bottomBit.AddComponent<interactionScript>();
+        //theInteractionScript.addInteraction("standardClick", "useVehicle");
+        theInteractionScript.addInteraction(enactionCreator.interType.standardClick, interactionScript.effect.useVehicle);
 
         //genGen.singleton.rigid(bottomBit);
 
-        //      DELETED tank1!!!!!!!!!!!!!!!!         tank1 theTank1Script = bottomBit.GetComponent<tank1>();
 
-        //theTank1Script.tankHead = repository2.singleton.simpleTankTurretWITHOUTBarrel; 
         //"Setting the parent of a transform which resides in a Prefab Asset is disabled to prevent data corruption (GameObject: 'simple tank turret without barrel')."
         //hmmm...
         //Debug.Log("genGen:  " + genGen);
 
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankHead = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.simpleTankTurretWITHOUTBarrel, where);
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankHead.transform.SetParent(bottomBit.transform, false);
+        tank2.tankHead = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.simpleTankTurretWITHOUTBarrel, where);
+        tank2.tankHead.transform.SetParent(bottomBit.transform, true);
+        //tank2.tankBarrel = repository2.singleton.simpleTankBarrel;
+        tank2.tankBarrel = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.simpleTankBarrel, where);
+        tank2.tankBarrel.transform.SetParent(tank2.tankHead.transform, true);
 
-        //theTank1Script.tankBarrel = repository2.singleton.simpleTankBarrel;
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankBarrel = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.simpleTankBarrel, where);
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankBarrel.transform.SetParent(theTank1Script.tankHead.transform, false);
 
-
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankHead.transform.localPosition += new Vector3(0, 1.5f, 0);
-        //      DELETED tank1!!!!!!!!!!!!!!!!         theTank1Script.tankBarrel.transform.localPosition += new Vector3(0, 3.4f, 1.5f);
+        tank2.tankHead.transform.localPosition += new Vector3(0, 0.2f, 0);
+        tank2.tankBarrel.transform.localPosition += new Vector3(0, 2.1f, 1.1f);
 
         return bottomBit;
     }
