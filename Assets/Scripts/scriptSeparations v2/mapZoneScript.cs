@@ -93,5 +93,10 @@ public class mapZoneScript : MonoBehaviour
         }
     }
 
+
+
+    
+
+
 }
 

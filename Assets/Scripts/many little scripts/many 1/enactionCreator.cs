@@ -135,6 +135,45 @@ public interface IEnactaVector
     void enact(Vector2 inputVector);
 }
 
+public interface IEnactByTargetVector
+{
+
+    //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+
+
+    //only for vector inputs!
+    void enact(Vector3 inputVector);
+}
+
+public class navAgent: IEnactByTargetVector
+{
+    NavMeshAgent theAgent;
+    //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+
+
+    public navAgent(GameObject objectToAddNavmeshAgentTo)
+    {
+        theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
+        if (theAgent == null)
+        {
+
+            theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
+        }
+    }
+
+    //only for vector inputs!
+    public void enact(Vector3 inputVector)
+    {
+
+        //Debug.Log("destination:  " + theAgent.destination);
+        //Debug.Log("inputVector:  " + inputVector);
+        theAgent.SetDestination(inputVector);
+        //theAgent.SetDestination(new Vector3());
+
+        //Debug.Log("2222222222222222destination:  " + theAgent.destination);
+    }
+}
+
 public class intSpherAtor : IEnactaBool
 {
     //short for "interaction sphere generator"
@@ -187,7 +226,7 @@ public class intSpherAtor : IEnactaBool
     public GameObject returnClickedOn;
 
 
-    public intSpherAtor(Transform inputFirePoint, enactionCreator.interType interactionType, virtualGamepad.buttonCategories inputGamepadButtonType, float inputMagnitudeOfInteraction = 1f, bool inputHitscan = false)
+    public intSpherAtor(Transform inputFirePoint, enactionCreator.interType inputInteractionType, virtualGamepad.buttonCategories inputGamepadButtonType, float inputMagnitudeOfInteraction = 1f, bool inputHitscan = false)
     {
         //enactionCreator.interType interactionType,
         //bool sdOnCollision = true,
@@ -198,7 +237,7 @@ public class intSpherAtor : IEnactaBool
         //bool hitscan = false
 
 
-
+        interactionType = inputInteractionType;
 
         firePoint = inputFirePoint;
         gamepadButtonType = inputGamepadButtonType;
@@ -235,7 +274,7 @@ public class intSpherAtor : IEnactaBool
         //Vector3 startPoint = authorSensorySystem.pointerOrigin();
         //Vector3 endPoint = enactionTarget.gameObject.transform.position;
         //authorSensorySystem.lookingRay = new Ray(startPoint, (endPoint - startPoint));
-        Debug.Log("firingByRaycastHit");
+        //          Debug.Log("firingByRaycastHit");
 
         RaycastHit myHit;
         //      Ray myRay = authorSensorySystem.lookingRay;
@@ -341,7 +380,7 @@ public class intSpherAtor : IEnactaBool
         //mastLine(newProjectile.transform.position, Color.blue);
 
 
-        Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
+        //Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
 
         //threatAlert(this);
     }

@@ -93,6 +93,24 @@ public class genGen : MonoBehaviour
 
         return newObj;
     }
+    public GameObject returnNPC4(Vector3 where)
+    {
+        GameObject newObj = Instantiate(repository2.singleton.placeHolderCylinderPrefab, where, Quaternion.identity);
+
+
+
+        newObj.AddComponent<AIHub3>();
+        newObj.AddComponent<body2>();
+
+        //newObj.AddComponent<navmeshAgentDebugging>();
+
+        //newObj.AddComponent<interactionScript>();
+        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+
+        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+
+        return newObj;
+    }
 
 
 

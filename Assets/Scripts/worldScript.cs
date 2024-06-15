@@ -38,6 +38,7 @@ public class worldScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
     }
 
 

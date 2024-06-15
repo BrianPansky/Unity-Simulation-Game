@@ -8,8 +8,8 @@ using static virtualGamepad;
 
 public class virtualGamepad : MonoBehaviour
 {
-
-    public static virtualGamepad singleton;
+    public bool isPlayer = false;
+    //public static virtualGamepad singleton;
 
     //WAIT I DON'T NEED WEIRD DOUBLE BOOLS HERE TO ENSURE OTHER SCRIPT GETS THE SIGNAL!
     //just have the OTHER script be the one responsible for resetting the bool after it has received it!  simple
@@ -57,10 +57,15 @@ public class virtualGamepad : MonoBehaviour
     //Dictionary<buttonCategories, bool> allCurrentBoolInputs = new Dictionary<buttonCategories, bool>();
     public Dictionary<buttonCategories, IEnactaBool> allCurrentBoolEnactables = new Dictionary<buttonCategories, IEnactaBool>();
     public Dictionary<buttonCategories, IEnactaVector> allCurrentVectorEnactables = new Dictionary<buttonCategories, IEnactaVector>();
+    //public Dictionary<buttonCategories, IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new Dictionary<buttonCategories, IEnactByTargetVector>();
+    public List<IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new List<IEnactByTargetVector>();
+
+
 
     playerMouseKeyboardInputs mouseKeyboardInputs;
 
 
+    //uninformative?
     public enum buttonCategories
     {
         primary,
@@ -68,7 +73,14 @@ public class virtualGamepad : MonoBehaviour
         vector1,
     }
 
-    
+    //need THIS instead/as well?
+    public enum INFORMATIVEbuttonCategories
+    {
+        fire1,
+        jump,
+        move1,
+    }
+
 
 
 
@@ -107,30 +119,19 @@ public class virtualGamepad : MonoBehaviour
 
     void Awake()
     {
+        //doThisPrintoutByInputString("0");
         initializeDictionaries();
-        singletonify();  //so that i can use "enum buttonCategories" when making enactables
+        //singletonify();  //so that i can use "enum buttonCategories" when making enactables
 
     }
 
-    void singletonify()
-    {
-        if (singleton != null && singleton != this)
-        {
-            Debug.Log("this class is supposed to be a singleton, you should not be making another instance, destroying the new one");
-            Destroy(this);
-            return;
-        }
-        singleton = this;
-    }
 
-
-
+    
     void initializeDictionaries()
     {
         List<buttonCategories> allBoolButtons = new List<buttonCategories>();
         allBoolButtons.Add(buttonCategories.primary);
         allBoolButtons.Add(buttonCategories.aux1);
-
 
 
 
@@ -159,7 +160,10 @@ public class virtualGamepad : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        if (isPlayer != true) { return; }
         initializeMouseKeyboardInputs();
+
     }
 
     void initializeMouseKeyboardInputs()
@@ -171,6 +175,7 @@ public class virtualGamepad : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isPlayer != true) { return; }
         mouseKeyboardInputs.updateAll();
 
         /*
@@ -190,6 +195,20 @@ public class virtualGamepad : MonoBehaviour
 
 
 
+    public void doThisPrintoutByInputString(string inputString)
+    {
+        Debug.Log(inputString + inputString + inputString + inputString + inputString + inputString + inputString + inputString + inputString + inputString + inputString + inputString);
+
+        foreach (var thisKey in allCurrentBoolEnactables.Keys)
+        {
+            Debug.Log(thisKey);
+            Debug.Log(allCurrentBoolEnactables[thisKey]);
+            if(allCurrentBoolEnactables[thisKey] == null) { continue; }
+
+            //if (allCurrentBoolEnactables[thisKey].interactionType == null) { continue; }
+            Debug.Log(allCurrentBoolEnactables[thisKey].interactionType);
+        }
+    }
 
 
 

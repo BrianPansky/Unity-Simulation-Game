@@ -13,10 +13,11 @@ public class navmeshAgentDebugging : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        currentNavMeshAgent = this.gameObject.GetComponent<NavMeshAgent>();
         if (currentNavMeshAgent == null)
         {
-            currentNavMeshAgent = this.gameObject.GetComponent<NavMeshAgent>();
+            Debug.Log("this object did not have a navmesh agent, adding one now...");
+            currentNavMeshAgent = this.gameObject.AddComponent<NavMeshAgent>();
         }
 
 
@@ -45,6 +46,7 @@ public class navmeshAgentDebugging : MonoBehaviour
     void someDebugLogs()
     {
 
+        Debug.Log(".......................................................");
         Debug.Log("CURRENT destination:  " + currentNavMeshAgent.destination);
         Debug.Log("hasPath:  " + currentNavMeshAgent.hasPath);
         Debug.Log("isOnNavMesh:  " + currentNavMeshAgent.isOnNavMesh);

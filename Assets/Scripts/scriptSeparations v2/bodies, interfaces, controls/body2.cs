@@ -30,7 +30,8 @@ public class body2 : MonoBehaviour, Iplayable
 
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
-    
+    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
 
 
     public interactionScript theInteractionScript;
@@ -95,6 +96,8 @@ public class body2 : MonoBehaviour, Iplayable
             );
 
         enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+
+        enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
     }
 
     public void plugIntoGamepadIfThereIsOne()
@@ -108,15 +111,16 @@ public class body2 : MonoBehaviour, Iplayable
 
 
     public void equip(virtualGamepad gamepad)
-    { 
+    {
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-
-
-        foreach(IEnactaBool enactaBool in enactableBoolSet)
+        
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
         {
             enactaBool.enactionAuthor = gamepad.transform.gameObject;
             gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
         }
+
+
 
         foreach (IEnactaVector enactaV in enactableVectorSet)
         {
@@ -124,6 +128,9 @@ public class body2 : MonoBehaviour, Iplayable
             gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
         }
 
+        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
+        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
+        
 
     }
 

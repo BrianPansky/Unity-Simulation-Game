@@ -199,6 +199,7 @@ public class initialGenerator2 : MonoBehaviour
         //objectList.Add(returnTestKey1());
 
         objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        objectList.Add(genGen.singleton.returnNPC4(startPosition + new Vector3(theXSpacing, 0, 0)));
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0,0, theXSpacing)));
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 

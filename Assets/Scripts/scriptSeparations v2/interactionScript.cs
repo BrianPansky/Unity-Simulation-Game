@@ -41,12 +41,12 @@ public class interactionScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
+        //Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
 
 
         foreach (var key in dictOfInteractions.Keys)
         {
-            Debug.Log(key);
+            //Debug.Log(key);
         }
 
         if (other.tag != "interactionType1")

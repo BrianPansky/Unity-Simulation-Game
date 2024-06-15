@@ -34,5 +34,17 @@ public class authorScript1 : MonoBehaviour
         //Debug.Log("the author is:  " + theAuthor);
         //Debug.Log("authorScript is ON this object:  " + this.gameObject.name);
         //Debug.Log("33333333333333333333333333333333333333333 the interactionType is:  " + interactionType);
+
+        Vector3 thisBit = (this.gameObject.transform.position + this.gameObject.transform.up);
+        Color whatColor = Color.white;
+
+        //change if it's a bullet.............tankShot:
+        if (enacting.interactionType == enactionCreator.interType.tankShot)
+        {
+            thisBit = (this.gameObject.transform.position + this.gameObject.transform.forward);
+            whatColor = Color.red;
+        }
+
+        Debug.DrawLine(this.gameObject.transform.position, thisBit, whatColor, 0.1f);
     }
 }

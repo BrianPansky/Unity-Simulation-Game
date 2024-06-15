@@ -36,9 +36,56 @@ public class conditionCreator : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
+
+
+    ////////////////////    CONDITIONS  ///////////////////
+
+    //proximity, time....what else.....various states?
+
+    public bool isXCloserThanYToZ(GameObject objectX, GameObject objectY, GameObject objectZ)
     {
-        
+        float distanceToX = distanceBetween(objectX, objectZ);
+
+        float distanceToY = distanceBetween(objectY, objectZ);
+
+
+        if (distanceToX > distanceToY)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+
     }
+
+    public float distanceBetween(GameObject object1, GameObject object2)
+    {
+        Vector3 theVectorBetweenXandZ = object1.transform.position - object2.transform.position;
+        return theVectorBetweenXandZ.sqrMagnitude;
+    }
+
+    public float horizontalDistanceBetween(GameObject object1, GameObject object2)
+    {
+        Vector3 v1 = object1.transform.position;
+        Vector3 v2 = object2.transform.position;
+        //Vector3 theVectorBetweenXandZ = object1.transform.position - object2.transform.position;
+        Vector3 theHorizontalVectorBetweenXandZ = new Vector3(v1.x - v2.x, 0, v1.z - v2.z);
+        return theHorizontalVectorBetweenXandZ.sqrMagnitude;
+    }
+
+
+    public Quaternion rotationFromLookingVector()
+    {
+
+        //transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        return Quaternion.identity;
+    }
+
+
+
+
+
+
 }
