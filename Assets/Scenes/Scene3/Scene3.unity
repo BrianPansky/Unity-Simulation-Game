@@ -5931,7 +5931,7 @@ PrefabInstance:
     - target: {fileID: 859809950099632636, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15.22
+      value: 10.19
       objectReference: {fileID: 0}
     - target: {fileID: 859809950099632636, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
         type: 3}
@@ -6001,6 +6001,11 @@ PrefabInstance:
     - target: {fileID: 4078888384240710299, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
         type: 3}
       propertyPath: m_SpotAngle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9142553827997022821, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
+        type: 3}
+      propertyPath: isPlayer
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
