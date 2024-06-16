@@ -1138,7 +1138,7 @@ PrefabInstance:
     - target: {fileID: 6387413386904728681, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6387413386904728682, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
@@ -5992,6 +5992,11 @@ PrefabInstance:
         type: 3}
       propertyPath: field of view
       value: 44
+      objectReference: {fileID: 0}
+    - target: {fileID: 859809951059807336, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
+        type: 3}
+      propertyPath: m_TagString
+      value: dontAddToZones
       objectReference: {fileID: 0}
     - target: {fileID: 1679280799684621594, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
         type: 3}
@@ -90123,7 +90128,7 @@ GameObject:
   - component: {fileID: 1975189745}
   m_Layer: 0
   m_Name: Cube floor
-  m_TagString: Untagged
+  m_TagString: dontAddToZones
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
