@@ -79,7 +79,11 @@ public class interactionScript : MonoBehaviour
                 //Debug.Log("theAuthorScript.enacting.enactionAuthor.transform.position:  " + theAuthorScript.enacting.enactionAuthor.transform.position);
 
                 CharacterController controller = theAuthorScript.enacting.enactionAuthor.GetComponent<CharacterController>();
-                controller.enabled = false;
+                if (controller != null)
+                {
+                    controller.enabled = false;
+                }
+                
                 theAuthorScript.enacting.enactionAuthor.transform.position = this.transform.position;
                 theAuthorScript.enacting.enactionAuthor.transform.rotation = this.transform.rotation;
 

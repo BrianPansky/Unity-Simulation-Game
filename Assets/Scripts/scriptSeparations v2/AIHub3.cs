@@ -51,18 +51,152 @@ public class AIHub3 : MonoBehaviour
         //currentNavMeshAgent.SetDestination(this.gameObject.transform.position + new Vector3(1, -0.5f, -14));
 
 
-        somethingInTHisCodeIsBreakingNavMeshAgent();
+        justDoRandomByInputORVector();
 
+        /*
         if(vGpad.allCurrentBoolEnactables.Count == 0)
         {
             return;
         }
 
         vGpad.allCurrentBoolEnactables[0].enact();
+        */
     }
 
 
-    void somethingInTHisCodeIsBreakingNavMeshAgent()
+    void justDoRandomByINPUT()
+    {
+        int bools = vGpad.allCurrentBoolEnactables.Count;
+        int vectors = vGpad.allCurrentVectorEnactables.Count;
+
+        int whichToPick = Random.Range(0, bools + vectors);
+
+
+        int dictionaryEntryCount = 0;
+
+        if (whichToPick <= bools-1)
+        {
+            foreach (var item in vGpad.allCurrentBoolEnactables.Values)
+            {
+                if(dictionaryEntryCount == whichToPick)
+                {
+                    if (item == null) { return; }
+                    item.enact();
+                }
+                dictionaryEntryCount++;
+            }
+        }
+        else
+        {
+            foreach (var item in vGpad.allCurrentVectorEnactables.Values)
+            {
+                if (dictionaryEntryCount == whichToPick- bools)
+                {
+
+                    if (item == null){return; }
+                    int x = Random.Range(-8, 8);
+                    int y = Random.Range(-8, 8);
+
+                    item.enact(new Vector2(x,y));
+                }
+                dictionaryEntryCount++;
+            }
+        }
+
+    }
+
+    void justDoRandomByInputORVector()
+    {
+        int bools = vGpad.allCurrentBoolEnactables.Count;
+        int vectors = vGpad.allCurrentVectorEnactables.Count;
+        int byTargets = vGpad.allCurrentTARGETbyVectorEnactables.Count;
+
+        int whichToPick = Random.Range(0, bools + vectors + byTargets);
+
+
+        int indexCount = 0;
+
+        if (whichToPick <= bools - 1)
+        {
+            foreach (var item in vGpad.allCurrentBoolEnactables.Values)
+            {
+                if (indexCount == whichToPick)
+                {
+                    if (item == null) { return; }
+                    item.enact();
+                }
+                indexCount++;
+            }
+        }
+        else if(whichToPick <= bools + vectors - 1)
+        {
+            foreach (var item in vGpad.allCurrentVectorEnactables.Values)
+            {
+                if (indexCount == whichToPick - bools)
+                {
+
+                    if (item == null) { return; }
+                    int x = Random.Range(-8, 8);
+                    int y = Random.Range(-8, 8);
+
+                    item.enact(new Vector2(x, y));
+                }
+                indexCount++;
+            }
+        }
+        else
+        {
+            foreach (var item in vGpad.allCurrentTARGETbyVectorEnactables)
+            {
+                if (indexCount == whichToPick - bools - vectors)
+                {
+
+                    if (item == null) { return; }
+
+
+                    CharacterController controller = this.transform.GetComponent<CharacterController>();
+                    if (controller != null)
+                    {
+                        //Debug.Log("?????????????????????????????????????");
+                        controller.enabled = false;
+                    }
+
+                    //int x = Random.Range(-8, 8);
+                    //int y = Random.Range(-8, 8);
+
+                    //item.enact(new Vector2(x, y));
+
+                    //eh, should i store this elsewhere?  but where else would be best?  for all other objects?
+                    //or just ALSO store it here on AIHub3, because AI will USE it often enough?
+                    //but then when/how to update it?  there's the rub.
+                    objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
+
+                    int currentZone = tagging2.singleton.zoneOfObject[thisPair];
+
+                    GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    item.enact(target.transform.position);
+                    //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
+
+                    //Debug.Log("3333333333333333333333333 target: " + target);
+
+                }
+                indexCount++;
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+    void somethingInTHisCodeIsBreakingNavMeshAgentitwasjusttheinputvectorwastoohighabovefloorithinkmaybe()
     {
 
 

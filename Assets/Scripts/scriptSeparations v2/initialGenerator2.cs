@@ -200,7 +200,7 @@ public class initialGenerator2 : MonoBehaviour
 
         objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition + new Vector3(theXSpacing, 0, 0)));
-        //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0,0, theXSpacing)));
+        objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(theXSpacing+ theXSpacing, 0, 0)));
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 
 
@@ -210,6 +210,14 @@ public class initialGenerator2 : MonoBehaviour
         //returnTestKey1
         //objectList.Add(testCube);
         //objectList.Add(testCube);
+
+        int currentSlotPosition = 0;
+
+        foreach(GameObject obj in objectList)
+        {
+            obj.transform.position += new Vector3(theXSpacing * currentSlotPosition, 0, 0);
+            currentSlotPosition++;
+        }
 
         return objectList;
     }

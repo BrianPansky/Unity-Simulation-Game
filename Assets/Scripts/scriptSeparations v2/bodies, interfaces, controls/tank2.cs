@@ -27,6 +27,7 @@ public class tank2 : MonoBehaviour, Iplayable
 
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
+    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
     public GameObject tankHead;
     public GameObject tankBarrel;
 
@@ -53,7 +54,7 @@ public class tank2 : MonoBehaviour, Iplayable
 
     void makeEnactions()
     {
-        printEnactaBoolSet();
+        //printEnactaBoolSet();
 
         enactableBoolSet.Add(
             new intSpherAtor(tankBarrel.transform, interType.tankShot, buttonCategories.primary, 1f)
@@ -62,9 +63,10 @@ public class tank2 : MonoBehaviour, Iplayable
 
         //printEnactaBoolSet();
 
-        enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+        //enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
 
 
+        enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
 
     }
 
@@ -85,26 +87,12 @@ public class tank2 : MonoBehaviour, Iplayable
     {
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
-
         foreach (IEnactaBool enactaBool in enactableBoolSet)
         {
-            //Debug.Log("//////////////////////enactaBool:  " + enactaBool);
-            //Debug.Log("enactaBool.interactionType:  " + enactaBool.interactionType);
-            //Debug.Log("enactaBool.gamepadButtonType:  " + enactaBool.gamepadButtonType);
-            //Debug.Log("gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-
-            //Debug.Log("gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType].interactionType:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType].interactionType);
             enactaBool.enactionAuthor = gamepad.transform.gameObject;
             gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-
-            //Debug.Log("22222enactaBool.gamepadButtonType:  " + enactaBool.gamepadButtonType);
-            //Debug.Log("gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-            //Debug.Log("gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType].interactionType:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType].interactionType);
-
-            //if (allCurrentBoolEnactables[thisKey] == null) { continue; }
-
-            //if (allCurrentBoolEnactables[thisKey].interactionType == null) { continue; }
         }
+
 
 
         foreach (IEnactaVector enactaV in enactableVectorSet)
@@ -113,6 +101,10 @@ public class tank2 : MonoBehaviour, Iplayable
             gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
         }
 
+        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
+        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
+
 
     }
+
 }

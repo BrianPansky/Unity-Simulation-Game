@@ -1,9 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class mapZoneScript : MonoBehaviour
 {
+
+    public int thisZoneNumber = 0;
+
+
+
+
+
+
     public bool isItThisZonesTurn = false;
     public int howManyUpdatesPerEntity = 1; //GETS SET BY WORLD SCRIPT
 
@@ -16,9 +25,17 @@ public class mapZoneScript : MonoBehaviour
 
     public worldScript theWorldScript;
 
+    void Awake()
+    {
+
+        initializeZoneNumber();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        //tagging2.singleton.zoneOfObject[tagging2.singleton.]
+
         /*
 
         //add self to a world script list/tag, then NPCs can pick the closest one
@@ -37,6 +54,15 @@ public class mapZoneScript : MonoBehaviour
         */
 
     }
+
+    private void initializeZoneNumber()
+    {
+        int numberOfZones = tagging2.singleton.objectsInZone.Keys.Count;
+
+        tagging2.singleton.objectsInZone[numberOfZones] = new List<objectIdPair>();
+        tagging2.singleton.zoneOfObject[tagging2.singleton.idPairGrabify(this.gameObject)] = numberOfZones;
+    }
+    
 
     // Update is called once per frame
     void Update()
@@ -62,7 +88,11 @@ public class mapZoneScript : MonoBehaviour
         //add objects to this zone's list, and update their body to reference this zone
         if (other.gameObject.tag != "interactionType1")
         {
-            theList.Add(other.gameObject);
+            tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
+            
+
+
+            //theList.Add(other.gameObject);
 
             /*
 
@@ -81,7 +111,7 @@ public class mapZoneScript : MonoBehaviour
             }
 
             */
-            
+
         }
     }
     private void OnTriggerExit(Collider other)

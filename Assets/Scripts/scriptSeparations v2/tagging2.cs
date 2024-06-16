@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using static tagging2;
 
 public class tagging2 : MonoBehaviour
@@ -252,6 +254,62 @@ public class tagging2 : MonoBehaviour
 
 
 
+    public void addToZone(GameObject theObject, int zone)
+    {
+        objectIdPair thisObjectIdPair = idPairGrabify(theObject);
+
+        if (zoneOfObject.ContainsKey(thisObjectIdPair) == false)
+        {
+            zoneOfObject[thisObjectIdPair] = zone;
+        }
+        else
+        {
+            if (zoneOfObject[thisObjectIdPair] == zone) { return; }
+        }
+
+        
+
+        initializeObjectEntriesIfNecessary(thisObjectIdPair);
+
+        //remove from old zone:
+        removeFromZone(theObject, zone);
+
+        zoneOfObject[thisObjectIdPair] = zone;
+
+        //add to new zone:
+        objectsInZone[zone].Add(thisObjectIdPair);
+    }
+
+    private void initializeObjectEntriesIfNecessary(objectIdPair thisIdPair)
+    {
+
+        if (zoneOfObject.ContainsKey(thisIdPair))
+        {
+            return;
+        }
+
+        zoneOfObject[thisIdPair] = 0;
+
+    }
+
+    public void removeFromZone(GameObject theObject, int zone)
+    {
+
+        objectIdPair thisObjectIdPair = idPairGrabify(theObject);
+
+
+        if (zoneOfObject[thisObjectIdPair] != zone) { return; }
+
+        objectsInZone[zone].Remove(thisObjectIdPair);
+    }
+
+
+
+
+
+
+
+
     public GameObject findXNearestToY(GameObject objectWeWantItClosestTo, tag2 tagToLookFor)
     {
         //      EXCEPT for the input object itself!!!
@@ -270,6 +328,44 @@ public class tagging2 : MonoBehaviour
         //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
         return whichOBJECTOnObjectIdPairListIsNearestToInputtedObject(objectWeWantItClosestTo, allPotentialTargets);
     }
+
+
+    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    {
+        if (theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            //Debug.Log("list count is:  " + theList.Count);
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            //Debug.Log("random index is:  " + randomIndex);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != notTHISObject)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
+    }
+
 
 
     public GameObject whichOBJECTOnObjectIdPairListIsNearestToInputtedObject(GameObject objectWeWantItClosestTo, List<objectIdPair> allPotentialTargets)
@@ -360,7 +456,24 @@ public class tagging2 : MonoBehaviour
 
     }
 
+    public List<GameObject> listInObjectFormat(List<objectIdPair> pairFormatList)
+    {
+        List<GameObject> newList = new List<GameObject>();
 
+        foreach (objectIdPair thisPair in pairFormatList)
+        {
+            if (thisPair.theObject != null)
+            {
+                newList.Add(thisPair.theObject);
+            }
+            else
+            {
+                Debug.Log("this object was deleted without being removed from the list!  id# = " + thisPair.theObjectIdNumber);
+            }
+        }
+
+        return newList;
+    }
     public void setObjectAsMemberOfZone(GameObject theObject, int zoneNumber)
     {
         //tagging2.singleton.objectsInZone[zoneNumber].Add(theObject);

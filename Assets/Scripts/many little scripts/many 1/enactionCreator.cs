@@ -474,3 +474,8 @@ public class vecTranslation: IEnactaVector
 
     }
 }
+
+public class playable
+{
+
+}

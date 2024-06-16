@@ -90,6 +90,7 @@ public class body2 : MonoBehaviour, Iplayable
     }
     void makeEnactions()
     {
+        
         enactableBoolSet.Add(
             new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true)
             

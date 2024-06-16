@@ -283,6 +283,7 @@ public class virtualGamepad : MonoBehaviour
             if(wasdVactor.magnitude > 0.05f)
             {
 
+                if (theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]] == null) { return; }
                 theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
             }
 
@@ -304,6 +305,7 @@ public class virtualGamepad : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
             {
+                if(theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) { return; }
                 theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]].enact();
             }
             
