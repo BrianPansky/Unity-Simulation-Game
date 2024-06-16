@@ -68,7 +68,7 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 11;
+        int howManyZones = 31;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 25;
@@ -136,7 +136,7 @@ public class initialGenerator2 : MonoBehaviour
         {
             //Instantiate(prefab, thisPoint, default);
             GameObject newObj = Instantiate(repository2.singleton.mapZone2, thisPoint, Quaternion.identity);
-            newObj.transform.localScale = new Vector3(400f, 10f, 25f * theZSpacing);
+            newObj.transform.localScale = new Vector3(400f, 10f, 1f * theZSpacing);
 
         }
     }

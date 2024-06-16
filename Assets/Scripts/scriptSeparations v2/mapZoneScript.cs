@@ -57,10 +57,10 @@ public class mapZoneScript : MonoBehaviour
 
     private void initializeZoneNumber()
     {
-        int numberOfZones = tagging2.singleton.objectsInZone.Keys.Count;
+        thisZoneNumber = tagging2.singleton.objectsInZone.Keys.Count;
 
-        tagging2.singleton.objectsInZone[numberOfZones] = new List<objectIdPair>();
-        tagging2.singleton.zoneOfObject[tagging2.singleton.idPairGrabify(this.gameObject)] = numberOfZones;
+        tagging2.singleton.objectsInZone[thisZoneNumber] = new List<objectIdPair>();
+        tagging2.singleton.zoneOfObject[tagging2.singleton.idPairGrabify(this.gameObject)] = thisZoneNumber;
     }
     
 
@@ -86,7 +86,9 @@ public class mapZoneScript : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //add objects to this zone's list, and update their body to reference this zone
-        if (other.gameObject.tag != "interactionType1")
+        if (other.gameObject.tag == "interactionType1") { return; }
+        if (other.gameObject.tag == "dontAddToZones") { return; }
+
         {
             tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
             

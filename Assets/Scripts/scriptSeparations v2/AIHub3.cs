@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AIHub3 : MonoBehaviour
+public class AIHub3 : MonoBehaviour, IupdateCallable
 {
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -40,9 +40,15 @@ public class AIHub3 : MonoBehaviour
     void Update()
     {
 
-        if(adhocCooldown < 44)
+        adhocCooldown++;
+    }
+
+
+    public void callableUpdate()
+    {
+
+        if (adhocCooldown < 44)
         {
-            adhocCooldown++;
             return;
         }
 
@@ -62,7 +68,6 @@ public class AIHub3 : MonoBehaviour
         vGpad.allCurrentBoolEnactables[0].enact();
         */
     }
-
 
     void justDoRandomByINPUT()
     {
@@ -172,8 +177,17 @@ public class AIHub3 : MonoBehaviour
                     objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
 
                     int currentZone = tagging2.singleton.zoneOfObject[thisPair];
+                    /*
+                    Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
+                    foreach (List<objectIdPair> obidpList in tagging2.singleton.objectsInZone.Values)
+                    {
+                        Debug.Log("obidpList.Count: " + obidpList.Count);
+                        
+                    }
+                    */
 
                     GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
                     //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
 
@@ -259,6 +273,5 @@ public class AIHub3 : MonoBehaviour
         //Debug.DrawLine(this.gameObject.transform.position, theEnactionScript.thisNavMeshAgent.destination, Color.magenta);
 
     }
-
 
 }

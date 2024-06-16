@@ -317,14 +317,81 @@ public class virtualGamepad : MonoBehaviour
 }
 
 
-public interface Iplayable
+public class playable: MonoBehaviour
 {
+    public bool occupied = false;
+
+    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
+    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
+    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
     //attach to objects/entities you can "play as" [such as bodies and vehicles]
     //weapons and items too
 
 
     //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-    void equip(virtualGamepad gamepad);
+    public void plugIntoGamepadIfThereIsOne()
+    {
+        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
+        if (gamepad == null) { return; }
+
+        equip(gamepad);
+
+    }
+
+
+    public void equip(virtualGamepad gamepad)
+    {
+        occupied = true;
+        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        {
+            enactaBool.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+        }
+
+
+
+        foreach (IEnactaVector enactaV in enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
+        }
+
+        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
+        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
+
+
+    }
+
+    public void unequip(virtualGamepad gamepad)
+    {
+        occupied = false;
+
+
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        {
+            enactaBool.enactionAuthor = null;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
+        }
+
+
+
+        foreach (IEnactaVector enactaV in enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
+        }
+
+        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
+        {
+            if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
+            {
+                gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
+            }
+        }
+    }
 
 }
 

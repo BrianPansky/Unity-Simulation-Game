@@ -4,7 +4,7 @@ using UnityEngine;
 using static enactionCreator;
 using static virtualGamepad;
 
-public class tank2 : MonoBehaviour, Iplayable
+public class tank2 : playable
 {
 
     //      mouse look stuff
@@ -25,9 +25,6 @@ public class tank2 : MonoBehaviour, Iplayable
 
 
 
-    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
-    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
     public GameObject tankHead;
     public GameObject tankBarrel;
 
@@ -63,7 +60,7 @@ public class tank2 : MonoBehaviour, Iplayable
 
         //printEnactaBoolSet();
 
-        //enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+        enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
 
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
@@ -83,28 +80,6 @@ public class tank2 : MonoBehaviour, Iplayable
         }
     }
 
-    public void equip(virtualGamepad gamepad)
-    {
-        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-
-
-    }
 
 }

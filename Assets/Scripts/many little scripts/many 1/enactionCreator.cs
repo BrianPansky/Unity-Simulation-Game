@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static enactionCreator;
 
 public class enactionCreator : MonoBehaviour
 {
@@ -16,7 +17,21 @@ public class enactionCreator : MonoBehaviour
         shootFlamethrower1,
         tankShot
     }
+    
+    
+    public enum vectorEnactionSubType  // "legibleType"???
+    {
+        navMesh,
+        Aim
+    }
 
+    /*
+    public enum legibleUse
+    {
+        navMesh,
+        Aim
+    }
+    */
 
     void Awake()
     {
@@ -137,6 +152,7 @@ public interface IEnactaVector
 
 public interface IEnactByTargetVector
 {
+    vectorEnactionSubType theTYPEofSubEnactable { get; set; }
 
     //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
 
@@ -145,14 +161,49 @@ public interface IEnactByTargetVector
     void enact(Vector3 inputVector);
 }
 
+public class byTargetVector : IEnactByTargetVector
+{
+    IEnactByTargetVector theSubEnactable;
+
+    public vectorEnactionSubType theTYPEofSubEnactable { get; set; }  // "legibleType"??
+
+
+    byTargetVector(IEnactByTargetVector theInputSubType)
+    {
+        //or use "IEnactByTargetVectorSubType", and give them the enact function but named "enactSUBTYPE"???
+        //or is  this redundant?  just use THOSE on bodies/virtualGamepad???
+        //but, ai needs to know which is which.  so.  need "type" info accessible.
+        //and don't want to have to do "if" branches every time they enact.  hence this solution.  ok.
+        //errrrr, but i just put that info in the sub-types anyways
+        //so ya, this class is redundant, don't use it
+        theSubEnactable = theInputSubType;
+
+        theTYPEofSubEnactable = theSubEnactable.theTYPEofSubEnactable;
+    }
+
+    public void enact(Vector3 inputVector)
+    {
+        theSubEnactable.enact(inputVector);
+    }
+
+
+    //interface IEnactByTargetVectorSubType
+}
+
 public class navAgent: IEnactByTargetVector
 {
     NavMeshAgent theAgent;
+
+    public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
     //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
 
+    //IEnactByTargetVectorSubType theSubType;
 
     public navAgent(GameObject objectToAddNavmeshAgentTo)
     {
+        theTYPEofSubEnactable = vectorEnactionSubType.navMesh;
+
+
         theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
         if (theAgent == null)
         {
@@ -172,6 +223,47 @@ public class navAgent: IEnactByTargetVector
 
         //Debug.Log("2222222222222222destination:  " + theAgent.destination);
     }
+
+
+
+
+}
+public class aimTarget : IEnactByTargetVector
+{
+    GameObject thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
+
+    GameObject thePartToAimBertical;
+
+    public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
+    //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+
+    //IEnactByTargetVectorSubType theSubType;
+
+    public aimTarget(GameObject inputPartToAimHorizontal, GameObject inputPartToAimBertical)
+    {
+        theTYPEofSubEnactable = vectorEnactionSubType.Aim;
+        this.thePartToAimHorizontal = inputPartToAimHorizontal;
+        this.thePartToAimBertical = inputPartToAimBertical;
+
+        /*
+        theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
+        if (theAgent == null)
+        {
+
+            theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
+        }
+        */
+    }
+
+    //only for vector inputs!
+    public void enact(Vector3 inputVector)
+    {
+        throw new NotImplementedException();
+    }
+
+
+
+
 }
 
 public class intSpherAtor : IEnactaBool
@@ -430,17 +522,27 @@ public class intSpherAtor : IEnactaBool
 
 }
 
-public class vecTranslation: IEnactaVector
+
+public abstract class vectorMovement : IEnactaVector
 {
-    //translation motion, like walking forward/back, and STRAFING left/right
-    CharacterController controller;
-    Transform theTransform;
+    public CharacterController controller;
+    public Transform theTransform;
+    public float speed = 0f;
 
     public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
 
+    public abstract void enact(Vector2 inputVector);
+
+}
+
+public class vecTranslation : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+    
+
+
     bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
 
-    float speed = 0f;
 
     public vecTranslation(float inputSpeed, Transform theTransform, virtualGamepad.buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
     {
@@ -449,8 +551,10 @@ public class vecTranslation: IEnactaVector
         this.theTransform = theTransform;
         this.gamepadButtonType = gamepadButtonType;
 
+
+
         controller = theTransform.GetComponent<CharacterController>();
-        if (controller == null )
+        if (controller == null)
         {
             controller = theTransform.gameObject.AddComponent<CharacterController>();
         }
@@ -462,20 +566,49 @@ public class vecTranslation: IEnactaVector
         }
     }
 
-    public void enact(Vector2 inputVector)
-    {
 
+    public override void enact(Vector2 inputVector)
+    {
         //Debug.Log("inputVector:  " + inputVector);
 
         Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
 
         controller.Move(move * speed * Time.deltaTime);
 
+    }
+}
+public class vecRotation : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+
+
+
+    public vecRotation(float inputSpeed, Transform theTransform, virtualGamepad.buttonCategories gamepadButtonType)
+    {
+        speed = inputSpeed;
+        this.theTransform = theTransform;
+        this.gamepadButtonType = gamepadButtonType;
+
+        controller = theTransform.GetComponent<CharacterController>();
+        if (controller == null)
+        {
+            controller = theTransform.gameObject.AddComponent<CharacterController>();
+        }
+
+        //maybe automatically add navmesh here too???  by default
+    }
+
+    public override void enact(Vector2 inputVector)
+    {
+
+        //Debug.Log("inputVector:  " + inputVector);
+
+        //Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
+
+        //controller.Move(move * speed * Time.deltaTime);
+
 
     }
 }
 
-public class playable
-{
 
-}

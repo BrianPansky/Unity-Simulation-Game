@@ -6,7 +6,7 @@ using static enactionCreator;
 using static UnityEditor.LightmapEditorSettings;
 using static virtualGamepad;
 
-public class body2 : MonoBehaviour, Iplayable
+public class body2 : playable
 {
 
     public GameObject enactionPoint1;
@@ -28,9 +28,6 @@ public class body2 : MonoBehaviour, Iplayable
 
 
 
-    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
-    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
 
 
 
@@ -101,40 +98,7 @@ public class body2 : MonoBehaviour, Iplayable
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
     }
 
-    public void plugIntoGamepadIfThereIsOne()
-    {
-        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
-        if(gamepad == null ){return; }
-
-        equip(gamepad);
-
-    }
-
-
-    public void equip(virtualGamepad gamepad)
-    {
-        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-        
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-        
-
-    }
-
+   
 
     public bool isThisGrounded()
     {
