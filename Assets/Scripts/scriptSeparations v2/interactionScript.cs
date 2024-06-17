@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class interactionScript : MonoBehaviour
 {
@@ -78,22 +79,35 @@ public class interactionScript : MonoBehaviour
                 //Debug.Log("theAuthorScript.enacting.enactionAuthor.name:  " + theAuthorScript.enacting.enactionAuthor.name);
                 //Debug.Log("theAuthorScript.enacting.enactionAuthor.transform.position:  " + theAuthorScript.enacting.enactionAuthor.transform.position);
 
-                CharacterController controller = theAuthorScript.enacting.enactionAuthor.GetComponent<CharacterController>();
-                if (controller != null)
-                {
-                    controller.enabled = false;
-                }
                 
-                theAuthorScript.enacting.enactionAuthor.transform.position = this.transform.position;
-                theAuthorScript.enacting.enactionAuthor.transform.rotation = this.transform.rotation;
-
                 //body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
 
                 //enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                 //ad hoc for now
                 virtualGamepad gamepad = theAuthorScript.enacting.enactionAuthor.GetComponent<virtualGamepad>();
                 tank2 theTank = this.GetComponent<tank2>();
+                if (theTank.occupied == true) { return; }
                 theTank.equip(gamepad);
+
+
+
+                CharacterController controller = theAuthorScript.enacting.enactionAuthor.GetComponent<CharacterController>();
+                if (controller != null)
+                {
+                    controller.enabled = false;
+                }
+
+                NavMeshAgent nva = theAuthorScript.enacting.enactionAuthor.GetComponent<NavMeshAgent>();
+                if (nva != null)
+                {
+                    nva.enabled = false;
+                }
+
+                theAuthorScript.enacting.enactionAuthor.transform.position = this.transform.position;
+                theAuthorScript.enacting.enactionAuthor.transform.rotation = this.transform.rotation;
+
+
+
                 //theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
                 //      theTank.pilot = theAuthorScript.enacting.enactionAuthor;
                 //      theTank.thePilotEnactionScript = theEnactionScript;

@@ -187,7 +187,7 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
                     */
 
                     GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
-                    Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
+                    //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
                     //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
 

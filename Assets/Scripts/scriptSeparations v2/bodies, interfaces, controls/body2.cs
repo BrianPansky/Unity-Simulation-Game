@@ -13,7 +13,7 @@ public class body2 : playable
 
 
     //      mouse look stuff
-    public float lookSpeed = 290f;
+    public float lookSpeed = 0.002f;
     public float standardClickDistance = 7.0f;
     public float speed = 12f;
     public float gravity = -9.81f;
@@ -44,12 +44,38 @@ public class body2 : playable
 
 
 
+        initializeEnactionPoint1();
+        initializeCamera();
 
     }
 
+    void initializeEnactionPoint1()
+    {
+        enactionPoint1 = new GameObject("aaaaaaaaaaaaaaaaaaaaaaaaaaaaenactionPoint1 in initializeEnactionPoint1() line 54, body2 script");
+        enactionPoint1.transform.parent = transform;
+        enactionPoint1.transform.position = this.transform.position + this.transform.forward*0.5f;
+        enactionPoint1.transform.rotation = this.transform.rotation;
+
+    }
+
+
+    void initializeCamera()
+    {
+        cameraMount = new GameObject("cameraMount in initializeCamera() line 64, body2 script").transform;
+        //cameraMount.transform.SetParent(transform, false);
+        cameraMount.transform.SetParent(enactionPoint1.transform, false); //has to be child of ENACTION point for this body!  because THAT is the point which the gamepad rotates!!!
+
+        //cameraMount.transform.parent = transform;
+        //cameraMount.transform.position = this.transform.position + this.transform.forward * 0.1f;
+        //cameraMount.transform.rotation = this.transform.rotation;
+
+    }
+
+
+
     void connectingComponents()
     {
-
+        /*
         if (thisNavMeshAgent == null)
         {
             thisNavMeshAgent = gameObject.GetComponent<NavMeshAgent>();
@@ -57,8 +83,11 @@ public class body2 : playable
             {
                 thisNavMeshAgent = gameObject.AddComponent<NavMeshAgent>();
             }
-        }
 
+
+            currentNavMeshAgent.baseOffset = 1; //prevent stutter, being in floor
+        }
+        */
 
         if (theInteractionScript == null)
         {
@@ -88,12 +117,12 @@ public class body2 : playable
     void makeEnactions()
     {
         
-        enactableBoolSet.Add(
-            new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true)
-            
-            );
+        enactableBoolSet.Add(new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true));
 
-        enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+
+        enactableVectorSet.Add(new vecTranslation(speed, this.transform, buttonCategories.vector1));
+        enactableVectorSet.Add(new vecRotation(lookSpeed, this.transform, enactionPoint1.transform, buttonCategories.vector2));
+
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
     }

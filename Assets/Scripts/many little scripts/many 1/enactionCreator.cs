@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static enactionCreator;
+using static UnityEngine.GraphicsBuffer;
 
 public class enactionCreator : MonoBehaviour
 {
@@ -210,6 +211,8 @@ public class navAgent: IEnactByTargetVector
 
             theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
         }
+
+        theAgent.baseOffset = 1f; //prevent stutter, being in floor
     }
 
     //only for vector inputs!
@@ -218,6 +221,13 @@ public class navAgent: IEnactByTargetVector
 
         //Debug.Log("destination:  " + theAgent.destination);
         //Debug.Log("inputVector:  " + inputVector);
+        
+        if(theAgent.enabled == false)
+        {
+            Debug.Log("theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
+            Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.magenta, 200f);
+        }
+        
         theAgent.SetDestination(inputVector);
         //theAgent.SetDestination(new Vector3());
 
@@ -232,18 +242,18 @@ public class aimTarget : IEnactByTargetVector
 {
     GameObject thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
 
-    GameObject thePartToAimBertical;
+    GameObject thePartToAimVertical;
 
     public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
     //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
 
     //IEnactByTargetVectorSubType theSubType;
 
-    public aimTarget(GameObject inputPartToAimHorizontal, GameObject inputPartToAimBertical)
+    public aimTarget(GameObject inputPartToAimHorizontal, GameObject inputPartToAimVertical)
     {
         theTYPEofSubEnactable = vectorEnactionSubType.Aim;
         this.thePartToAimHorizontal = inputPartToAimHorizontal;
-        this.thePartToAimBertical = inputPartToAimBertical;
+        this.thePartToAimVertical = inputPartToAimVertical;
 
         /*
         theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
@@ -356,7 +366,9 @@ public class intSpherAtor : IEnactaBool
         if (hitscan == true)
         {
             firingByRaycastHit(range);
+            //return;  //turn it off to make NPCs fire "standard click", for faster random testing
         }
+
 
         projectileGenerator(firePoint, interactionType, sdOnCollision, timeUntilSelfDestruct, growthSpeed, magnitudeOfInteraction);
     }
@@ -559,11 +571,15 @@ public class vecTranslation : vectorMovement
             controller = theTransform.gameObject.AddComponent<CharacterController>();
         }
 
+        /*
         //maybe automatically add navmesh here too???  by default
         if (navmeshToo && theTransform.GetComponent<NavMeshAgent>() == null)
         {
             theTransform.gameObject.AddComponent<NavMeshAgent>();
+        
+            theAgent.baseOffset = 1; //prevent stutter, being in floor
         }
+        */
     }
 
 
@@ -573,27 +589,54 @@ public class vecTranslation : vectorMovement
 
         Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
 
+        //move.y = 0f;
         controller.Move(move * speed * Time.deltaTime);
+        //controller.Move(move * speed);
 
     }
 }
 public class vecRotation : vectorMovement
 {
-    //translation motion, like walking forward/back, and STRAFING left/right
+    //rotation motion, like turning left/right, looking up/down
+
+    Transform thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
+    Transform thePartToAimVertical;
+    //CharacterController thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
+    //CharacterController thePartToAimVertical;
+
+    float yawSpeed = 1f;
+    float pitchSpeed = 1f;
+
+    float limitedPitchRotation = 0f;
 
 
-
-    public vecRotation(float inputSpeed, Transform theTransform, virtualGamepad.buttonCategories gamepadButtonType)
+    public vecRotation(float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, virtualGamepad.buttonCategories gamepadButtonType)
     {
         speed = inputSpeed;
-        this.theTransform = theTransform;
+        yawSpeed = inputSpeed/444;
+        pitchSpeed = inputSpeed/444;
+
+
+
+        //this.theTransform = theTransform;
+        thePartToAimHorizontal = theHorizontalTransform;
+        thePartToAimVertical = theVerticalTransform;
         this.gamepadButtonType = gamepadButtonType;
 
-        controller = theTransform.GetComponent<CharacterController>();
-        if (controller == null)
+        /*
+        thePartToAimHorizontal = theHorizontalTransform.GetComponent<CharacterController>();
+        if (thePartToAimHorizontal == null)
         {
-            controller = theTransform.gameObject.AddComponent<CharacterController>();
+            thePartToAimHorizontal = theHorizontalTransform.gameObject.AddComponent<CharacterController>();
         }
+
+        thePartToAimVertical = theVerticalTransform.GetComponent<CharacterController>();
+        if (thePartToAimVertical == null)
+        {
+            thePartToAimVertical = theVerticalTransform.gameObject.AddComponent<CharacterController>();
+        }
+
+        */
 
         //maybe automatically add navmesh here too???  by default
     }
@@ -607,8 +650,73 @@ public class vecRotation : vectorMovement
 
         //controller.Move(move * speed * Time.deltaTime);
 
+        //      thePartToAimHorizontal.RotateAround(thePartToAimHorizontal.position, thePartToAimHorizontal.up, inputVector.x);
+        //      thePartToAimVertical.RotateAround(thePartToAimVertical.position, thePartToAimVertical.right, inputVector.y);
+        //controller.Move(move * speed * Time.deltaTime);
+        //thePartToAimVertical
+        updatePitch(inputVector.y);
+        updateYaw(inputVector.x);
+    }
+
+    void updatePitch(float pitchInput)
+    {
+        //Debug.Log("11111111111111thePartToAimVertical.transform.gameObject:  " + thePartToAimVertical.transform.gameObject);
+
+        limitedPitchRotation -= pitchInput*pitchSpeed;
+
+        //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
+        limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
+        //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
+        //   thePartToAimVertical.Rotate(thePartToAimVertical.right * limitedPitchRotation);
+        //Debug.Log("111111111111111111thePartToAimVertical.GetInstanceID():  " + thePartToAimVertical.transform.GetInstanceID());
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        //Debug.Log("thePartToAimVertical.transform x+y+z:  X:  " + thePartToAimVertical.transform.rotation.x + "  Y:  " + thePartToAimVertical.transform.rotation.y + "  Z:  " + thePartToAimVertical.transform.rotation.z + "  W:  " + thePartToAimVertical.transform.rotation.w);
+        thePartToAimVertical.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+        //thePartToAimVertical.localRotation = Quaternion.AngleAxis(limitedPitchRotation, thePartToAimVertical.right);
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        //Debug.Log("thePartToAimVertical.transform x+y+z:  X:  " + thePartToAimVertical.transform.rotation.x + "  Y:  " + thePartToAimVertical.transform.rotation.y + "  Z:  " + thePartToAimVertical.transform.rotation.z + "  W:  " + thePartToAimVertical.transform.rotation.w);
+        //thePartToAimVertical.Rotate(thePartToAimHorizontal.right * pitchInput);
+
+        //thePartToAimVertical.localRotation = Quaternion.(limitedPitchRotation, 0f, 0f);
+        //                  playerBody.Rotate(Vector3.up * theVirtualGamePad.mouseX);
+    }
+
+    /*
+    void updateBarrelPitch()
+    {
+        barrelPitch -= thePilotEnactionScript.theGamePad.pitchInput * barrelPitchSpeed;
+        barrelPitch = Mathf.Clamp(barrelPitch, -pitchRange, pitchRange);
+        //tankBarrel
+        //tankHead.transform.Rotate(Vector3.up * thePilotEnactionScript.yawInput);
+
+        //tankBarrel.transform.localRotation = Quaternion.Euler(thePilotEnactionScript.pitchInput, 0f, 0f);
+
+        //tankBarrel.transform.Rotate(Vector3.right * barrelPitch);
+        tankBarrel.transform.localRotation = Quaternion.Euler(barrelPitch, 0f, 0f);
 
     }
+    */
+
+    void updateYaw(float yawInput)
+    {
+
+        //                  xRotation -= theEnactionScript.mouseY;
+        //                  xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
+
+        //Debug.Log("222222222222222222222222thePartToAimHorizontal.transform.gameObject:  " + thePartToAimHorizontal.transform.gameObject);
+
+        //Debug.Log("222222222222222222222222thePartToAimHorizontal.GetInstanceID():  " + thePartToAimHorizontal.transform.GetInstanceID());
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        thePartToAimHorizontal.Rotate(thePartToAimHorizontal.up * yawInput * yawSpeed);
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        //float xRotation = yawInput * yawSpeed;
+        //thePartToAimHorizontal.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+    }
+
+
 }
 
 

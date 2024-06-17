@@ -8,6 +8,8 @@ using static virtualGamepad;
 
 public class virtualGamepad : MonoBehaviour
 {
+    public GameObject theCamera = null;
+
     public bool isPlayer = false;
     //public static virtualGamepad singleton;
 
@@ -71,6 +73,7 @@ public class virtualGamepad : MonoBehaviour
         primary,
         aux1,
         vector1,
+        vector2
     }
 
     //need THIS instead/as well?
@@ -146,6 +149,7 @@ public class virtualGamepad : MonoBehaviour
 
         List<buttonCategories> allVectorButtons = new List<buttonCategories>();
         allVectorButtons.Add(buttonCategories.vector1);
+        allVectorButtons.Add(buttonCategories.vector2);
 
 
 
@@ -235,7 +239,8 @@ public class virtualGamepad : MonoBehaviour
             click1,
             space,
             g,
-            wasd
+            wasd,
+            mouse
         }
 
 
@@ -251,6 +256,7 @@ public class virtualGamepad : MonoBehaviour
             buttonMapping[realButton.click1] = buttonCategories.primary;
             buttonMapping[realButton.space] = buttonCategories.aux1;
             buttonMapping[realButton.wasd] = buttonCategories.vector1;
+            buttonMapping[realButton.mouse] = buttonCategories.vector2;
             //buttonMapping[realButton.g] = buttonCategories.aux...2???;
             //buttonMapping[realButton.click1] = buttonCategories.;
         }
@@ -297,18 +303,45 @@ public class virtualGamepad : MonoBehaviour
 
         void mouseUpdate()
         {
+
+            mouseClick();
+            mouseMove();
             //Debug.Log("...................INPUTS...................");
             //      theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
             //      theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
 
             //theVirtualGamePad.primary = Input.GetMouseButtonDown(0);
 
+
+
+            /*
+            theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
+            theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+            */
+
+
+
+        }
+
+        void mouseClick()
+        {
             if (Input.GetMouseButtonDown(0))
             {
-                if(theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) { return; }
+                if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) { return; }
                 theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]].enact();
             }
-            
+        }
+
+
+        void mouseMove()
+        {
+            if (theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.mouse]] == null) { return; }
+
+            float yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
+            float pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+
+            theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.mouse]].enact(new Vector2(yawInput, pitchInput));
+
         }
 
     }
@@ -321,6 +354,8 @@ public class playable: MonoBehaviour
 {
     public bool occupied = false;
 
+    public Transform cameraMount;
+
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
     public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
@@ -330,6 +365,29 @@ public class playable: MonoBehaviour
 
 
     //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+
+    public void defaultCameraMountGenerator()
+    {
+        GameObject newObject = new GameObject("cameraMount?????");
+
+        //newObject.transform.parent = this.transform;
+        newObject.transform.SetParent(this.transform, false);
+        //newObject.transform.position = this.transform.position + this.transform.forward * 0.3f;
+        //newObject.transform.rotation = this.transform.rotation;
+
+        //GameObject newObject2 = genGen.singleton.returnPineTree1(this.transform.position + this.transform.forward * 2.3f);
+
+        //newObject2.transform.SetParent(this.transform, false);
+        //newObject2.transform.position = this.transform.position + this.transform.forward * 8f;
+        //newObject2.transform.rotation = this.transform.rotation;
+
+        cameraMount = newObject.transform;
+
+    }
+
+
+
+
     public void plugIntoGamepadIfThereIsOne()
     {
         virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
@@ -342,7 +400,19 @@ public class playable: MonoBehaviour
 
     public void equip(virtualGamepad gamepad)
     {
+        if(occupied == true) { return; }
         occupied = true;
+
+        Debug.Log("is it null???:  " + cameraMount);
+
+        if (cameraMount != null && gamepad.theCamera != null)
+        {
+
+            gamepad.theCamera.transform.SetParent(cameraMount, false);
+        }
+        
+
+
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
         foreach (IEnactaBool enactaBool in enactableBoolSet)
@@ -363,6 +433,17 @@ public class playable: MonoBehaviour
         gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
 
 
+        if(gamepad.theCamera == null) { return; }
+
+        /*
+        Debug.Log(cameraMount);
+        if (cameraMount == null)
+        {
+            defaultCameraMountGenerator();
+        }
+        Debug.Log(cameraMount);
+        gamepad.theCamera.transform.SetParent(cameraMount, false);
+        */
     }
 
     public void unequip(virtualGamepad gamepad)

@@ -35,6 +35,8 @@ public class tank2 : playable
 
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
 
+        initializeCamera();
+
         //Debug.Log("sssssssssssssssssssssssss");
 
         //Debug.Log("this.gameObject.transform.position:  " + this.gameObject.transform.position);
@@ -49,6 +51,23 @@ public class tank2 : playable
         //Debug.DrawLine(this.transform.position, tankBarrel.transform.position, Color.blue, 777f);
     }
 
+    void initializeCamera()
+    {
+        cameraMount = new GameObject("cameraMount in initializeCamera() line 54, tank2 script").transform;
+        //cameraMount.transform.SetParent(transform, false);
+
+        Debug.Log("tankBarrel:  " + tankBarrel);
+        cameraMount.transform.SetParent(tankBarrel.transform, false); //has to be child of ENACTION point for this body!  because THAT is the point which the gamepad rotates!!!
+        //      cameraMount.transform.position += 0.2f*cameraMount.transform.up;
+        cameraMount.transform.position += 0.1f * cameraMount.transform.up;
+        //cameraMount.transform.position += 0.8f * cameraMount.transform.up - cameraMount.transform.forward;
+
+        //cameraMount.transform.parent = transform;
+        //cameraMount.transform.position = this.transform.position + this.transform.forward * 0.1f;
+        //cameraMount.transform.rotation = this.transform.rotation;
+
+    }
+
     void makeEnactions()
     {
         //printEnactaBoolSet();
@@ -61,6 +80,7 @@ public class tank2 : playable
         //printEnactaBoolSet();
 
         enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+        enactableVectorSet.Add(new vecRotation(lookSpeed, tankHead.transform, tankBarrel.transform, buttonCategories.vector2));
 
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));

@@ -22,6 +22,7 @@ public class cameraScript : MonoBehaviour
             theVirtualGamePad = parent.GetComponent<virtualGamepad>();
         }
 
+        theVirtualGamePad.theCamera = this.gameObject;
     }
 
     // Update is called once per frame
@@ -32,8 +33,9 @@ public class cameraScript : MonoBehaviour
             return;
         }
 
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccc   this.transform x+y+z:  X:  " + this.transform.rotation.x + "  Y:  " + this.transform.rotation.y + "  Z:  " + this.transform.rotation.z + "  W:  " + this.transform.rotation.w);
 
-        updatePitch();
+        //updatePitch();
         //theVirtualGamePad.updateLookingVector();
         //                          this.transform.rotation = theVirtualGamePad.rotationFromLookingVector();
     }

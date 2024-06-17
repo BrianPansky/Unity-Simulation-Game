@@ -71,7 +71,7 @@ public class initialGenerator2 : MonoBehaviour
         int howManyZones = 31;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
-        int theXSpacing = 25;
+        int theXSpacing = 5;
         float sideOffset = 0;
 
         //create a line of points, spaced by multiples of "howManysetsPerZone"
@@ -81,7 +81,8 @@ public class initialGenerator2 : MonoBehaviour
 
 
         INVERSEmakeAndFillZones(
-            patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset)
+            patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset), 
+            theXSpacing
             );
     }
 
@@ -198,7 +199,7 @@ public class initialGenerator2 : MonoBehaviour
 
         //objectList.Add(returnTestKey1());
 
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition+ new Vector3(-theXSpacing, 0, 0)));
         objectList.Add(genGen.singleton.returnNPC4(startPosition + new Vector3(theXSpacing, 0, 0)));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(theXSpacing+ theXSpacing, 0, 0)));
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));

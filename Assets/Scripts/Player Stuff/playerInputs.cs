@@ -90,8 +90,8 @@ public class playerInputs : MonoBehaviour
     void mouseUpdate()
     {
         //Debug.Log("...................INPUTS...................");
-        theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
-        theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
+        //theVirtualGamePad.yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
+        //theVirtualGamePad.pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
 
         //          theVirtualGamePad.primary = Input.GetMouseButtonDown(0);
     }

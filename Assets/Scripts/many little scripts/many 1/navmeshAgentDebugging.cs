@@ -21,6 +21,9 @@ public class navmeshAgentDebugging : MonoBehaviour
         }
 
 
+        currentNavMeshAgent.baseOffset = 1; //prevent stutter, being in floor
+
+
         currentNavMeshAgent.SetDestination(this.gameObject.transform.position + new Vector3(11, 10.3f, 4));
     }
 
