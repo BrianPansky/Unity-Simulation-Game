@@ -1162,6 +1162,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3381459262025078435, guid: 9902ed1a50fbc3d4399d72b0dcd4aa97,
         type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: simpleTankBottom
+      value: 
+      objectReference: {fileID: 6657601300937366603, guid: 60b3e899b90539c43bcaf1082f7c688c,
+        type: 3}
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
       propertyPath: m_LocalPosition.x
