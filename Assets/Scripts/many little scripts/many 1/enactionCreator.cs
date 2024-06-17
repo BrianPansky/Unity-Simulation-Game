@@ -595,6 +595,7 @@ public class vecTranslation : vectorMovement
 
     }
 }
+
 public class vecRotation : vectorMovement
 {
     //rotation motion, like turning left/right, looking up/down
@@ -715,6 +716,82 @@ public class vecRotation : vectorMovement
         //float xRotation = yawInput * yawSpeed;
         //thePartToAimHorizontal.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
+
+
+}
+
+public class turningWithNoStrafe : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+
+    float yawSpeed = 11f;
+
+
+    bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
+
+
+    public turningWithNoStrafe(float inputSpeed, Transform theTransform, virtualGamepad.buttonCategories gamepadButtonType)
+    {
+        speed = inputSpeed;
+        this.theTransform = theTransform;
+        this.gamepadButtonType = gamepadButtonType;
+        yawSpeed = inputSpeed / 10;
+
+
+        controller = theTransform.GetComponent<CharacterController>();
+        if (controller == null)
+        {
+            controller = theTransform.gameObject.AddComponent<CharacterController>();
+        }
+
+        /*
+        //maybe automatically add navmesh here too???  by default
+        if (navmeshToo && theTransform.GetComponent<NavMeshAgent>() == null)
+        {
+            theTransform.gameObject.AddComponent<NavMeshAgent>();
+        
+            theAgent.baseOffset = 1; //prevent stutter, being in floor
+        }
+        */
+    }
+
+
+    public override void enact(Vector2 inputVector)
+    {
+        //Debug.Log("inputVector:  " + inputVector);
+
+        Vector3 translate = theTransform.forward * inputVector.y; //needs to be Y!!!!!!!!!!  //and FORWARD vector!!!!!!!!!!
+
+        //move.y = 0f;
+        controller.Move(translate * speed * Time.deltaTime);
+
+        //+theTransform.forward * inputVector.y;  //needs to be X!!!!!!!!!!
+        updateYaw(inputVector.x);
+        //controller.Move(move * speed);
+
+    }
+
+
+    void updateYaw(float yawInput)
+    {
+
+        //                  xRotation -= theEnactionScript.mouseY;
+        //                  xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
+
+        //Debug.Log("222222222222222222222222thePartToAimHorizontal.transform.gameObject:  " + thePartToAimHorizontal.transform.gameObject);
+
+        //Debug.Log("222222222222222222222222thePartToAimHorizontal.GetInstanceID():  " + thePartToAimHorizontal.transform.GetInstanceID());
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        theTransform.Rotate(theTransform.up * yawInput * yawSpeed);
+        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        //float xRotation = yawInput * yawSpeed;
+        //thePartToAimHorizontal.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+    }
+
+
 
 
 }

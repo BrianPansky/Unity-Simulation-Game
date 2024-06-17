@@ -79,9 +79,9 @@ public class tank2 : playable
 
         //printEnactaBoolSet();
 
-        enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
+        //enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
         enactableVectorSet.Add(new vecRotation(lookSpeed, tankHead.transform, tankBarrel.transform, buttonCategories.vector2));
-
+        enactableVectorSet.Add(new turningWithNoStrafe(speed, transform, buttonCategories.vector1));
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
 
