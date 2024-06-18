@@ -233,6 +233,8 @@ public class virtualGamepad : MonoBehaviour
 
         float verticalCameraRotation = 0f;
 
+        float mouseThreshhold = 0.2f;
+
 
         enum realButton
         {
@@ -340,6 +342,9 @@ public class virtualGamepad : MonoBehaviour
             float yawInput = Input.GetAxis("Mouse X") * mouseSpeed * Time.deltaTime;
             float pitchInput = Input.GetAxis("Mouse Y") * mouseSpeed * Time.deltaTime;
 
+            //if (yawInput < mouseThreshhold) { return; }
+            //if (pitchInput < mouseThreshhold) { return; }
+
             theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.mouse]].enact(new Vector2(yawInput, pitchInput));
 
         }
@@ -403,7 +408,7 @@ public class playable: MonoBehaviour
         if(occupied == true) { return; }
         occupied = true;
 
-        Debug.Log("is it null???:  " + cameraMount);
+        //Debug.Log("is it null???:  " + cameraMount);
 
         if (cameraMount != null && gamepad.theCamera != null)
         {

@@ -10,6 +10,7 @@ public class worldScript : MonoBehaviour
 {
     public static worldScript singleton;
 
+    public bool debugToggle = false;
 
     int numberOfNearZones = 9;
 
@@ -41,6 +42,7 @@ public class worldScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        new helpINeedRotation().doTesting();
     }
 
     // Update is called once per frame
@@ -139,4 +141,69 @@ public interface IupdateCallable
 
 
     void callableUpdate();
+}
+
+public class helpINeedRotation
+{
+    public void doTesting()
+    {
+        Vector3 inputVector = new Vector3(1,1,0);
+        Vector3 forward = new Vector3(1, 0, 0);
+        Vector3 upAxis = new Vector3(0, 1, 0);
+        Vector3 v4 = new Vector3(1, 0.8f, 0);
+        Vector3 v5 = new Vector3(1, 0.2f, 0);
+        Vector3 v6 = new Vector3(0, 0, 1);
+        Vector3 v7 = new Vector3(1, 0, 1);
+
+        float angle = AngleOffAroundAxis(inputVector.normalized,forward,upAxis);
+
+        //Debug.Log("angle:  " + angle);
+        //um, that's returning 0 degrees, just like it's precisely supposed to be designed NOT to do.....
+        //oh, no, wait,  that IS precisely what it is designed to do.  ok, ya, good.  next
+
+
+        angle = AngleOffAroundAxis(v4.normalized, forward, upAxis);
+
+        //Debug.Log("angle:  " + angle);
+
+        angle = AngleOffAroundAxis(v6.normalized, forward, upAxis);
+
+        //Debug.Log("angle:  " + angle);
+        
+        angle = AngleOffAroundAxis(v7.normalized, forward, upAxis);
+
+        //Debug.Log("angleFromForwardToInputAroundUpAxis:  " + angle);
+
+
+        //ok, all works as it should.  soooo...
+
+    }
+
+    public float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
+    {
+        //from here:
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        //but had to change conversion thing from "MathUtil.RAD_TO_DEG" to the following:
+        //Mathf.Rad2Deg
+
+
+        Vector3 right;
+        if (clockwise)
+        {
+            right = Vector3.Cross(forward, axis);
+            forward = Vector3.Cross(axis, right);
+        }
+        else
+        {
+            right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+        }
+
+
+        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
+    }
+
+
+
 }

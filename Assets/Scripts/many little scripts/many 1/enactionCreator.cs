@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
+//using System.Numerics;
 using UnityEngine;
 using UnityEngine.AI;
 using static enactionCreator;
@@ -238,40 +240,181 @@ public class navAgent: IEnactByTargetVector
 
 
 }
+
 public class aimTarget : IEnactByTargetVector
 {
-    GameObject thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
-
-    GameObject thePartToAimVertical;
+    public vecRotation theVectorRotationEnaction;
 
     public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
     //virtualGamepad.buttonCategories gamepadButtonType { get; set; }
 
     //IEnactByTargetVectorSubType theSubType;
 
-    public aimTarget(GameObject inputPartToAimHorizontal, GameObject inputPartToAimVertical)
+    public aimTarget(vecRotation theInputVectorRotationEnaction)
     {
-        theTYPEofSubEnactable = vectorEnactionSubType.Aim;
-        this.thePartToAimHorizontal = inputPartToAimHorizontal;
-        this.thePartToAimVertical = inputPartToAimVertical;
+        theVectorRotationEnaction = theInputVectorRotationEnaction;
+    }
 
-        /*
-        theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
-        if (theAgent == null)
-        {
+    public void addToBothLists(List<IEnactaVector> enactableVectorSet, List<IEnactByTargetVector> enactableTARGETVectorSet)
+    {
+        enactableVectorSet.Add(theVectorRotationEnaction);
 
-            theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
-        }
-        */
+        enactableTARGETVectorSet.Add(this);
     }
 
     //only for vector inputs!
-    public void enact(Vector3 inputVector)
+    public void enact(Vector3 targetPosition)
     {
-        throw new NotImplementedException();
+        //instantaneous for now
+        Vector3 lineFromVertAimerToTarget = targetPosition - theVectorRotationEnaction.thePartToAimVertical.position;
+        //Vector2 theXYvectorCoordinates = calculateVector2(inputVector);
+
+        //theVectorRotationEnaction.enact(theXYvectorCoordinates);
+        worldScript.singleton.debugToggle =true;
+
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,
+            theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,
+            Color.white, 44f);
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,
+            Color.yellow, 44f);
+
+        theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
+        theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
+        //theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(-90));
+        //theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(inputVector)));
+
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,
+            theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,
+            Color.blue, 44f);
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,
+            Color.red, 44f);
+
+        worldScript.singleton.debugToggle = false;
+    }
+
+    private float translateAngleIntoYawSpeedEtc(float angle)
+    {
+        Debug.Log(":::::::::::::::::::translateAngleIntoYawSpeedEtc::::::::::::::::::::");
+        Debug.Log("angle:  " + angle);
+        Debug.Log("theVectorRotationEnaction.yawSpeed:  " + theVectorRotationEnaction.yawSpeed);
+        Debug.Log("angle / (theVectorRotationEnaction.yawSpeed):  " + angle / (theVectorRotationEnaction.yawSpeed));
+        return angle / (theVectorRotationEnaction.yawSpeed);
+    }
+
+    private float translateAngleIntoPitchSpeedEtc(float angle)
+    {
+        Debug.Log("----------------------translateAngleIntoPitchSpeedEtc:----------------------");
+        Debug.Log("angle:  " + angle);
+        Debug.Log("theVectorRotationEnaction.pitchSpeed:  " + theVectorRotationEnaction.pitchSpeed);
+        Debug.Log("angle / (theVectorRotationEnaction.pitchSpeed):  " + angle / (theVectorRotationEnaction.pitchSpeed));
+
+        return angle / theVectorRotationEnaction.pitchSpeed;
+    }
+
+    Vector2 calculateVector2(Vector3 inputVector)
+    {
+        float horizontal = getHorizontalAngle(inputVector);
+        float vertical = getVerticalAngle(inputVector);
+
+
+        return new Vector2(horizontal, vertical);
+    }
+
+    private float getHorizontalAngle(Vector3 lineToTarget)
+    {
+        //float inputHorizontalAngle = Vector3.Angle(inputVector, theVectorRotationEnaction.thePartToAimHorizontal.forward);
+        //float currentAimingHorizontalAngle = Vector3.Angle(inputVector, theVectorRotationEnaction.thePartToAimHorizontal.forward);
+
+
+        //float oneAngle = Vector3.Angle(inputVector, theVectorRotationEnaction.thePartToAimHorizontal.forward);
+        //      float oneAngle = Vector3.SignedAngle(inputVector, theVectorRotationEnaction.thePartToAimHorizontal.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+        /*
+        Vector3 currentPerpendicularToRotationAxis = theVectorRotationEnaction.thePartToAimHorizontal.forward;
+        //Vector3 desiredPerpendicularToRotationAxis = findOnePerpendicularVector(inputVector.normalized, theVectorRotationEnaction.thePartToAimHorizontal.up);
+        Vector3 desiredPerpendicularToRotationAxis = findOnePerpendicularVector(theVectorRotationEnaction.thePartToAimHorizontal.up, inputVector.normalized);
+
+        float oneAngle = Vector3.Angle(currentPerpendicularToRotationAxis, desiredPerpendicularToRotationAxis);
+
+        */
+
+        //fucking hell:
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, theVectorRotationEnaction.thePartToAimHorizontal.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+
+
+        return oneAngle;
+    }
+
+    private float getVerticalAngle(Vector3 lineToTarget)
+    {
+        //float oneAngle = Vector3.Angle(inputVector, theVectorRotationEnaction.thePartToAimVertical.forward);
+        //      float oneAngle = Vector3.SignedAngle(inputVector, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimHorizontal.right);
+
+
+        //RotateAround(Vector3 point, Vector3 axis, float angle); 
+        //and need perpendicular components [perpendicular to axis of rotation]
+
+
+        /*
+        Vector3 currentPerpendicularToRotationAxis = theVectorRotationEnaction.thePartToAimVertical.forward;
+        //Vector3 desiredPerpendicularToRotationAxis = findOnePerpendicularVector(inputVector.normalized, theVectorRotationEnaction.thePartToAimHorizontal.right);
+        Vector3 desiredPerpendicularToRotationAxis = findOnePerpendicularVector(theVectorRotationEnaction.thePartToAimHorizontal.right, inputVector.normalized);
+
+        float oneAngle = Vector3.Angle(currentPerpendicularToRotationAxis, desiredPerpendicularToRotationAxis);
+
+        */
+
+        //float oneAngle = AngleOffAroundAxis(inputVector, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimHorizontal.right);
+        //......aaaand, still not producing the rotation i want....gahh...
+        //try normalized???
+        //float oneAngle = AngleOffAroundAxis(inputVector.normalized, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimHorizontal.right);
+        //uhhhh, no, that's somehow catastrophically worse.
+        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimHorizontal.right);
+        //fixed it!  my input vector was just target position!  i needed to be using line from aiming object to the target it is aiming at!  position relative to the person doing the aiming, basically
+
+        //this one has to be negative for some reason??
+        return -oneAngle;
     }
 
 
+    public float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
+    {
+        //from here:
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        //but had to change conversion thing from "MathUtil.RAD_TO_DEG" to the following:
+        //Mathf.Rad2Deg
+
+
+        Vector3 right;
+        if (clockwise)
+        {
+            right = Vector3.Cross(forward, axis);
+            forward = Vector3.Cross(axis, right);
+        }
+        else
+        {
+            right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+        }
+
+
+        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
+    }
+
+
+    public Vector3 findOnePerpendicularVector(Vector3 vector1, Vector3 vector2)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(vector1, vector2);
+
+        return perpendicular;
+    }
 
 
 }
@@ -600,15 +743,15 @@ public class vecRotation : vectorMovement
 {
     //rotation motion, like turning left/right, looking up/down
 
-    Transform thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
-    Transform thePartToAimVertical;
+    public Transform thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
+    public Transform thePartToAimVertical;
     //CharacterController thePartToAimHorizontal;  //no, just use the "mouse"/"joystick" controls for this one???  ehhhhhh......?
     //CharacterController thePartToAimVertical;
 
-    float yawSpeed = 1f;
-    float pitchSpeed = 1f;
+    public float yawSpeed = 1f;
+    public float pitchSpeed = 1f;
 
-    float limitedPitchRotation = 0f;
+    public float limitedPitchRotation = 0f;
 
 
     public vecRotation(float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, virtualGamepad.buttonCategories gamepadButtonType)
@@ -659,11 +802,17 @@ public class vecRotation : vectorMovement
         updateYaw(inputVector.x);
     }
 
-    void updatePitch(float pitchInput)
+    public void updatePitch(float pitchInput)
     {
+        if (worldScript.singleton.debugToggle)
+        {
+
+            Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,updatePitch");
+        }
         //Debug.Log("11111111111111thePartToAimVertical.transform.gameObject:  " + thePartToAimVertical.transform.gameObject);
 
-        limitedPitchRotation -= pitchInput*pitchSpeed;
+        limitedPitchRotation -= pitchInput * pitchSpeed;
+        //limitedPitchRotation -= 30;
 
         //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
         limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
@@ -672,7 +821,17 @@ public class vecRotation : vectorMovement
         //Debug.Log("111111111111111111thePartToAimVertical.GetInstanceID():  " + thePartToAimVertical.transform.GetInstanceID());
         //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
         //Debug.Log("thePartToAimVertical.transform x+y+z:  X:  " + thePartToAimVertical.transform.rotation.x + "  Y:  " + thePartToAimVertical.transform.rotation.y + "  Z:  " + thePartToAimVertical.transform.rotation.z + "  W:  " + thePartToAimVertical.transform.rotation.w);
+        if (worldScript.singleton.debugToggle)
+        {
+            Debug.Log("thePartToAimVertical.transform.forward x+y+z:  X:  " + thePartToAimVertical.transform.forward.x + "  Y:  " + thePartToAimVertical.transform.forward.y + "  Z:  " + thePartToAimVertical.transform.forward.z);
+
+        }
         thePartToAimVertical.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+        if (worldScript.singleton.debugToggle)
+        {
+            Debug.Log("thePartToAimVertical.transform.forward x+y+z:  X:  " + thePartToAimVertical.transform.forward.x + "  Y:  " + thePartToAimVertical.transform.forward.y + "  Z:  " + thePartToAimVertical.transform.forward.z);
+
+        }
         //thePartToAimVertical.localRotation = Quaternion.AngleAxis(limitedPitchRotation, thePartToAimVertical.right);
         //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
         //Debug.Log("thePartToAimVertical.transform x+y+z:  X:  " + thePartToAimVertical.transform.rotation.x + "  Y:  " + thePartToAimVertical.transform.rotation.y + "  Z:  " + thePartToAimVertical.transform.rotation.z + "  W:  " + thePartToAimVertical.transform.rotation.w);
@@ -698,21 +857,39 @@ public class vecRotation : vectorMovement
     }
     */
 
-    void updateYaw(float yawInput)
+    public void updateYaw(float yawInput)
     {
+        
 
+        if (worldScript.singleton.debugToggle)
+        {
+            Debug.Log("___________________________________updateYaw");
+            Debug.Log("yawSpeed:  " + yawSpeed);
+            Debug.Log("yawInput:  " + yawInput);
+            Debug.Log("yawInput * yawSpeed:  " + yawInput * yawSpeed);
+            Vector3 thisThing = thePartToAimHorizontal.up * yawInput * yawSpeed;
+            Debug.Log("thePartToAimHorizontal.transform.up x+y+z:  X:  " + thePartToAimHorizontal.transform.up.x + "  Y:  " + thePartToAimHorizontal.transform.up.y + "  Z:  " + thePartToAimHorizontal.transform.up.z);
+            Debug.Log("thePartToAimHorizontal.up * yawInput * yawSpeed x+y+z:  X:  " + thisThing.x + "  Y:  " + thisThing.y + "  Z:  " + thisThing.z);
+            Debug.Log("thePartToAimHorizontal.transform.forward x+y+z:  X:  " + thePartToAimHorizontal.transform.forward.x + "  Y:  " + thePartToAimHorizontal.transform.forward.y + "  Z:  " + thePartToAimHorizontal.transform.forward.z);
+
+        }
         //                  xRotation -= theEnactionScript.mouseY;
         //                  xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         //                  transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
+
+        //Debug.Log("yawSpeed:  " + yawSpeed);
 
         //Debug.Log("222222222222222222222222thePartToAimHorizontal.transform.gameObject:  " + thePartToAimHorizontal.transform.gameObject);
 
         //Debug.Log("222222222222222222222222thePartToAimHorizontal.GetInstanceID():  " + thePartToAimHorizontal.transform.GetInstanceID());
-        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+
         thePartToAimHorizontal.Rotate(thePartToAimHorizontal.up * yawInput * yawSpeed);
-        //Debug.Log("thePartToAimHorizontal.transform x+y+z:  X:  " + thePartToAimHorizontal.transform.rotation.x + "  Y:  " + thePartToAimHorizontal.transform.rotation.y + "  Z:  " + thePartToAimHorizontal.transform.rotation.z + "  W:  " + thePartToAimHorizontal.transform.rotation.w);
+        if (worldScript.singleton.debugToggle)
+        {
+            Debug.Log("thePartToAimHorizontal.transform.forward x+y+z:  X:  " + thePartToAimHorizontal.transform.forward.x + "  Y:  " + thePartToAimHorizontal.transform.forward.y + "  Z:  " + thePartToAimHorizontal.transform.forward.z);
+
+        }
         //float xRotation = yawInput * yawSpeed;
         //thePartToAimHorizontal.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }

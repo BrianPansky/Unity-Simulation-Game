@@ -13,7 +13,8 @@ public class body2 : playable
 
 
     //      mouse look stuff
-    public float lookSpeed = 0.002f;
+    //public float lookSpeed = 0.002f;
+    float lookSpeed = 290f;
     public float standardClickDistance = 7.0f;
     public float speed = 12f;
     public float gravity = -9.81f;
