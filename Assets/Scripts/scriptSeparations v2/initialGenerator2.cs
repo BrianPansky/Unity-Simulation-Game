@@ -68,7 +68,7 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 31;
+        int howManyZones = 11;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 5;
@@ -198,10 +198,13 @@ public class initialGenerator2 : MonoBehaviour
         //GameObject testCube = repository2.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
+        //objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        //objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
 
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition+ new Vector3(-theXSpacing, 0, 0)));
-        objectList.Add(genGen.singleton.returnNPC4(startPosition + new Vector3(theXSpacing, 0, 0)));
-        objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(theXSpacing+ theXSpacing, 0, 0)));
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 
 

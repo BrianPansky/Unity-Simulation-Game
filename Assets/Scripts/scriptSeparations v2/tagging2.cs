@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 using static tagging2;
@@ -27,7 +28,8 @@ public class tagging2 : MonoBehaviour
     public enum tag2
     {
         interactable,
-        mapZone
+        mapZone,
+        gamepad
     }
 
 
@@ -480,9 +482,77 @@ public class tagging2 : MonoBehaviour
         //tagging2.singleton.zoneOfObject
 
     }
+
+    internal int whichZone(GameObject gameObject)
+    {
+        return zoneOfObject[idPairGrabify(gameObject)];
+    }
 }
 
+public class find
+{
+    public find()
+    {
 
+    }
+
+    List<GameObject> allMultipleInZone(int zone, List<tag2> theTags)
+    {
+        List<GameObject> newList = new List<GameObject> ();
+
+        foreach(objectIdPair thisId in allInZone(zone))
+        {
+            if(hasAllTagsOnList(thisId, theTags) == false) { continue; }
+
+            newList.Add(thisId.theObject);
+        }
+
+        return newList;
+    }
+
+
+    public List<objectIdPair> allInZone(int zone)
+    {
+        return tagging2.singleton.objectsInZone[zone];
+    }
+
+    public List<objectIdPair> allWithOneTag(List<objectIdPair> theList,tag2 theTag)
+    {
+        List<objectIdPair> newList = new List<objectIdPair>();
+
+        //return tagging2.singleton.objectsInZone[zone];
+
+        foreach(objectIdPair thisId in theList)
+        {
+            if (tagging2.singleton.tagsOnObject.Keys.Contains(thisId) == false) { continue; }
+            if (tagging2.singleton.tagsOnObject[thisId].Contains(theTag) == false) { continue; }
+
+            newList.Add(thisId);
+        }
+
+        return newList;
+    }
+
+
+    public bool hasAllTagsOnList(objectIdPair thisId, List<tag2> wantedTags)
+    {
+        //should be moved to tagging script or something!
+        //returns true if this object has all tags
+
+        //need to grab the tags on that object:
+
+        foreach (tag2 tag in wantedTags)
+        {
+            if (tagging2.singleton.tagsOnObject[thisId].Contains(tag) == false) { return false; }
+        }
+
+        //if we reach this point, it means the object does indeed have all the tags we want!
+        return true;
+    }
+
+    
+
+}
 
 public class objectIdPair
 {

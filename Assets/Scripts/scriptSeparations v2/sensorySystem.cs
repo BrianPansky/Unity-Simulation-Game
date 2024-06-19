@@ -351,7 +351,7 @@ public class spatialDataPointFragment
             
         }
 
-        Ray targetLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
+        Ray targetLookingRay = new Ray(targetObject.transform.position, targetObject.transform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
         Vector3 lineBetweenThreatAndPoint = originLocation - targetObject.transform.position;
         float theAngle = Vector3.Angle(targetLookingRay.direction, lineBetweenThreatAndPoint);
 
@@ -388,7 +388,8 @@ public class spatialDataPointFragment
     public Vector3 findOnePerpendicularVectorSYMMETRICAL()
     {
         Vector3 perpendicular = new Vector3();
-        Ray threatLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
+        //Ray threatLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
+        Ray targetLookingRay = new Ray(targetObject.transform.position, targetObject.transform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
         lineBetweenTargetAndThisPoint = originLocation - targetObject.transform.position;
 
         //do i have these correct?
@@ -396,7 +397,7 @@ public class spatialDataPointFragment
         towardsTarget = -lineBetweenTargetAndThisPoint;
 
 
-        float theAngle = Vector3.SignedAngle(threatLookingRay.direction, lineBetweenTargetAndThisPoint, Vector3.up);
+        float theAngle = Vector3.SignedAngle(targetLookingRay.direction, lineBetweenTargetAndThisPoint, Vector3.up);
         //Debug.Log("theAngle:  " + theAngle);
 
         if (theAngle < 0f)

@@ -270,43 +270,37 @@ public class aimTarget : IEnactByTargetVector
         //Vector2 theXYvectorCoordinates = calculateVector2(inputVector);
 
         //theVectorRotationEnaction.enact(theXYvectorCoordinates);
-        worldScript.singleton.debugToggle =true;
+        //worldScript.singleton.debugToggle =true;
 
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,
-            theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,
-            Color.white, 44f);
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,
-            Color.yellow, 44f);
+        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,Color.white, 44f);
+        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.yellow, 44f);
 
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
         //theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(-90));
         //theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(inputVector)));
 
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,
-            theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,
-            Color.blue, 44f);
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,
-            Color.red, 44f);
+        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,Color.blue, 44f);
+        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.red, 44f);
 
-        worldScript.singleton.debugToggle = false;
+        //worldScript.singleton.debugToggle = false;
     }
 
     private float translateAngleIntoYawSpeedEtc(float angle)
     {
-        Debug.Log(":::::::::::::::::::translateAngleIntoYawSpeedEtc::::::::::::::::::::");
-        Debug.Log("angle:  " + angle);
-        Debug.Log("theVectorRotationEnaction.yawSpeed:  " + theVectorRotationEnaction.yawSpeed);
-        Debug.Log("angle / (theVectorRotationEnaction.yawSpeed):  " + angle / (theVectorRotationEnaction.yawSpeed));
+        //Debug.Log(":::::::::::::::::::translateAngleIntoYawSpeedEtc::::::::::::::::::::");
+        //Debug.Log("angle:  " + angle);
+        //Debug.Log("theVectorRotationEnaction.yawSpeed:  " + theVectorRotationEnaction.yawSpeed);
+        //Debug.Log("angle / (theVectorRotationEnaction.yawSpeed):  " + angle / (theVectorRotationEnaction.yawSpeed));
         return angle / (theVectorRotationEnaction.yawSpeed);
     }
 
     private float translateAngleIntoPitchSpeedEtc(float angle)
     {
-        Debug.Log("----------------------translateAngleIntoPitchSpeedEtc:----------------------");
-        Debug.Log("angle:  " + angle);
-        Debug.Log("theVectorRotationEnaction.pitchSpeed:  " + theVectorRotationEnaction.pitchSpeed);
-        Debug.Log("angle / (theVectorRotationEnaction.pitchSpeed):  " + angle / (theVectorRotationEnaction.pitchSpeed));
+        //Debug.Log("----------------------translateAngleIntoPitchSpeedEtc:----------------------");
+        //Debug.Log("angle:  " + angle);
+        //Debug.Log("theVectorRotationEnaction.pitchSpeed:  " + theVectorRotationEnaction.pitchSpeed);
+        //Debug.Log("angle / (theVectorRotationEnaction.pitchSpeed):  " + angle / (theVectorRotationEnaction.pitchSpeed));
 
         return angle / theVectorRotationEnaction.pitchSpeed;
     }
@@ -863,14 +857,14 @@ public class vecRotation : vectorMovement
 
         if (worldScript.singleton.debugToggle)
         {
-            Debug.Log("___________________________________updateYaw");
-            Debug.Log("yawSpeed:  " + yawSpeed);
-            Debug.Log("yawInput:  " + yawInput);
-            Debug.Log("yawInput * yawSpeed:  " + yawInput * yawSpeed);
+            //Debug.Log("___________________________________updateYaw");
+            //Debug.Log("yawSpeed:  " + yawSpeed);
+            //Debug.Log("yawInput:  " + yawInput);
+            //Debug.Log("yawInput * yawSpeed:  " + yawInput * yawSpeed);
             Vector3 thisThing = thePartToAimHorizontal.up * yawInput * yawSpeed;
-            Debug.Log("thePartToAimHorizontal.transform.up x+y+z:  X:  " + thePartToAimHorizontal.transform.up.x + "  Y:  " + thePartToAimHorizontal.transform.up.y + "  Z:  " + thePartToAimHorizontal.transform.up.z);
-            Debug.Log("thePartToAimHorizontal.up * yawInput * yawSpeed x+y+z:  X:  " + thisThing.x + "  Y:  " + thisThing.y + "  Z:  " + thisThing.z);
-            Debug.Log("thePartToAimHorizontal.transform.forward x+y+z:  X:  " + thePartToAimHorizontal.transform.forward.x + "  Y:  " + thePartToAimHorizontal.transform.forward.y + "  Z:  " + thePartToAimHorizontal.transform.forward.z);
+            //Debug.Log("thePartToAimHorizontal.transform.up x+y+z:  X:  " + thePartToAimHorizontal.transform.up.x + "  Y:  " + thePartToAimHorizontal.transform.up.y + "  Z:  " + thePartToAimHorizontal.transform.up.z);
+            //Debug.Log("thePartToAimHorizontal.up * yawInput * yawSpeed x+y+z:  X:  " + thisThing.x + "  Y:  " + thisThing.y + "  Z:  " + thisThing.z);
+            //Debug.Log("thePartToAimHorizontal.transform.forward x+y+z:  X:  " + thePartToAimHorizontal.transform.forward.x + "  Y:  " + thePartToAimHorizontal.transform.forward.y + "  Z:  " + thePartToAimHorizontal.transform.forward.z);
 
         }
         //                  xRotation -= theEnactionScript.mouseY;

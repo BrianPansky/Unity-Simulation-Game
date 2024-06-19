@@ -165,8 +165,15 @@ public class virtualGamepad : MonoBehaviour
     void Start()
     {
 
-        if (isPlayer != true) { return; }
-        initializeMouseKeyboardInputs();
+        Debug.Log("this.gameObject:  " + this.gameObject);
+        Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.green, 22f);
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.gamepad);
+
+        if (isPlayer)
+        {
+            initializeMouseKeyboardInputs();
+        }
+
 
     }
 
@@ -285,22 +292,28 @@ public class virtualGamepad : MonoBehaviour
             //theVirtualGamePad.x = Input.GetAxis("Horizontal");
             //theVirtualGamePad.z = Input.GetAxis("Vertical");
 
-            Vector2 wasdVactor= new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-            
-            if(wasdVactor.magnitude > 0.05f)
-            {
+            updateWASD();
 
-                if (theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]] == null) { return; }
-                theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
-            }
+            updateJump();
+        }
+
+        void updateWASD()
+        {
+            Vector2 wasdVactor = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
 
+            if (wasdVactor.magnitude < 0.05f) { return; }
+            if (theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]] == null) { return; }
+            theVirtualGamePad.allCurrentVectorEnactables[buttonMapping[realButton.wasd]].enact(wasdVactor);
+        }
 
-            if (Input.GetButtonDown("Jump"))
-            {
-                theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.space]].enact();
-            }
+        void updateJump()
+        {
+
+            if (Input.GetButtonDown("Jump") == false) { return; }
+            if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.space]] == null) { return; }
+            theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.space]].enact();
         }
 
         void mouseUpdate()
