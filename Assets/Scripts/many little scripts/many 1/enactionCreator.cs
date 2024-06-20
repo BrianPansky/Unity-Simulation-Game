@@ -221,7 +221,7 @@ public class navAgent: IEnactByTargetVector
     public void enact(Vector3 inputVector)
     {
 
-        //Debug.Log("destination:  " + theAgent.destination);
+        Debug.Log("destination:  " + theAgent.destination);
         //Debug.Log("inputVector:  " + inputVector);
         
         if(theAgent.enabled == false)
@@ -265,6 +265,8 @@ public class aimTarget : IEnactByTargetVector
     //only for vector inputs!
     public void enact(Vector3 targetPosition)
     {
+        Debug.Log("aimTarget.  enactionAuthor:  ");
+
         //instantaneous for now
         Vector3 lineFromVertAimerToTarget = targetPosition - theVectorRotationEnaction.thePartToAimVertical.position;
         //Vector2 theXYvectorCoordinates = calculateVector2(inputVector);
@@ -273,7 +275,7 @@ public class aimTarget : IEnactByTargetVector
         //worldScript.singleton.debugToggle =true;
 
         //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,Color.white, 44f);
-        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.yellow, 44f);
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.yellow, 44f);
 
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
@@ -496,7 +498,7 @@ public class intSpherAtor : IEnactaBool
 
     public void enact()
     {
-        //Debug.Log("enact this.  enactionAuthor, interactionType:  " + enactionAuthor + ", "  + interactionType);
+        //Debug.Log("enact this intSpherAtor.  enactionAuthor, interactionType:  " + enactionAuthor + ", "  + interactionType);
         //, sensorySystem inputAuthorSensorySystem
         //authorSensorySystem = inputAuthorSensorySystem;
 

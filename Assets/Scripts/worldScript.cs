@@ -14,6 +14,9 @@ public class worldScript : MonoBehaviour
 
     int numberOfNearZones = 9;
 
+
+    //List<List<IupdateCallable>> zoneListOfCallables = new List<List<IupdateCallable>>();
+
     List<List<IupdateCallable>> nearZones = new List<List<IupdateCallable>>();
     List<List<IupdateCallable>> farZones = new List<List<IupdateCallable>>();
     int currentFarZone = 0;
@@ -61,6 +64,10 @@ public class worldScript : MonoBehaviour
     }
 
 
+
+
+
+
     private void updateWhichFarZoneWillBeCurrent()
     {
         currentFarZone++;
@@ -101,10 +108,26 @@ public class worldScript : MonoBehaviour
 
         foreach(objectIdPair thisPair in tagging2.singleton.objectsInZone[whichZoneWeAreLookingAt])
         {
+            if(thisPair == null)
+            {
+                Debug.Log("idPair is null");
+            }
+            if (thisPair.theObject == null)
+            {
+                Debug.Log("the object is null");
+                Debug.Log("id number:  " + thisPair.theObjectIdNumber);
+
+
+                Debug.Log("zzzzzzzzzso....zone _______with id________ contains pair with id ________ for object with id________:  "
+                    + whichZoneWeAreLookingAt+ "zone id:  "+ whichZoneWeAreLookingAt.GetHashCode()
+                    + "contains pair (boolean):  " + tagging2.singleton.objectsInZone[whichZoneWeAreLookingAt].Contains(thisPair)
+                    + "pair id:  " + thisPair.GetHashCode() + "object id:  " + thisPair.theObjectIdNumber);
+            }
             IupdateCallable thisCallable = thisPair.theObject.GetComponent<IupdateCallable>();
             //Debug.Log(thisCallable);
             if(thisCallable == null) { continue; }
             newList.Add(thisCallable);
+            thisCallable.currentUpdateList = newList;
         }
 
         return newList;
@@ -134,11 +157,22 @@ public class worldScript : MonoBehaviour
         }
     }
 
+
+    public void removeIupdateCallableFromItsList(IupdateCallable theCallable)
+    {
+        //when object is destroyed
+        //public List<IupdateCallable> currentUpdateList { get; set; }
+
+        theCallable.currentUpdateList.Remove(theCallable);
+
+    }
+
 }
 
 public interface IupdateCallable
 {
-
+    //easy way to remove from world script when object is destroyed:
+    List<IupdateCallable> currentUpdateList { get; set; }
 
     void callableUpdate();
 }

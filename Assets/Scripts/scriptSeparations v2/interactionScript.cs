@@ -14,6 +14,7 @@ public class interactionScript : MonoBehaviour
 
     int cooldown = 0;
 
+    int health = 2;
 
     public enum effect
     {
@@ -24,13 +25,44 @@ public class interactionScript : MonoBehaviour
     }
 
 
+    void Awake()
+    {
 
+
+    }
+
+
+    void OnEnable()
+    {
+
+        if (this.gameObject.GetComponent<safeDestroy>() == null)
+        {
+            this.gameObject.AddComponent<safeDestroy>();
+        }
+
+        //              theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
+
+
+
+        Debug.Log("add the tags");
+        Debug.Log("tagging2.singleton:  " + tagging2.singleton);
+        Debug.Log("this.gameObject:  " + this.gameObject);
+        Debug.Log("tagging2.tag2.interactable:  " + tagging2.tag2.interactable);
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
+
+        Debug.Log("now show what tags are on the object:  ");
+        foreach (tagging2.tag2 thisTag in tagging2.singleton.allTagsOnObject(this.gameObject))
+        {
+            Debug.Log(thisTag);
+        }
+    }
 
 
     void Start()
     {
 
-        //              theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
+        
 
     }
 
@@ -61,11 +93,7 @@ public class interactionScript : MonoBehaviour
 
         if (theAuthorScript.enacting.enactionAuthor == null) { return; }
 
-        if (dictOfInteractions.ContainsKey(theAuthorScript.enacting.interactionType) != true)
-        {
-
-            return;
-        }
+        if (dictOfInteractions.ContainsKey(theAuthorScript.enacting.interactionType) != true){return;}
 
 
 
@@ -123,7 +151,15 @@ public class interactionScript : MonoBehaviour
 
 
             }
+            else if (thisEffect == effect.damage)
+            {
+                health--;
 
+                if(health < 1)
+                {
+                    killThisBody();
+                }
+            }
             /*
             if (thisEffect == effect.damage)
             {
@@ -202,6 +238,29 @@ public class interactionScript : MonoBehaviour
 
         //Debug.Log("ZZZZZZZ     END onTriggerEnter for:  " + this.gameObject.name + "     ZZZZZZZ");
 
+    }
+
+    public void killThisBody()
+    {
+        //move to separate script?
+        //did that, soooooo now it should be safe to simply just do THIS here:
+        UnityEngine.Object.Destroy(this.gameObject);
+
+        /*
+        //this.gameObject.SetActive(false);
+        Debug.Log("................................preparing to destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
+
+        tagging2.singleton.removeALLtags(this.gameObject);
+        //removeIupdateCallableFromItsList
+        if(this.gameObject.GetComponent<IupdateCallable>() != null)
+        {
+            worldScript.singleton.removeIupdateCallableFromItsList(this.gameObject.GetComponent<IupdateCallable>());
+        }
+        
+
+        Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
+        UnityEngine.Object.Destroy(this.gameObject);
+        */
     }
 
 

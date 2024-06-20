@@ -10,6 +10,9 @@ public class virtualGamepad : MonoBehaviour
 {
     public GameObject theCamera = null;
 
+    public playable playingAs;
+
+
     public bool isPlayer = false;
     //public static virtualGamepad singleton;
 
@@ -118,8 +121,6 @@ public class virtualGamepad : MonoBehaviour
     public thumbstick thumbstick1 = new thumbstick();
     public thumbstick thumbstick2 = new thumbstick();
 
-
-
     void Awake()
     {
         //doThisPrintoutByInputString("0");
@@ -165,8 +166,8 @@ public class virtualGamepad : MonoBehaviour
     void Start()
     {
 
-        Debug.Log("this.gameObject:  " + this.gameObject);
-        Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.green, 22f);
+        //Debug.Log("this.gameObject:  " + this.gameObject);
+        //Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.green, 22f);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.gamepad);
 
         if (isPlayer)
@@ -372,6 +373,7 @@ public class playable: MonoBehaviour
 {
     public bool occupied = false;
 
+
     public Transform cameraMount;
 
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
@@ -415,6 +417,12 @@ public class playable: MonoBehaviour
 
     }
 
+    public void playAs(virtualGamepad gamepad)
+    {
+        //better way, just plug whole thing in, lol
+        occupied = true;
+        gamepad.playingAs = this;
+    }
 
     public void equip(virtualGamepad gamepad)
     {

@@ -10,6 +10,7 @@ public class repository2 : MonoBehaviour
     public static repository2 singleton;
 
     //OBJECTS:
+    public GameObject player;
     public GameObject npc2Prefab;
     public GameObject placeHolderCubePrefab;
     public GameObject placeHolderCylinderPrefab;

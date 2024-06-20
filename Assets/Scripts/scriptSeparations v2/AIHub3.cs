@@ -21,6 +21,7 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
     bool test = true;
 
+    public List<IupdateCallable> currentUpdateList { get; set; }
 
     // Start is called before the first frame update
     void Start()
@@ -218,10 +219,16 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
         int whichToPick = Random.Range(0, bools + byTargets);
 
 
+        Debug.Log("whichToPick" + whichToPick);
+
         int indexCount = 0;
 
         if (whichToPick <= bools - 1)
         {
+
+            Debug.Log("whichToPick <= bools - 1");
+            Debug.Log("bools - 1:  " + (bools - 1));
+
             foreach (var item in vGpad.allCurrentBoolEnactables.Values)
             {
                 if (indexCount == whichToPick)
@@ -234,63 +241,99 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
         }
         else
         {
-            foreach (var item in vGpad.allCurrentTARGETbyVectorEnactables)
-            {
-                if (printThisNPC)
-                {
-                    Debug.Log("item: " + item);
-                }
-                if (indexCount == whichToPick - bools)
-                {
-
-                    if (item == null) { continue; }
-
-
-                    CharacterController controller = this.transform.GetComponent<CharacterController>();
-                    if (controller != null)
-                    {
-                        //Debug.Log("?????????????????????????????????????");
-                        controller.enabled = false;
-                    }
-
-                    //int x = Random.Range(-8, 8);
-                    //int y = Random.Range(-8, 8);
-
-                    //item.enact(new Vector2(x, y));
-
-                    //eh, should i store this elsewhere?  but where else would be best?  for all other objects?
-                    //or just ALSO store it here on AIHub3, because AI will USE it often enough?
-                    //but then when/how to update it?  there's the rub.
-                    objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
-
-                    int currentZone = tagging2.singleton.zoneOfObject[thisPair];
-                    /*
-                    Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
-                    foreach (List<objectIdPair> obidpList in tagging2.singleton.objectsInZone.Values)
-                    {
-                        Debug.Log("obidpList.Count: " + obidpList.Count);
-                        
-                    }
-                    */
-
-                    GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
-                    //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
-                    item.enact(target.transform.position);
-                    //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
-                    if (printThisNPC)
-                    {
-                        Debug.DrawLine(this.transform.position, target.transform.position, Color.magenta, 2f);
-                        Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> target: " + target);
-                    }
-                    //
-
-                }
-                indexCount++;
-            }
+            Debug.Log("else");
+            doRandomByTarget(whichToPick - bools);
         }
 
     }
 
+    private void doRandomByTarget(int whichToPick)
+    {
+        Debug.Log("doRandomByTarget:  " + whichToPick);
+
+        objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
+        Debug.Log("thisId:  " + thisId);
+        int currentZone = tagging2.singleton.zoneOfObject[thisId];
+        Debug.Log("currentZone:  " + currentZone);
+        GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(
+            tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
+            this.gameObject);
+
+        Debug.Log("target:  " + target);
+        Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
+        Debug.Log("target.transform.position:  " + target.transform.position.ToString());
+        Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
+        Debug.Log("there should be a line, ok" + thisId);
+        //item.enact(target.transform.position);
+
+        vGpad.allCurrentTARGETbyVectorEnactables[whichToPick].enact(target.transform.position);
+
+
+        /*
+
+        foreach (IEnactByTargetVector item in vGpad.allCurrentTARGETbyVectorEnactables)
+        {
+            if (printThisNPC)
+            {
+                Debug.Log("item: " + item);
+            }
+
+            if (indexCount == whichToPick - bools)
+            {
+
+                if (item == null) { continue; }
+
+
+                CharacterController controller = this.transform.GetComponent<CharacterController>();
+                if (controller != null)
+                {
+                    //Debug.Log("?????????????????????????????????????");
+                    controller.enabled = false;
+                }
+
+                //int x = Random.Range(-8, 8);
+                //int y = Random.Range(-8, 8);
+
+                //item.enact(new Vector2(x, y));
+
+                //eh, should i store this elsewhere?  but where else would be best?  for all other objects?
+                //or just ALSO store it here on AIHub3, because AI will USE it often enough?
+                //but then when/how to update it?  there's the rub.
+                objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
+
+                int currentZone = tagging2.singleton.zoneOfObject[thisPair];
+                /*
+                Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
+                foreach (List<objectIdPair> obidpList in tagging2.singleton.objectsInZone.Values)
+                {
+                    Debug.Log("obidpList.Count: " + obidpList.Count);
+
+                }
+
+        //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
+        if (printThisNPC)
+                {
+                    Debug.DrawLine(this.transform.position, target.transform.position, Color.magenta, 2f);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> target: " + target);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.destination: " + currentNavMeshAgent.destination);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.enabled: " + currentNavMeshAgent.enabled);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.hasPath: " + currentNavMeshAgent.hasPath);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isActiveAndEnabled: " + currentNavMeshAgent.isActiveAndEnabled);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isOnNavMesh: " + currentNavMeshAgent.isOnNavMesh);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isPathStale: " + currentNavMeshAgent.isPathStale);
+                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isStopped: " + currentNavMeshAgent.isStopped);
+                    //Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isActiveAndEnabled: " + currentNavMeshAgent);
+                }
+                //
+
+            }
+            
+        }
+
+        */
+
+
+    }
 
     void simpleDodge()
     {
@@ -301,6 +344,14 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
         //Place waypoint in that direction, go with nav agent ?
 
         List<GameObject> threatList = threatListWithoutSelf();
+
+        //need to combine/balance dodging with other navigation goals.
+        //for now, at least allow normal navigation if there are zero threats
+        //[and save some calculation that is pointless if there are no threats]: 
+        if (threatList.Count < 1) {
+            //Debug.Log("threatList.Count < 1:  return");
+            return; }
+
         //from my older code:
         //
         spatialDataPoint myData = new spatialDataPoint();

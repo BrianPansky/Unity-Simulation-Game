@@ -59,7 +59,6 @@ public class genGen : MonoBehaviour
         
         interactionScript theInteractionScript = bottomBit.AddComponent<interactionScript>();
         //theInteractionScript.addInteraction("standardClick", "useVehicle");
-        theInteractionScript.addInteraction(enactionCreator.interType.standardClick, interactionScript.effect.useVehicle);
 
         //genGen.singleton.rigid(bottomBit);
 

@@ -128,7 +128,25 @@ public class body2 : playable
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
     }
 
-   
+    private void makeInteractions()
+    {
+        if (theInteractionScript == null)
+        {
+            theInteractionScript = this.gameObject.GetComponent<interactionScript>();
+
+            if (theInteractionScript == null)
+            {
+                theInteractionScript = this.gameObject.AddComponent<interactionScript>();
+
+            }
+
+            //do i still need this?
+            //theInteractionScript.dictOfInteractions = new Dictionary<interType, List<interactionScript.effect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+        }
+
+        theInteractionScript.addInteraction(enactionCreator.interType.tankShot, interactionScript.effect.damage);
+        theInteractionScript.addInteraction(enactionCreator.interType.shoot1, interactionScript.effect.damage);
+    }
 
     public bool isThisGrounded()
     {

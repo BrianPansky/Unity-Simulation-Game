@@ -29,18 +29,23 @@ public class tagging2 : MonoBehaviour
     {
         interactable,
         mapZone,
-        gamepad
+        gamepad,
+        zoneable
     }
 
 
 
     void Awake()
     {
+        Debug.Log("Awake:  " + this);
         singletonify();
     }
 
     void singletonify()
     {
+        Debug.Log("singleton, right?  " + this);
+
+
         if (singleton != null && singleton != this)
         {
             Debug.Log("this class is supposed to be a singleton, you should not be making another instance, destroying the new one");
@@ -172,7 +177,13 @@ public class tagging2 : MonoBehaviour
         int currentIndex = 0;
 
 
-        //objectIdPair newIdPair = idPairify(theObject);
+        objectIdPair theIdPair = idPairGrabify(theObject);
+        if(objectsWithTag[tag] !=null && objectsWithTag[tag].Contains(theIdPair))
+        {
+            objectsWithTag[tag].Remove(theIdPair);
+        }
+
+        /*
         //need to find the object in the list of tagged objects, then remove it from that list
         foreach (objectIdPair pair in objectsWithTag[tag])
         {
@@ -194,12 +205,16 @@ public class tagging2 : MonoBehaviour
         }
 
         objectsWithTag[tag].RemoveAt(currentIndex);
+
+        */
     }
     public void removeALLtags(GameObject theObject)
     {
         //REMOVES this object from ALL tag lists
         //necessary when destroying objects, 
         //otherwise there will be "null" object references on those lists!
+
+        //ok, but i need to remove it from pairsById, tagsOnObject, AND zoneOfObject as well then, and probably rename the function to be clearer
 
         //which data to modify?
         //      tagsOnObject
@@ -211,7 +226,45 @@ public class tagging2 : MonoBehaviour
         //???????
 
 
-        objectIdPair newIdPair = idPairify(theObject);
+        objectIdPair newIdPair = idPairGrabify(theObject);
+
+
+        
+        //          !!!!!!!!!!!  ZONES  !!!!!!!!!!!!!
+
+        if (zoneOfObject.ContainsKey(newIdPair))
+        {
+            if (objectsInZone[zoneOfObject[newIdPair]].Contains(newIdPair))
+            {
+
+                /*
+                Debug.Log("111111111so....zone _______with id________ contains pair with id ________ for object with id________:  "
+            + zoneOfObject[newIdPair] + "zone id:  " + zoneOfObject[newIdPair].GetHashCode()
+            + "contains pair (boolean):  " + tagging2.singleton.objectsInZone[zoneOfObject[newIdPair]].Contains(newIdPair)
+            + "pair id:  " + newIdPair.GetHashCode() + "object id:  " + newIdPair.theObjectIdNumber);
+                */
+
+                objectsInZone[zoneOfObject[newIdPair]].Remove(newIdPair);
+            }
+            else
+            {
+                Debug.Log("objectsInZone[zoneOfObject[newIdPair]].Contains(newIdPair) is FALSE, object is not in the zone list, zone list does not contain the object, well the idpair");
+
+            }
+
+            removeFromZone(theObject, zoneOfObject[newIdPair]);
+        }
+        else
+        {
+            Debug.Log("zoneOfObject.ContainsKey(newIdPair) is FALSE, object has no zone");
+
+        }
+
+
+
+
+
+
 
         //      objectsWithTag
         //      do this FIRST.  need to know which tags the object will be filed under
@@ -259,40 +312,35 @@ public class tagging2 : MonoBehaviour
     public void addToZone(GameObject theObject, int zone)
     {
         objectIdPair thisObjectIdPair = idPairGrabify(theObject);
-
-        if (zoneOfObject.ContainsKey(thisObjectIdPair) == false)
-        {
-            zoneOfObject[thisObjectIdPair] = zone;
-        }
-        else
-        {
-            if (zoneOfObject[thisObjectIdPair] == zone) { return; }
-        }
-
-        
-
         initializeObjectEntriesIfNecessary(thisObjectIdPair);
 
-        //remove from old zone:
-        removeFromZone(theObject, zone);
+        if (zoneOfObject[thisObjectIdPair] == zone && objectsInZone[zone].Contains(thisObjectIdPair))
+        {
+            //no modification necessary
+            return;
+        }
+
+        removeFromZone(theObject, zoneOfObject[thisObjectIdPair]);
+
 
         zoneOfObject[thisObjectIdPair] = zone;
+
+        //remove from [all should be handled in remove from zone function]:
+        //      zoneOfObject
+        //      objectsInZone
+        //WHEN to remove from a zone?
+        //      could do it always
+        //      or skip if new zone is same as old zone......so ya, check this FIRST
+        //add to:
+        //      zoneOfObject
+
+
 
         //add to new zone:
         objectsInZone[zone].Add(thisObjectIdPair);
     }
 
-    private void initializeObjectEntriesIfNecessary(objectIdPair thisIdPair)
-    {
-
-        if (zoneOfObject.ContainsKey(thisIdPair))
-        {
-            return;
-        }
-
-        zoneOfObject[thisIdPair] = 0;
-
-    }
+    
 
     public void removeFromZone(GameObject theObject, int zone)
     {
@@ -348,9 +396,9 @@ public class tagging2 : MonoBehaviour
 
         while (numberOfTries > 0)
         {
-            //Debug.Log("list count is:  " + theList.Count);
+            Debug.Log("list count is:  " + theList.Count);
             int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            //Debug.Log("random index is:  " + randomIndex);
+            Debug.Log("random index is:  " + randomIndex);
             thisObject = theList[randomIndex];
 
             if (thisObject != notTHISObject)
@@ -435,29 +483,43 @@ public class tagging2 : MonoBehaviour
 
     public objectIdPair idPairGrabify(GameObject theObject)
     {
-        objectIdPair newIdPair = idPairify(theObject);
+        //objectIdPair newIdPair = idPairify(theObject);
+        objectIdPair newIdPair = new objectIdPair();
+        newIdPair.theObject = theObject;
+        newIdPair.theObjectIdNumber = theObject.GetHashCode();
         if (pairsById.ContainsKey(newIdPair.theObjectIdNumber))
         {
+            initializeObjectEntriesIfNecessary(pairsById[newIdPair.theObjectIdNumber]);
             return pairsById[newIdPair.theObjectIdNumber];
         }
         else
         {
+            initializeObjectEntriesIfNecessary(newIdPair);
             pairsById[newIdPair.theObjectIdNumber] = newIdPair;
             return newIdPair;
         }
 
+        //initialize other dictionaries?  if needed?  sure.  but through another function.
+        
+
     }
 
-    public objectIdPair idPairify(GameObject theObject)
+    public void initializeObjectEntriesIfNecessary(objectIdPair thisIdPair)
     {
-        objectIdPair newobjIdPair = new objectIdPair();
-        newobjIdPair.theObject = theObject;
-        newobjIdPair.theObjectIdNumber = theObject.GetHashCode();  //this???  or other id number???
-        return newobjIdPair;
+
+
+
+        if (zoneOfObject.ContainsKey(thisIdPair) == false)
+        {
+            zoneOfObject[thisIdPair] = 0;
+        }
+        if (tagsOnObject.ContainsKey(thisIdPair) == false)
+        {
+            tagsOnObject[thisIdPair] = new List<tag2>();
+        }
 
 
     }
-
     public List<GameObject> listInObjectFormat(List<objectIdPair> pairFormatList)
     {
         List<GameObject> newList = new List<GameObject>();
@@ -486,6 +548,11 @@ public class tagging2 : MonoBehaviour
     internal int whichZone(GameObject gameObject)
     {
         return zoneOfObject[idPairGrabify(gameObject)];
+    }
+
+    public List<tag2> allTagsOnObject(GameObject gameObject)
+    {
+        return tagsOnObject[idPairGrabify(gameObject)];
     }
 }
 

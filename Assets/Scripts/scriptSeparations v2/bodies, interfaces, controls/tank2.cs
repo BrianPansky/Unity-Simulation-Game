@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
@@ -6,7 +7,7 @@ using static virtualGamepad;
 
 public class tank2 : playable
 {
-
+    interactionScript theInteractionScript;
     //      mouse look stuff
     //public float lookSpeed = 0.002f;
     float lookSpeed = 290f;
@@ -29,12 +30,19 @@ public class tank2 : playable
     public GameObject tankHead;
     public GameObject tankBarrel;
 
+    void Awake()
+    {
+
+        makeInteractions();
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
         makeEnactions();
 
-        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
+        //tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
 
         initializeCamera();
 
@@ -50,6 +58,30 @@ public class tank2 : playable
         //          Debug.DrawLine(this.gameObject.transform.position, thisBit, Color.white, 777f);
         //Debug.DrawLine(this.transform.position, tankHead.transform.position, Color.white, 777f);
         //Debug.DrawLine(this.transform.position, tankBarrel.transform.position, Color.blue, 777f);
+    }
+
+    private void makeInteractions()
+    {
+        if (theInteractionScript == null)
+        {
+            theInteractionScript = this.gameObject.GetComponent<interactionScript>(); 
+
+            if (theInteractionScript == null)
+            {
+                theInteractionScript = this.gameObject.AddComponent<interactionScript>();
+                
+            }
+            
+            //do i still need this?
+            //theInteractionScript.dictOfInteractions = new Dictionary<interType, List<interactionScript.effect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+        }
+
+
+        theInteractionScript.addInteraction(enactionCreator.interType.standardClick, interactionScript.effect.useVehicle);
+        theInteractionScript.addInteraction(enactionCreator.interType.tankShot, interactionScript.effect.damage);
+
+
+        //Debug.Log("add the tags to tank2:  " + randomIndex);
     }
 
     void initializeCamera()
