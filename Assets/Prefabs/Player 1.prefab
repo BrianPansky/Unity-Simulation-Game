@@ -170,7 +170,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a16cc8fa141e1f341bcbf2966ffc82dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPlayer: 0
+  theCamera: {fileID: 0}
+  playingAs: {fileID: 0}
+  isPlayer: 1
   x: 0
   z: 0
   yawInput: 0
@@ -188,8 +190,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   occupied: 0
+  cameraMount: {fileID: 0}
   enactionPoint1: {fileID: 0}
-  lookSpeed: 290
   standardClickDistance: 7
   speed: 12
   gravity: -9.81
