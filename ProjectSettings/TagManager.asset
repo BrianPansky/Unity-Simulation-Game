@@ -8,6 +8,9 @@ TagManager:
   - aMapZone
   - aProperty
   - container
+  - inputOutput1
+  - interactionType1
+  - dontAddToZones
   layers:
   - Default
   - TransparentFX
