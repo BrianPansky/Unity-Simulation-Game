@@ -105,18 +105,20 @@ public class tank2 : playable
     {
         //printEnactaBoolSet();
 
-        enactableBoolSet.Add(
-            new intSpherAtor(tankBarrel.transform, interType.tankShot, buttonCategories.primary, 1f)
+        //enactableBoolSet.Add(new intSpherAtor(tankBarrel.transform, interType.tankShot, buttonCategories.primary, 1f));
+        enactableBoolSet.Add(new projectileLauncher(tankBarrel.transform, buttonCategories.primary,
+            new interactionInfo(interType.tankShot),
+            new projectileInfo(1, true, 99, 0, false, true)));
 
-            );
 
         //printEnactaBoolSet();
 
         //enactableVectorSet.Add(new vecTranslation(speed, transform, buttonCategories.vector1));
         //  enactableVectorSet.Add(new vecRotation(lookSpeed, tankHead.transform, tankBarrel.transform, buttonCategories.vector2));
         new aimTarget(
-            new vecRotation(lookSpeed, tankHead.transform, tankBarrel.transform, buttonCategories.vector2)
+            new vecRotation(lookSpeed, tankHead.transform, tankBarrel.transform, buttonCategories.vector2, 25f)
             ).addToBothLists(enactableVectorSet, enactableTARGETVectorSet);
+        
         enactableVectorSet.Add(new turningWithNoStrafe(speed, transform, buttonCategories.vector1));
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
@@ -128,7 +130,7 @@ public class tank2 : playable
         foreach (IEnactaBool enactaBool in enactableBoolSet)
         {
             Debug.Log("11111111111111111enactaBool:  " + enactaBool);
-            Debug.Log("enactaBool.interactionType:  " + enactaBool.interactionType);
+            Debug.Log("enactaBool.interactionType:  " + enactaBool.interInfo.interactionType);
             Debug.Log("enactaBool.gamepadButtonType:  " + enactaBool.gamepadButtonType);
             //if (allCurrentBoolEnactables[thisKey] == null) { continue; }
 

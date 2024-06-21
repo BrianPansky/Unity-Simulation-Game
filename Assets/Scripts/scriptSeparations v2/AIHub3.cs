@@ -218,30 +218,39 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
         int whichToPick = Random.Range(0, bools + byTargets);
 
-
-        Debug.Log("whichToPick" + whichToPick);
+        //Debug.Log("iiiiiiiiiiiiiiivGpad.allCurrentBoolEnactables.Count" + vGpad.allCurrentBoolEnactables.Count); 
+        //Debug.Log("vGpad.allCurrentTARGETbyVectorEnactables.Count" + vGpad.allCurrentTARGETbyVectorEnactables.Count);
+        //Debug.Log("whichToPick" + whichToPick);
 
         int indexCount = 0;
 
         if (whichToPick <= bools - 1)
         {
 
-            Debug.Log("whichToPick <= bools - 1");
-            Debug.Log("bools - 1:  " + (bools - 1));
+            //Debug.Log("whichToPick <= bools - 1");
+            //Debug.Log("bools - 1:  " + (bools - 1));
 
-            foreach (var item in vGpad.allCurrentBoolEnactables.Values)
+            foreach (var key in vGpad.allCurrentBoolEnactables.Keys)
             {
+                //Debug.Log("22222222222222222222222222");
+
                 if (indexCount == whichToPick)
                 {
-                    if (item == null) { return; }
-                    item.enact();
+                    //Debug.Log("33333333333333333");
+                    if (vGpad.allCurrentBoolEnactables[key] == null) {
+
+                        //Debug.Log("item == null, for this key: " + key);
+                        return; }
+
+                    //Debug.Log("enact, for this key:  " + key);
+                    vGpad.allCurrentBoolEnactables[key].enact();
                 }
                 indexCount++;
             }
         }
         else
         {
-            Debug.Log("else");
+            //Debug.Log("else, doRandomByTarget");
             doRandomByTarget(whichToPick - bools);
         }
 
@@ -249,21 +258,21 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
     private void doRandomByTarget(int whichToPick)
     {
-        Debug.Log("doRandomByTarget:  " + whichToPick);
+        //Debug.Log("doRandomByTarget:  " + whichToPick);
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
-        Debug.Log("thisId:  " + thisId);
+        //Debug.Log("thisId:  " + thisId);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        Debug.Log("currentZone:  " + currentZone);
+        //Debug.Log("currentZone:  " + currentZone);
         GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
-        Debug.Log("target:  " + target);
-        Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
-        Debug.Log("target.transform.position:  " + target.transform.position.ToString());
-        Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
-        Debug.Log("there should be a line, ok" + thisId);
+        //Debug.Log("target:  " + target);
+        //Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
+        //Debug.Log("target.transform.position:  " + target.transform.position.ToString());
+        //Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
+        //Debug.Log("there should be a line, ok" + thisId);
         //item.enact(target.transform.position);
 
         vGpad.allCurrentTARGETbyVectorEnactables[whichToPick].enact(target.transform.position);

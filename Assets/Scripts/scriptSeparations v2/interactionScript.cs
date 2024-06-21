@@ -44,17 +44,17 @@ public class interactionScript : MonoBehaviour
 
 
 
-        Debug.Log("add the tags");
-        Debug.Log("tagging2.singleton:  " + tagging2.singleton);
-        Debug.Log("this.gameObject:  " + this.gameObject);
-        Debug.Log("tagging2.tag2.interactable:  " + tagging2.tag2.interactable);
+        //Debug.Log("add the tags");
+        //Debug.Log("tagging2.singleton:  " + tagging2.singleton);
+        //Debug.Log("this.gameObject:  " + this.gameObject);
+        //Debug.Log("tagging2.tag2.interactable:  " + tagging2.tag2.interactable);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
 
-        Debug.Log("now show what tags are on the object:  ");
+        //Debug.Log("now show what tags are on the object:  ");
         foreach (tagging2.tag2 thisTag in tagging2.singleton.allTagsOnObject(this.gameObject))
         {
-            Debug.Log(thisTag);
+            //Debug.Log(thisTag);
         }
     }
 
@@ -77,7 +77,7 @@ public class interactionScript : MonoBehaviour
         //Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
 
 
-        foreach (var key in dictOfInteractions.Keys)
+        //foreach (var key in dictOfInteractions.Keys)
         {
             //Debug.Log(key);
         }
@@ -91,13 +91,25 @@ public class interactionScript : MonoBehaviour
 
         authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
 
-        if (theAuthorScript.enacting.enactionAuthor == null) { return; }
+        if (theAuthorScript.enacting == null) {
+            Debug.Log("theAuthorScript.enacting == null");
+                return; }
 
-        if (dictOfInteractions.ContainsKey(theAuthorScript.enacting.interactionType) != true){return;}
+        //Debug.Log("theAuthorScript.enacting.interInfo:  " + theAuthorScript.enacting.interInfo);
+        //Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor:  " + theAuthorScript.enacting.interInfo.enactionAuthor);
+        if (theAuthorScript.enacting.interInfo.enactionAuthor == null) {
+
+            Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor == null"); 
+            return; }
+
+        if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true)
+        {
+            Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true"); 
+            return;}
 
 
 
-        foreach (effect thisEffect in dictOfInteractions[theAuthorScript.enacting.interactionType])
+        foreach (effect thisEffect in dictOfInteractions[theAuthorScript.interactionType])
         {
 
             if (thisEffect == effect.useVehicle)
@@ -112,27 +124,27 @@ public class interactionScript : MonoBehaviour
 
                 //enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
                 //ad hoc for now
-                virtualGamepad gamepad = theAuthorScript.enacting.enactionAuthor.GetComponent<virtualGamepad>();
+                virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
                 tank2 theTank = this.GetComponent<tank2>();
                 if (theTank.occupied == true) { return; }
                 theTank.equip(gamepad);
 
 
 
-                CharacterController controller = theAuthorScript.enacting.enactionAuthor.GetComponent<CharacterController>();
+                CharacterController controller = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<CharacterController>();
                 if (controller != null)
                 {
                     controller.enabled = false;
                 }
 
-                NavMeshAgent nva = theAuthorScript.enacting.enactionAuthor.GetComponent<NavMeshAgent>();
+                NavMeshAgent nva = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<NavMeshAgent>();
                 if (nva != null)
                 {
                     nva.enabled = false;
                 }
 
-                theAuthorScript.enacting.enactionAuthor.transform.position = this.transform.position;
-                theAuthorScript.enacting.enactionAuthor.transform.rotation = this.transform.rotation;
+                theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
+                theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
 
 
 
@@ -144,7 +156,7 @@ public class interactionScript : MonoBehaviour
                 //      theBodyScript.theBodyGameObject.active = false;
 
                 //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
-                theAuthorScript.enacting.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
+                theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
                 //theEnactionScript.enactionBody = this.gameObject;
                 //theEnactionScript.currentlyUsable.Remove("humanBody");
                 //theEnactionScript.currentlyUsable.Add("tank");

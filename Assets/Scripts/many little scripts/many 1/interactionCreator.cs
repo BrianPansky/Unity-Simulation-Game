@@ -42,3 +42,16 @@ public class interactionCreator : MonoBehaviour
         
     }
 }
+
+public class interactionInfo
+{
+    public GameObject enactionAuthor { get; set; }
+    public enactionCreator.interType interactionType { get; set; }
+    public float magnitudeOfInteraction = 1f;
+
+    public interactionInfo(enactionCreator.interType interactionType, float magnitudeOfInteraction = 1f)
+    {
+        this.interactionType = interactionType;
+        this.magnitudeOfInteraction = magnitudeOfInteraction;
+    }
+}

@@ -37,13 +37,13 @@ public class tagging2 : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log("Awake:  " + this);
+        //Debug.Log("Awake:  " + this);
         singletonify();
     }
 
     void singletonify()
     {
-        Debug.Log("singleton, right?  " + this);
+        //Debug.Log("singleton, right?  " + this);
 
 
         if (singleton != null && singleton != this)
@@ -396,9 +396,9 @@ public class tagging2 : MonoBehaviour
 
         while (numberOfTries > 0)
         {
-            Debug.Log("list count is:  " + theList.Count);
+            //Debug.Log("list count is:  " + theList.Count);
             int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            Debug.Log("random index is:  " + randomIndex);
+            //Debug.Log("random index is:  " + randomIndex);
             thisObject = theList[randomIndex];
 
             if (thisObject != notTHISObject)

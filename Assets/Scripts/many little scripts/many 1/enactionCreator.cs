@@ -130,14 +130,17 @@ public class enactionCreator : MonoBehaviour
 
 public interface IEnactaBool
 {
-
+    /*
     GameObject enactionAuthor
     {
         get; set;
     }
+    */
 
     virtualGamepad.buttonCategories gamepadButtonType {  get; set; }
-    enactionCreator.interType interactionType {  get; set; }
+    interactionInfo interInfo { get; set; }
+
+    //      enactionCreator.interType interactionType {  get; set; }
 
     //only for bool inputs!
     void enact();
@@ -221,12 +224,12 @@ public class navAgent: IEnactByTargetVector
     public void enact(Vector3 inputVector)
     {
 
-        Debug.Log("destination:  " + theAgent.destination);
+        //Debug.Log("destination:  " + theAgent.destination);
         //Debug.Log("inputVector:  " + inputVector);
         
         if(theAgent.enabled == false)
         {
-            Debug.Log("theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
+            Debug.Log("theAgent.enabled == false, theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
             Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.magenta, 200f);
         }
         
@@ -265,7 +268,7 @@ public class aimTarget : IEnactByTargetVector
     //only for vector inputs!
     public void enact(Vector3 targetPosition)
     {
-        Debug.Log("aimTarget.  enactionAuthor:  ");
+        //Debug.Log("aimTarget.  enactionAuthor:  ");
 
         //instantaneous for now
         Vector3 lineFromVertAimerToTarget = targetPosition - theVectorRotationEnaction.thePartToAimVertical.position;
@@ -415,6 +418,118 @@ public class aimTarget : IEnactByTargetVector
 
 }
 
+
+public class projectileLauncher: rangedEnaction, IEnactaBool
+{
+    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+    public interactionInfo interInfo { get; set; }
+    public projectileInfo theProjectileInfo;
+    /*
+    public Transform firePoint;
+    //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
+    //public bool hitscan = false;  //just make a separate class for this?
+    public float range = 99f;  //this can also be the time until projectile "self destruct"?
+    //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
+    public int firingCooldown = 0;
+    public int firingCooldownMax = 0;
+    //      can i do without the following?
+    //public float enactionCost = 1f;  //maybe like ammo? //wait until i'm ready to implement ammo, then clearly name it AMMO
+
+    */
+
+
+    public projectileLauncher(Transform firePoint, virtualGamepad.buttonCategories gamepadButtonType, interactionInfo interInfo, projectileInfo theProjectileInfo, float range = 99f)
+    {
+        this.gamepadButtonType = gamepadButtonType;
+        this.interInfo = interInfo;
+        this.theProjectileInfo = theProjectileInfo;
+
+        this.firePoint = firePoint;
+        this.range = range;
+        //int firingCooldown = 0;
+        //int firingCooldownMax = 0;
+    }
+
+    public void enact()
+    {
+        //Debug.Log("enact projectileLauncher");
+        genGen.singleton.projectileGenerator(theProjectileInfo, this, firePoint.position+ firePoint.forward, firePoint.forward);
+    }
+
+}
+
+public class hitscanEnactor: rangedEnaction, IEnactaBool
+{
+    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+    public interactionInfo interInfo { get; set; }
+    /*
+    public Transform firePoint;
+    //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
+    public float range = 7f;
+    //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
+    public int firingCooldown = 0;
+    public int firingCooldownMax = 0;
+
+    */
+
+    public void enact()
+    {
+        //Vector3 startPoint = authorSensorySystem.pointerOrigin();
+        //Vector3 endPoint = enactionTarget.gameObject.transform.position;
+        //authorSensorySystem.lookingRay = new Ray(startPoint, (endPoint - startPoint));
+        //          Debug.Log("firingByRaycastHit");
+
+        RaycastHit myHit;
+        //      Ray myRay = authorSensorySystem.lookingRay;
+        //Ray myRay = theEnactionScript.primaryRay;
+        Ray myRay = new Ray(firePoint.transform.position + firePoint.transform.forward, firePoint.transform.forward);
+
+        if (Physics.Raycast(myRay, out myHit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) == false) { return; }
+
+        //&& myHit.transform.gameObject == enactionTarget
+        if (myHit.transform == null) { return; }
+
+        //GameObject anInteractionSphere = repository2.singleton.interactionSphere;
+        //GameObject thisObject = genGen.singleton.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+        //genGen.singleton.projectileGenerator();
+        genGen.singleton.projectileGenerator(new projectileInfo(0), this, firePoint.position+firePoint.forward, firePoint.forward);
+
+
+        //      should this use "interactionMate" isntead?
+        //authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+        //theAuthorScript.enacting = this;
+        //          GENAuthorScript1(thisObject);
+
+        //theAuthorScript.theAuthor = enactionAuthor;
+        //theAuthorScript.interactionType = interactionType;
+
+
+
+        //see how far interactionSphere is from it's supposed target:
+        //Debug.DrawLine(thisObject.transform.position, enactionTarget.transform.position, Color.red, 0.9f);
+        //                  deleteThisEnaction = true;
+
+
+        firingCooldown--;
+    }
+
+
+
+}
+
+public abstract class rangedEnaction
+{
+    public Transform firePoint;
+    //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
+    public float range = 7f;
+    //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
+    public int firingCooldown = 0;
+    public int firingCooldownMax = 0;
+}
+
+
+
+
 public class intSpherAtor : IEnactaBool
 {
     //short for "interaction sphere generator"
@@ -429,42 +544,107 @@ public class intSpherAtor : IEnactaBool
     //other values should be plugged in by the body/vehicle that has this enaction
 
 
+
+    // orrrrr divie by part....
+    //all INTERACTION info
+    //all PROJECTILE info
+    //all GAMEPAD info
+    //all GENERATOR info, mere initialization stuff
+    //etc
+
+
+
+    //>>>>>>>>>> info needed when it collides with something
+    //[should probably be the only info on here, right?  err...it's a generator...so...
+    //....so this generator shouldn't store ANY info?  hmmm....i dunno.....just have ....
+    //...for GENERATOR, just have info needed to put a new object in the game world
+    //all other info should be packaged and ready to drop into the sub-components?  not a huge mess here?]:
+    
+    
+
+
+    //>>>>>>>>>> all INTERACTION info
     public GameObject enactionAuthor { get; set; }
-
-    //      public GameObject firePoint;
-    //public GameObject firePoint;
-    public Transform firePoint;
-    //      public enactionScript theEnactionScript;  //looks at this script to see if "fire" button has been pressed, etc
-
-    //      public string gamepadButtonType;
-    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
-
-    //      public enactionCreator.interType interactionType;
+    public interactionInfo interInfo { get; set; }
     public enactionCreator.interType interactionType { get; set; }
     public float magnitudeOfInteraction = 1f;
 
-    public bool hitscan = false;
 
-    public float range = 7f;
-    //public Ray firingRay;  //has to be filled RIGHT at moment of firing, so i will have it as an INPUT variable, not permanent
-    public bool sdOnCollision = true; //"projectileSelfDestructOnCollision"
-    public int timeUntilSelfDestruct = 99; //"timeUntilProjectileSelfDestruct"
+
+    //>>>>>>>>>> all PROJECTILE info
+    public bool sdOnCollision = true;
+    public int timeUntilSelfDestruct = 99;
+    public float growthSpeed = 0f;
     public bool affectedByGravity = false;
 
-    public float growthSpeed = 0f;
 
 
-    //need to put these somewhere else?  no, this class object basically IS the gun [or at least this relevant PART of the gun]?
+    //>>>>>>>>>> all GAMEPAD info
+    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+    //interactionInfo IEnactaBool.theInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+
+
+    //>>>>>>>>>> all GENERATOR info, mere initialization stuff
+    //>>>>>>>>>> info needed to put a new object in the game world [THIS should probably be the only info on here, right?]:
+    public Transform firePoint;
+    //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
+    public bool hitscan = false;  //just make a separate class for this?
+    public float range = 7f;
+    //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
     public int firingCooldown = 0;
     public int firingCooldownMax = 0;
     //      can i do without the following?
     public float enactionCost = 1f;  //maybe like ammo?
 
 
-    //unsure i want/need these:
-    public GameObject enactionTarget;
-    //public sensorySystem authorSensorySystem;
-    public GameObject returnClickedOn;
+
+
+
+
+
+    /*
+
+    //mmmmm, probably NOT gonna arrange it like this.  it's too vague and mixing things together, i dunno
+
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    //>>>>>>>>>> info needed when it collides with something
+    //[should probably be the only info on here, right?  err...it's a generator...so...
+    //....so this generator shouldn't store ANY info?  hmmm....i dunno.....just have ....
+    //...for GENERATOR, just have info needed to put a new object in the game world
+    //all other info should be packaged and ready to drop into the sub-components?  not a huge mess here?]:
+    public GameObject enactionAuthor { get; set; }
+    public enactionCreator.interType interactionType { get; set; }
+    public float magnitudeOfInteraction = 1f;
+    public bool sdOnCollision = true;
+
+    //>>>>>>>>>> well, other info needed AFTER being generated:
+    public int timeUntilSelfDestruct = 99;
+    public float growthSpeed = 0f;
+    public bool affectedByGravity = false;
+
+
+    //>>>>>>>>>> info needed to put a new object in the game world [THIS should probably be the only info on here, right?]:
+    public Transform firePoint;
+
+
+    //>>>>>>>>>> needed ....BEFORE generating/firing it:
+    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
+    public bool hitscan = false;
+    public float range = 7f;
+    //need to put cooldowns somewhere else?  no, this class object basically IS the gun [or at least this relevant PART of the gun]?
+    public int firingCooldown = 0;
+    public int firingCooldownMax = 0;
+    //      can i do without the following?
+    public float enactionCost = 1f;  //maybe like ammo?
+
+
+    //>>>>>>>>>> unsure i want/need these:
+    //      public GameObject enactionTarget;
+    //      public GameObject returnClickedOn;
+
+
+    */
 
 
     public intSpherAtor(Transform inputFirePoint, enactionCreator.interType inputInteractionType, virtualGamepad.buttonCategories inputGamepadButtonType, float inputMagnitudeOfInteraction = 1f, bool inputHitscan = false)
@@ -495,7 +675,6 @@ public class intSpherAtor : IEnactaBool
 
     }
 
-
     public void enact()
     {
         //Debug.Log("enact this intSpherAtor.  enactionAuthor, interactionType:  " + enactionAuthor + ", "  + interactionType);
@@ -508,8 +687,7 @@ public class intSpherAtor : IEnactaBool
             //return;  //turn it off to make NPCs fire "standard click", for faster random testing
         }
 
-
-        projectileGenerator(firePoint, interactionType, sdOnCollision, timeUntilSelfDestruct, growthSpeed, magnitudeOfInteraction);
+        //          genGen.singleton.projectileGenerator(this);
     }
 
     public void firingByRaycastHit(float theRange)
@@ -538,7 +716,19 @@ public class intSpherAtor : IEnactaBool
         //      should this use "interactionMate" isntead?
         //authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
         //theAuthorScript.enacting = this;
-        genAuthorScript1(thisObject);
+
+
+
+
+
+        //                      GENAuthorScript1(thisObject);
+
+
+
+
+
+
+
 
         //theAuthorScript.theAuthor = enactionAuthor;
         //theAuthorScript.interactionType = interactionType;
@@ -553,86 +743,11 @@ public class intSpherAtor : IEnactaBool
         firingCooldown--;
     }
 
-    public void projectileGenerator(Transform firePoint, enactionCreator.interType interactionType, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
-    {
-
-        //      GameObject prefabToUse = repository2.singleton.interactionSphere;
-
-        //Debug.Log("startPoint:  " + startPoint);
-
-        //      GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
-
-
-        GameObject prefabToUse = repository2.singleton.interactionSphere;
-
-        //Debug.Log("startPoint:  " + startPoint);
-
-        //Vector3 startPoint = theEnactionScript.primaryRay.origin;
-        //      Vector3 startPoint = theEnactionScript.primaryFiringPoint.transform.position;
-        //  Vector3 startPoint = author.transform.position + author.transform.forward;
-        //Vector3 startPoint = this.firePoint.transform.position + this.firePoint.transform.forward;
-        Vector3 startPoint = firePoint.position + firePoint.forward;
-
-        GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
 
 
 
 
 
-
-
-        //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
-
-        //Debug.Log("newProjectile.transform.position:  " + newProjectile.transform.position);
-
-        //newProjectile.transform.position += enactionBody.lookingRay.direction;
-        //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
-        projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
-        projectileScript.speed = 1f;
-        //              projectileScript.Direction = theEnactionScript.primaryRay.direction;
-        projectileScript.Direction = this.firePoint.transform.forward;
-        projectileScript.selfDestructOnCollision = sdOnCollision;
-        selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
-        killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
-        //killScript.
-
-        if (growthSpeed > 0f)
-        {
-            newProjectile.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-
-            growScript1 growScript = newProjectile.AddComponent<growScript1>();
-            growScript.growthSpeed = growthSpeed;
-        }
-
-
-        genAuthorScript1(newProjectile);
-
-        /*
-        //      should this use "interactionMate" isntead?
-
-        authorScript1 theAuthorScript = newProjectile.GetComponent<authorScript1>();
-        theAuthorScript.theAuthor = author;
-        //theAuthorScript.enactThisInteraction = theInteractionMate.enactThisInteraction;
-        //theAuthorScript.interactionType = "bullet1";
-        theAuthorScript.interactionType = interactionType;
-        theAuthorScript.magnitudeOfInteraction = magnitudeOfInteraction;
-        */
-
-        //Debug.Log("projectile made supposedly");
-        //mastLine(startPoint, Color.red);
-        //mastLine(newProjectile.transform.position, Color.blue);
-
-
-        //Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
-
-        //threatAlert(this);
-    }
-
-    private void genAuthorScript1(GameObject thisObject)
-    {
-        authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
-        theAuthorScript.enacting = this;
-    }
 
     void threatAlert(GameObject theThreat)
     {
@@ -662,8 +777,6 @@ public class intSpherAtor : IEnactaBool
 
     }
 
-
-
     void mastLine(Vector3 startPoint, Color theColor, float theHeight = 10f)
     {
         Vector3 p1 = startPoint;
@@ -672,6 +785,8 @@ public class intSpherAtor : IEnactaBool
     }
 
 }
+
+
 
 
 public abstract class vectorMovement : IEnactaVector
@@ -746,15 +861,17 @@ public class vecRotation : vectorMovement
 
     public float yawSpeed = 1f;
     public float pitchSpeed = 1f;
+    public float pitchRange = 70f;
 
     public float limitedPitchRotation = 0f;
 
 
-    public vecRotation(float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, virtualGamepad.buttonCategories gamepadButtonType)
+    public vecRotation(float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, virtualGamepad.buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
         speed = inputSpeed;
         yawSpeed = inputSpeed/444;
         pitchSpeed = inputSpeed/444;
+        this.pitchRange = pitchRange;
 
 
 
@@ -811,7 +928,8 @@ public class vecRotation : vectorMovement
         //limitedPitchRotation -= 30;
 
         //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
-        limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
+        //              limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
+        limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -pitchRange, pitchRange);
         //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
         //   thePartToAimVertical.Rotate(thePartToAimVertical.right * limitedPitchRotation);
         //Debug.Log("111111111111111111thePartToAimVertical.GetInstanceID():  " + thePartToAimVertical.transform.GetInstanceID());

@@ -86,25 +86,25 @@ public class mapZoneScript : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
 
-        Debug.Log("Collider other):  " + other );
+        //Debug.Log("Collider other):  " + other );
 
 
         //add objects to this zone's list, and update their body to reference this zone
         if (other.gameObject.tag == "interactionType1") {
 
-            Debug.Log("other.gameObject.tag == \"interactionType1\"");
+            //Debug.Log("other.gameObject.tag == \"interactionType1\"");
             return; }
         if (other.gameObject.tag == "dontAddToZones") {
 
-            Debug.Log("other.gameObject.tag == \"dontAddToZones\"");
+            //Debug.Log("other.gameObject.tag == \"dontAddToZones\"");
             return; }
 
         if(tagging2.singleton.allTagsOnObject(other.transform.gameObject).Contains(tagging2.tag2.zoneable))
         {
-            Debug.Log("Contains(tagging2.tag2.zoneable), addToZone");
+            //Debug.Log("Contains(tagging2.tag2.zoneable), addToZone");
             tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
 
-            Debug.Log("zone number:  " + thisZoneNumber +"   object name and id number:  " +other.transform.gameObject.name +"  " + tagging2.singleton.idPairGrabify(other.transform.gameObject).theObjectIdNumber);
+            //Debug.Log("zone number:  " + thisZoneNumber +"   object name and id number:  " +other.transform.gameObject.name +"  " + tagging2.singleton.idPairGrabify(other.transform.gameObject).theObjectIdNumber);
 
 
             //theList.Add(other.gameObject);
@@ -131,7 +131,7 @@ public class mapZoneScript : MonoBehaviour
         else
         {
 
-            Debug.Log("does NOT Contains(tagging2.tag2.zoneable), DON'T addToZone");
+            //Debug.Log("does NOT Contains(tagging2.tag2.zoneable), DON'T addToZone");
         }
     }
     private void OnTriggerExit(Collider other)

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static enactionCreator;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class genGen : MonoBehaviour
 {
@@ -109,6 +111,81 @@ public class genGen : MonoBehaviour
         //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
 
         return newObj;
+    }
+
+
+
+
+
+    public GameObject makeEmptyIntSphere(Vector3 position)
+    {
+
+        GameObject prefabToUse = repository2.singleton.interactionSphere;
+        GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, position);
+
+        return newProjectile;
+    }
+
+
+    public void projectileGenerator(projectileInfo theProjectileInfo, IEnactaBool theEnactable, Vector3 startPoint, Vector3 direction)//(rangedEnaction enInfo, interactionInfo interINFO, IEnactaBool theEnactable)
+    {
+
+        //Debug.Log("projectileGenerator");
+        //Transform firePoint, enactionCreator.interType interactionType, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
+
+        //Vector3 startPoint = enInfo.firePoint.position + enInfo.firePoint.forward;
+
+        GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
+        projectile1.genProjectile1(newObjectForProjectile, theProjectileInfo, direction);//enInfo, interINFO, theEnactable);
+        growScript1.genGrowScript1(newObjectForProjectile, theProjectileInfo.growthSpeed);
+
+        //should this use "interactionMate" isntead?
+        //authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
+        //interactionSpheres already have an author script!  use THIS function instead:
+        authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable);
+
+        /*
+
+        //Debug.Log("projectile made supposedly");
+        //mastLine(startPoint, Color.red);
+        //mastLine(newProjectile.transform.position, Color.blue);
+
+
+        //Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
+
+        //threatAlert(this);
+
+        */
+    }
+
+
+    public void OLDprojectileGenerator(intSpherAtor theEnactable)
+    {
+        /*
+        //Transform firePoint, enactionCreator.interType interactionType, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
+
+        Vector3 startPoint = theEnactable.firePoint.position + theEnactable.firePoint.forward;
+
+        GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
+        projectile1.genProjectile1(newObjectForProjectile, theEnactable);
+        growScript1.genGrowScript1(newObjectForProjectile, theEnactable);
+
+        //should this use "interactionMate" isntead?
+        authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
+
+
+        /*
+
+        //Debug.Log("projectile made supposedly");
+        //mastLine(startPoint, Color.red);
+        //mastLine(newProjectile.transform.position, Color.blue);
+
+
+        //Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
+
+        //threatAlert(this);
+
+        */
     }
 
 

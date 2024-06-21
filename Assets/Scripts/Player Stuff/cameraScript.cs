@@ -16,6 +16,9 @@ public class cameraScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //hmm, maybe i'll just plug them in in the prefab....
+
+        /*
         if (theVirtualGamePad == null)
         {
             GameObject parent = this.transform.parent.gameObject;
@@ -23,6 +26,8 @@ public class cameraScript : MonoBehaviour
         }
 
         theVirtualGamePad.theCamera = this.gameObject;
+
+        */
     }
 
     // Update is called once per frame

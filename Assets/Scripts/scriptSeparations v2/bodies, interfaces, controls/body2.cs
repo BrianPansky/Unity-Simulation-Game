@@ -46,7 +46,7 @@ public class body2 : playable
 
 
         initializeEnactionPoint1();
-        initializeCamera();
+        initializeCameraMount();
 
     }
 
@@ -60,7 +60,7 @@ public class body2 : playable
     }
 
 
-    void initializeCamera()
+    void initializeCameraMount()
     {
         cameraMount = new GameObject("cameraMount in initializeCamera() line 64, body2 script").transform;
         //cameraMount.transform.SetParent(transform, false);
@@ -117,8 +117,11 @@ public class body2 : playable
     }
     void makeEnactions()
     {
-        
-        enactableBoolSet.Add(new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true));
+
+        //enactableBoolSet.Add(new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true));
+        enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick), 
+            new projectileInfo(1)));
 
 
         enactableVectorSet.Add(new vecTranslation(speed, this.transform, buttonCategories.vector1));

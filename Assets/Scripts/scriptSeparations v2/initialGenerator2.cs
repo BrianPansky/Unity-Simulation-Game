@@ -23,7 +23,7 @@ public class initialGenerator2 : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log("Awake:  " + this);
+        //Debug.Log("Awake:  " + this);
         singletonify();
 
         //doing this so the singleton is ready before other objects we generate need it
@@ -45,7 +45,7 @@ public class initialGenerator2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Start:  " + this);
+        //Debug.Log("Start:  " + this);
         makePLAYER();
         GameObject theWorldObject = GameObject.Find("World");
         //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
@@ -76,8 +76,8 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 11;
-        int howManySetsPerZone = 1;
+        int howManyZones = 81;
+        int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 5;
         float sideOffset = 0;
@@ -208,12 +208,13 @@ public class initialGenerator2 : MonoBehaviour
         //objectList.Add(returnTestKey1());
         objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
-        /*
+        ///*
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        */
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        //*/
 
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 

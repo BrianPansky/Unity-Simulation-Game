@@ -218,7 +218,7 @@ public class virtualGamepad : MonoBehaviour
             if(allCurrentBoolEnactables[thisKey] == null) { continue; }
 
             //if (allCurrentBoolEnactables[thisKey].interactionType == null) { continue; }
-            Debug.Log(allCurrentBoolEnactables[thisKey].interactionType);
+            Debug.Log(allCurrentBoolEnactables[thisKey].interInfo.interactionType);
         }
     }
 
@@ -343,7 +343,12 @@ public class virtualGamepad : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-                if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) { return; }
+                //Debug.Log("...................Input.GetMouseButtonDown(0)");
+                if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) {
+
+                    //Debug.Log("theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null");
+                    //Debug.Log("buttonMapping[realButton.click1]:  " + buttonMapping[realButton.click1]);
+                    return; }
                 theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]].enact();
             }
         }
@@ -411,7 +416,9 @@ public class playable: MonoBehaviour
     public void plugIntoGamepadIfThereIsOne()
     {
         virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
-        if (gamepad == null) { return; }
+        if (gamepad == null) {
+            Debug.Log("gamepad == null for:  " + this.gameObject.name); 
+            return; }
 
         equip(gamepad);
 
@@ -429,8 +436,9 @@ public class playable: MonoBehaviour
         if(occupied == true) { return; }
         occupied = true;
 
-        //Debug.Log("is it null???:  " + cameraMount);
 
+        //Debug.Log("is cameraMount  null:  " + cameraMount + "  for this object:  " + this.gameObject.name);
+        //Debug.Log("is gamepad.theCamera null:  " + gamepad.theCamera + "  for this object:  " + this.gameObject.name);
         if (cameraMount != null && gamepad.theCamera != null)
         {
 
@@ -443,7 +451,16 @@ public class playable: MonoBehaviour
 
         foreach (IEnactaBool enactaBool in enactableBoolSet)
         {
-            enactaBool.enactionAuthor = gamepad.transform.gameObject;
+            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
+            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
+            //so i need to print sooooooo many....
+            //Debug.Log("enactaBool:  " + enactaBool);
+            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
+            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
+            //Debug.Log("gamepad:  " + gamepad);
+            //Debug.Log("gamepad.transform:  " + gamepad.transform);
+            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
+            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
             gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
         }
 
@@ -479,7 +496,7 @@ public class playable: MonoBehaviour
 
         foreach (IEnactaBool enactaBool in enactableBoolSet)
         {
-            enactaBool.enactionAuthor = null;
+            enactaBool.interInfo.enactionAuthor = null;
             gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
         }
 
@@ -502,21 +519,12 @@ public class playable: MonoBehaviour
 
 }
 
-
-public interface IbuttonObservable
+public abstract class gamePadButtonable
 {
-    //enum ButtonUseType
-    //{
-        //primary,
-        //secondary,
-        //aux1
-    //}
-
-    //ButtonUseType useType { get; set; }
-
-
-    void observeButton(IEnactaBool whatItDoes);
+    public virtualGamepad.buttonCategories gamepadButtonType;
+    public IEnactaBool theEnaction;
 }
+
 
 
 public class myButtonClass
