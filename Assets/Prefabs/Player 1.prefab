@@ -170,7 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a16cc8fa141e1f341bcbf2966ffc82dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  theCamera: {fileID: 0}
+  theCamera: {fileID: 859809950337065639}
   playingAs: {fileID: 0}
   isPlayer: 1
   x: 0
