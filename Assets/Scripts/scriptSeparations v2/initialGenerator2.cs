@@ -53,7 +53,7 @@ public class initialGenerator2 : MonoBehaviour
         //generateScene2();
         //generateScene3();
 
-        NEWgenerateScene3();
+        //      NEWgenerateScene3();
         
         //Time.timeScale = 0f;
     }

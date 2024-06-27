@@ -65,7 +65,7 @@ public class virtualGamepad : MonoBehaviour
     //public Dictionary<buttonCategories, IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new Dictionary<buttonCategories, IEnactByTargetVector>();
     public List<IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new List<IEnactByTargetVector>();
 
-
+    
 
     playerMouseKeyboardInputs mouseKeyboardInputs;
 
@@ -379,11 +379,14 @@ public class playable: MonoBehaviour
     public bool occupied = false;
 
 
+    public GameObject enactionPoint1;
     public Transform cameraMount;
 
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
     public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+    
+    public Dictionary<interactionCreator.simpleSlot, equippable> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, equippable>();
 
     //attach to objects/entities you can "play as" [such as bodies and vehicles]
     //weapons and items too
@@ -524,6 +527,137 @@ public abstract class gamePadButtonable
     public virtualGamepad.buttonCategories gamepadButtonType;
     public IEnactaBool theEnaction;
 }
+
+public class equippable : MonoBehaviour
+{
+    public interactionCreator.simpleSlot theEquippableType;
+
+    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
+    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
+    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
+    //attach to objects/entities you can "play as" [such as bodies and vehicles]
+    //weapons and items too
+
+
+    //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+
+
+
+    public void plugIntoGamepadIfThereIsOne()
+    {
+
+        playable thePlayable = this.gameObject.GetComponent<playable>();
+        if (thePlayable == null)
+        {
+            Debug.Log("thePlayable == null for:  " + this.gameObject.name);
+            return;
+        }
+
+        equip(thePlayable);
+
+    }
+
+    
+
+    public void equip(playable thePlayable)
+    {
+
+
+        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+        if (thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false) { 
+        Debug.Log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");return; }
+
+        Debug.Log("before thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
+
+        if (thePlayable.equipperSlotsAndContents[theEquippableType] != null)
+        {
+            thePlayable.equipperSlotsAndContents[theEquippableType].unequip();
+        }
+
+        thePlayable.equipperSlotsAndContents[theEquippableType] = this;
+
+
+        Debug.Log("after thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
+
+
+
+        //super ad hoc for now:
+        virtualGamepad gamepad = thePlayable.transform.gameObject.GetComponent<virtualGamepad>();
+
+
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        {
+            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
+            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
+            //so i need to print sooooooo many....
+            //Debug.Log("enactaBool:  " + enactaBool);
+            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
+            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
+            //Debug.Log("gamepad:  " + gamepad);
+            //Debug.Log("gamepad.transform:  " + gamepad.transform);
+            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
+            //          enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
+            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+        }
+
+
+
+        foreach (IEnactaVector enactaV in enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
+        }
+
+        //          gamepad.allCurrentTARGETbyVectorEnactables.Clear();
+        //          gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
+
+
+        //          if (gamepad.theCamera == null) { return; }
+
+        /*
+        Debug.Log(cameraMount);
+        if (cameraMount == null)
+        {
+            defaultCameraMountGenerator();
+        }
+        Debug.Log(cameraMount);
+        gamepad.theCamera.transform.SetParent(cameraMount, false);
+        */
+    }
+
+    public void unequip()
+    {
+
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        {
+            enactaBool.interInfo.enactionAuthor = null;
+            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
+        }
+
+
+
+        foreach (IEnactaVector enactaV in enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
+        }
+
+        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
+        {
+            //          if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
+            {
+                //          gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
+            }
+        }
+    }
+
+}
+
+
+
 
 
 

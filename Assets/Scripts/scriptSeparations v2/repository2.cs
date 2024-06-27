@@ -23,6 +23,7 @@ public class repository2 : MonoBehaviour
     public GameObject simpleTankBottom;
     public GameObject simpleTankTurretWITHOUTBarrel;
     public GameObject simpleTankBarrel;
+    public GameObject simpleGun1;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;

@@ -10,6 +10,19 @@ public class interactionCreator : MonoBehaviour
 
     //public enum interType
 
+    public enum simpleSlot
+    {
+        //XYZ Controller buttons,
+        storage,
+        seat,
+        hands,
+        liquidHolder,
+        topOfHead,
+        face,
+        torso
+
+    }
+
 
     void Awake()
     {

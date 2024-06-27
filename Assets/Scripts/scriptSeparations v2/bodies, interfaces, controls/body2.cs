@@ -9,7 +9,7 @@ using static virtualGamepad;
 public class body2 : playable
 {
 
-    public GameObject enactionPoint1;
+    //public GameObject enactionPoint1;
 
 
     //      mouse look stuff
@@ -43,7 +43,7 @@ public class body2 : playable
         currentHealth = maxHealth;
         connectingComponents();
 
-
+        equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
 
         initializeEnactionPoint1();
         initializeCameraMount();

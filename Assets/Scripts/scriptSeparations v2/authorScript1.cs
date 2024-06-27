@@ -185,6 +185,11 @@ public class authorScript1 : MonoBehaviour
             thisBit = (this.gameObject.transform.position + this.gameObject.transform.forward);
             whatColor = Color.red;
         }
+        else if (enacting != null && interactionType == enactionCreator.interType.shoot1)
+        {
+            thisBit = (this.gameObject.transform.position - this.gameObject.transform.up);
+            whatColor = Color.blue;
+        }
 
         Debug.DrawLine(this.gameObject.transform.position, thisBit, whatColor, 0.1f);
     }

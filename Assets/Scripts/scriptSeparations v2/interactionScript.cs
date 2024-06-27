@@ -21,7 +21,8 @@ public class interactionScript : MonoBehaviour
         damage,
         burn,
         useVehicle,
-        activate1
+        activate1,
+        equip
     }
 
 
@@ -92,19 +93,19 @@ public class interactionScript : MonoBehaviour
         authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
 
         if (theAuthorScript.enacting == null) {
-            Debug.Log("theAuthorScript.enacting == null");
+            //Debug.Log("theAuthorScript.enacting == null");
                 return; }
 
         //Debug.Log("theAuthorScript.enacting.interInfo:  " + theAuthorScript.enacting.interInfo);
         //Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor:  " + theAuthorScript.enacting.interInfo.enactionAuthor);
         if (theAuthorScript.enacting.interInfo.enactionAuthor == null) {
 
-            Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor == null"); 
+            //Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor == null"); 
             return; }
 
         if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true)
         {
-            Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true"); 
+            //Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true"); 
             return;}
 
 
@@ -143,8 +144,10 @@ public class interactionScript : MonoBehaviour
                     nva.enabled = false;
                 }
 
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
+
+                dockToThisObject(theAuthorScript.enacting.interInfo.enactionAuthor);
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
 
 
 
@@ -156,11 +159,24 @@ public class interactionScript : MonoBehaviour
                 //      theBodyScript.theBodyGameObject.active = false;
 
                 //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
                 //theEnactionScript.enactionBody = this.gameObject;
                 //theEnactionScript.currentlyUsable.Remove("humanBody");
                 //theEnactionScript.currentlyUsable.Add("tank");
 
+
+            }
+            else if (thisEffect == effect.equip)
+            {
+                //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
+                playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
+                gun1 theGun = this.GetComponent<gun1>();
+                //if (theGun.occupied == true) { return; }
+                theGun.equip(thePlayable);
+
+
+                //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
+                dockThisToOtherObject(thePlayable.enactionPoint1, (0.5f * thePlayable.enactionPoint1.transform.forward) + new Vector3(0.6f, 0.1f, 0));
 
             }
             else if (thisEffect == effect.damage)
@@ -275,6 +291,44 @@ public class interactionScript : MonoBehaviour
         */
     }
 
+    public void dockToThisObject(GameObject theObjectWeWantToDockToTHISObject, Vector3 offset = new Vector3())
+    {
+        theObjectWeWantToDockToTHISObject.transform.position = this.transform.position;
+        theObjectWeWantToDockToTHISObject.transform.rotation = this.transform.rotation;
+
+
+
+        //theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
+        //      theTank.pilot = theAuthorScript.enacting.enactionAuthor;
+        //      theTank.thePilotEnactionScript = theEnactionScript;
+
+        //this is probably great, but it also disables my camera.  will need to re-arrange things...
+        //      theBodyScript.theBodyGameObject.active = false;
+
+        //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
+        theObjectWeWantToDockToTHISObject.transform.SetParent(this.gameObject.transform, true);
+
+        theObjectWeWantToDockToTHISObject.transform.localPosition += offset;
+    }
+    public void dockThisToOtherObject(GameObject theObjectWeWantToDockTHISObjectTo, Vector3 offset = new Vector3())
+    {
+        this.transform.position = theObjectWeWantToDockTHISObjectTo.transform.position;
+        this.transform.rotation = theObjectWeWantToDockTHISObjectTo.transform.rotation;
+
+
+
+        //theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
+        //      theTank.pilot = theAuthorScript.enacting.enactionAuthor;
+        //      theTank.thePilotEnactionScript = theEnactionScript;
+
+        //this is probably great, but it also disables my camera.  will need to re-arrange things...
+        //      theBodyScript.theBodyGameObject.active = false;
+
+        //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
+        this.gameObject.transform.SetParent(theObjectWeWantToDockTHISObjectTo.transform, true);
+
+        this.transform.localPosition += offset;
+    }
 
     internal void addInteraction(enactionCreator.interType interactionType, effect effect)
     {
