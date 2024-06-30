@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Android;
 using static enactionCreator;
 using static virtualGamepad;
 
@@ -138,12 +139,16 @@ public class projectile1 : MonoBehaviour
             //newProjectile.GetComponent<Renderer>().material.color = new Color(1f, 1f, 0f);
             MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
             theRenderer.material.color = new Color(1f, 1f, 0f);
+            //DynamicGI.SetEmissive(GetComponent<Renderer>(), new Color(1f, 1f, 0f));
+            //material.EnableKeyword(“_EMISSION”);
+
+
             //theRenderer.material.shader.
             //theRenderer.
 
             //don't bother with this for now.  need to later though.
             //intSpherAtor thing =
-            
+
 
 
             authorScript1 auth = newProjectile.GetComponent<authorScript1>();

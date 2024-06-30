@@ -9,7 +9,7 @@ using static virtualGamepad;
 public class body2 : playable
 {
 
-    //public GameObject enactionPoint1;
+    public GameObject enactionPoint1;
 
 
     //      mouse look stuff
@@ -43,7 +43,7 @@ public class body2 : playable
         currentHealth = maxHealth;
         connectingComponents();
 
-        equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+
 
         initializeEnactionPoint1();
         initializeCameraMount();
@@ -105,7 +105,78 @@ public class body2 : playable
         customizeTheComponents();
         makeEnactions();
 
-        plugIntoGamepadIfThereIsOne();
+        //      plugIntoGamepadIfThereIsOne();
+    }
+
+    public void plugIntoGamepadIfThereIsOne()
+    {
+        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
+        if (gamepad == null)
+        {
+            Debug.Log("gamepad == null for:  " + this.gameObject.name);
+            return;
+        }
+
+        equip(gamepad);
+
+    }
+
+    public void equip(virtualGamepad gamepad)
+    {
+        //          if (occupied == true) { return; }
+        //          occupied = true;
+
+
+        //Debug.Log("is cameraMount  null:  " + cameraMount + "  for this object:  " + this.gameObject.name);
+        //Debug.Log("is gamepad.theCamera null:  " + gamepad.theCamera + "  for this object:  " + this.gameObject.name);
+        if (cameraMount != null && gamepad.theCamera != null)
+        {
+
+            gamepad.theCamera.transform.SetParent(cameraMount, false);
+        }
+
+
+
+        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
+
+        foreach (IEnactaBool enactaBool in enactableBoolSet)
+        {
+            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
+            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
+            //so i need to print sooooooo many....
+            Debug.Log("enactaBool:  " + enactaBool);
+            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
+            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
+            //Debug.Log("gamepad:  " + gamepad);
+            //Debug.Log("gamepad.transform:  " + gamepad.transform);
+            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
+            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+        }
+
+
+
+        foreach (IEnactaVector enactaV in enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
+        }
+
+        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
+        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
+
+
+        if (gamepad.theCamera == null) { return; }
+
+        /*
+        Debug.Log(cameraMount);
+        if (cameraMount == null)
+        {
+            defaultCameraMountGenerator();
+        }
+        Debug.Log(cameraMount);
+        gamepad.theCamera.transform.SetParent(cameraMount, false);
+        */
     }
 
     void customizeTheComponents()

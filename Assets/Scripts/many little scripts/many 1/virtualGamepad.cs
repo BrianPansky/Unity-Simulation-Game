@@ -4,13 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
 using UnityEngine.XR;
-using static virtualGamepad;
+using UnityEngine.Playables;
+//using static virtualGamepad;
+//using System.Numerics;
 
 public class virtualGamepad : MonoBehaviour
 {
     public GameObject theCamera = null;
 
-    public playable playingAs;
+    //public playable playingAs;
+    public Dictionary<buttonCategories, IEnactaBool> allCurrentBoolEnactables = new Dictionary<buttonCategories, IEnactaBool>();
+    public Dictionary<buttonCategories, IEnactaVector> allCurrentVectorEnactables = new Dictionary<buttonCategories, IEnactaVector>();
+    public List<IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new List<IEnactByTargetVector>();
+
+
+    public Dictionary<interactionCreator.slot, gamepadable> equipperSlotsAndTheirEquipment = new Dictionary<interactionCreator.slot, gamepadable>();
+    //public Dictionary<interactionCreator.slot, bool> availabilityOfParts = new Dictionary<interactionCreator.slot, bool>();
+
 
 
     public bool isPlayer = false;
@@ -60,11 +70,6 @@ public class virtualGamepad : MonoBehaviour
 
 
     //Dictionary<buttonCategories, bool> allCurrentBoolInputs = new Dictionary<buttonCategories, bool>();
-    public Dictionary<buttonCategories, IEnactaBool> allCurrentBoolEnactables = new Dictionary<buttonCategories, IEnactaBool>();
-    public Dictionary<buttonCategories, IEnactaVector> allCurrentVectorEnactables = new Dictionary<buttonCategories, IEnactaVector>();
-    //public Dictionary<buttonCategories, IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new Dictionary<buttonCategories, IEnactByTargetVector>();
-    public List<IEnactByTargetVector> allCurrentTARGETbyVectorEnactables = new List<IEnactByTargetVector>();
-
     
 
     playerMouseKeyboardInputs mouseKeyboardInputs;
@@ -75,6 +80,7 @@ public class virtualGamepad : MonoBehaviour
     {
         primary,
         aux1,
+        interact,
         vector1,
         vector2
     }
@@ -205,6 +211,65 @@ public class virtualGamepad : MonoBehaviour
         */
     }
 
+    void equipSelf()
+    {
+        //          this.gameObject.GetComponent<playable>().equip(this);
+    }
+
+
+    void tryToChangeWhichEnactablesGamepadActivatesAndWhichequipperSlotsAreOccupied(gamepadable thisGamepadable)
+    {
+        //[this is the generic function.  it will detect whether it needs to use "playAs" or "equip"
+        //of course, there should be an interface for that?  not quite, i DO want to pre-design the functions.
+        //err...ya?  i guess specific items/vehicles can INHERIT from "playable" and "equippable"
+        //still need to define ABSTRACT function in.....gamepadable.  right.  so THAT is the data type this function
+        //will take as input.
+
+        //          thisGamepadable.tryToChangeWhichEnactablesGamepadActivatesAndWhichequipperSlotsAreOccupied(this);
+
+    }
+
+    void playAs(playable thisPlayable)
+    {
+        //transfer ALL enactables
+        //if(thisPlayable.occupied == true) { return;}
+
+        //playingAs = thisPlayable;
+        //thisPlayable.occupied = true;
+    }
+
+    void equip(playable thisPlayable)
+    {
+        //only transfer the non-null enactables
+
+
+    }
+
+
+
+
+    public void plugIntoGamepadIfThereIsOne()
+    {
+        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
+        if (gamepad == null)
+        {
+            Debug.Log("gamepad == null for:  " + this.gameObject.name);
+            return;
+        }
+
+        //          equip(gamepad);
+
+    }
+
+    public void playAs(virtualGamepad gamepad)
+    {
+        //better way, just plug whole thing in, lol
+        //      occupied = true;
+        //      gamepad.playingAs = this;
+    }
+
+    
+
 
 
     public void doThisPrintoutByInputString(string inputString)
@@ -250,7 +315,8 @@ public class virtualGamepad : MonoBehaviour
             space,
             g,
             wasd,
-            mouse
+            mouse,
+            e
         }
 
 
@@ -267,6 +333,7 @@ public class virtualGamepad : MonoBehaviour
             buttonMapping[realButton.space] = buttonCategories.aux1;
             buttonMapping[realButton.wasd] = buttonCategories.vector1;
             buttonMapping[realButton.mouse] = buttonCategories.vector2;
+            buttonMapping[realButton.e] = buttonCategories.interact;
             //buttonMapping[realButton.g] = buttonCategories.aux...2???;
             //buttonMapping[realButton.click1] = buttonCategories.;
         }
@@ -297,6 +364,17 @@ public class virtualGamepad : MonoBehaviour
             updateWASD();
 
             updateJump();
+
+            updateMiscKeyboard();
+
+        }
+
+        private void updateMiscKeyboard()
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                //          theVirtualGamePad.playingAs.enactableBoolSet[buttonMapping[realButton.space]].enact();
+            }
         }
 
         void updateWASD()
@@ -374,19 +452,80 @@ public class virtualGamepad : MonoBehaviour
 }
 
 
-public class playable: MonoBehaviour
+
+
+
+
+
+
+
+
+
+
+
+
+
+public abstract class vehicleItemWeaponOrBodyEtc
 {
-    public bool occupied = false;
+    public List<slot> equipperSlotList;
+
+    public void equippableSlotsInitializer(List<interactionCreator.slot> availableParts)
+    {
+        //(List<buttonCategories> availableButtonCategories) hmmmmmmmmmmm, no, need to do this in terms of how they can be equipped [held one one of your free hands, worn on head, etc]
 
 
-    public GameObject enactionPoint1;
-    public Transform cameraMount;
+        foreach (var part in availableParts)
+        {
+            //      this.availabilityOfParts[part] = false;
+        }
+    }
 
+}
+
+public abstract class gamepadable : MonoBehaviour
+{
+    //not all items/equippables require a gamepad button, some are passive
+
+    
+
+    //Can’t just plug enactions into gamepad anymore:
+    //      You DO plug them in like that most of the time.And at the same time,
+    //      have to UNEQUIP anything that occupies the same button OR equipperSlot slot
+    //          Oh, and unequipping something obviously simultaneously removes it from the buttons AND the equipperSlot slots.
+    //      The exception is if slots are occupied by a “playAs” [body or vehicle],
+    //      then they cannot be repurposed until player manually exits vehicle
+    //          It could tell the player “you can’t do that while in this vehicle”
+
+
+
+
+
+    //public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
+    //public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
+    //public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
+
+    //public Dictionary<buttonCategories, IEnactaBool> enactableBoolSet = new Dictionary<buttonCategories, IEnactaBool>();
+    //public Dictionary<buttonCategories, IEnactaVector> enactableVectorSet = new Dictionary<buttonCategories, IEnactaVector>();
+    //public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
+
+    //all should have exit by default.  yes, it has to be an IEnactaBool, not a mere function, because it needs to occupy a BUTTON!
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
     public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
+
+
     
-    public Dictionary<interactionCreator.simpleSlot, equippable> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, equippable>();
+}
+
+public abstract class playable : gamepadable
+{
+    //these can also be an individual "seat" on a vehicle?  which might not have any enactions at all?  except exit
+    //public bool occupied = false;
+    //public Dictionary<buttonCategories, equippable> currentlyEquipped = new Dictionary<buttonCategories, equippable>();
+    
+    public Transform cameraMount;
 
     //attach to objects/entities you can "play as" [such as bodies and vehicles]
     //weapons and items too
@@ -394,267 +533,77 @@ public class playable: MonoBehaviour
 
     //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
-    public void defaultCameraMountGenerator()
-    {
-        GameObject newObject = new GameObject("cameraMount?????");
-
-        //newObject.transform.parent = this.transform;
-        newObject.transform.SetParent(this.transform, false);
-        //newObject.transform.position = this.transform.position + this.transform.forward * 0.3f;
-        //newObject.transform.rotation = this.transform.rotation;
-
-        //GameObject newObject2 = genGen.singleton.returnPineTree1(this.transform.position + this.transform.forward * 2.3f);
-
-        //newObject2.transform.SetParent(this.transform, false);
-        //newObject2.transform.position = this.transform.position + this.transform.forward * 8f;
-        //newObject2.transform.rotation = this.transform.rotation;
-
-        cameraMount = newObject.transform;
-
-    }
 
 
+    //need to get clear.  is this just a slot/seat?  or is this a full vehicle/body?
+    //"playable" sounds like a vehcile/body.
+    //so i need something ELSE to be the slots/seats.....and that is the dictionary entries.
 
-
-    public void plugIntoGamepadIfThereIsOne()
-    {
-        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
-        if (gamepad == null) {
-            Debug.Log("gamepad == null for:  " + this.gameObject.name); 
-            return; }
-
-        equip(gamepad);
-
-    }
-
-    public void playAs(virtualGamepad gamepad)
-    {
-        //better way, just plug whole thing in, lol
-        occupied = true;
-        gamepad.playingAs = this;
-    }
-
-    public void equip(virtualGamepad gamepad)
-    {
-        if(occupied == true) { return; }
-        occupied = true;
-
-
-        //Debug.Log("is cameraMount  null:  " + cameraMount + "  for this object:  " + this.gameObject.name);
-        //Debug.Log("is gamepad.theCamera null:  " + gamepad.theCamera + "  for this object:  " + this.gameObject.name);
-        if (cameraMount != null && gamepad.theCamera != null)
-        {
-
-            gamepad.theCamera.transform.SetParent(cameraMount, false);
-        }
-        
-
-
-        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
-            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
-            //so i need to print sooooooo many....
-            //Debug.Log("enactaBool:  " + enactaBool);
-            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
-            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
-            //Debug.Log("gamepad:  " + gamepad);
-            //Debug.Log("gamepad.transform:  " + gamepad.transform);
-            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
-            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-
-
-        if(gamepad.theCamera == null) { return; }
-
-        /*
-        Debug.Log(cameraMount);
-        if (cameraMount == null)
-        {
-            defaultCameraMountGenerator();
-        }
-        Debug.Log(cameraMount);
-        gamepad.theCamera.transform.SetParent(cameraMount, false);
-        */
-    }
-
-    public void unequip(virtualGamepad gamepad)
-    {
-        occupied = false;
-
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.interInfo.enactionAuthor = null;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
-        }
-
-        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
-        {
-            if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
-            {
-                gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
-            }
-        }
-    }
 
 }
 
+public abstract class equippable: gamepadable
+{
+    //interactionCreator.slot thisEquippablePart;  //like items //hmm, infinite variety of items, an object of this class will suffice to describe itself, no need for enum
+    List<interactionCreator.slot> whatPartsAreRequiredToEquipThis;  //like hands
+    playable equippedBy;
+
+
+    
+
+
+
+}
+
+/*
+
+public class equipperSlot
+{
+    no, go see the "slots" i defined elsewhere [they are in interactionCreator, for now]
+    
+
+
+
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//??????????  do i need this?
 public abstract class gamePadButtonable
 {
     public virtualGamepad.buttonCategories gamepadButtonType;
     public IEnactaBool theEnaction;
 }
 
-public class equippable : MonoBehaviour
-{
-    public interactionCreator.simpleSlot theEquippableType;
-
-    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
-    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
-
-    //attach to objects/entities you can "play as" [such as bodies and vehicles]
-    //weapons and items too
-
-
-    //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
 
 
-    public void plugIntoGamepadIfThereIsOne()
-    {
-
-        playable thePlayable = this.gameObject.GetComponent<playable>();
-        if (thePlayable == null)
-        {
-            Debug.Log("thePlayable == null for:  " + this.gameObject.name);
-            return;
-        }
-
-        equip(thePlayable);
-
-    }
-
-    
-
-    public void equip(playable thePlayable)
-    {
-
-
-        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-        if (thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false) { 
-        Debug.Log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");return; }
-
-        Debug.Log("before thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
-
-        if (thePlayable.equipperSlotsAndContents[theEquippableType] != null)
-        {
-            thePlayable.equipperSlotsAndContents[theEquippableType].unequip();
-        }
-
-        thePlayable.equipperSlotsAndContents[theEquippableType] = this;
-
-
-        Debug.Log("after thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
 
 
 
-        //super ad hoc for now:
-        virtualGamepad gamepad = thePlayable.transform.gameObject.GetComponent<virtualGamepad>();
-
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
-            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
-            //so i need to print sooooooo many....
-            //Debug.Log("enactaBool:  " + enactaBool);
-            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
-            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
-            //Debug.Log("gamepad:  " + gamepad);
-            //Debug.Log("gamepad.transform:  " + gamepad.transform);
-            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
-            //          enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
 
 
 
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
 
-        //          gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        //          gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-
-
-        //          if (gamepad.theCamera == null) { return; }
-
-        /*
-        Debug.Log(cameraMount);
-        if (cameraMount == null)
-        {
-            defaultCameraMountGenerator();
-        }
-        Debug.Log(cameraMount);
-        gamepad.theCamera.transform.SetParent(cameraMount, false);
-        */
-    }
-
-    public void unequip()
-    {
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.interInfo.enactionAuthor = null;
-            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
-        }
-
-        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
-        {
-            //          if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
-            {
-                //          gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
-            }
-        }
-    }
-
-}
 
 
 
@@ -687,7 +636,6 @@ public class trigger
     public float press = 0f;
     myButtonClass booleanButtonLogic = new myButtonClass();
 }
-
 
 public class thumbstick
 {
