@@ -622,6 +622,52 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 859809950099632578, guid: 5d05bc88e193bcc4ca4e69dac0ed537f,
         type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: npc2Prefab
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: placeHolderCubePrefab
+      value: 
+      objectReference: {fileID: 1038552138117451207, guid: dcff2d644f2083e4e8d72757afa6a453,
+        type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: placeHolderCylinderPrefab
+      value: 
+      objectReference: {fileID: 8919460830259755840, guid: f9c24fd08ffdbae44802ff86b044a097,
+        type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: invisibleCubePrefab
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: interactionSphere
+      value: 
+      objectReference: {fileID: 5953803115850116078, guid: 1a8a8b7ee725f3f42896f2e6d08dce8b,
+        type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: mapZone2
+      value: 
+      objectReference: {fileID: 6233897664412132075, guid: b39e19cf45edbd24f81287656652bc43,
+        type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: simpleTankTurretWITHOUTBarrel
+      value: 
+      objectReference: {fileID: 3190879108886832838, guid: 755aac088337f9940a62f5520e37281c,
+        type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: simpleGun1
+      value: 
+      objectReference: {fileID: -927199367670048503, guid: 50a5000b9fbd0b74a9d12d13d32acf2c,
+        type: 3}
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
       propertyPath: m_LocalPosition.x
