@@ -666,7 +666,7 @@ PrefabInstance:
         type: 3}
       propertyPath: simpleGun1
       value: 
-      objectReference: {fileID: -927199367670048503, guid: 50a5000b9fbd0b74a9d12d13d32acf2c,
+      objectReference: {fileID: 9098113273653535854, guid: c4a5250d7e7a1374782cf578e2d04ad2,
         type: 3}
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
@@ -706,7 +706,7 @@ PrefabInstance:
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
@@ -4305,7 +4305,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 52.382004, y: 109.825005, z: 66.597}
 --- !u!1 &280014028
 GameObject:
@@ -12509,7 +12509,7 @@ Transform:
   - {fileID: 992277368}
   - {fileID: 413052238}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 52.274002, y: 14.062, z: 53.992004}
 --- !u!1 &1066973195
 GameObject:
