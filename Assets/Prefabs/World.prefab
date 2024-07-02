@@ -63,6 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 411062ad6d6afea49adfc014f3ec60c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 0}
   npc2Prefab: {fileID: 1996924758962253453, guid: 29e883423d704e24ea16357bbcf798fb,
     type: 3}
   placeHolderCubePrefab: {fileID: 8620951049736949961, guid: ef0686372dde93640a567e5d2d594b88,
@@ -84,6 +85,10 @@ MonoBehaviour:
   simpleTankTurretWITHOUTBarrel: {fileID: 3190879108886832838, guid: 755aac088337f9940a62f5520e37281c,
     type: 3}
   simpleTankBarrel: {fileID: 6742334954144941906, guid: 7e14df7cf8b2b064b9d14ae9c1d348b3,
+    type: 3}
+  simpleGun1: {fileID: 9098113273653535854, guid: c4a5250d7e7a1374782cf578e2d04ad2,
+    type: 3}
+  shotgun1: {fileID: 8237283253626521563, guid: e3efedad745406947b000094ecc5607b,
     type: 3}
   prefab4: {fileID: 0}
   prefab5: {fileID: 0}
