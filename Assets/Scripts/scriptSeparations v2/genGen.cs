@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -94,6 +95,7 @@ public class genGen : MonoBehaviour
 
         return newObj;
     }
+
     public GameObject returnNPC4(Vector3 where)
     {
         GameObject newObj = Instantiate(repository2.singleton.placeHolderCylinderPrefab, where, Quaternion.identity);
@@ -102,6 +104,12 @@ public class genGen : MonoBehaviour
 
         newObj.AddComponent<AIHub3>();
         newObj.AddComponent<body2>();
+
+
+        inventory1 theirInventory = newObj.GetComponent<inventory1>();
+
+        //theirInventory.storedEquippables.Add(returnGun1(where));
+        //                  theirInventory.putInInventory(returnGun1(where));//.storedEquippables.Add(returnGun1(where));
 
         //newObj.AddComponent<navmeshAgentDebugging>();
 
@@ -113,6 +121,18 @@ public class genGen : MonoBehaviour
         return newObj;
     }
 
+    public GameObject returnGun1(Vector3 where)
+    {
+        GameObject newObj = Instantiate(repository2.singleton.simpleGun1, where, Quaternion.identity);
+
+
+        //newObj.AddComponent<interactionScript>();
+        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+
+        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+
+        return newObj;
+    }
 
 
 
@@ -143,6 +163,8 @@ public class genGen : MonoBehaviour
         //authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
         //interactionSpheres already have an author script!  use THIS function instead:
         authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable);
+        selfDestructScript1 sds = newObjectForProjectile.GetComponent<selfDestructScript1>();
+        sds.timeUntilSelfDestruct = theProjectileInfo.timeUntilSelfDestruct;
 
         /*
 
@@ -188,6 +210,16 @@ public class genGen : MonoBehaviour
         */
     }
 
+    internal GameObject returnShotgun1(Vector3 where)
+    {
+        GameObject newObj = Instantiate(repository2.singleton.shotgun1, where, Quaternion.identity);
 
 
+        //newObj.AddComponent<interactionScript>();
+        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+
+        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+
+        return newObj;
+    }
 }

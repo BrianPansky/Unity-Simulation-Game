@@ -15,6 +15,8 @@ public class enactionCreator : MonoBehaviour
 
     public enum interType
     {
+        errorYouDidntSetEnumTypeForINTERTYPE,
+        self,
         standardClick,
         shoot1,
         shootFlamethrower1,
@@ -24,6 +26,7 @@ public class enactionCreator : MonoBehaviour
     
     public enum vectorEnactionSubType  // "legibleType"???
     {
+        errorYouDidntSetEnumTypeForVECTORENACTIONSUBTYPE,
         navMesh,
         Aim
     }
@@ -423,7 +426,6 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 {
     public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
     public interactionInfo interInfo { get; set; }
-    public projectileInfo theProjectileInfo;
     /*
     public Transform firePoint;
     //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
@@ -472,8 +474,31 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
     */
 
+
+    public hitscanEnactor(Transform firePoint, virtualGamepad.buttonCategories gamepadButtonType, interactionInfo interInfo, projectileInfo theProjectileInfo, float range = 7f)
+    {
+        this.gamepadButtonType = gamepadButtonType;
+        this.interInfo = interInfo;
+        this.theProjectileInfo = theProjectileInfo;
+
+        this.firePoint = firePoint;
+        this.range = range;
+        //int firingCooldown = 0;
+        //int firingCooldownMax = 0;
+
+        this.theProjectileInfo.timeUntilSelfDestruct = 0;
+    }
+
+
+
     public void enact()
     {
+        firingByRaycastHit(range);
+
+
+
+        /*
+
         //Vector3 startPoint = authorSensorySystem.pointerOrigin();
         //Vector3 endPoint = enactionTarget.gameObject.transform.position;
         //authorSensorySystem.lookingRay = new Ray(startPoint, (endPoint - startPoint));
@@ -489,10 +514,10 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
         //&& myHit.transform.gameObject == enactionTarget
         if (myHit.transform == null) { return; }
 
-        //GameObject anInteractionSphere = repository2.singleton.interactionSphere;
-        //GameObject thisObject = genGen.singleton.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+        GameObject anInteractionSphere = repository2.singleton.interactionSphere;
+        GameObject thisObject = genGen.singleton.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
         //genGen.singleton.projectileGenerator();
-        genGen.singleton.projectileGenerator(new projectileInfo(0), this, firePoint.position+firePoint.forward, firePoint.forward);
+        //      genGen.singleton.projectileGenerator(new projectileInfo(0), this, firePoint.position+firePoint.forward, firePoint.forward);
 
 
         //      should this use "interactionMate" isntead?
@@ -509,8 +534,66 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
         //Debug.DrawLine(thisObject.transform.position, enactionTarget.transform.position, Color.red, 0.9f);
         //                  deleteThisEnaction = true;
 
+        */
 
         firingCooldown--;
+    }
+
+
+    public void firingByRaycastHit(float theRange)
+    {
+        //Debug.Log("range:  "+ theRange);
+        //Vector3 startPoint = authorSensorySystem.pointerOrigin();
+        //Vector3 endPoint = enactionTarget.gameObject.transform.position;
+        //authorSensorySystem.lookingRay = new Ray(startPoint, (endPoint - startPoint));
+        //      Debug.Log("firingByRaycastHit");
+
+        RaycastHit myHit;
+        //      Ray myRay = authorSensorySystem.lookingRay;
+        //Ray myRay = theEnactionScript.primaryRay;
+        Ray myRay = new Ray(firePoint.transform.position + firePoint.transform.forward, firePoint.transform.forward);
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) == false) { return; }
+
+        //&& myHit.transform.gameObject == enactionTarget
+        if (myHit.transform == null) { return; }
+
+        GameObject anInteractionSphere = repository2.singleton.interactionSphere;
+        GameObject thisObject = genGen.singleton.createPrefabAtPointAndRETURN(anInteractionSphere, myHit.point);
+        selfDestructScript1 sds = thisObject.GetComponent<selfDestructScript1>();
+        sds.timeUntilSelfDestruct = 0;
+
+
+        //      should this use "interactionMate" isntead?
+        //authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+        //theAuthorScript.enacting = this;
+        //              genAuthorScript1(thisObject);
+
+        authorScript1.FILLAuthorScript1(thisObject, this);
+
+
+        Debug.DrawLine(this.interInfo.enactionAuthor.transform.position, myHit.transform.position, Color.yellow, 0.3f);
+
+
+        //theAuthorScript.theAuthor = enactionAuthor;
+        //theAuthorScript.interactionType = interactionType;
+
+
+
+        //see how far interactionSphere is from it's supposed target:
+        //Debug.DrawLine(thisObject.transform.position, enactionTarget.transform.position, Color.red, 0.9f);
+        //                  deleteThisEnaction = true;
+
+
+        firingCooldown--;
+    }
+
+
+    private void genAuthorScript1(GameObject thisObject)
+    {
+        authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
+        theAuthorScript.enacting = this;
+        theAuthorScript.enacting.interInfo = this.interInfo;
     }
 
 
@@ -525,7 +608,11 @@ public abstract class rangedEnaction
     //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
     public int firingCooldown = 0;
     public int firingCooldownMax = 0;
+
+    public projectileInfo theProjectileInfo;
 }
+
+
 
 
 

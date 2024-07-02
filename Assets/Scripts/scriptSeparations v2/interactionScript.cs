@@ -18,20 +18,32 @@ public class interactionScript : MonoBehaviour
 
     public enum effect
     {
+        errorYouDidntSetEnumTypeForEFFECT,
         damage,
         burn,
         useVehicle,
-        activate1
+        activate1,
+        putInInventory,
+        equip
     }
-
-
-
 
 
     void Awake()
     {
+        //Debug.Log("awake this.gameObject:  " + this.gameObject.GetInstanceID());
 
+        if (tagging2.singleton == null)
+        {
+            Debug.Log("tagging2.singleton is null, cannot use it to add tags.  this happens for objects that have been added to the scene using the editor, because they exist before any scripts are called.  solution:  do not add prefabs to scene using editor.  generate them after singletons have initialized.");
+        }
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
 
+        //Debug.Log("now show what tags are on the object:  ");
+        foreach (tagging2.tag2 thisTag in tagging2.singleton.allTagsOnObject(this.gameObject))
+        {
+            //Debug.Log(thisTag);
+        }
     }
 
 
@@ -44,28 +56,24 @@ public class interactionScript : MonoBehaviour
         }
 
         //              theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
-
+        
+        //Debug.Log("this.gameObject:  " + this.gameObject);
+        //Debug.Log("enable this.gameObject:  " + this.gameObject.GetInstanceID());
 
 
         //Debug.Log("add the tags");
         //Debug.Log("tagging2.singleton:  " + tagging2.singleton);
         //Debug.Log("this.gameObject:  " + this.gameObject);
         //Debug.Log("tagging2.tag2.interactable:  " + tagging2.tag2.interactable);
-        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
-        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
-
-        //Debug.Log("now show what tags are on the object:  ");
-        foreach (tagging2.tag2 thisTag in tagging2.singleton.allTagsOnObject(this.gameObject))
-        {
-            //Debug.Log(thisTag);
-        }
+        
     }
 
 
     void Start()
     {
 
-        
+        //Debug.Log("start this.gameObject:  " + this.gameObject.GetInstanceID());
+
 
     }
 
@@ -77,17 +85,14 @@ public class interactionScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("YYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYY");
+        Debug.Log("YYYYYYYYYYYYYYYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYYYYYYYYYYYYYYYY");
 
 
-        //foreach (var key in dictOfInteractions.Keys)
-        {
-            //Debug.Log(key);
-        }
+        
 
         if (other.tag != "interactionType1")
         {
-
+            Debug.Log("other.tag != \"interactionType1\"");
             return;
         }
 
@@ -107,9 +112,18 @@ public class interactionScript : MonoBehaviour
 
         if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true)
         {
-            Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true"); 
+            //Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true, object being interacted with doesn't have this key:  " + theAuthorScript.interactionType);
+            //Debug.Log("instead, it only has the following:  ");
+
+            foreach (var key in dictOfInteractions.Keys)
+            {
+                //Debug.Log(key);
+            }
+            //Debug.Log("..........................................................");
             return;}
 
+
+        Debug.Log("great, what interaction effect is it???");
 
 
         foreach (effect thisEffect in dictOfInteractions[theAuthorScript.interactionType])
@@ -117,7 +131,7 @@ public class interactionScript : MonoBehaviour
 
             if (thisEffect == effect.useVehicle)
             {
-                //Debug.Log("thisEffect == effect.useVehicle");
+                Debug.Log("thisEffect == effect.useVehicle");
                 //Debug.Log("thisEffect == effect.useVehicle");
                 //Debug.Log("theAuthorScript.enacting.enactionAuthor.name:  " + theAuthorScript.enacting.enactionAuthor.name);
                 //Debug.Log("theAuthorScript.enacting.enactionAuthor.transform.position:  " + theAuthorScript.enacting.enactionAuthor.transform.position);
@@ -126,20 +140,11 @@ public class interactionScript : MonoBehaviour
                 //body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
 
                 //enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
-
-
-
                 //ad hoc for now
                 virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
                 tank2 theTank = this.GetComponent<tank2>();
-
-
-
-
-
-
-                //      if (theTank.occupied == true) { return; }
-                //      theTank.equip(gamepad);
+                if (theTank.occupied == true) { return; }
+                theTank.equip(gamepad);
 
 
 
@@ -155,8 +160,12 @@ public class interactionScript : MonoBehaviour
                     nva.enabled = false;
                 }
 
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
+
+                //      dockToThisObject(theAuthorScript.enacting.interInfo.enactionAuthor);
+                //Debug.Log("theAuthorScript:  " + theAuthorScript);
+                interactionCreator.singleton.dockXToY(theAuthorScript.enacting.interInfo.enactionAuthor, this.gameObject);
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
 
 
 
@@ -168,21 +177,63 @@ public class interactionScript : MonoBehaviour
                 //      theBodyScript.theBodyGameObject.active = false;
 
                 //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
-                theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
+                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
                 //theEnactionScript.enactionBody = this.gameObject;
                 //theEnactionScript.currentlyUsable.Remove("humanBody");
                 //theEnactionScript.currentlyUsable.Add("tank");
 
 
             }
+            else if (thisEffect == effect.equip)
+            {
+                Debug.Log("thisEffect == effect.equip");
+                //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
+                playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
+                gun1 theGun = this.GetComponent<gun1>();
+                //if (theGun.occupied == true) { return; }
+                theGun.equip(thePlayable);
+
+
+                //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
+                interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
+                //          dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
+
+            }
+            else if (thisEffect == effect.putInInventory)
+            {
+                Debug.Log("thisEffect == effect.putInInventory");
+                //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
+                //playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
+                //gun1 theGun = this.GetComponent<gun1>();
+                //if (theGun.occupied == true) { return; }
+                //          theGun.equip(thePlayable);
+
+                //          equippable theEquippable = this.GetComponent<equippable>();
+
+                //inventory1 theInventory = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<inventory1>();
+                //          theEquippable.putInInventory(theAuthorScript.enacting.interInfo.enactionAuthor);
+                inventory1 theInventory = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<inventory1>();
+                theInventory.putInInventory(this.gameObject);
+                //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
+                //dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
+
+            }
             else if (thisEffect == effect.damage)
             {
+
+                Debug.Log("thisEffect == effect.damage");
+
                 health--;
 
                 if(health < 1)
                 {
                     killThisBody();
                 }
+            }
+            else
+            {
+
+                Debug.Log("thisEffect is not implemented:  " + thisEffect);
             }
             /*
             if (thisEffect == effect.damage)
@@ -287,7 +338,7 @@ public class interactionScript : MonoBehaviour
         */
     }
 
-
+    
     internal void addInteraction(enactionCreator.interType interactionType, effect effect)
     {
         //dictOfInteractions

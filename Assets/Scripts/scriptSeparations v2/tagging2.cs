@@ -27,6 +27,7 @@ public class tagging2 : MonoBehaviour
 
     public enum tag2
     {
+        errorYouDidntSetEnumTypeForTAG2,
         interactable,
         mapZone,
         gamepad,
@@ -400,9 +401,11 @@ public class tagging2 : MonoBehaviour
             int randomIndex = UnityEngine.Random.Range(0, theList.Count);
             //Debug.Log("random index is:  " + randomIndex);
             thisObject = theList[randomIndex];
+            //Debug.Log("thisObject:  " + thisObject);
 
             if (thisObject != notTHISObject)
             {
+                //Debug.Log("thisObject:  " + thisObject);
                 return thisObject;
             }
 

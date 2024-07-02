@@ -24,11 +24,10 @@ public class repository2 : MonoBehaviour
     public GameObject simpleTankTurretWITHOUTBarrel;
     public GameObject simpleTankBarrel;
     public GameObject simpleGun1;
+    public GameObject shotgun1;
     public GameObject prefab4;
     public GameObject prefab5;
     public GameObject prefab6;
-
-
 
     void Awake()
     {

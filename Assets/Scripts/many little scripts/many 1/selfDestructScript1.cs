@@ -23,7 +23,7 @@ public class selfDestructScript1 : MonoBehaviour
         }
         if (currentCounter > timeUntilSelfDestruct)
         {
-            //Debug.Log("selfDestructScript1, currentCounter > timeUntilSelfDestruct, this.gameObject.name:  " + currentCounter +" > "+ timeUntilSelfDestruct + ", name: " + this.gameObject.name);
+            Debug.Log("selfDestructScript1, currentCounter > timeUntilSelfDestruct, this.gameObject.name:  " + currentCounter +" > "+ timeUntilSelfDestruct + ", name: " + this.gameObject.name);
 
             Destroy(this.gameObject);
         }

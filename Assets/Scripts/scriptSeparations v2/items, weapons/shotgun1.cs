@@ -4,18 +4,14 @@ using UnityEngine;
 using static enactionCreator;
 using static virtualGamepad;
 
-public class gun1 : equippable
+public class shotgun1 : equippable
 {
-
-
 
     public GameObject enactionPoint1;
 
     void Awake()
     {
         callableAwake();
-        //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
-        theEquippableType = interactionCreator.simpleSlot.hands;
     }
 
 
@@ -31,11 +27,12 @@ public class gun1 : equippable
         initializeEnactionPoint1();
 
 
-        
-
-        
 
 
+
+
+
+        theEquippableType = interactionCreator.simpleSlot.hands;
 
         enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
@@ -55,11 +52,11 @@ public class gun1 : equippable
 
     void initializeEnactionPoint1()
     {
-        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1() line 58, gun1 script");
+        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1() line 52, shotgun1 script");
         enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.2f + this.transform.up * 0.3f;
+        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.7f + this.transform.up * 0.3f;
         enactionPoint1.transform.rotation = this.transform.rotation;
 
     }
-
 }
+

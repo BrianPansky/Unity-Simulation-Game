@@ -87,17 +87,10 @@ public class mapZoneScript : MonoBehaviour
     {
 
         //Debug.Log("Collider other):  " + other );
-
+        if(zoneTaggingConditionsMet(other) == false) { return; }
 
         //add objects to this zone's list, and update their body to reference this zone
-        if (other.gameObject.tag == "interactionType1") {
-
-            //Debug.Log("other.gameObject.tag == \"interactionType1\"");
-            return; }
-        if (other.gameObject.tag == "dontAddToZones") {
-
-            //Debug.Log("other.gameObject.tag == \"dontAddToZones\"");
-            return; }
+        
 
         if(tagging2.singleton.allTagsOnObject(other.transform.gameObject).Contains(tagging2.tag2.zoneable))
         {
@@ -134,6 +127,26 @@ public class mapZoneScript : MonoBehaviour
             //Debug.Log("does NOT Contains(tagging2.tag2.zoneable), DON'T addToZone");
         }
     }
+
+    private bool zoneTaggingConditionsMet(Collider other)
+    {
+
+        if (other.gameObject.tag == "interactionType1")
+        {
+
+            //Debug.Log("other.gameObject.tag == \"interactionType1\"");
+            return false;
+        }
+        if (other.gameObject.tag == "dontAddToZones")
+        {
+
+            //Debug.Log("other.gameObject.tag == \"dontAddToZones\"");
+            return false;
+        }
+
+        return true;
+    }
+
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject.tag != "interactionType1")

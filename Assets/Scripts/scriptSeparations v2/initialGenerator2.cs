@@ -28,6 +28,7 @@ public class initialGenerator2 : MonoBehaviour
 
         //doing this so the singleton is ready before other objects we generate need it
         this.gameObject.AddComponent<tagging2>();
+        this.gameObject.AddComponent<interactionCreator>();
     }
 
     void singletonify()
@@ -206,15 +207,16 @@ public class initialGenerator2 : MonoBehaviour
         //GameObject testCube = repository2.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
-        objectList.Add(genGen.singleton.returnNPC4(startPosition));
-        ///*
-        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
+        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
-        //*/
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
+        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
+        objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+
 
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 
