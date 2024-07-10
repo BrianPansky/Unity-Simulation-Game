@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 7561328533045377208}
   - component: {fileID: 4776186454121454562}
   m_Layer: 0
-  m_Name: Cylinder
+  m_Name: tank barrel Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
