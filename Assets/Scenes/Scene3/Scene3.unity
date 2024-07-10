@@ -668,6 +668,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 9098113273653535854, guid: c4a5250d7e7a1374782cf578e2d04ad2,
         type: 3}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: explosion1
+      value: 
+      objectReference: {fileID: 2100000, guid: fddba165593af394ebb304f125f4bb03, type: 2}
+    - target: {fileID: 6387413386904728683, guid: ae2216130227ece40a555d534fdd68fb,
+        type: 3}
+      propertyPath: smoke1
+      value: 
+      objectReference: {fileID: 2100000, guid: 9db97b98c2dc43247b0dcf573ff1467a, type: 2}
     - target: {fileID: 6387413386904728686, guid: ae2216130227ece40a555d534fdd68fb,
         type: 3}
       propertyPath: m_LocalPosition.x
