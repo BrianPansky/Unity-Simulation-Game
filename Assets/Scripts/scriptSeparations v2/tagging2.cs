@@ -81,6 +81,8 @@ public class tagging2 : MonoBehaviour
 
         //update "local" tags
         //tags.Add(tag);
+        genGen.singleton.ensureSafetyForDeletion(theObject);
+
 
         if (tagsOnObject.ContainsKey(idPairGrabify(theObject)) == false)
         {
@@ -134,6 +136,9 @@ public class tagging2 : MonoBehaviour
         
 
     }
+
+    
+
     public void removeTag(GameObject theObject, tag2 tag)
     {
         //this funciton updates BOTH lists of tags
@@ -312,6 +317,8 @@ public class tagging2 : MonoBehaviour
 
     public void addToZone(GameObject theObject, int zone)
     {
+
+        genGen.singleton.ensureSafetyForDeletion(theObject);
         objectIdPair thisObjectIdPair = idPairGrabify(theObject);
         initializeObjectEntriesIfNecessary(thisObjectIdPair);
 

@@ -29,6 +29,10 @@ public class repository2 : MonoBehaviour
     public GameObject prefab5;
     public GameObject prefab6;
 
+
+    public Material explosion1;
+    public Material smoke1;
+
     void Awake()
     {
         singletonify();

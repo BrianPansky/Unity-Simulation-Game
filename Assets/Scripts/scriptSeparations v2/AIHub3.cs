@@ -4,46 +4,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static tagging2;
+using static enactionCreator;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
-using static virtualGamepad;
+
 
 public class AIHub3 : MonoBehaviour, IupdateCallable
 {
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
     public NavMeshAgent currentNavMeshAgent;
-    public bool printThisNPC = false;
-
-    int adhocCooldown = 0;
-
-
     virtualGamepad vGpad;
 
+    int adhocCooldown = 0;
+    public bool printThisNPC = false;
     bool test = true;
+
+
+    void Awake()
+    {
+
+        vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
+    }
 
     public List<IupdateCallable> currentUpdateList { get; set; }
 
     // Start is called before the first frame update
     void Start()
     {
-        if (currentNavMeshAgent == null)
-        {
-            currentNavMeshAgent = this.gameObject.GetComponent<NavMeshAgent>();
-            if (currentNavMeshAgent == null)
-            {
-                currentNavMeshAgent = this.gameObject.AddComponent<NavMeshAgent>();
-            }
-        }
-        vGpad = this.transform.GetComponent<virtualGamepad>();
-        if (vGpad == null)
-        {
+        currentNavMeshAgent = genGen.singleton.ensureNavmeshAgent(this.gameObject);
 
-            vGpad = this.transform.gameObject.AddComponent<virtualGamepad>();
-        }
 
-        //test
-        
     }
 
     // Update is called once per frame
@@ -57,28 +47,15 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
     public void callableUpdate()
     {
 
-        if (adhocCooldown < 44)
-        {
-            return;
-        }
+        //Debug.Log("=======================callableUpdate()............");
+        if (adhocCooldown < 44){return;}
 
         adhocCooldown = 0;
         //Debug.Log("0000000000000000000destination:  " + currentNavMeshAgent.destination);
-        //currentNavMeshAgent.SetDestination(this.gameObject.transform.position + new Vector3(1, -0.5f, -14));
 
-        //justDoRandomByINPUT();
-        //justDoRandomByInputORVector();
         justDoRandomByBoolORTarget();
-        //              simpleDodge();
+        simpleDodge();
 
-        /*
-        if(vGpad.allCurrentBoolEnactables.Count == 0)
-        {
-            return;
-        }
-
-        vGpad.allCurrentBoolEnactables[0].enact();
-        */
     }
 
     void justDoRandomByINPUT()
@@ -114,6 +91,7 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
                     int x = Random.Range(-8, 8);
                     int y = Random.Range(-8, 8);
 
+                    Debug.Log("item.enact:  " + item);
                     item.enact(new Vector2(x,y));
                 }
                 dictionaryEntryCount++;
@@ -220,15 +198,8 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
         int whichToPick = Random.Range(0, bools + byTargets);
 
 
-        foreach (buttonCategories thisButtonCategory in vGpad.allCurrentBoolEnactables.Keys)
-        {
-            //Debug.Log("22222222222222222 has category:  " + thisButtonCategory);
-        }
 
-
-        Debug.Log("iiiiiiiiiiiiiiivGpad.allCurrentBoolEnactables.Count:  " + vGpad.allCurrentBoolEnactables.Count); 
-        Debug.Log("vGpad.allCurrentTARGETbyVectorEnactables.Count:  " + vGpad.allCurrentTARGETbyVectorEnactables.Count);
-        Debug.Log("whichToPick:  " + whichToPick);
+        //Debug.Log("whichToPick:  " + whichToPick);
 
         int indexCount = 0;
 
@@ -245,12 +216,14 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
                 if (indexCount == whichToPick)
                 {
                     //Debug.Log("33333333333333333");
-                    if (vGpad.allCurrentBoolEnactables[key] == null) {
+                    if (vGpad.allCurrentBoolEnactables[key] == null)
+                    {
 
                         //Debug.Log("item == null, for this key: " + key);
-                        return; }
+                        return;
+                    }
 
-                    //      Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
+                          //Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
                     enactaBool = vGpad.allCurrentBoolEnactables[key];
                     //vGpad.allCurrentBoolEnactables[key].enact();
                     break;
@@ -260,9 +233,39 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
             enactaBool.enact();
         }
+
+        /*
+        if (whichToPick <= bools - 1)
+        {
+            IEnactaBool enactaBool = null;
+            Debug.Log("whichToPick <= bools - 1");
+            Debug.Log("bools - 1:  " + (bools - 1));
+
+            foreach (buttonCategories key in vGpad.allCurrentBoolEnactables.Keys)
+            {
+                Debug.Log("22222222222222222222222222");
+
+                if (indexCount != whichToPick) { continue; }
+                Debug.Log("33333333333333333");
+                if (vGpad.allCurrentBoolEnactables[key] == null)
+                {
+                    //Debug.Log("item == null, for this key: " + key);
+                    return;
+                }
+
+                      Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
+                enactaBool = vGpad.allCurrentBoolEnactables[key];
+                break;
+
+                indexCount++;
+            }
+
+            enactaBool.enact();
+        }
+        */
         else
         {
-            Debug.Log("else, doRandomByTarget");
+            //Debug.Log("else, doRandomByTarget");
             doRandomByTarget(whichToPick - bools);
         }
 
@@ -270,95 +273,33 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
     private void doRandomByTarget(int whichToPick)
     {
-        Debug.Log("doRandomByTarget:  " + whichToPick);
+        //Debug.Log("doRandomByTarget:  " + whichToPick);
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
-        Debug.Log("thisId:  " + thisId);
+        //Debug.Log("thisId:  " + thisId);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        Debug.Log("currentZone:  " + currentZone);
-        Debug.Log("number of objects in currentZone:  " + tagging2.singleton.objectsInZone[currentZone].Count);
+        //Debug.Log("currentZone:  " + currentZone);
+        //Debug.Log("number of objects in currentZone:  " + tagging2.singleton.objectsInZone[currentZone].Count);
         GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
-        Debug.Log("target:  " + target);
-        Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
-        Debug.Log("target.transform.position:  " + target.transform.position.ToString());
-        Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
+        //Debug.Log("target:  " + target);
+        //Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
+        //Debug.Log("target.transform.position:  " + target.transform.position.ToString());
+        //Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
         //Debug.Log("there should be a line, ok" + thisId);
         //item.enact(target.transform.position);
         //      Debug.Log("vGpad.allCurrentTARGETbyVectorEnactables[whichToPick]:  " + vGpad.allCurrentTARGETbyVectorEnactables[whichToPick]);
         vGpad.allCurrentTARGETbyVectorEnactables[whichToPick].enact(target.transform.position);
 
 
-        /*
-
-        foreach (IEnactByTargetVector item in vGpad.allCurrentTARGETbyVectorEnactables)
-        {
-            if (printThisNPC)
-            {
-                Debug.Log("item: " + item);
-            }
-
-            if (indexCount == whichToPick - bools)
-            {
-
-                if (item == null) { continue; }
-
-
-                CharacterController controller = this.transform.GetComponent<CharacterController>();
-                if (controller != null)
-                {
-                    //Debug.Log("?????????????????????????????????????");
-                    controller.enabled = false;
-                }
-
-                //int x = Random.Range(-8, 8);
-                //int y = Random.Range(-8, 8);
-
-                //item.enact(new Vector2(x, y));
-
-                //eh, should i store this elsewhere?  but where else would be best?  for all other objects?
-                //or just ALSO store it here on AIHub3, because AI will USE it often enough?
-                //but then when/how to update it?  there's the rub.
-                objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
-
-                int currentZone = tagging2.singleton.zoneOfObject[thisPair];
-                /*
-                Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
-                foreach (List<objectIdPair> obidpList in tagging2.singleton.objectsInZone.Values)
-                {
-                    Debug.Log("obidpList.Count: " + obidpList.Count);
-
-                }
-
-        //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
-        if (printThisNPC)
-                {
-                    Debug.DrawLine(this.transform.position, target.transform.position, Color.magenta, 2f);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> target: " + target);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.destination: " + currentNavMeshAgent.destination);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.enabled: " + currentNavMeshAgent.enabled);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.hasPath: " + currentNavMeshAgent.hasPath);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isActiveAndEnabled: " + currentNavMeshAgent.isActiveAndEnabled);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isOnNavMesh: " + currentNavMeshAgent.isOnNavMesh);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isPathStale: " + currentNavMeshAgent.isPathStale);
-                    Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isStopped: " + currentNavMeshAgent.isStopped);
-                    //Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> currentNavMeshAgent.isActiveAndEnabled: " + currentNavMeshAgent);
-                }
-                //
-
-            }
-            
-        }
-
-        */
-
 
     }
 
     void simpleDodge()
     {
+        //Debug.Log("try simpleDodge()");
         //Know positions of nearby threats
         //      For now, just log the position of NPCs[and player], which will include any occupied tanks.
         //          Soooo, tag everything with a virtualGamepad?
@@ -383,12 +324,16 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
         if(currentNavMeshAgent.enabled == true)
         {
+            //Debug.Log("should dodge............");
             //currentNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 8f);
             //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
             currentNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 12f);
 
         }
 
+
+
+        //Debug.Log("-----------------------------------end of dodge............");
     }
 
 
@@ -442,7 +387,7 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
         if (vGpad.allCurrentTARGETbyVectorEnactables.Count == 0)
         {
-            //vGpad.allCurrentTARGETbyVectorEnactables[virtualGamepad.buttonCategories.vector1].enact(new Vector3(22, 11, 17));
+            //vGpad.allCurrentTARGETbyVectorEnactables[buttonCategories.vector1].enact(new Vector3(22, 11, 17));
             //Debug.Log("..................................");
             return;
         }
@@ -459,10 +404,6 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
         test = false;
 
-
-
-        //Debug.Log("zzzzzzzzzzzzzzzzzzzzzzzzdestination:  " + currentNavMeshAgent.destination);
-        //someDebugLogs();
     }
 
     void someDebugLogs()

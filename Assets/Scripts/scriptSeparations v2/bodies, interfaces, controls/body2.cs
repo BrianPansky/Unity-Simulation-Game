@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static enactionCreator;
+using static equippableSetup;
 using static UnityEditor.LightmapEditorSettings;
-using static virtualGamepad;
 
 public class body2 : playable
 {
@@ -40,150 +40,65 @@ public class body2 : playable
 
     void Awake()
     {
+        //Debug.Log("Awake:  " + this);
         currentHealth = maxHealth;
         initializingComponents();
 
         equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
 
         initializeEnactionPoint1();
-        initializeCameraMount();
+        initializeCameraMount(enactionPoint1.transform);
 
     }
 
-    void initializeEnactionPoint1()
-    {
-        enactionPoint1 = new GameObject("aaaaaaaaaaaaaaaaaaaaaaaaaaaaenactionPoint1 in initializeEnactionPoint1() line 54, body2 script");
-        enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward*0.5f;
-        enactionPoint1.transform.rotation = this.transform.rotation;
-
-    }
-
-
-    void initializeCameraMount()
-    {
-        cameraMount = new GameObject("cameraMount in initializeCamera() line 64, body2 script").transform;
-        //cameraMount.transform.SetParent(transform, false);
-        cameraMount.transform.SetParent(enactionPoint1.transform, false); //has to be child of ENACTION point for this body!  because THAT is the point which the gamepad rotates!!!
-
-        //cameraMount.transform.parent = transform;
-        //cameraMount.transform.position = this.transform.position + this.transform.forward * 0.1f;
-        //cameraMount.transform.rotation = this.transform.rotation;
-
-    }
+    
 
 
 
     void initializingComponents()
     {
-        /*
-        if (thisNavMeshAgent == null)
-        {
-            thisNavMeshAgent = gameObject.GetComponent<NavMeshAgent>();
-            if (thisNavMeshAgent == null)
-            {
-                thisNavMeshAgent = gameObject.AddComponent<NavMeshAgent>();
-            }
-
-
-            currentNavMeshAgent.baseOffset = 1; //prevent stutter, being in floor
-        }
-        */
-
-        if (theInteractionScript == null)
-        {
-            theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-            if (theInteractionScript == null)
-            {
-                theInteractionScript = this.gameObject.AddComponent<interactionScript>();
-            }
-            theInteractionScript.dictOfInteractions = new Dictionary<interType, List<interactionScript.effect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
-        }
-
-
-        if (theInventory == null)
-        {
-            theInventory = this.gameObject.GetComponent<inventory1>();
-            if (theInventory == null)
-            {
-                theInventory = this.gameObject.AddComponent<inventory1>();
-            }
-            
-        }
-
-
-        //          theInventory.storedEquippables.Add(genGen.singleton.returnGun1(startPosition));
+        //theInteractionScript = genGen.singleton.ensureInteractionScript(this.gameObject);
+        theInventory = genGen.singleton.ensureInventory1Script(this.gameObject);
 
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        customizeTheComponents();
+        makeInteractions();
         makeEnactions();
 
         plugIntoGamepadIfThereIsOne();
     }
 
-    void customizeTheComponents()
-    {
 
-        //theInteractionScript.dictOfInteractions.Add("bullet1", "die");  shoot1
-        theInteractionScript.addInteraction(interType.shoot1, interactionScript.effect.damage);
-        theInteractionScript.addInteraction(interType.shootFlamethrower1, interactionScript.effect.damage);
-    }
     void makeEnactions()
     {
-
-        //enactableBoolSet.Add(new intSpherAtor(this.transform, interType.standardClick, buttonCategories.primary, 1f, true));
-        //          enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary, new interactionInfo(interType.standardClick), new projectileInfo(1)));
         enactableBoolSet.Add(new hitscanEnactor(enactionPoint1.transform, buttonCategories.primary,
-            new interactionInfo(interType.standardClick),
-            new projectileInfo(1)));
-        //hitscanEnactor
-
-        foreach(IEnactaBool enactaBool in enactableBoolSet)
-        {
-            //Debug.Log(enactaBool);
-        }
+            new interactionInfo(interType.standardClick)));
+        
 
         enactableVectorSet.Add(new vecTranslation(speed, this.transform, buttonCategories.vector1));
-        //enactableVectorSet.Add(new vecRotation(lookSpeed, this.transform, enactionPoint1.transform, buttonCategories.vector2));
-
 
         enactableTARGETVectorSet.Add(new navAgent(this.gameObject));
         new aimTarget(
-            new vecRotation(lookSpeed, this.transform, enactionPoint1.transform, buttonCategories.vector2, 25f)
+            new vecRotation(lookSpeed, this.transform, enactionPoint1.transform, buttonCategories.vector2)
             ).addToBothLists(enactableVectorSet, enactableTARGETVectorSet);
 
     }
 
     private void makeInteractions()
     {
-        if (theInteractionScript == null)
-        {
-            theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-
-            if (theInteractionScript == null)
-            {
-                theInteractionScript = this.gameObject.AddComponent<interactionScript>();
-
-            }
-
-            //do i still need this?
-            //theInteractionScript.dictOfInteractions = new Dictionary<interType, List<interactionScript.effect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
-        }
-
-        theInteractionScript.addInteraction(enactionCreator.interType.tankShot, interactionScript.effect.damage);
-        theInteractionScript.addInteraction(enactionCreator.interType.shoot1, interactionScript.effect.damage);
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, interType.shoot1, new damage());
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, interType.shootFlamethrower1, new damage());
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.tankShot, new damage());
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.tankShot, new damage());  //uhhh, double damage
     }
 
     public bool isThisGrounded()
     {
-
         //old version is this one line of code:
         //return Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
-
 
         RaycastHit hit;
         Ray downRay = new Ray(transform.position, -Vector3.up);
@@ -223,7 +138,7 @@ public class body2 : playable
 
     void Update()
     {
-        Debug.DrawLine(enactionPoint1.transform.position, enactionPoint1.transform.position+enactionPoint1.transform.forward, Color.magenta, 0.3f);
+        //Debug.DrawLine(enactionPoint1.transform.position, enactionPoint1.transform.position+enactionPoint1.transform.forward, Color.magenta, 0.3f);
     }
 
 }

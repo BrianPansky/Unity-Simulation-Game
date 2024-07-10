@@ -64,24 +64,4 @@ public class cameraScript : MonoBehaviour
     }
 
 
-    void updatePitch()
-    {
-        limitedPitchRotation -= theVirtualGamePad.pitchInput;
-
-        //Debug.Log("limitedPitchRotation:  " + limitedPitchRotation);
-        limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -90f, 90f);
-        
-        transform.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
-        //                  playerBody.Rotate(Vector3.up * theVirtualGamePad.mouseX);
-    }
-
-    void updateMouseLook()
-    {
-
-        //          xRotation -= theVirtualGamePad.mouseY;
-        //          xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        //          transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        //          playerBody.Rotate(Vector3.up * theVirtualGamePad.mouseX);
-    }
 }

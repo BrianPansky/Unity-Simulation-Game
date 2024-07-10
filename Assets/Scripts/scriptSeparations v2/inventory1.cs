@@ -3,9 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
+using static equippableSetup;
 
-public class inventory1 : MonoBehaviour
+public class inventory1 : MonoBehaviour, IInteractable
 {
+
+    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
+
+
+    //Debug.Log("hello:  " + this);
+    //              helloTest h1 = new helloTest();  //will helloTest's "awake" be called before "inventory1" awake?!?!?!
 
     //public List<string> testInventory1 = new List<string>();
 
@@ -13,39 +20,29 @@ public class inventory1 : MonoBehaviour
 
     void Awake()
     {
-        //need something blank so i can unequip things:
-        //storedEquippables.Add(new equippable());
-    }
-
-    void Start()
-    {
-
 
         playable thePlayable = this.gameObject.GetComponent<playable>();
-
         if (thePlayable == null)
         {
-            Debug.Log("this shouldn't be null");
+            Debug.Log("this shouldn't be null, on this object:  " + this.gameObject);
         }
 
-        thePlayable.enactableBoolSet.Add(new cycleInventory(this.gameObject));
+        thePlayable.enactableBoolSet.Add(new takeFromAndPutBackIntoInventory(this.gameObject));
 
-        foreach (IEnactaBool enactaBool in thePlayable.enactableBoolSet)
+        //foreach (IEnactaBool enactaBool in thePlayable.enactableBoolSet)
         {
             //Debug.Log(enactaBool);
         }
 
         //.....this looks like a bad way to do things:
-        thePlayable.updateAnyGamepadButtons(this.gameObject.GetComponent<virtualGamepad>());
+        //              thePlayable.updateALLGamepadButtonsFromPlayable(this.gameObject.GetComponent<virtualGamepad>());
+    }
+    
+    void Start()
+    {
 
-        //foreach (var item in testInventory1)
-        {
-            //theObjectBeingInteractedWith.GetComponent<inventory1>().testInventory1.Add("testKey1");
-            //if (item == "testKey1")
-            {
-                //Debug.Log("yesssssssssssssssssssssssss");
-            }
-        }
+
+
     }
 
 
@@ -53,40 +50,84 @@ public class inventory1 : MonoBehaviour
 
     public void putInInventory(GameObject theObjectToPutInInventory)
     {
-        Debug.Log("will it put in inventory???");
-        //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
-        //playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
-        //gun1 theGun = this.GetComponent<gun1>();
-        //if (theGun.occupied == true) { return; }
-        //          theGun.equip(thePlayable);
-
         //should i just be storing a game object?  because maybe someday an inventory item won't be equippable?
         //i'm doing this so it's easy to write code to equip it.  can worry about edge cases later.
         equippable theEquippable = theObjectToPutInInventory.GetComponent<equippable>();
+        putInInventory(theEquippable);
+
+        /*
+
         storedEquippables.Add(theEquippable);
 
-        //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
+        //dockThisToOtherObject(theAuthorScript.enacting.enactionAuthor, (1.5f * theAuthorScript.enacting.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
         interactionCreator.singleton.dockXToY(theObjectToPutInInventory, this.gameObject);
         theEquippable.gameObject.SetActive(false);
+
+
+        */
+
+
+
+        //Debug.Log("will it put in inventory???");
+        //virtualGamepad gamepad = theAuthorScript.enacting.enactionAuthor.GetComponent<virtualGamepad>();
+        //playable thePlayable = theAuthorScript.enacting.enactionAuthor.GetComponent<playable>();
+        //gun1 theGun = this.GetComponent<gun1>();
+        //if (theGun.occupied == true) { return; }
+        //          theGun.equipThisEquippable(thePlayable);
+
+
         //          interactionCreator.singleton.makeThisObjectDisappear(theObjectToPutInInventory);
         //dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
     }
 
+
+    public void putInInventory(equippable theEquippable)
+    {
+        //should i just be storing a game object?  because maybe someday an inventory item won't be equippable?
+        //i'm doing this so it's easy to write code to equip it.  can worry about edge cases later.
+        //equippable theEquippable = theObjectToPutInInventory.GetComponent<equippable>();
+        storedEquippables.Add(theEquippable);
+
+        //dockThisToOtherObject(theAuthorScript.enacting.enactionAuthor, (1.5f * theAuthorScript.enacting.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
+        interactionCreator.singleton.dockXToY(theEquippable.gameObject, this.gameObject);
+        theEquippable.gameObject.SetActive(false);
+
+
+
+
+
+
+        //Debug.Log("will it put in inventory???");
+        //virtualGamepad gamepad = theAuthorScript.enacting.enactionAuthor.GetComponent<virtualGamepad>();
+        //playable thePlayable = theAuthorScript.enacting.enactionAuthor.GetComponent<playable>();
+        //gun1 theGun = this.GetComponent<gun1>();
+        //if (theGun.occupied == true) { return; }
+        //          theGun.equipThisEquippable(thePlayable);
+
+
+        //          interactionCreator.singleton.makeThisObjectDisappear(theObjectToPutInInventory);
+        //dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
+    }
+
+
 }
 
-public class equippable : MonoBehaviour
+public class equippable : MonoBehaviour, IInteractable
 {
+
+    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
+
+    //......should thes be an IEnactabool with toggling equipped/unequipped as the enaction????  how else am i doing it again???
     public interactionCreator.simpleSlot theEquippableType;
 
+
     public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
+    //public List<gamePadButtonable> enactableSet = new List<gamePadButtonable>();
     public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
     public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
 
-    //attach to objects/entities you can "play as" [such as bodies and vehicles]
-    //weapons and items too
-
     //aren't i supposed to NOT have these references to other scripts floating around???
-    public interactionScript theInteractionScript;
+    //          public interactionScript theInteractionScript;  //shouldn't this be in the IEnactaBools???
 
     public void callableAwake()
     {
@@ -95,30 +136,21 @@ public class equippable : MonoBehaviour
         //maybe just do a "get component" in interactions....but...but no, interaction script handles collision interactions,
         //so i would still NEED an interaction script for this.................
         //well, looks like i HAVE this code in "gun1", just move it HERE, simple.
-        if (theInteractionScript == null)
-        {
-            theInteractionScript = this.gameObject.GetComponent<interactionScript>();
-            if (theInteractionScript == null)
-            {
-                theInteractionScript = this.gameObject.AddComponent<interactionScript>();
-            }
-            theInteractionScript.dictOfInteractions = new Dictionary<interType, List<interactionScript.effect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
-        }
-
-
-
+        //      theInteractionScript = genGen.singleton.ensureInteractionScript(this.gameObject);
 
 
         //ya, obviously this should go here:
-        List<interactionScript.effect> thing = new List<interactionScript.effect>();
+        //     List<Ieffect> thing = new List<Ieffect>();
         //thing.Add(interactionScript.effect.equip);
 
         //well, change to a "put in inventory" effect?  probably, ya.
         //i dunno, i don't really like this.  an enum for "put in inventory"???  what if i just made ALL objects [of some type]
         //have required/interface functions for "what to do if this get's clicked"?  right?
         //buuut i've got this system for now.............
-        thing.Add(interactionScript.effect.putInInventory);
-        theInteractionScript.dictOfInteractions[interType.standardClick] = thing;
+        //      thing.Add(new putInInventory());
+        //theInteractionScript.dictOfInteractions[interType.standardClick] = thing;
+
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new putInInventory());
 
         //Debug.Log("equippable awake");
 
@@ -139,118 +171,59 @@ public class equippable : MonoBehaviour
             return;
         }
 
-        equip(thePlayable);
+        equipThisEquippable(thePlayable);
 
     }
 
 
 
-    public void equip(playable thePlayable)
+    public void equipThisEquippable(playable thePlayable)
     {
-        Debug.Log("trying to equip...");
+        //Debug.Log("trying to equip...");
 
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
         if (thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false)
         {
-            Debug.Log("can't, thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false, the type is:  " + theEquippableType); 
-            return; }
-
-        Debug.Log("still good....");
-
-
-        //Debug.Log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");return; }
-
-        Debug.Log("before thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
-
-        if (thePlayable.equipperSlotsAndContents[theEquippableType] != null)
-        {
-            thePlayable.equipperSlotsAndContents[theEquippableType].unequip(thePlayable);
+            Debug.Log("can't, thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false, the type is:  " + theEquippableType);
+            return;
         }
 
-        thePlayable.equipperSlotsAndContents[theEquippableType] = this;
+        equipToEquipperSlots(thePlayable);
+        equipToGamepadButtons(thePlayable);
+        equipVisiblyToLocation(thePlayable.enactionPoint1);
 
+    }
 
-        Debug.Log("after thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
+    private void equipVisiblyToLocation(GameObject locationObjectToEquipTo)
+    {
+        interactionCreator.singleton.dockXToY(this.gameObject, locationObjectToEquipTo, new Vector3(0.47f, 0.2f, 0.4f));
+        this.gameObject.SetActive(true);
+    }
 
-
+    private void equipToGamepadButtons(playable thePlayable)
+    {
 
         //super ad hoc for now:
         virtualGamepad gamepad = thePlayable.transform.gameObject.GetComponent<virtualGamepad>();
+        gamepad.receiveAnyNonNullEnactionsForButtons(this);
+    }
 
+    private void equipToEquipperSlots(playable thePlayable)
+    {
+        //Debug.Log("111111111111111-------------thePlayable.equipperSlotsAndContents[theEquippableType] == null ? :  " + thePlayable.equipperSlotsAndContents[theEquippableType]);
 
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
-            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
-            //so i need to print sooooooo many....
-            Debug.Log("1111111111111111111 gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
-            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
-            //Debug.Log("gamepad:  " + gamepad);
-            //Debug.Log("gamepad.transform:  " + gamepad.transform);
-            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
-            //          enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-            enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-            Debug.Log("222222222222222222222 gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-        }
+        thePlayable.clearTheEquipperSlot(theEquippableType);
+        thePlayable.equipperSlotsAndContents[theEquippableType] = this;
 
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        //          gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        //          gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-
-
-        //          if (gamepad.theCamera == null) { return; }
-
-        /*
-        Debug.Log(cameraMount);
-        if (cameraMount == null)
-        {
-            defaultCameraMountGenerator();
-        }
-        Debug.Log(cameraMount);
-        gamepad.theCamera.transform.SetParent(cameraMount, false);
-        */
-
-
-
-        //interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.gameObject);
-        interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.enactionPoint1, new Vector3(0.47f, 0.2f, 0.4f));
-
-        this.gameObject.SetActive(true);
+        //Debug.Log("222222222222222-------------thePlayable.equipperSlotsAndContents[theEquippableType] == null ? :  " + thePlayable.equipperSlotsAndContents[theEquippableType]);
 
     }
+
+
     public void unequip(playable thePlayable)
     {
-
-
-        Debug.Log("trying to UNequip...");
-
-        //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-        //      if (thePlayable.equipperSlotsAndContents.ContainsKey(theEquippableType) == false)
-        {
-            
-        }
-
-        //Debug.Log("still good....");
-
-
-        //Debug.Log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");return; }
-
-        //Debug.Log("before thePlayable.equipperSlotsAndContents[theEquippableType]" + thePlayable.equipperSlotsAndContents[theEquippableType]);
-
-        //if (thePlayable.equipperSlotsAndContents[theEquippableType] != null)
-        {
-            //thePlayable.equipperSlotsAndContents[theEquippableType].unequip();
-        }
+        Debug.Log("trying to UNequip... for this object:  " + thePlayable.gameObject);
+        //Debug.Log("trying to UNequip...");
 
         thePlayable.equipperSlotsAndContents[theEquippableType] = null;
 
@@ -261,113 +234,28 @@ public class equippable : MonoBehaviour
 
         //super ad hoc for now:
         virtualGamepad gamepad = thePlayable.transform.gameObject.GetComponent<virtualGamepad>();
+        gamepad.removeFromGamepadButtons(this);
+        //      thePlayable.replace(this);
+        thePlayable.refilUnusedSlotsAndButtonsFromThisPlayable();
 
 
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            //this "object is null" error is usually the only kind of error where it isn't clear which variable went wrong
-            //and EVERY TIME it's a situation like this, where there are a TON of variables in a single line.
-            //so i need to print sooooooo many....
-            //                  Debug.Log("1111111111111111111 gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-            //Debug.Log("enactaBool.interInfo:  " + enactaBool.interInfo);
-            //Debug.Log("enactaBool.interInfo.enactionAuthor:  " + enactaBool.interInfo.enactionAuthor);
-            //Debug.Log("gamepad:  " + gamepad);
-            //Debug.Log("gamepad.transform:  " + gamepad.transform);
-            //ebug.Log("gamepad.transform.gameObject:  " + gamepad.transform.gameObject);
-            //          enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+        disappearIntoPocket(thePlayable.gameObject);
 
-
-
-
-            //                  enactaBool.interInfo.enactionAuthor = gamepad.transform.gameObject;
-            //      gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = thePlayable.enactableBoolSet[0];
-            //      Debug.Log("222222222222222222222 gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        //          gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        //          gamepad.allCurrentTARGETbyVectorEnactables = enactableTARGETVectorSet;
-
-
-        //          if (gamepad.theCamera == null) { return; }
-
-        /*
-        Debug.Log(cameraMount);
-        if (cameraMount == null)
-        {
-            defaultCameraMountGenerator();
-        }
-        Debug.Log(cameraMount);
-        gamepad.theCamera.transform.SetParent(cameraMount, false);
-        */
-
-
-
-        //interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.enactionPoint1, new Vector3(0.47f, 0.2f, 0.4f));
-        interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.gameObject);
-
-        this.gameObject.SetActive(false);
-
-        /*
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.interInfo.enactionAuthor = null;
-            //          gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            //          gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
-        }
-
-        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
-        {
-            //          if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
-            {
-                //          gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
-            }
-        }
-
-
-        */
     }
 
-    public void putInInventory(GameObject theObjectWithTheInventory)
+    private void disappearIntoPocket(GameObject thePocketObject)
     {
-        //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
-        //playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
-        //gun1 theGun = this.GetComponent<gun1>();
-        //if (theGun.occupied == true) { return; }
-        //          theGun.equip(thePlayable);
-
-        inventory1 theInventory = theObjectWithTheInventory.GetComponent<inventory1>();
-
-
-        //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
-        interactionCreator.singleton.dockXToY(this.gameObject, theObjectWithTheInventory);
-        //dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
+        interactionCreator.singleton.dockXToY(this.gameObject, thePocketObject);
+        this.gameObject.SetActive(false);
     }
-
 
 }
 
-public class cycleInventory : IEnactaBool
+public class takeFromAndPutBackIntoInventory : IEnactaBool
 {
-    public virtualGamepad.buttonCategories gamepadButtonType { get; set; }
-    public interactionInfo interInfo { get; set; }
+    public buttonCategories gamepadButtonType { get; set; }
+    //public interactionInfo interInfo { get; set; }  //hmmm.......
+    public GameObject enactionAuthor { get; set; }
 
     public inventory1 theInventory;
     public playable thePlayable;
@@ -375,9 +263,9 @@ public class cycleInventory : IEnactaBool
     public interactionCreator.simpleSlot theSlotTypeToCycle; //[typically "hands"]
 
 
-    public cycleInventory(GameObject theObjectWithAnInventory, interactionCreator.simpleSlot theSlotTypeToCycle = interactionCreator.simpleSlot.hands)
+    public takeFromAndPutBackIntoInventory(GameObject theObjectWithAnInventory, interactionCreator.simpleSlot theSlotTypeToCycle = interactionCreator.simpleSlot.hands)
     {
-        gamepadButtonType = virtualGamepad.buttonCategories.augment1;
+        gamepadButtonType = buttonCategories.augment1;
         this.theSlotTypeToCycle = theSlotTypeToCycle;
         theInventory = theObjectWithAnInventory.GetComponent<inventory1>();
         if (theInventory == null)
@@ -391,30 +279,37 @@ public class cycleInventory : IEnactaBool
             thePlayable = theObjectWithAnInventory.AddComponent<playable>();
         }
 
-        interInfo = new interactionInfo(interType.self, 1f);
+        //interInfo = new interactionInfo(interType.self, 1f);
     }
 
     public void enact()
     {
-        if(theInventory.storedEquippables.Count < 1) { return; }
+        
+        equippable theEquippableToPutAway = thePlayable.equipperSlotsAndContents[theSlotTypeToCycle]; 
+        //Debug.Log("::::::::::::::::::::::::::::::thePlayable.equipperSlotsAndContents[theSlotTypeToCycle] == null ? :  " + thePlayable.equipperSlotsAndContents[theSlotTypeToCycle]);
 
-        if (thePlayable.equipperSlotsAndContents[theSlotTypeToCycle] == null)
+        //Debug.Log("::::::::::::::::::::::::::::::theEquippableToPutAway == null ? :  " + theEquippableToPutAway);
+
+        if (theEquippableToPutAway == null)
         {
-            Debug.Log("trying to equip something from inventory");
 
-            if (theInventory.storedEquippables.Count < 1)
-            {
+            //Debug.Log("trying to equip something from inventory");
+            if (theInventory.storedEquippables.Count < 1) { return; }
 
-                Debug.Log("......can't, theInventory.storedEquippables.Count < 1"); return;
-            }
-            Debug.Log("so far so good");
-            //theInventory.storedEquippables[0].equip(thePlayable);
-            theInventory.storedEquippables[0].equip(thePlayable);
+            //Debug.Log("so far so good");
+            //theInventory.storedEquippables[0].equipThisEquippable(thePlayable);
+            theInventory.storedEquippables[0].equipThisEquippable(thePlayable);
+            theInventory.storedEquippables.RemoveAt(0);
         }
         else
         {
-            theInventory.storedEquippables[0].unequip(thePlayable);
-            rotateInventoryList();
+            //Debug.Log("trying to puy away something into inventory");
+            
+            theEquippableToPutAway.unequip(thePlayable);
+            theInventory.putInInventory(theEquippableToPutAway);
+            //theInventory.storedEquippables[0].unequip(thePlayable);
+            //rotateInventoryList();
+            //theInventory.putInInventory();
             
         }
         
@@ -436,7 +331,7 @@ public class cycleInventory : IEnactaBool
     void equipFirstItemInInventoryList()
     {
         if (theInventory.storedEquippables.Count < 1) { return; }
-        theInventory.storedEquippables[0].equip(thePlayable);
+        theInventory.storedEquippables[0].equipThisEquippable(thePlayable);
     }
 
 

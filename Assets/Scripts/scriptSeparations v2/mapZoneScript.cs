@@ -90,12 +90,13 @@ public class mapZoneScript : MonoBehaviour
         if(zoneTaggingConditionsMet(other) == false) { return; }
 
         //add objects to this zone's list, and update their body to reference this zone
-        
+        tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
 
-        if(tagging2.singleton.allTagsOnObject(other.transform.gameObject).Contains(tagging2.tag2.zoneable))
+
+        if (tagging2.singleton.allTagsOnObject(other.transform.gameObject).Contains(tagging2.tag2.zoneable))
         {
             //Debug.Log("Contains(tagging2.tag2.zoneable), addToZone");
-            tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
+            //                      tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
 
             //Debug.Log("zone number:  " + thisZoneNumber +"   object name and id number:  " +other.transform.gameObject.name +"  " + tagging2.singleton.idPairGrabify(other.transform.gameObject).theObjectIdNumber);
 
@@ -130,13 +131,25 @@ public class mapZoneScript : MonoBehaviour
 
     private bool zoneTaggingConditionsMet(Collider other)
     {
+        if (other.gameObject.GetComponent<IInteractable>() == null)
+        {
 
+            //Debug.Log("other.GetComponent<IInteractable>() == null  for this object:  "  +other.gameObject);
+            return false;
+        }
+        else
+        {
+
+            //Debug.Log("other.GetComponent<IInteractable>() NOT = null  for this object:  " + other.gameObject);
+        }
+        /*
         if (other.gameObject.tag == "interactionType1")
         {
 
             //Debug.Log("other.gameObject.tag == \"interactionType1\"");
             return false;
         }
+        */
         if (other.gameObject.tag == "dontAddToZones")
         {
 

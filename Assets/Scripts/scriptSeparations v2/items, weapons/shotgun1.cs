@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
-using static virtualGamepad;
+
 
 public class shotgun1 : equippable
 {
@@ -36,7 +36,7 @@ public class shotgun1 : equippable
 
         enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
-            new projectileInfo(1, true, 99, 0)));
+            new projectileToGenerate(1, true, 99, 0)));
 
         //Debug.Log(this.transform);
 

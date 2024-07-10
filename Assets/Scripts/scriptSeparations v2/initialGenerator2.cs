@@ -29,6 +29,7 @@ public class initialGenerator2 : MonoBehaviour
         //doing this so the singleton is ready before other objects we generate need it
         this.gameObject.AddComponent<tagging2>();
         this.gameObject.AddComponent<interactionCreator>();
+        this.gameObject.AddComponent<comboGen>();
     }
 
     void singletonify()
@@ -80,12 +81,10 @@ public class initialGenerator2 : MonoBehaviour
         int howManyZones = 81;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
-        int theXSpacing = 5;
+        int theXSpacing = 10;
         float sideOffset = 0;
 
         //create a line of points, spaced by multiples of "howManysetsPerZone"
-        makeEmptyZones(howManyZones, theZSpacing * howManySetsPerZone);
-
         //makeAndFillZones(objectList1(), 11);
 
 
@@ -93,6 +92,12 @@ public class initialGenerator2 : MonoBehaviour
             patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset), 
             theXSpacing
             );
+
+
+        //do this last to make zone collisions easier
+        makeEmptyZones(howManyZones, theZSpacing * howManySetsPerZone);
+
+
     }
 
 
@@ -208,14 +213,12 @@ public class initialGenerator2 : MonoBehaviour
 
         //objectList.Add(returnTestKey1());
         objectList.Add(genGen.singleton.returnGun1(startPosition));
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        objectList.Add(genGen.singleton.returnGun1(startPosition));
-        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnNPC4(startPosition));
-        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
 
 
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
@@ -254,7 +257,7 @@ public class initialGenerator2 : MonoBehaviour
         //  bottomBit.AddComponent<interactionScript>();
         //  interactionScript theInteractionScript = bottomBit.GetComponent<interactionScript>();
 
-        //  theInteractionScript.addInteraction("standardClick", "useVehicle");
+        //  dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "useVehicle");
 
         Rigidbody rigidbody = bottomBit.AddComponent<Rigidbody>();
         rigidbody.isKinematic = true;
@@ -327,7 +330,7 @@ public class initialGenerator2 : MonoBehaviour
         newObj.AddComponent<interactionScript>();
         interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        theInteractionScript.addInteraction("shootFlamethrower1", "burn");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "shootFlamethrower1", "burn");
 
         return newObj;
     }
@@ -1500,7 +1503,7 @@ public class initialGenerator2 : MonoBehaviour
         newObj.AddComponent<interactionScript>();
         interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        theInteractionScript.addInteraction("shootFlamethrower1", "burn");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "shootFlamethrower1", "burn");
 
         return newObj;
     }
@@ -1530,7 +1533,7 @@ public class initialGenerator2 : MonoBehaviour
         //  bottomBit.AddComponent<interactionScript>();
         //  interactionScript theInteractionScript = bottomBit.GetComponent<interactionScript>();
 
-        //  theInteractionScript.addInteraction("standardClick", "useVehicle");
+        //  dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "useVehicle");
 
         Rigidbody rigidbody = bottomBit.AddComponent<Rigidbody>();
         rigidbody.isKinematic = true;
@@ -1625,7 +1628,7 @@ public class initialGenerator2 : MonoBehaviour
         newObj.transform.position += new Vector3(0, 3, 3);
 
         //theInteractionScript.listOfInteractions.Add("grabKey");
-        theInteractionScript.addInteraction("standardClick", "grabKey");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "grabKey");
 
 
     }
@@ -1637,7 +1640,7 @@ public class initialGenerator2 : MonoBehaviour
         newObj.transform.position += new Vector3(0, 0, -8);
 
         //theInteractionScript.listOfInteractions.Add("clickLock");
-        theInteractionScript.addInteraction("standardClick", "clickLock");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "clickLock");
 
 
 
@@ -1652,7 +1655,7 @@ public class initialGenerator2 : MonoBehaviour
         //newObj.transform.position += new Vector3(0, 3, 3);
 
         //theInteractionScript.listOfInteractions.Add("grabKey");
-        theInteractionScript.addInteraction("standardClick", "grabKey");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "grabKey");
 
         return newObj;
 
@@ -1666,7 +1669,7 @@ public class initialGenerator2 : MonoBehaviour
         //newObj.transform.position += new Vector3(0, 0, -8);
 
         //theInteractionScript.listOfInteractions.Add("clickLock");
-        theInteractionScript.addInteraction("standardClick", "clickLock");
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "clickLock");
 
 
 

@@ -13,6 +13,7 @@ public class genGen : MonoBehaviour
 
     void Awake()
     {
+        //Debug.Log("Awake:  " + this);
         singletonify();
     }
 
@@ -60,8 +61,8 @@ public class genGen : MonoBehaviour
         bottomBit.AddComponent<CharacterController>();
         //bottomBit.AddComponent<AIHub2>();
         
-        interactionScript theInteractionScript = bottomBit.AddComponent<interactionScript>();
-        //theInteractionScript.addInteraction("standardClick", "useVehicle");
+        //interactionScript theInteractionScript = bottomBit.AddComponent<interactionScript>();
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, "standardClick", "useVehicle");
 
         //genGen.singleton.rigid(bottomBit);
 
@@ -87,11 +88,20 @@ public class genGen : MonoBehaviour
     {
         GameObject newObj = Instantiate(repository2.singleton.pineTree1, where, Quaternion.identity);
 
+        simpleInteractable.genSimpleInteractable(newObj, enactionCreator.interType.shootFlamethrower1, new burn());
+        //newObj.AddComponent<simpleInteractable>();
+        //simpleInteractable theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        newObj.AddComponent<interactionScript>();
-        interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, new burn());
 
-        theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+
+
+
+        //newObj.AddComponent<interactionScript>();
+        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, new burn());\
+        //      dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new playAsPlayable());
 
         return newObj;
     }
@@ -100,11 +110,12 @@ public class genGen : MonoBehaviour
     {
         GameObject newObj = Instantiate(repository2.singleton.placeHolderCylinderPrefab, where, Quaternion.identity);
 
+        Destroy(newObj.GetComponent<Collider>());
 
-
-        newObj.AddComponent<AIHub3>();
         newObj.AddComponent<body2>();
+        newObj.AddComponent<AIHub3>();
 
+        newObj.AddComponent<CapsuleCollider>();
 
         inventory1 theirInventory = newObj.GetComponent<inventory1>();
 
@@ -116,7 +127,7 @@ public class genGen : MonoBehaviour
         //newObj.AddComponent<interactionScript>();
         //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
 
         return newObj;
     }
@@ -129,7 +140,7 @@ public class genGen : MonoBehaviour
         //newObj.AddComponent<interactionScript>();
         //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
 
         return newObj;
     }
@@ -147,7 +158,7 @@ public class genGen : MonoBehaviour
     }
 
 
-    public void projectileGenerator(projectileInfo theProjectileInfo, IEnactaBool theEnactable, Vector3 startPoint, Vector3 direction)//(rangedEnaction enInfo, interactionInfo interINFO, IEnactaBool theEnactable)
+    public void projectileGenerator(projectileToGenerate theprojectileToGenerate, collisionEnaction theEnactable, Vector3 startPoint, Vector3 direction)//(rangedEnaction enInfo, interactionInfo interINFO, IEnactaBool theEnactable)
     {
 
         //Debug.Log("projectileGenerator");
@@ -156,15 +167,15 @@ public class genGen : MonoBehaviour
         //Vector3 startPoint = enInfo.firePoint.position + enInfo.firePoint.forward;
 
         GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
-        projectile1.genProjectile1(newObjectForProjectile, theProjectileInfo, direction);//enInfo, interINFO, theEnactable);
-        growScript1.genGrowScript1(newObjectForProjectile, theProjectileInfo.growthSpeed);
+        projectile1.genProjectile1(newObjectForProjectile, theprojectileToGenerate, direction);//enInfo, interINFO, theEnactable);
+        growScript1.genGrowScript1(newObjectForProjectile, theprojectileToGenerate.growthSpeed);
 
         //should this use "interactionMate" isntead?
         //authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
         //interactionSpheres already have an author script!  use THIS function instead:
-        authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable);
+        authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable.interInfo, theEnactable);
         selfDestructScript1 sds = newObjectForProjectile.GetComponent<selfDestructScript1>();
-        sds.timeUntilSelfDestruct = theProjectileInfo.timeUntilSelfDestruct;
+        sds.timeUntilSelfDestruct = theprojectileToGenerate.timeUntilSelfDestruct;
 
         /*
 
@@ -181,36 +192,7 @@ public class genGen : MonoBehaviour
     }
 
 
-    public void OLDprojectileGenerator(intSpherAtor theEnactable)
-    {
-        /*
-        //Transform firePoint, enactionCreator.interType interactionType, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f, float magnitudeOfInteraction = 1f)
-
-        Vector3 startPoint = theEnactable.firePoint.position + theEnactable.firePoint.forward;
-
-        GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
-        projectile1.genProjectile1(newObjectForProjectile, theEnactable);
-        growScript1.genGrowScript1(newObjectForProjectile, theEnactable);
-
-        //should this use "interactionMate" isntead?
-        authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
-
-
-        /*
-
-        //Debug.Log("projectile made supposedly");
-        //mastLine(startPoint, Color.red);
-        //mastLine(newProjectile.transform.position, Color.blue);
-
-
-        //Debug.DrawLine(newProjectile.transform.position, new Vector3(), Color.red);
-
-        //threatAlert(this);
-
-        */
-    }
-
-    internal GameObject returnShotgun1(Vector3 where)
+    public GameObject returnShotgun1(Vector3 where)
     {
         GameObject newObj = Instantiate(repository2.singleton.shotgun1, where, Quaternion.identity);
 
@@ -218,8 +200,75 @@ public class genGen : MonoBehaviour
         //newObj.AddComponent<interactionScript>();
         //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
-        //theInteractionScript.addInteraction(enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
 
         return newObj;
     }
+
+
+
+
+    /*
+
+    public interactionScript ensureInteractionScript(GameObject onThisObject)
+    {
+        interactionScript ensuredThing = onThisObject.GetComponent<interactionScript>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<interactionScript>();
+
+        }
+
+        ensuredThing.dictOfInteractions = new Dictionary<interType, List<Ieffect>>();//new Dictionary<string, List<string>>(); //for some reason it was saying it already had that key in it, but it should be blank.  so MAKING it blank.
+
+        return ensuredThing;
+    }
+
+    */
+
+
+    internal inventory1 ensureInventory1Script(GameObject onThisObject)
+    {
+        inventory1 ensuredThing = onThisObject.GetComponent<inventory1>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<inventory1>();
+        }
+
+
+        return ensuredThing;
+    }
+
+    internal virtualGamepad ensureVirtualGamePad(GameObject onThisObject)
+    {
+        virtualGamepad ensuredThing = onThisObject.GetComponent<virtualGamepad>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<virtualGamepad>();
+        }
+
+        return ensuredThing;
+    }
+
+    internal NavMeshAgent ensureNavmeshAgent(GameObject onThisObject)
+    {
+        NavMeshAgent ensuredThing = onThisObject.GetComponent<NavMeshAgent>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<NavMeshAgent>();
+        }
+
+        return ensuredThing;
+    }
+
+
+
+    public void ensureSafetyForDeletion(GameObject theObject)
+    {
+        if (theObject.GetComponent<safeDestroy>() == null)
+        {
+            theObject.AddComponent<safeDestroy>();
+        }
+    }
+
 }

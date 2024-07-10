@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
-using static virtualGamepad;
+
 
 public class projectile1 : MonoBehaviour
 {
@@ -12,6 +12,8 @@ public class projectile1 : MonoBehaviour
     public float speed = 0f;
     public Vector3 Direction = new Vector3(0,0,0);
     public bool selfDestructOnCollision = true;
+    public bool gravity = false;
+    public float gavityRamp = 0f; //ad hoc for now
 
     void Awake()
     {
@@ -21,7 +23,7 @@ public class projectile1 : MonoBehaviour
         Vector3 Direction;
     }
 
-    public static void genProjectile1(GameObject theObject,projectileInfo inputProjectileInfo, Vector3 direction = new Vector3())//IEnactaBool enactingThis)//(GameObject theObject, int timeUntilSelfDestruct, Vector3 direction = new Vector3(), bool sdOnCollision = true, bool explodeOnDestroy = false)//, IEnactaBool enactingThis)
+    public static void genProjectile1(GameObject theObject,projectileToGenerate inputprojectileToGenerate, Vector3 direction = new Vector3(), bool gravity = false)//IEnactaBool enactingThis)//(GameObject theObject, int timeUntilSelfDestruct, Vector3 direction = new Vector3(), bool sdOnCollision = true, bool explodeOnDestroy = false)//, IEnactaBool enactingThis)
     {
         //use like THIS:
         //authorScript1.genProjectile1(x, y, z);
@@ -36,13 +38,13 @@ public class projectile1 : MonoBehaviour
         //hmm, i don't have an input that modifies speed yet?
         //      projectileScript.speed = 1f;
 
-        projectileScript.speed = inputProjectileInfo.speed;
+        projectileScript.speed = inputprojectileToGenerate.speed;
         projectileScript.Direction = direction;
-        projectileScript.selfDestructOnCollision = inputProjectileInfo.sdOnCollision;
+        projectileScript.selfDestructOnCollision = inputprojectileToGenerate.sdOnCollision;
         selfDestructScript1 killScript = theObject.GetComponent<selfDestructScript1>();
-        killScript.timeUntilSelfDestruct = inputProjectileInfo.timeUntilSelfDestruct;
+        killScript.timeUntilSelfDestruct = inputprojectileToGenerate.timeUntilSelfDestruct;
 
-        projectileScript.explode = inputProjectileInfo.explodeOnDestroy;
+        projectileScript.explode = inputprojectileToGenerate.explodeOnDestroy;
 
         //if (interactionType == interType.tankShot)
         {
@@ -51,37 +53,15 @@ public class projectile1 : MonoBehaviour
 
     }
 
-    public static void OLDgenProjectile1(GameObject theObject, intSpherAtor interactionSphereCreator)//, IEnactaBool enactingThis)
-    {
-        //use like THIS:
-        //authorScript1.genProjectile1(x, y, z);
-
-        projectile1 projectileScript = theObject.AddComponent<projectile1>();
-
-        //i dunno, at this point, why not merely store "intSpherAtor interactionSphereCreator" itself on this script
-        //instead of all these details from it?
-        //should i....reverse it?  you ....
-        //...no can't create free floating components that aren't attached to anything, i don't think...
-
-        //hmm, i don't have an input that modifies speed yet?
-        projectileScript.speed = 1f;
-
-        projectileScript.Direction = interactionSphereCreator.firePoint.transform.forward;
-        projectileScript.selfDestructOnCollision = interactionSphereCreator.sdOnCollision;
-        selfDestructScript1 killScript = theObject.GetComponent<selfDestructScript1>();
-        killScript.timeUntilSelfDestruct = interactionSphereCreator.timeUntilSelfDestruct;
-
-        if (interactionSphereCreator.interactionType == interType.tankShot)
-        {
-            projectileScript.explode = true;
-        }
-
-    }
-
     // Update is called once per frame
     void Update()
     {
         this.gameObject.transform.position = this.gameObject.transform.position + Direction*speed;
+        if(gravity == true)
+        {
+            this.gameObject.transform.position += 9 * gavityRamp * new Vector3(0,-1,0);
+            gavityRamp += 0.018f;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -92,7 +72,7 @@ public class projectile1 : MonoBehaviour
 
         if (selfDestructOnCollision && other.gameObject.tag != "aMapZone")
         {
-            Debug.Log("projectile1, selfDestructOnCollision, this.gameObject.name:  " + this.gameObject.name);
+            //Debug.Log("projectile1, selfDestructOnCollision, this.gameObject.name:  " + this.gameObject.name);
 
             Destroy(this.gameObject);
 
@@ -112,54 +92,16 @@ public class projectile1 : MonoBehaviour
         //should put this somewhere else?  just putting it here FOR NOW:
         if (explode == true)
         {
-            //new intSpherAtor(transform, enactionCreator.interType.tankShot, virtualGamepad.buttonCategories.aux1)
-
-
-
-
-            GameObject prefabToUse = repository2.singleton.interactionSphere;
-            Vector3 startPoint = this.transform.position;
-
-            GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, startPoint);
-
-
-            projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
-            projectileScript.speed = 0.17f;
-            //projectileScript.Direction = this.firePoint.transform.forward;
-            projectileScript.selfDestructOnCollision = false;
-            selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
-            killScript.timeUntilSelfDestruct = 4;
-            //killScript.
-            newProjectile.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-
-            growScript1 growScript = newProjectile.AddComponent<growScript1>();
-            growScript.growthSpeed = 3f;
-
-            //newProjectile.GetComponent<Renderer>().material.color = new Color(1f, 1f, 0f);
-            MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
-            theRenderer.material.color = new Color(1f, 1f, 0f);
-            //theRenderer.material.shader.
-            //theRenderer.
-
-            //don't bother with this for now.  need to later though.
-            //intSpherAtor thing =
-            
-
-
-            authorScript1 auth = newProjectile.GetComponent<authorScript1>();
-            //auth.enacting = new intSpherAtor(this.transform, enactionCreator.interType.tankShot, virtualGamepad.buttonCategories.aux1, 1).genAuthorScript2(newProjectile, this.gameObject);
-            List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-            enactableBoolSet.Add(new intSpherAtor(this.transform, interType.tankShot, buttonCategories.aux1, 1f, false));
-            auth.enacting = enactableBoolSet[0];
-            auth.enacting.interInfo = new interactionInfo(interType.tankShot);
-            auth.enacting.interInfo.enactionAuthor = this.gameObject;  //uhhhhh super messy for now...
+            comboGen.singleton.tankShotExplosion(this.transform.position);
         }
     }
 }
 
-public class projectileInfo
+public class projectileToGenerate
 {
-    //stuff to keep track of about the projectile BEFORE it is generated
+    //stuff to keep track of about the projectile BEFORE it is generated, otherwise attach a projectile COMPONENT
+
+
     public float speed = 1f;
     public bool sdOnCollision = true;
     public int timeUntilSelfDestruct = 99;
@@ -167,7 +109,7 @@ public class projectileInfo
     public bool affectedByGravity = false;
     public bool explodeOnDestroy = false;
 
-    public projectileInfo(float speed, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f,
+    public projectileToGenerate(float speed, bool sdOnCollision = true, int timeUntilSelfDestruct = 99, float growthSpeed = 0f,
             bool affectedByGravity = false, bool explodeOnDestroy = false)
     {
         this.speed = speed;

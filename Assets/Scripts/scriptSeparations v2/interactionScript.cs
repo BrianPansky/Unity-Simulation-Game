@@ -4,18 +4,15 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using static interactionScript;
 
 public class interactionScript : MonoBehaviour
 {
-
-
-    public Dictionary<enactionCreator.interType, List<effect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<effect>>();
+    //public Dictionary<enactionCreator.interType, List<effect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<effect>>();
+    //          public Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
 
 
     int cooldown = 0;
-
-    int health = 2;
-
     public enum effect
     {
         errorYouDidntSetEnumTypeForEFFECT,
@@ -30,12 +27,13 @@ public class interactionScript : MonoBehaviour
 
     void Awake()
     {
+        //Debug.Log("Awake:  " + this);
         //Debug.Log("awake this.gameObject:  " + this.gameObject.GetInstanceID());
-
         if (tagging2.singleton == null)
         {
             Debug.Log("tagging2.singleton is null, cannot use it to add tags.  this happens for objects that have been added to the scene using the editor, because they exist before any scripts are called.  solution:  do not add prefabs to scene using editor.  generate them after singletons have initialized.");
         }
+
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
 
@@ -45,8 +43,6 @@ public class interactionScript : MonoBehaviour
             //Debug.Log(thisTag);
         }
     }
-
-
     void OnEnable()
     {
 
@@ -55,334 +51,27 @@ public class interactionScript : MonoBehaviour
             this.gameObject.AddComponent<safeDestroy>();
         }
 
-        //              theWorldScript.theTagScript.foreignAddTag("interactable", this.gameObject);
-        
-        //Debug.Log("this.gameObject:  " + this.gameObject);
-        //Debug.Log("enable this.gameObject:  " + this.gameObject.GetInstanceID());
-
-
-        //Debug.Log("add the tags");
         //Debug.Log("tagging2.singleton:  " + tagging2.singleton);
-        //Debug.Log("this.gameObject:  " + this.gameObject);
-        //Debug.Log("tagging2.tag2.interactable:  " + tagging2.tag2.interactable);
         
     }
-
-
     void Start()
     {
-
         //Debug.Log("start this.gameObject:  " + this.gameObject.GetInstanceID());
 
-
-    }
-
-    void Update()
-    {
-        
-    }
-
-
-    private void OnTriggerEnter(Collider other)
-    {
-        Debug.Log("YYYYYYYYYYYYYYYYYYY     START onTriggerEnter for:  " + this.gameObject.name + "     YYYYYYYYYYYYYYYYYYYY");
-
-
-        
-
-        if (other.tag != "interactionType1")
-        {
-            Debug.Log("other.tag != \"interactionType1\"");
-            return;
-        }
-
-
-        authorScript1 theAuthorScript = other.gameObject.GetComponent<authorScript1>();
-
-        if (theAuthorScript.enacting == null) {
-            Debug.Log("theAuthorScript.enacting == null");
-                return; }
-
-        //Debug.Log("theAuthorScript.enacting.interInfo:  " + theAuthorScript.enacting.interInfo);
-        //Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor:  " + theAuthorScript.enacting.interInfo.enactionAuthor);
-        if (theAuthorScript.enacting.interInfo.enactionAuthor == null) {
-
-            Debug.Log("theAuthorScript.enacting.interInfo.enactionAuthor == null"); 
-            return; }
-
-        if (dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true)
-        {
-            //Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true, object being interacted with doesn't have this key:  " + theAuthorScript.interactionType);
-            //Debug.Log("instead, it only has the following:  ");
-
-            foreach (var key in dictOfInteractions.Keys)
-            {
-                //Debug.Log(key);
-            }
-            //Debug.Log("..........................................................");
-            return;}
-
-
-        Debug.Log("great, what interaction effect is it???");
-
-
-        foreach (effect thisEffect in dictOfInteractions[theAuthorScript.interactionType])
-        {
-
-            if (thisEffect == effect.useVehicle)
-            {
-                Debug.Log("thisEffect == effect.useVehicle");
-                //Debug.Log("thisEffect == effect.useVehicle");
-                //Debug.Log("theAuthorScript.enacting.enactionAuthor.name:  " + theAuthorScript.enacting.enactionAuthor.name);
-                //Debug.Log("theAuthorScript.enacting.enactionAuthor.transform.position:  " + theAuthorScript.enacting.enactionAuthor.transform.position);
-
-                
-                //body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
-
-                //enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
-                //ad hoc for now
-                virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
-                tank2 theTank = this.GetComponent<tank2>();
-                if (theTank.occupied == true) { return; }
-                theTank.equip(gamepad);
-
-
-
-                CharacterController controller = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<CharacterController>();
-                if (controller != null)
-                {
-                    controller.enabled = false;
-                }
-
-                NavMeshAgent nva = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<NavMeshAgent>();
-                if (nva != null)
-                {
-                    nva.enabled = false;
-                }
-
-
-                //      dockToThisObject(theAuthorScript.enacting.interInfo.enactionAuthor);
-                //Debug.Log("theAuthorScript:  " + theAuthorScript);
-                interactionCreator.singleton.dockXToY(theAuthorScript.enacting.interInfo.enactionAuthor, this.gameObject);
-                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.position = this.transform.position;
-                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.rotation = this.transform.rotation;
-
-
-
-                //theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
-                //      theTank.pilot = theAuthorScript.enacting.enactionAuthor;
-                //      theTank.thePilotEnactionScript = theEnactionScript;
-
-                //this is probably great, but it also disables my camera.  will need to re-arrange things...
-                //      theBodyScript.theBodyGameObject.active = false;
-
-                //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
-                //      theAuthorScript.enacting.interInfo.enactionAuthor.transform.SetParent(this.gameObject.transform, true);
-                //theEnactionScript.enactionBody = this.gameObject;
-                //theEnactionScript.currentlyUsable.Remove("humanBody");
-                //theEnactionScript.currentlyUsable.Add("tank");
-
-
-            }
-            else if (thisEffect == effect.equip)
-            {
-                Debug.Log("thisEffect == effect.equip");
-                //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
-                playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
-                gun1 theGun = this.GetComponent<gun1>();
-                //if (theGun.occupied == true) { return; }
-                theGun.equip(thePlayable);
-
-
-                //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
-                interactionCreator.singleton.dockXToY(this.gameObject, thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
-                //          dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
-
-            }
-            else if (thisEffect == effect.putInInventory)
-            {
-                Debug.Log("thisEffect == effect.putInInventory");
-                //virtualGamepad gamepad = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<virtualGamepad>();
-                //playable thePlayable = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<playable>();
-                //gun1 theGun = this.GetComponent<gun1>();
-                //if (theGun.occupied == true) { return; }
-                //          theGun.equip(thePlayable);
-
-                //          equippable theEquippable = this.GetComponent<equippable>();
-
-                //inventory1 theInventory = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<inventory1>();
-                //          theEquippable.putInInventory(theAuthorScript.enacting.interInfo.enactionAuthor);
-                inventory1 theInventory = theAuthorScript.enacting.interInfo.enactionAuthor.GetComponent<inventory1>();
-                theInventory.putInInventory(this.gameObject);
-                //dockThisToOtherObject(theAuthorScript.enacting.interInfo.enactionAuthor, (1.5f * theAuthorScript.enacting.interInfo.enactionAuthor.transform.forward) + new Vector3(0.9f, 0.2f, 0));
-                //dockThisToOtherObject(thePlayable.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
-
-            }
-            else if (thisEffect == effect.damage)
-            {
-
-                Debug.Log("thisEffect == effect.damage");
-
-                health--;
-
-                if(health < 1)
-                {
-                    killThisBody();
-                }
-            }
-            else
-            {
-
-                Debug.Log("thisEffect is not implemented:  " + thisEffect);
-            }
-            /*
-            if (thisEffect == effect.damage)
-            {
-
-                body1 thisBody = this.gameObject.GetComponent<body1>();
-                thisBody.currentHealth -= theAuthorScript.magnitudeOfInteraction;
-
-
-                this.gameObject.GetComponent<Renderer>().material.color = new Color(((thisBody.currentHealth + 10) / (thisBody.maxHealth + 10)), 0f, 0f);
-
-                if (thisBody.currentHealth < 0 && this.gameObject.name != "Player 1")
-                {
-                    thisBody.killThisBody();
-                }
-
-
-            }
-            else if (thisEffect == effect.burn)
-            {
-                GameObject makeThis = repository2.singleton.interactionSphere;
-
-
-                GameObject thisObject = Instantiate(repository2.singleton.interactionSphere, this.transform.position, Quaternion.identity);
-                //UnityEngine.Object.Destroy(thisObject.GetComponent<selfDestructScript1>());
-                thisObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-                //thisObject.transform.position += lookingRay.direction;
-                //theInteractionMate.interactionAuthor.transform.position + new Vector3(0, 0, 0)
-                projectile1 projectileScript = thisObject.AddComponent<projectile1>();
-                projectileScript.Direction = Vector3.up;
-                projectileScript.selfDestructOnCollision = false;
-                selfDestructScript1 killScript = thisObject.GetComponent<selfDestructScript1>();
-                killScript.timeUntilSelfDestruct = 30;
-
-                growScript1 growScript = thisObject.AddComponent<growScript1>();
-                growScript.growthSpeed = 0.3f;
-
-
-            }
-            else if (thisEffect == effect.useVehicle)
-            {
-                theAuthorScript.theAuthor.transform.position = this.transform.position;
-                theAuthorScript.theAuthor.transform.rotation = this.transform.rotation;
-
-                //body1 theBodyScript = theAuthorScript.theAuthor.GetComponent<body1>();
-
-
-                enactionScript theEnactionScript = theAuthorScript.theAuthor.GetComponent<enactionScript>();
-                //ad hoc for now
-                tank1 theTank = this.GetComponent<tank1>();
-                theEnactionScript.thisNavMeshAgent = theTank.thisNavMeshAgent;
-                theTank.pilot = theAuthorScript.theAuthor;
-                theTank.thePilotEnactionScript = theEnactionScript;
-
-                //this is probably great, but it also disables my camera.  will need to re-arrange things...
-                //      theBodyScript.theBodyGameObject.active = false;
-
-                //this.gameObject.transform.SetParent(theAuthorScript.theAuthor.transform, true);
-                theAuthorScript.theAuthor.transform.SetParent(this.gameObject.transform, true);
-
-                theEnactionScript.enactionBody = this.gameObject;
-                theEnactionScript.currentlyUsable.Remove("humanBody");
-                theEnactionScript.currentlyUsable.Add("tank");
-
-
-
-            }
-            else if (thisEffect == effect.activate1)
-            {
-                moveByForce motorScript = this.gameObject.GetComponent<moveByForce>();
-                motorScript.turnedOn = true;
-            }
-            */
-        }
-
-
-
-        //Debug.Log("ZZZZZZZ     END onTriggerEnter for:  " + this.gameObject.name + "     ZZZZZZZ");
-
-    }
-
-    public void killThisBody()
-    {
-        //move to separate script?
-        //did that, soooooo now it should be safe to simply just do THIS here:
-        UnityEngine.Object.Destroy(this.gameObject);
-
-        /*
-        //this.gameObject.SetActive(false);
-        Debug.Log("................................preparing to destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
-
-        tagging2.singleton.removeALLtags(this.gameObject);
-        //removeIupdateCallableFromItsList
-        if(this.gameObject.GetComponent<IupdateCallable>() != null)
-        {
-            worldScript.singleton.removeIupdateCallableFromItsList(this.gameObject.GetComponent<IupdateCallable>());
-        }
-        
-
-        Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
-        UnityEngine.Object.Destroy(this.gameObject);
-        */
     }
 
     
-    internal void addInteraction(enactionCreator.interType interactionType, effect effect)
-    {
-        //dictOfInteractions
 
-        if (dictOfInteractions.ContainsKey(interactionType))
-        {
-            //add the game object to the list of objects tagged with that tag:
-            dictOfInteractions[interactionType].Add(effect);
-        }
-        else
-        {
-            //sigh, need to add the key first, which means the list it unlocks as well...
-            dictOfInteractions.Add(interactionType, makeEffectIntoList(effect));
-        }
-    }
+    /*
+    
 
-    public List<effect> makeEffectIntoList(effect e1)
-    {
-        List<effect> newList = new List<effect>();
-        newList.Add(e1);
-        return newList;
-    }
 
-    public List<string> makeStringsIntoList(string s1, string s2 = null, string s3 = null, string s4 = null)
-    {
-        //input 4 strings
-        //get backa  list of all of them that are NOT null
+    */
 
-        List<string> allStrings = new List<string>();
-        allStrings.Add(s1);
-        allStrings.Add(s2);
-        allStrings.Add(s3);
-        allStrings.Add(s4);
-
-        List<string> nonNullStrings = new List<string>();
-
-        foreach (string thisString in allStrings)
-        {
-            if (thisString != null)
-            {
-                nonNullStrings.Add(thisString);
-            }
-        }
-
-        return nonNullStrings;
-    }
 }
+
+
+
+
+
+

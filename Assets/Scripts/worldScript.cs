@@ -57,6 +57,9 @@ public class worldScript : MonoBehaviour
         //Debug.Log("======================================================");
 
         updateZoneLists();
+
+        //Debug.Log("222222222222222222222222 zoneList.Count:  " + nearZones.Count);
+        //Debug.Log("333333333333333333333333 zoneList.Count:  " + farZones.Count);
         updateNearZones(nearZones);
         updateFarZones(farZones);
 
@@ -85,19 +88,28 @@ public class worldScript : MonoBehaviour
 
         while (whichZoneWeAreLookingAt < tagging2.singleton.objectsInZone.Keys.Count)
         {
-            List<IupdateCallable> alltheCallablesInThisZone = getAllCallablesInThisZone(whichZoneWeAreLookingAt);
 
-            if(whichZoneWeAreLookingAt < numberOfNearZones)
+            //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            List<IupdateCallable> alltheCallablesInThisZone = getAllCallablesInThisZone(whichZoneWeAreLookingAt);
+            //Debug.Log("alltheCallablesInThisZone.Count:  " + alltheCallablesInThisZone.Count);
+
+            if (whichZoneWeAreLookingAt < numberOfNearZones)
             {
+                //Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
                 nearZones.Add(alltheCallablesInThisZone);
             }
             else
             {
+                //Debug.Log("cccccccccccccccccccccccccccccccccccccc");
                 farZones.Add(alltheCallablesInThisZone);
             }
 
             whichZoneWeAreLookingAt++;
         }
+
+
+        //Debug.Log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy zoneList.Count:  " + nearZones.Count);
+        //Debug.Log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz zoneList.Count:  " + farZones.Count);
     }
 
     private List<IupdateCallable> getAllCallablesInThisZone(int whichZoneWeAreLookingAt)
@@ -135,9 +147,13 @@ public class worldScript : MonoBehaviour
 
     private void updateNearZones(List<List<IupdateCallable>> setOfZones)
     {
-        if (setOfZones.Count == 0) { return; }
+        if (setOfZones.Count == 0)
+        {
+            //Debug.Log("setOfZones.Count == 0");
+            return; }
         foreach (List<IupdateCallable> zone in setOfZones)
         {
+            //Debug.Log("callAllonOneZoneList(zone);:");
             callAllonOneZoneList(zone);
         }
     }
@@ -150,7 +166,11 @@ public class worldScript : MonoBehaviour
 
     private void callAllonOneZoneList(List<IupdateCallable> zoneList)
     {
-        foreach (IupdateCallable callable in zoneList)
+
+        //Debug.Log("calllllllllllllllllllllllllllllllllllllll");
+
+            //Debug.Log("zoneList.Count:  " + zoneList.Count);
+            foreach (IupdateCallable callable in zoneList)
         {
             //Debug.Log(callable);
             callable.callableUpdate();
