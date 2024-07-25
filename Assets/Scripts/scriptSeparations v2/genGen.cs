@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static enactionCreator;
+using static interactionCreator;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class genGen : MonoBehaviour
 {
-    //[general generator]
+    //[general generator]  hmmm, thigs here should either be in repository or combo gen maybe?
     public static genGen singleton;
 
     void Awake()
@@ -49,8 +50,100 @@ public class genGen : MonoBehaviour
 
 
 
+    public GameObject returnNPC5(Vector3 where)
+    {
+        GameObject newObj = Instantiate(repository2.singleton.placeHolderCylinderPrefab, where, Quaternion.identity);
+
+        Destroy(newObj.GetComponent<Collider>());
+
+        addBody4ToObject(newObj);
+
+        newObj.AddComponent<AIHub3>();
 
 
+        newObj.AddComponent<CapsuleCollider>();
+        return newObj;
+    }
+
+
+    public void addBody4ToObject(GameObject newObj)
+    {
+
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        //newObj.AddComponent<navmeshAgentDebugging>();
+
+
+
+
+        thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+        thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+
+
+
+
+
+
+        makeEnactionsBody4(thePlayable);
+        makeInteractionsBody4(thePlayable);
+
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+    }
+
+
+    void makeEnactionsBody4(playable2 thePlayable)
+    {
+        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick));
+
+
+        vecTranslation.addVecTranslation(thePlayable.gameObject, thePlayable.speed, buttonCategories.vector1);
+
+        navAgent.addNavAgentEnaction(thePlayable.gameObject);
+
+        aimTarget.addAaimTargetAndAimTranslation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
+
+
+        /*
+        thePlayable.enactableBoolSet.Add(new hitscanEnactor(thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick)));
+
+
+        thePlayable.enactableVectorSet.Add(new vecTranslation(thePlayable.speed, thePlayable.transform, buttonCategories.vector1));
+
+        thePlayable.enactableTARGETVectorSet.Add(new navAgent(thePlayable.gameObject));
+        new aimTarget(
+            new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2)
+            ).addToBothLists(thePlayable.enactableVectorSet, thePlayable.enactableTARGETVectorSet);
+
+        */
+
+
+    }
+
+    private void makeInteractionsBody4(IInteractable theInteractable)
+    {
+        theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, interType.shoot1, new numericalEffect(numericalVariable.health));
+
+        /*
+        theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, interType.shoot1, new numericalEffect(numericalVariable.health));
+        theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, interType.shootFlamethrower1, new damage());
+        theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, enactionCreator.interType.tankShot, new damage());
+        theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, enactionCreator.interType.tankShot, new damage());  //uhhh, double damage
+        */
+
+    }
+
+
+
+    /*
+    
     public GameObject returnSimpleTank2(Vector3 where)
     {
 
@@ -83,12 +176,30 @@ public class genGen : MonoBehaviour
 
         return bottomBit;
     }
+    */
 
     public GameObject returnPineTree1(Vector3 where)
     {
         GameObject newObj = Instantiate(repository2.singleton.pineTree1, where, Quaternion.identity);
 
-        simpleInteractable.genSimpleInteractable(newObj, enactionCreator.interType.shootFlamethrower1, new burn());
+        //                          simpleInteractable.genSimpleInteractable(newObj, enactionCreator.interType.shootFlamethrower1, new burn());
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         //newObj.AddComponent<simpleInteractable>();
         //simpleInteractable theInteractionScript = newObj.GetComponent<interactionScript>();
 
@@ -101,10 +212,12 @@ public class genGen : MonoBehaviour
         //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
 
         //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, new burn());\
-        //      dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new playAsPlayable());
+        //      dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new playAsPlayable2());
 
         return newObj;
     }
+
+    /*
 
     public GameObject returnNPC4(Vector3 where)
     {
@@ -119,8 +232,8 @@ public class genGen : MonoBehaviour
 
         inventory1 theirInventory = newObj.GetComponent<inventory1>();
 
-        //theirInventory.storedEquippables.Add(returnGun1(where));
-        //                  theirInventory.putInInventory(returnGun1(where));//.storedEquippables.Add(returnGun1(where));
+        //theirInventory.storedequippable2s.Add(returnGun1(where));
+        //                  theirInventory.putInInventory(returnGun1(where));//.storedequippable2s.Add(returnGun1(where));
 
         //newObj.AddComponent<navmeshAgentDebugging>();
 
@@ -131,6 +244,8 @@ public class genGen : MonoBehaviour
 
         return newObj;
     }
+    */
+
 
     public GameObject returnGun1(Vector3 where)
     {
@@ -144,7 +259,19 @@ public class genGen : MonoBehaviour
 
         return newObj;
     }
+    
+    public GameObject returnShotgun1(Vector3 where)
+    {
+        GameObject newObj = Instantiate(repository2.singleton.shotgun1, where, Quaternion.identity);
 
+
+        //newObj.AddComponent<interactionScript>();
+        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
+
+        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
+
+        return newObj;
+    }
 
 
 
@@ -173,7 +300,8 @@ public class genGen : MonoBehaviour
         //should this use "interactionMate" isntead?
         //authorScript1.GENAuthorScript1(newObjectForProjectile, theEnactable);
         //interactionSpheres already have an author script!  use THIS function instead:
-        authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable.interInfo, theEnactable);
+        //authorScript1.FILLAuthorScript1(newObjectForProjectile, theEnactable.interInfo, theEnactable);
+        colliderInteractor.genColliderInteractor(newObjectForProjectile, theEnactable);
         selfDestructScript1 sds = newObjectForProjectile.GetComponent<selfDestructScript1>();
         sds.timeUntilSelfDestruct = theprojectileToGenerate.timeUntilSelfDestruct;
 
@@ -192,18 +320,7 @@ public class genGen : MonoBehaviour
     }
 
 
-    public GameObject returnShotgun1(Vector3 where)
-    {
-        GameObject newObj = Instantiate(repository2.singleton.shotgun1, where, Quaternion.identity);
-
-
-        //newObj.AddComponent<interactionScript>();
-        //interactionScript theInteractionScript = newObj.GetComponent<interactionScript>();
-
-        //dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.shootFlamethrower1, interactionScript.effect.burn);
-
-        return newObj;
-    }
+    
 
 
 

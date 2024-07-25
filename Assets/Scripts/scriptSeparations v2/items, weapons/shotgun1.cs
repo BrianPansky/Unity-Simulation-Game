@@ -4,18 +4,13 @@ using UnityEngine;
 using static enactionCreator;
 
 
-public class shotgun1 : equippable
+public class shotgun1 : equippable2
 {
 
-    public GameObject enactionPoint1;
-
-    void Awake()
-    {
-        callableAwake();
-    }
+    //public GameObject enactionPoint1;
 
 
-    //can't have this, because it prevents the "awake" function from being called in "equippable"?!?  -_____-
+    //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
     //void Awake()
     //{
     //}
@@ -32,11 +27,15 @@ public class shotgun1 : equippable
 
 
 
-        theEquippableType = interactionCreator.simpleSlot.hands;
-
+        //theequippable2Type = interactionCreator.simpleSlot.hands;
+        projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.shoot1),
+            new projectileToGenerate(1, true, 99, 0));
+        /*
         enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
             new projectileToGenerate(1, true, 99, 0)));
+        */
 
         //Debug.Log(this.transform);
 

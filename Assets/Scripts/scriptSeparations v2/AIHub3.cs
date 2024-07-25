@@ -7,9 +7,10 @@ using static tagging2;
 using static enactionCreator;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
+using static interactionCreator;
 
 
-public class AIHub3 : MonoBehaviour, IupdateCallable
+public class AIHub3 : planningAndImagination, IupdateCallable
 {
 
     public NavMeshAgent currentNavMeshAgent;
@@ -24,6 +25,8 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
     {
 
         vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
+
+        makeAdHocPlanToDo();
     }
 
     public List<IupdateCallable> currentUpdateList { get; set; }
@@ -53,9 +56,77 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
         adhocCooldown = 0;
         //Debug.Log("0000000000000000000destination:  " + currentNavMeshAgent.destination);
 
-        justDoRandomByBoolORTarget();
-        simpleDodge();
+        //justSenseNearbyEquipables(numericalVariable.health, false);
+        //justDoRandomByBoolORTarget();
+        //simpleDodge();
 
+        //playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+        //thePlayable.printEnactables();
+        //thePlayable.printInteractions();
+        //thePlayable.printSlots();
+
+        //justDoRandomByBoolORTarget();
+
+        doCurrentPlanStep();
+    }
+
+
+
+
+
+
+    void makeAdHocPlanToDo()
+    {
+        playable2 thePlayable  = this.gameObject.GetComponent<playable2>();
+        Transform firePoint = thePlayable.enactionPoint1.transform;
+        buttonCategories theButton = buttonCategories.primary;
+        interType theInterType = interType.standardClick;
+
+        IEnactaBool testE1 = new projectileLauncher(firePoint, theButton,
+            new interactionInfo(theInterType),
+            new projectileToGenerate(1, true, 99, 0));
+
+
+        boolEXE exe1 = new boolEXE(testE1);
+
+        plan.Add(exe1);
+
+        /*
+
+        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick));
+
+
+        vecTranslation.addVecTranslation(thePlayable.gameObject, thePlayable.speed, buttonCategories.vector1);
+
+        navAgent.addNavAgentEnaction(thePlayable.gameObject);
+
+        aimTarget.addAaimTargetAndAimTranslation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
+
+
+
+
+
+
+        */
+
+
+
+    }
+
+    void doCurrentPlanStep()
+    {
+        if (plan.Count <1) { return; }
+
+        plan[0].executePlan();
+
+        //plan.RemoveAt(0);
+    }
+
+
+    private void justSenseNearbyEquipables(numericalVariable health, bool shouldItBeAddition)
+    {
+        
     }
 
     void justDoRandomByINPUT()
@@ -176,7 +247,8 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
                     }
                     */
 
-                    GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    //GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    GameObject target = pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
                     //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
                     //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
@@ -225,12 +297,15 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
                           //Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
                     enactaBool = vGpad.allCurrentBoolEnactables[key];
+
+                    //Debug.Log("enactaBool = "+enactaBool );
                     //vGpad.allCurrentBoolEnactables[key].enact();
                     break;
                 }
                 indexCount++;
             }
 
+            //Debug.Log("enacting:  ");
             enactaBool.enact();
         }
 
@@ -273,14 +348,14 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
     private void doRandomByTarget(int whichToPick)
     {
-        //Debug.Log("doRandomByTarget:  " + whichToPick);
+        //Debug.Log("_______________________________________doRandomByTarget:  " + whichToPick);
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
         //Debug.Log("thisId:  " + thisId);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
         //Debug.Log("currentZone:  " + currentZone);
         //Debug.Log("number of objects in currentZone:  " + tagging2.singleton.objectsInZone[currentZone].Count);
-        GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(
+        GameObject target = pickRandomObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
@@ -366,6 +441,48 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
 
 
+    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    {
+        if (theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            //Debug.Log("list count is:  " + theList.Count);
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            //Debug.Log("random index is:  " + randomIndex);
+            thisObject = theList[randomIndex];
+            //Debug.Log("thisObject:  " + thisObject);
+
+            if (thisObject != notTHISObject)
+            {
+                //Debug.Log("thisObject:  " + thisObject);
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
+    }
+
+
+
+
+
     void somethingInTHisCodeIsBreakingNavMeshAgentitwasjusttheinputvectorwastoohighabovefloorithinkmaybe()
     {
 
@@ -395,7 +512,7 @@ public class AIHub3 : MonoBehaviour, IupdateCallable
 
 
 
-        GameObject target = tagging2.singleton.findXNearestToY(this.gameObject, tagging2.tag2.interactable);
+        GameObject target = conditionCreator.singleton.whichObjOnIDPAIRListIsNearest(this.gameObject, tagging2.singleton.objectsWithTag[tagging2.tag2.interactable]);
         Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 1f);
 
 

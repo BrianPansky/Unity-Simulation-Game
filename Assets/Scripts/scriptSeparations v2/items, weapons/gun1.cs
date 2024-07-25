@@ -4,22 +4,22 @@ using UnityEngine;
 using static enactionCreator;
 
 
-public class gun1 : equippable
+public class gun1 : equippable2
 {
 
 
 
-    public GameObject enactionPoint1;
-
+    //public GameObject enactionPoint1;
+    /*
     void Awake()
     {
-        callableAwake();
+        //          callableAwake();
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
-        theEquippableType = interactionCreator.simpleSlot.hands;
+        theequippable2Type = interactionCreator.simpleSlot.hands;
     }
+    */
 
-
-    //can't have this, because it prevents the "awake" function from being called in "equippable"?!?  -_____-
+    //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
     //void Awake()
     //{
     //}
@@ -33,13 +33,21 @@ public class gun1 : equippable
 
 
 
-
-
-
-
+        //this.gameObject.AddComponent<projectileLauncher>();
+        projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.shoot1),
+            new projectileToGenerate(1, true, 99, 0));
+        /*
+        projectileLauncher x = new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.shoot1),
+            new projectileToGenerate(1, true, 99, 0));
+        this.gameObject.AddComponent(x);
+        */
+        /*
         enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
             new projectileToGenerate(1, true, 99, 0)));
+        */
 
         //Debug.Log(this.transform);
 

@@ -10,7 +10,7 @@ using UnityEngine.XR;
 public class virtualGamepad : MonoBehaviour
 {
     public GameObject theCamera = null;
-    public playable playingAs;
+    public playable2 playingAs;
     public bool isPlayer = false;
     playerMouseKeyboardInputs mouseKeyboardInputs;
 
@@ -113,12 +113,10 @@ public class virtualGamepad : MonoBehaviour
 
     */
 
-    internal void receiveAnyNonNullEnactionsForButtons(equippable equippable)
+    internal void receiveAnyNonNullEnactionsForButtons(equippable2 equippable2)
     {
 
-
-        //wait, is this allowed????  i GUESS so..........since the execution is conditional on whether there ARE any such items on the list???  or it's just not getting angry at me YET???
-        foreach (collisionEnaction enactaBool in equippable.enactableBoolSet)
+        foreach (IEnactaBool enactaBool in equippable2.GetComponents<IEnactaBool>())
         {
             //                  Debug.Log("1111111111111111111 allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
 
@@ -128,34 +126,56 @@ public class virtualGamepad : MonoBehaviour
         }
 
 
-        foreach (IEnactaVector enactaV in equippable.enactableVectorSet)
+        foreach (IEnactaVector enactaV in equippable2.GetComponents<IEnactaVector>())
         {
             //enactaV.enactionAuthor = gamepad.transform.gameObject;
             allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
         }
+
+
+
+        /*
+        //wait, is this allowed????  i GUESS so..........since the execution is conditional on whether there ARE any such items on the list???  or it's just not getting angry at me YET???
+        foreach (collisionEnaction enactaBool in equippable2.enactableBoolSet)
+        {
+            //                  Debug.Log("1111111111111111111 allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
+
+            enactaBool.enactionAuthor = this.transform.gameObject;
+            allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+            //                  Debug.Log("222222222222222222222 allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
+        }
+
+
+        foreach (IEnactaVector enactaV in equippable2.enactableVectorSet)
+        {
+            //enactaV.enactionAuthor = gamepad.transform.gameObject;
+            allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
+        }
+        */
+
     }
 
-    internal void updateALLGamepadButtonsFromPlayable(playable thePlayable)
+    internal void updateALLGamepadButtonsFromplayable2(playable2 thePlayable2)
     {
         //      virtualGamepad gamepad = this.gameObject.GetComponent<virtualGamepad>();
-        if (thePlayable == null) { Debug.Log("thePlayable ==null"); return; }
+        if (thePlayable2 == null) { Debug.Log("thePlayable2 ==null"); return; }
         //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
 
-        foreach (IEnactaBool enactaBool in thePlayable.enactableBoolSet)
+        foreach (IEnactaBool enactaBool in thePlayable2.GetComponents<IEnactaBool>())
         {
             enactaBool.enactionAuthor = this.transform.gameObject;
             this.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
         }
 
 
-        foreach (IEnactaVector enactaV in thePlayable.enactableVectorSet)
+        foreach (IEnactaVector enactaV in thePlayable2.GetComponents<IEnactaVector>())
         {
             this.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
         }
 
 
         List<IEnactByTargetVector> newListToPreventShallowCopyError = new List<IEnactByTargetVector>();
-        foreach (IEnactByTargetVector enactByTargetVector in thePlayable.enactableTARGETVectorSet)
+        foreach (IEnactByTargetVector enactByTargetVector in thePlayable2.GetComponents<IEnactByTargetVector>())
         {
             newListToPreventShallowCopyError.Add(enactByTargetVector);
         }
@@ -168,11 +188,11 @@ public class virtualGamepad : MonoBehaviour
     }
 
 
-    internal void removeFromGamepadButtons(equippable equippable)
+    internal void removeFromGamepadButtons(equippable2 equippable2)
     {
         //merely remove, do not replace with any defaults in this function
 
-        foreach (IEnactaBool enactaBool in equippable.enactableBoolSet)
+        foreach (IEnactaBool enactaBool in equippable2.GetComponents<IEnactaBool>())
         {
             allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
         }
@@ -181,14 +201,14 @@ public class virtualGamepad : MonoBehaviour
 
         /*
 
-        foreach (IEnactaBool enactaBool in equippable.enactableBoolSet)
+        foreach (IEnactaBool enactaBool in equippable2.enactableBoolSet)
         {
             //merely remove, do not replace with any defaults in this function
             allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
 //          Debug.Log("222222222222222222222 gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]:  " + gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType]);
         }
 
-        foreach (IEnactaVector enactaV in equippable.enactableVectorSet)
+        foreach (IEnactaVector enactaV in equippable2.enactableVectorSet)
         {
             //merely remove, do not replace with any defaults in this function
             allCurrentBoolEnactables[enactaV.gamepadButtonType] = null;
@@ -342,224 +362,6 @@ public class virtualGamepad : MonoBehaviour
 
 }
 
-
-public class playable: MonoBehaviour, IInteractable
-{
-    //attach to objects/entities you can "play as" [such as bodies and vehicles], NOT weapons and items [for them use "equippable"]
-    public bool occupied = false;
-
-
-    public GameObject enactionPoint1;
-    public Transform cameraMount;
-
-    public List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-    //public List<collisionEnaction> enactableBoolSet = new List<collisionEnaction>();
-    public List<IEnactaVector> enactableVectorSet = new List<IEnactaVector>();
-    public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
-    
-    public Dictionary<interactionCreator.simpleSlot, equippable> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, equippable>();
-
-    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
-
-
-
-
-    //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
-    public void initializeEnactionPoint1()
-    {
-        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1(), playable script"); //hmm, shouldn't playable AND equippables both have this?  a class encompassing them both?
-        enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.5f;
-        enactionPoint1.transform.rotation = this.transform.rotation;
-
-    }
-    public void initializeCustomEnactionPoint1(GameObject parent, Vector3 offset)
-    {
-        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1(), playable script"); //hmm, shouldn't playable AND equippables both have this?  a class encompassing them both?
-        //enactionPoint1.transform.SetParent(parent, false, )
-        enactionPoint1.transform.parent = parent.transform;
-        enactionPoint1.transform.position = parent.transform.position + offset;
-        enactionPoint1.transform.rotation = this.transform.rotation;
-
-        enactionPoint1.transform.localScale = -parent.transform.localScale;
-
-    }
-
-    public void defaultCameraMountGenerator()
-    {
-        GameObject newObject = new GameObject("cameraMount");
-
-
-        newObject.transform.SetParent(this.transform, false);
-        cameraMount = newObject.transform;
-
-    }
-
-    public void initializeCameraMount(Transform attachNewObjectForCameraOnThisInputTransform, Vector3 offset = new Vector3())
-    {
-        cameraMount = new GameObject("cameraMount in initializeCamera(), playable script").transform;
-
-        //Debug.Log("tankBarrel:  " + tankBarrel);
-        cameraMount.transform.SetParent(attachNewObjectForCameraOnThisInputTransform, false); //has to be child of ENACTION point for this body!  because THAT is the point which the gamepad rotates!!!
-        cameraMount.transform.position += offset;
-    }
-
-
-    public void plugIntoGamepadIfThereIsOne()
-    {
-        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
-        if (gamepad == null) {
-            Debug.Log("gamepad == null for:  " + this.gameObject.name); 
-            return; }
-
-        playAsPlayable(gamepad);
-
-    }
-
-    public void playAs(virtualGamepad gamepad)
-    {
-        //better way, just plug whole thing in, lol
-        occupied = true;
-        gamepad.playingAs = this;
-    }
-
-    public void playAsPlayable(virtualGamepad gamepad)
-    {
-        if(occupied == true) { return; }
-        //Debug.Log("equipping/occupying this:  " + this.gameObject + "for this object's gamepad:  " + gamepad.gameObject); 
-        occupied = true;
-
-        //Debug.Log("4444444444444444444444444444444444444444444");
-        //Debug.Log("is cameraMount  null:  " + cameraMount + "  for this object:  " + this.gameObject.name);
-        //Debug.Log("is gamepad.theCamera null:  " + gamepad.theCamera + "  for this object:  " + this.gameObject.name);
-        if (cameraMount != null && gamepad.theCamera != null)
-        {
-
-            gamepad.theCamera.transform.SetParent(cameraMount, false);
-        }
-
-        //Debug.Log("5555555555555555555555555555555555555555555");
-        gamepad.updateALLGamepadButtonsFromPlayable(this);
-
-    }
-
-    public void UNplayAsPlayable(virtualGamepad gamepad)
-    {
-        //redundant?  entering a different playable already overwrites everything?
-        //what about exiting a vehicle back into your own body?
-
-        //right now i'm using the function in "equippable" instead?  and virtual gamepad?
-        //Debug.Log("unequip, for this object:  " + gamepad.gameObject);
-
-
-
-        occupied = false;
-
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            enactaBool.enactionAuthor = null;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
-        }
-
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            //enactaV.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = null;
-        }
-
-        foreach (IEnactByTargetVector enactaTargetV in enactableTARGETVectorSet)
-        {
-            if (gamepad.allCurrentTARGETbyVectorEnactables.Contains(enactaTargetV))
-            {
-
-                Debug.Log("here?????????$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                gamepad.allCurrentTARGETbyVectorEnactables.Remove(enactaTargetV);
-            }
-        }
-    }
-
-    internal void clearTheEquipperSlot(interactionCreator.simpleSlot theEquippableType)
-    {
-        if (equipperSlotsAndContents[theEquippableType] != null)
-        {
-            equipperSlotsAndContents[theEquippableType].unequip(this);
-        }
-    }
-
-    internal void refilUnusedSlotsAndButtonsFromThisPlayable()
-    {
-        //equip ONLY those things that are not blocked by other things in those equipper slots or buttons
-
-        virtualGamepad gamepad = this.gameObject.GetComponent<virtualGamepad>();
-        if (gamepad == null) { return; }
-
-
-        foreach (IEnactaBool enactaBool in enactableBoolSet)
-        {
-            if(gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] != null){ continue; }
-            enactaBool.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
-
-
-        foreach (IEnactaVector enactaV in enactableVectorSet)
-        {
-            if (gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] != null) { continue; }
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-
-        //hmmm, no idea what to do with these for now, should be fine without for now:
-        /*
-
-        List<IEnactByTargetVector> newListToPreventShallowCopyError = new List<IEnactByTargetVector>();
-        foreach (IEnactByTargetVector enactByTargetVector in enactableTARGETVectorSet)
-        {
-            newListToPreventShallowCopyError.Add(enactByTargetVector);
-        }
-
-
-        gamepad.allCurrentTARGETbyVectorEnactables.Clear();
-        gamepad.allCurrentTARGETbyVectorEnactables = newListToPreventShallowCopyError;
-
-        */
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    internal void replace(equippable equippable)
-    {
-
-        virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();
-
-
-        //look at all spaces [buttons AND equipper slots] that this equippable was taking up
-        //find what things the ...PLAYABLE has to fill those by default, and fill them........[seems anoying.....]
-        //orr.....just.....ignore the equippable, and have a function to equip only those things that are not blocked?  will be similar...?
-        //sure, that seems more general
-
-        //so.  
-        refilUnusedSlotsAndButtonsFromThisPlayable();
-    }
-
-
-
-
-}
 
 public abstract class gamePadButtonable
 {

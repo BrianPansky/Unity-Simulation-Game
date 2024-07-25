@@ -93,7 +93,7 @@ public interface IEnactaVector
 public interface IEnactByTargetVector
 {
     //only for vector inputs!
-    vectorEnactionSubType theTYPEofSubEnactable { get; set; }
+    //vectorEnactionSubType theTYPEofSubEnactable { get; set; }  //???
 
     void enact(Vector3 inputVector);
 }
@@ -101,19 +101,43 @@ public interface IEnactByTargetVector
 
 
 
-
-
-public class navAgent: IEnactByTargetVector
+public abstract class targetedEnaction : MonoBehaviour, IEnactByTargetVector
 {
+
+
+    public abstract void enact(Vector3 inputVector);
+
+}
+
+
+public class navAgent : targetedEnaction, IEnactByTargetVector
+{
+
     //only for vector inputs!
     NavMeshAgent theAgent;
-    public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
 
+
+    public static void addNavAgentEnaction(GameObject objectToAddNavmeshAgentTo)
+    {
+        navAgent nA = objectToAddNavmeshAgentTo.AddComponent<navAgent>();
+
+
+
+        nA.theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
+        if (nA.theAgent == null)
+        {
+
+            nA.theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
+        }
+
+        nA.theAgent.baseOffset = 1f; //prevent stutter, being in floor
+
+
+    }
 
 
     public navAgent(GameObject objectToAddNavmeshAgentTo)
     {
-        theTYPEofSubEnactable = vectorEnactionSubType.navMesh;
 
 
         theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
@@ -127,33 +151,44 @@ public class navAgent: IEnactByTargetVector
     }
 
     //only for vector inputs!
-    public void enact(Vector3 inputVector)
+    override public void enact(Vector3 inputVector)
     {
 
         //Debug.Log("destination:  " + theAgent.destination);
         //Debug.Log("inputVector:  " + inputVector);
-        
-        if(theAgent.enabled == false)
+
+        if (theAgent.enabled == false)
         {
             Debug.Log("theAgent.enabled == false, theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
             Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.magenta, 200f);
         }
-        
+
         theAgent.SetDestination(inputVector);
         //theAgent.SetDestination(new Vector3());
 
         //Debug.Log("2222222222222222destination:  " + theAgent.destination);
+        //Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.green, 5f);
+        //Debug.DrawLine(new Vector3(), inputVector, Color.red, 5f);
+        //Debug.DrawLine(theAgent.transform.position, inputVector, Color.black, 5f);
     }
 
 
 }
 
-public class aimTarget : IEnactByTargetVector
+public class aimTarget : targetedEnaction, IEnactByTargetVector
 {
-    //only for vector inputs!
-    public vecRotation theVectorRotationEnaction;
-    public vectorEnactionSubType theTYPEofSubEnactable { get; set; }
 
+    //only for vector inputs!
+    public vecRotation theVectorRotationEnaction; //????
+
+
+    public static void addAaimTargetAndAimTranslation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
+    {
+        aimTarget aT = objectToAddItTo.AddComponent<aimTarget>();
+        //new vecRotation(inputSpeed, theHorizontalTransform, theVerticalTransform, gamepadButtonType);
+
+        aT.theVectorRotationEnaction = vecRotation.addVecRotationAndReturnIt(objectToAddItTo, inputSpeed, theHorizontalTransform, theVerticalTransform, gamepadButtonType);
+    }
 
 
     public aimTarget(vecRotation theInputVectorRotationEnaction)
@@ -171,7 +206,7 @@ public class aimTarget : IEnactByTargetVector
 
 
     //only for vector inputs!
-    public void enact(Vector3 targetPosition)
+    override public void enact(Vector3 targetPosition)
     {
         //Debug.Log("aimTarget.  enactionAuthor:  ");
 
@@ -287,8 +322,8 @@ public class aimTarget : IEnactByTargetVector
 
 
 
-public abstract class collisionEnaction:IEnactaBool
-{
+public abstract class collisionEnaction: MonoBehaviour, IEnactaBool
+{ 
     public interactionInfo interInfo;
     public GameObject enactionAuthor { get; set; }
     public buttonCategories gamepadButtonType { get; set; }
@@ -313,6 +348,17 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
     //public interactionInfo interInfo { get; set; }
     public projectileToGenerate theprojectileToGenerate;
 
+    public static void addProjectileLauncher(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
+    {
+        projectileLauncher pL = objectToAddItTo.AddComponent<projectileLauncher>();
+        pL.gamepadButtonType = gamepadButtonType;
+        pL.interInfo = interInfo;
+        pL.theprojectileToGenerate = theprojectileToGenerate;
+
+        pL.firePoint = firePoint;
+        pL.range = range;
+    }
+
     public projectileLauncher(Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
     {
         this.gamepadButtonType = gamepadButtonType;
@@ -321,6 +367,7 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 
         this.firePoint = firePoint;
         this.range = range;
+
     }
 
     override public void enact()
@@ -333,9 +380,19 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 
 public class hitscanEnactor: rangedEnaction, IEnactaBool
 {
-    public buttonCategories gamepadButtonType { get; set; }
     //public interactionInfo interInfo { get; set; }
-    
+
+    public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 7f)
+    {
+        hitscanEnactor hE = objectToAddItTo.AddComponent<hitscanEnactor>();
+        hE.gamepadButtonType = gamepadButtonType;
+        hE.interInfo = interInfo;
+        //hE.theprojectileToGenerate = theprojectileToGenerate;
+        //hE.theprojectileToGenerate.timeUntilSelfDestruct = 0;
+
+        hE.firePoint = firePoint;
+        hE.range = range;
+    }
 
 
     public hitscanEnactor(Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 7f)
@@ -371,18 +428,12 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
         if (myHit.transform == null) { return; }
 
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
-        authorScript1.FILLAuthorScript1(newInstantInteractionSphere, interInfo, this);
+        colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
         //      Debug.DrawLine(this.enactionAuthor.transform.position, myHit.transform.position, Color.yellow, 0.3f);
         firingCooldown--;
     }
     
-    private void genAuthorScript1(GameObject thisObject)
-    {
-        authorScript1 theAuthorScript = thisObject.GetComponent<authorScript1>();
-        theAuthorScript.enacting = this;
-        theAuthorScript.interactionInfo = this.interInfo;
-    }
 
 
 
@@ -394,7 +445,7 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
 
 
-public abstract class vectorMovement : IEnactaVector
+public abstract class vectorMovement : MonoBehaviour, IEnactaVector
 {
     public CharacterController controller;
     public Transform theTransform;
@@ -411,6 +462,24 @@ public class vecTranslation : vectorMovement
     //translation motion, like walking forward/back, and STRAFING left/right
     bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
 
+    public static void addVecTranslation(GameObject objectToAddItTo, float inputSpeed, buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        vecTranslation vT = objectToAddItTo.AddComponent<vecTranslation>();
+
+        vT.speed = inputSpeed;
+        vT.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        vT.theTransform = objectToAddItTo.transform;
+        vT.gamepadButtonType = gamepadButtonType;
+
+
+
+        vT.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (vT.controller == null)
+        {
+            vT.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+
+    }
 
     public vecTranslation(float inputSpeed, Transform theTransform, buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
     {
@@ -452,6 +521,24 @@ public class vecRotation : vectorMovement
 
     public float limitedPitchRotation = 0f;
 
+
+    public static vecRotation addVecRotationAndReturnIt(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
+    {
+        vecRotation theVectorRotationComponent = objectToAddItTo.AddComponent<vecRotation>();
+
+        theVectorRotationComponent.speed = inputSpeed;
+        theVectorRotationComponent.yawSpeed = inputSpeed / 444;
+        theVectorRotationComponent.pitchSpeed = inputSpeed / 444;
+        theVectorRotationComponent.pitchRange = pitchRange;
+
+
+
+        theVectorRotationComponent.thePartToAimHorizontal = theHorizontalTransform;
+        theVectorRotationComponent.thePartToAimVertical = theVerticalTransform;
+        theVectorRotationComponent.gamepadButtonType = gamepadButtonType;
+
+        return theVectorRotationComponent;
+    }
 
 
     public vecRotation(float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)

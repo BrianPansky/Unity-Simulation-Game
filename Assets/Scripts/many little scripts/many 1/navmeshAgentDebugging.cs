@@ -39,8 +39,10 @@ public class navmeshAgentDebugging : MonoBehaviour
 
         cooldownTimer2++;
 
+        //Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.blue, 0.01f);
         currentNavMeshAgent.SetDestination(this.gameObject.transform.position + new Vector3(21, -0.5f, 14));
 
+        //Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.blue, 0.01f);
 
         //someDebugLogs();
 

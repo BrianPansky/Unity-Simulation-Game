@@ -56,16 +56,51 @@ public class initialGenerator2 : MonoBehaviour
         //generateScene3();
 
         NEWgenerateScene3();
-        
+        //oneZoneNoNPCS();
+
         //Time.timeScale = 0f;
     }
 
 
     void makePLAYER()
     {
-        genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.player, new Vector3(0, 0, 4));
+        GameObject player = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.player, new Vector3(0, 0, 4));
+        genGen.singleton.addBody4ToObject(player);
     }
 
+
+    void oneZoneNoNPCS()
+    {
+
+        //      [reverse the order of the following?][or make "objects" with transform first, duplicate those, then for each one, add the other components?]
+        //Which object I want to create 
+        //      with all of its properties and its location/ rotation,
+        //how many per Zone
+        //how many zones
+        //how big are zones [they are another kind of object, by definition one per zone] and
+        //spacing [patternScript2!  dot singleton]
+
+
+        int howManyZones = 1;
+        int howManySetsPerZone = 2;
+        int theZSpacing = 25;
+        int theXSpacing = 10;
+        float sideOffset = 0;
+
+        //create a line of points, spaced by multiples of "howManysetsPerZone"
+        //makeAndFillZones(objectList1(), 11);
+
+
+        INVERSEmakeAndFillZonesNoNPCs(
+            patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset),
+            theXSpacing
+            );
+
+
+        //do this last to make zone collisions easier
+        makeEmptyZones(howManyZones, theZSpacing * howManySetsPerZone);
+
+    }
 
     void NEWgenerateScene3()
     {
@@ -78,7 +113,7 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 81;
+        int howManyZones = 1;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 10;
@@ -110,6 +145,22 @@ public class initialGenerator2 : MonoBehaviour
             //List<Vector3> setsPositions = patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset);
             //makePrefabsAtListOfPoints(setsPositions, thisPrefab);
             INVERSEobjectList1(point, theXSpacing);
+            //sideOffset += theZSpacing / 2;
+        }
+
+
+
+    }
+
+    void INVERSEmakeAndFillZonesNoNPCs(List<Vector3> setsPositions, int theXSpacing = 25)
+    {
+        float sideOffset = 0f;
+
+        foreach (Vector3 point in setsPositions)
+        {
+            //List<Vector3> setsPositions = patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset);
+            //makePrefabsAtListOfPoints(setsPositions, thisPrefab);
+            INVERSEobjectListNoNPCs(point, theXSpacing);
             //sideOffset += theZSpacing / 2;
         }
 
@@ -190,7 +241,7 @@ public class initialGenerator2 : MonoBehaviour
 
         //objectList.Add(returnTestKey1());
 
-        objectList.Add(genGen.singleton.returnSimpleTank2(this.transform.position));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(this.transform.position));
         objectList.Add(genGen.singleton.returnPineTree1(this.transform.position));
         objectList.Add(genGen.singleton.returnPineTree1(this.transform.position));
 
@@ -213,12 +264,12 @@ public class initialGenerator2 : MonoBehaviour
 
         //objectList.Add(returnTestKey1());
         objectList.Add(genGen.singleton.returnGun1(startPosition));
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         objectList.Add(genGen.singleton.returnShotgun1(startPosition));
-        objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        objectList.Add(genGen.singleton.returnNPC5(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
-        objectList.Add(genGen.singleton.returnNPC4(startPosition));
-        objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        //objectList.Add(genGen.singleton.returnNPC4(startPosition));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
 
 
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
@@ -234,6 +285,41 @@ public class initialGenerator2 : MonoBehaviour
         int currentSlotPosition = 0;
 
         foreach(GameObject obj in objectList)
+        {
+            obj.transform.position += new Vector3(theXSpacing * currentSlotPosition, 0, 0);
+            currentSlotPosition++;
+        }
+
+        return objectList;
+    }
+
+    List<GameObject> INVERSEobjectListNoNPCs(Vector3 startPosition, int theXSpacing = 25)
+    {
+
+        List<GameObject> objectList = new List<GameObject>();
+        //GameObject testCube = repository2.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
+
+        //objectList.Add(returnTestKey1());
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
+        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
+        //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+
+
+        //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
+
+
+        //objectList.Add(returnTestKey1());
+
+
+        //returnTestKey1
+        //objectList.Add(testCube);
+        //objectList.Add(testCube);
+
+        int currentSlotPosition = 0;
+
+        foreach (GameObject obj in objectList)
         {
             obj.transform.position += new Vector3(theXSpacing * currentSlotPosition, 0, 0);
             currentSlotPosition++;

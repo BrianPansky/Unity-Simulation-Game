@@ -49,14 +49,15 @@ public class comboGen : MonoBehaviour
         MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
         theRenderer.material.color = new Color(1f, 1f, 0f);
 
-        authorScript1 auth = newProjectile.GetComponent<authorScript1>();
+        //authorScript1 auth = newProjectile.GetComponent<authorScript1>();
+        colliderInteractor theCollisionInteraction = newProjectile.AddComponent<colliderInteractor>();
         List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
-        auth.interactionType = enactionCreator.interType.tankShot;
-        auth.enacting = new hitscanEnactor(this.transform, buttonCategories.aux1, new interactionInfo(interType.tankShot, 0.1f), 1f);
+        theCollisionInteraction.interactionType = enactionCreator.interType.tankShot;
+        //                  theCollisionInteraction.enacting = new hitscanEnactor(this.transform, buttonCategories.aux1, new interactionInfo(interType.tankShot, 0.1f), 1f);
         //      enactableBoolSet.Add(new intSpherAtor(this.transform, interType.tankShot, buttonCategories.aux1, 1f, false));
         //          auth.enacting = enactableBoolSet[0];
         //          auth.enacting.interInfo = new interactionInfo(interType.tankShot);
-        auth.enacting.enactionAuthor = this.gameObject;  //uhhhhh super messy for now...
+        theCollisionInteraction.enactionAuthor = this.gameObject;  //uhhhhh super messy for now...
     }
 
     public void tankDeathExplosion(Vector3 theLocation)

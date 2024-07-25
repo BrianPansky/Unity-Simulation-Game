@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static equippableSetup;
+using static equippable2Setup;
 
-public class equippableSetup : MonoBehaviour
+public class equippable2Setup : MonoBehaviour
 {
 
 
-    public static equippableSetup singleton;
+    public static equippable2Setup singleton;
 
     /*
 
@@ -72,7 +72,7 @@ public class equippableSetup : MonoBehaviour
 /*
 public abstract class gamePadButtonable
 {
-    //      public equippableSetup.buttonCategories gamepadButtonType { get; set; }
+    //      public equippable2Setup.buttonCategories gamepadButtonType { get; set; }
     //public IEnactaBool theEnaction;
 
     //      public abstract void plugIntoController(virtualGamepad gamepad);

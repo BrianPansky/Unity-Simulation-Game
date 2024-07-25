@@ -29,6 +29,8 @@ public class tagging2 : MonoBehaviour
     {
         errorYouDidntSetEnumTypeForTAG2,
         interactable,
+        equippable2,
+        playable2,
         mapZone,
         gamepad,
         zoneable
@@ -365,122 +367,6 @@ public class tagging2 : MonoBehaviour
 
 
 
-
-
-
-    public GameObject findXNearestToY(GameObject objectWeWantItClosestTo, tag2 tagToLookFor)
-    {
-        //      EXCEPT for the input object itself!!!
-
-
-        //one tag input for now
-        //return nearest object with that tag
-        //other funciton can be called "nearest XYZ" or something lol
-
-
-        //stackoverflow.com/questions/63106256/find-and-return-nearest-gameobject-with-tag-unity
-        //var sorted = NearGameobjects.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        //  List<GameObject> allPotentialTargets = listInObjectFormat(objectsWithTag[tagToLookFor]);
-        List<objectIdPair> allPotentialTargets = objectsWithTag[tagToLookFor];
-        //List<GameObject> sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        //var sortedListByDistance = allPotentialTargets.OrderBy(obj => (col.transform.position - transform.position).sqrMagnitude);
-        return whichOBJECTOnObjectIdPairListIsNearestToInputtedObject(objectWeWantItClosestTo, allPotentialTargets);
-    }
-
-
-    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
-    {
-        if (theList.Count == 0)
-        {
-            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
-            return null;
-        }
-
-
-        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
-        GameObject thisObject;
-        thisObject = null;
-
-
-        while (numberOfTries > 0)
-        {
-            //Debug.Log("list count is:  " + theList.Count);
-            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            //Debug.Log("random index is:  " + randomIndex);
-            thisObject = theList[randomIndex];
-            //Debug.Log("thisObject:  " + thisObject);
-
-            if (thisObject != notTHISObject)
-            {
-                //Debug.Log("thisObject:  " + thisObject);
-                return thisObject;
-            }
-
-            numberOfTries--;
-        }
-
-
-
-
-        return thisObject;
-
-    }
-
-
-
-    public GameObject whichOBJECTOnObjectIdPairListIsNearestToInputtedObject(GameObject objectWeWantItClosestTo, List<objectIdPair> allPotentialTargets)
-    {
-        //      EXCEPT for the input object itself!!!
-
-        //how to make it not return the inputted object?
-
-        GameObject theClosestSoFar = null;
-        //Debug.Log("===================================================");
-        //Debug.Log("objectWeWantItClosestTo.GetInstanceID():  " + objectWeWantItClosestTo.GetInstanceID());
-
-        foreach (objectIdPair thisObjectIdPair in allPotentialTargets)
-        {
-            //Debug.DrawLine(objectWeWantItClosestTo.transform.position, thisObjectIdPair.theObject.transform.position, Color.green, 12f);
-
-            //Debug.Log(":::::::::::::::::::::::::::::::::::::::::::");
-
-            //Debug.Log("thisObjectIdPair.theObjectIdNumber:  " + thisObjectIdPair.theObjectIdNumber);
-            
-            if (thisObjectIdPair.theObjectIdNumber == objectWeWantItClosestTo.GetInstanceID())
-            {
-                //Debug.Log("1111111111111111111111111111111111111111");
-                continue;
-            }
-
-            if (theClosestSoFar == null)
-            {
-                //Debug.Log("22222222222222222222222222222222222222222222222");
-                theClosestSoFar = thisObjectIdPair.theObject;
-                continue;
-            }
-
-            float distanceToThisObject = Vector3.Distance(thisObjectIdPair.theObject.transform.position, objectWeWantItClosestTo.transform.position);
-            float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, objectWeWantItClosestTo.transform.position);
-
-            //Debug.Log("distanceToThisObject:  " + distanceToThisObject);
-            //Debug.Log("distanceToTheClosestSoFar:  " + distanceToTheClosestSoFar);
-            if (distanceToThisObject > distanceToTheClosestSoFar)
-            {
-
-                //Debug.Log("distanceToThisObject > distanceToTheClosestSoFar!!!!!!!!!!");
-                continue;
-            }
-
-            //Debug.Log("444444444444444444444444444444444444");
-            theClosestSoFar = thisObjectIdPair.theObject;
-
-        }
-
-
-        //Debug.DrawLine(objectWeWantItClosestTo.transform.position, theClosestSoFar.transform.position, Color.red, 2f);
-
-        return theClosestSoFar;
-    }
 
 
 

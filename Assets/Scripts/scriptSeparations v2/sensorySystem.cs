@@ -13,46 +13,52 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Timeline;
 using UnityEngine.UIElements;
+using static enactionCreator;
+using static tagging2;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class sensorySystem : MonoBehaviour
 {
-    public worldScript theWorldScript;
+    //public worldScript theWorldScript;
     public GameObject target;
     public Ray lookingRay;
 
     //public body1 body;
 
-    List<GameObject> sensedObjects = new List<GameObject>();
+    //List<GameObject> sensedObjects = new List<GameObject>();
 
 
-    void Awake()
+
+
+
+
+    public List<equippable2> toolsWithIntertypeX(interType intertypeX, List<equippable2> equippable2s)
     {
+        List < equippable2 > toolsWithIntertypeX = new List < equippable2 >();
 
+        foreach (equippable2 thisTool in equippable2s)
+        {
+            if (thisTool.containsIntertype(intertypeX)) { toolsWithIntertypeX.Add( thisTool); }
+        }
+
+        /*
+        foreach (equippable2 thisTool in storedequippable2s)
+        {
+            if (thisTool.containsIntertype(intertypeX)) { return thisTool; }
+        }
+
+        */
+
+
+        return toolsWithIntertypeX;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        //Debug.Log("xxxxxxxxxxxxxxxxxxx END of sensory update xxxxxxxxxxxxxxxxxxxxx");
-    }
 
 
 
 
-
-
-
-
-
+    /*
 
     private void OnTriggerEnter(Collider other)
     {
@@ -61,7 +67,7 @@ public class sensorySystem : MonoBehaviour
         sensedObjects.Add(other.gameObject);
     }
 
-
+    */
 
 
     public Vector3 pointerOrigin()
@@ -75,32 +81,12 @@ public class sensorySystem : MonoBehaviour
 
 
 
-    public GameObject whichObjectOnListIsNearest(List<GameObject> listOfObjects)
-    {
-        //closest to what?  to THIS object, i suppose
 
-        GameObject theClosestSoFar = null;
 
-        foreach (GameObject thisObject in listOfObjects)
-        {
-            if (theClosestSoFar != null)
-            {
-                float distanceToThisObject = Vector3.Distance(thisObject.transform.position, this.gameObject.transform.position);
-                float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, this.gameObject.transform.position);
 
-                if (distanceToThisObject < distanceToTheClosestSoFar)
-                {
-                    theClosestSoFar = thisObject;
-                }
-            }
-            else
-            {
-                theClosestSoFar = thisObject;
-            }
-        }
 
-        return theClosestSoFar;
-    }
+
+
 
     public List<Vector3> returnPossibleNearMeshPoints()
     {
