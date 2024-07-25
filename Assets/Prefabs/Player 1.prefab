@@ -44,7 +44,6 @@ GameObject:
   - component: {fileID: 284237302895610163}
   - component: {fileID: 1679280799684621594}
   - component: {fileID: 9142553827997022821}
-  - component: {fileID: 425318520543297713}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: anNPC
@@ -173,35 +172,6 @@ MonoBehaviour:
   theCamera: {fileID: 859809950337065639}
   playingAs: {fileID: 0}
   isPlayer: 1
-  x: 0
-  z: 0
-  yawInput: 0
-  pitchInput: 0
---- !u!114 &425318520543297713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 859809950099632578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd46e03caf7b7294182119fee39334eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  occupied: 0
-  cameraMount: {fileID: 0}
-  enactionPoint1: {fileID: 0}
-  standardClickDistance: 7
-  speed: 12
-  gravity: -9.81
-  jumpHeight: 3
-  groundDistance: 0.4
-  isGrounded: 0
-  maxHealth: 100
-  currentHealth: 0
-  theInteractionScript: {fileID: 0}
-  thisNavMeshAgent: {fileID: 0}
 --- !u!1 &859809950337065639
 GameObject:
   m_ObjectHideFlags: 0
