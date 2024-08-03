@@ -107,7 +107,7 @@ public class genGen : MonoBehaviour
 
         navAgent.addNavAgentEnaction(thePlayable.gameObject);
 
-        aimTarget.addAaimTargetAndAimTranslation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
+        aimTarget.addAaimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
 
 
         /*
@@ -232,8 +232,8 @@ public class genGen : MonoBehaviour
 
         inventory1 theirInventory = newObj.GetComponent<inventory1>();
 
-        //theirInventory.storedequippable2s.Add(returnGun1(where));
-        //                  theirInventory.putInInventory(returnGun1(where));//.storedequippable2s.Add(returnGun1(where));
+        //theirInventory.inventoryItems.Add(returnGun1(where));
+        //                  theirInventory.putInInventory(returnGun1(where));//.inventoryItems.Add(returnGun1(where));
 
         //newObj.AddComponent<navmeshAgentDebugging>();
 

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class planningAndImagination : MonoBehaviour
 {
+    //keep in mind that planning is only about causality/logic.  which things CAN be done, in which order, to get an outcome
+    //the EVALUATION of which plan is best [or even "good enough"] has to happen elsewhere
 
     public List<planEXE> plan = new List<planEXE>();
 
@@ -22,9 +24,8 @@ public class boolEXE :  planEXE
 {
     IEnactaBool theEnaction;
     List<planEXE> microPlan = new List<planEXE>();
-    private IEnactaBool testE1;
 
-    public boolEXE(IEnactaBool theEnaction)
+    public boolEXE(IEnactaBool theEnaction, GameObject theTarget)
     {
         this.theEnaction = theEnaction;
     }
@@ -50,6 +51,13 @@ public class vectEXE : planEXE
 
     IEnactByTargetVector theEnaction;
     GameObject theTarget;
+
+    public vectEXE(IEnactByTargetVector theEnaction, GameObject theTarget)
+    {
+        this.theEnaction = theEnaction;
+        this.theTarget = theTarget;
+    }
+
 
     public void executePlan()
     {

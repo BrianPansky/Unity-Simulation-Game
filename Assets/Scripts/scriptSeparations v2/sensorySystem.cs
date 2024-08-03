@@ -43,7 +43,7 @@ public class sensorySystem : MonoBehaviour
         }
 
         /*
-        foreach (equippable2 thisTool in storedequippable2s)
+        foreach (equippable2 thisTool in inventoryItems)
         {
             if (thisTool.containsIntertype(intertypeX)) { return thisTool; }
         }

@@ -26,7 +26,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
 
-        makeAdHocPlanToDo();
     }
 
     public List<IupdateCallable> currentUpdateList { get; set; }
@@ -37,6 +36,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         currentNavMeshAgent = genGen.singleton.ensureNavmeshAgent(this.gameObject);
 
 
+        makeAdHocPlanToDo();
     }
 
     // Update is called once per frame
@@ -51,6 +51,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
 
         //Debug.Log("=======================callableUpdate()............");
+
+        doCurrentPlanStep();
         if (adhocCooldown < 44){return;}
 
         adhocCooldown = 0;
@@ -66,8 +68,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //thePlayable.printSlots();
 
         //justDoRandomByBoolORTarget();
-
-        doCurrentPlanStep();
+        makeAdHocPlanToDo();
     }
 
 
@@ -77,19 +78,11 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void makeAdHocPlanToDo()
     {
-        playable2 thePlayable  = this.gameObject.GetComponent<playable2>();
-        Transform firePoint = thePlayable.enactionPoint1.transform;
-        buttonCategories theButton = buttonCategories.primary;
-        interType theInterType = interType.standardClick;
-
-        IEnactaBool testE1 = new projectileLauncher(firePoint, theButton,
-            new interactionInfo(theInterType),
-            new projectileToGenerate(1, true, 99, 0));
 
 
-        boolEXE exe1 = new boolEXE(testE1);
-
-        plan.Add(exe1);
+        plan.Add(equipX(interType.shoot1));
+        plan.Add(aimPlan1());
+        plan.Add(firePlan1());
 
         /*
 
@@ -114,13 +107,119 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     }
 
+    private planEXE equipX(interType interTypeX)
+    {
+
+        //find inventory equippable with interTypeX
+        //then .........make micro plan to equip it???  ehh?
+
+
+
+        //find inventory equippable with interTypeX
+        //      ummm need the inventory list
+        //      loop through, pick first one with iTX
+        //      ......ignore possibility of finding none for now?  planning failures are a whole other issue?
+
+        GameObject theItemWeWant = null;
+        inventory1 inventory = this.gameObject.GetComponent<inventory1>();
+
+
+        foreach(GameObject thisObject in inventory.inventoryItems)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(interTypeX))
+            {
+
+
+
+                theItemWeWant = thisObject;
+                break;
+            }
+        }
+
+
+        //k.  now???
+        //well, i need an enactabool, and "takeFromAndPutBackIntoInventory" is an enactabool!  soooo....fine?
+        //well, it doesn't specify WHICH thing to equip.  how to fix?
+        //      make a new "equip target equippable/gameobject" enaction?
+        //      add equippable/gameobject variable to that specific enactabool, plug it in here....use it in my "enact" interface?  won't that mean player can't just press button?  or that happens if target is null?  what?  all seems very messy.......
+        //
+        //i vote use gameobjects for all lists, then grab specific components when i need them
+
+
+
+
+
+
+        /*
+        GameObject target = pickRandomObjectFromListEXCEPT(threatList, this.gameObject);
+
+
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+        IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
+
+
+        vectEXE exe1 = new vectEXE(testE1, target);
+        */
+        //Debug.Log("working here");
+        IEnactaBool testE1 = new takeFromAndPutBackIntoInventory(this.gameObject);
+
+        boolEXE exe1 = new boolEXE(testE1, theItemWeWant);
+        return exe1;
+        //return null;
+    }
+
+    planEXE aimPlan1()
+    {
+        //pick random enemy target
+        //aim
+
+        List<GameObject> threatList = threatListWithoutSelf();
+        //objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
+        //int currentZone = tagging2.singleton.zoneOfObject[thisId];
+        GameObject target = pickRandomObjectFromListEXCEPT(threatList, this.gameObject);
+
+
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+        IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
+
+
+        vectEXE exe1 = new vectEXE(testE1, target);
+        return exe1;
+
+    }
+
+    planEXE firePlan1()
+    {
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+        Transform firePoint = thePlayable.enactionPoint1.transform;
+        buttonCategories theButton = buttonCategories.primary;
+        interType theInterType = interType.standardClick;
+
+        IEnactaBool testE1 = new projectileLauncher(firePoint, theButton,
+            new interactionInfo(theInterType),
+            new projectileToGenerate(1, true, 99, 0));
+
+
+        boolEXE exe1 = new boolEXE(testE1, null);
+
+        return exe1;
+    }
+
+
     void doCurrentPlanStep()
     {
         if (plan.Count <1) { return; }
+        if(plan[0] == null)
+        {
+            Debug.Log("how to handle this"); return; }
 
         plan[0].executePlan();
 
-        //plan.RemoveAt(0);
+        plan.RemoveAt(0);
     }
 
 
@@ -416,7 +515,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public List<GameObject> threatListWithoutSelf()
     {
         List<GameObject> threatListWithoutSelf = new List<GameObject>();
-        List<GameObject> thisThreatList = tagging2.singleton.listInObjectFormat(new find().allWithOneTag(new find().allInZone(tagging2.singleton.whichZone(this.gameObject)), tagging2.tag2.gamepad));//tagging2.singleton.all
+        List<GameObject> thisThreatList = tagging2.singleton.listInObjectFormat(
+            new find().allWithOneTag(
+                new find().allInZone(tagging2.singleton.whichZone(this.gameObject)), tagging2.tag2.gamepad));//tagging2.singleton.all
 
         //Debug.Log("body.theLocalMapZoneScript.threatList.Count:  " + body.theLocalMapZoneScript.threatList.Count);
         //printAllIdNumbers(body.theLocalMapZoneScript.threatList);

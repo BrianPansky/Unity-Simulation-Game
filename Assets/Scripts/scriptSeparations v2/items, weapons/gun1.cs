@@ -20,14 +20,12 @@ public class gun1 : equippable2
     */
 
     //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
-    //void Awake()
-    //{
-    //}
-
-
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
+        //equippable2.Awake();
+        this.gameObject.GetComponent<equippable2>().Awake();
+
+
         initializeEnactionPoint1();
 
 
@@ -37,6 +35,12 @@ public class gun1 : equippable2
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
             new projectileToGenerate(1, true, 99, 0));
+    }
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
         /*
         projectileLauncher x = new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),

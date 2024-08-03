@@ -23,7 +23,8 @@ public class playable2 : stateHolder, IInteractable
     public List<IEnactByTargetVector> enactableTARGETVectorSet = new List<IEnactByTargetVector>();
     */
 
-    public Dictionary<interactionCreator.simpleSlot, equippable2> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, equippable2>();
+    //public Dictionary<interactionCreator.simpleSlot, equippable2> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, equippable2>();
+    public Dictionary<interactionCreator.simpleSlot, GameObject> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, GameObject>();
 
     //public Dictionary<interType, List<Ieffect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
     //public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
@@ -211,7 +212,9 @@ public class playable2 : stateHolder, IInteractable
     {
         if (equipperSlotsAndContents[theequippable2Type] != null)
         {
-            equipperSlotsAndContents[theequippable2Type].unequip(this);
+            GameObject item1 = equipperSlotsAndContents[theequippable2Type];
+            equippable2 equip = item1.GetComponent<equippable2>();
+            equip.unequip(this);
         }
     }
 
@@ -268,7 +271,7 @@ public class playable2 : stateHolder, IInteractable
 
 
 
-    internal void replace(equippable2 equippable2)
+    internal void replace(GameObject equippable2)
     {
 
         virtualGamepad gamepad = gameObject.GetComponent<virtualGamepad>();

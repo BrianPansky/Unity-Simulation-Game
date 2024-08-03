@@ -182,7 +182,7 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
     public vecRotation theVectorRotationEnaction; //????
 
 
-    public static void addAaimTargetAndAimTranslation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
+    public static void addAaimTargetAndVecRotation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
         aimTarget aT = objectToAddItTo.AddComponent<aimTarget>();
         //new vecRotation(inputSpeed, theHorizontalTransform, theVerticalTransform, gamepadButtonType);

@@ -36,7 +36,7 @@ public class equippable2 : stateHolder, IInteractable
 
     }
 
-    void Awake()
+    public void Awake()
     {
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
         theequippable2Type = interactionCreator.simpleSlot.hands;
@@ -79,7 +79,10 @@ public class equippable2 : stateHolder, IInteractable
 
     }
 
-    
+    public void test1()
+    {
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -155,7 +158,7 @@ public class equippable2 : stateHolder, IInteractable
         //Debug.Log("111111111111111-------------thePlayable2.equipperSlotsAndContents[theequippable2Type] == null ? :  " + thePlayable2.equipperSlotsAndContents[theequippable2Type]);
 
         thePlayable2.clearTheEquipperSlot(theequippable2Type);
-        thePlayable2.equipperSlotsAndContents[theequippable2Type] = this;
+        thePlayable2.equipperSlotsAndContents[theequippable2Type] = this.gameObject;
 
         //Debug.Log("222222222222222-------------thePlayable2.equipperSlotsAndContents[theequippable2Type] == null ? :  " + thePlayable2.equipperSlotsAndContents[theequippable2Type]);
 

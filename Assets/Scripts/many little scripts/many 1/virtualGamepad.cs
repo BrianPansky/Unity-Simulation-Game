@@ -26,6 +26,7 @@ public class virtualGamepad : MonoBehaviour
         //Debug.Log("Awake:  " + this);
         //doThisPrintoutByInputString("0");
         initializeDictionaries();
+        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.gamepad);
 
     }
 
@@ -68,7 +69,6 @@ public class virtualGamepad : MonoBehaviour
 
         //Debug.Log("this.gameObject:  " + this.gameObject);
         //Debug.DrawLine(new Vector3(), this.gameObject.transform.position, Color.green, 22f);
-        tagging2.singleton.addTag(this.gameObject, tagging2.tag2.gamepad);
 
         if (isPlayer)
         {
