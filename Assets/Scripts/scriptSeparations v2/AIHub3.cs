@@ -82,7 +82,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         plan.Add(equipX(interType.shoot1));
         plan.Add(aimPlan1());
-        plan.Add(firePlan1());
+        //plan.Add(firePlan1());
+        plan.Add(firePlan2(interType.shoot1));
 
         /*
 
@@ -120,25 +121,11 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //      loop through, pick first one with iTX
         //      ......ignore possibility of finding none for now?  planning failures are a whole other issue?
 
-        GameObject theItemWeWant = null;
         inventory1 inventory = this.gameObject.GetComponent<inventory1>();
 
-
-        foreach(GameObject thisObject in inventory.inventoryItems)
-        {
-
-            equippable2 equip = thisObject.GetComponent<equippable2>();
-            if (equip == null) { continue; }
-
-            if (equip.containsIntertype(interTypeX))
-            {
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, inventory.inventoryItems);
 
 
-
-                theItemWeWant = thisObject;
-                break;
-            }
-        }
 
 
         //k.  now???
@@ -209,18 +196,76 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         return exe1;
     }
 
+    planEXE firePlan2(interType interTypeX)
+    {
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+
+        List<GameObject> theList = new List<GameObject>();
+        foreach(var x in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            if(thePlayable.equipperSlotsAndContents[x] == null) { continue; }
+            theList.Add(thePlayable.equipperSlotsAndContents[x]);
+        }
+
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, theList);
+
+
+        //oh no it can be null
+        if(theItemWeWant == null) { return null; }//???
+
+
+        IEnactaBool grabEnact1 = theItemWeWant.GetComponent<IEnactaBool>();
+
+
+        boolEXE exe1 = new boolEXE(grabEnact1, null);
+
+        return exe1;
+    }
+
 
     void doCurrentPlanStep()
     {
         if (plan.Count <1) { return; }
         if(plan[0] == null)
         {
-            Debug.Log("how to handle this"); return; }
+            Debug.Log("how to handle this");
+            plan.RemoveAt(0); 
+            return; }
 
         plan[0].executePlan();
 
         plan.RemoveAt(0);
     }
+
+
+
+
+    GameObject firstObjectOnListWIthInterTypeX(interType interTypeX, List<GameObject> theList)
+    {
+        //looking at the INTERACTION TYPES of their enactions
+
+        GameObject theItemWeWant = null;
+
+        foreach (GameObject thisObject in theList)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(interTypeX))
+            {
+
+
+
+                theItemWeWant = thisObject;
+                break;
+            }
+        }
+
+        return theItemWeWant;
+    }
+
+
 
 
     private void justSenseNearbyEquipables(numericalVariable health, bool shouldItBeAddition)
@@ -582,47 +627,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
-
-
-    void somethingInTHisCodeIsBreakingNavMeshAgentitwasjusttheinputvectorwastoohighabovefloorithinkmaybe()
-    {
-
-
-        if (test == false)
-        {
-            return;
-            
-        }
-
-
-        CharacterController controller = this.transform.GetComponent<CharacterController>();
-        if (controller != null)
-        {
-            //Debug.Log("?????????????????????????????????????");
-            controller.enabled = false;
-        }
-
-
-        if (vGpad.allCurrentTARGETbyVectorEnactables.Count == 0)
-        {
-            //vGpad.allCurrentTARGETbyVectorEnactables[buttonCategories.vector1].enact(new Vector3(22, 11, 17));
-            //Debug.Log("..................................");
-            return;
-        }
-
-
-
-
-        GameObject target = conditionCreator.singleton.whichObjOnIDPAIRListIsNearest(this.gameObject, tagging2.singleton.objectsWithTag[tagging2.tag2.interactable]);
-        Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 1f);
-
-
-        //vGpad.allCurrentTARGETbyVectorEnactables[0].enact(new Vector3(10, 0, 20));
-        vGpad.allCurrentTARGETbyVectorEnactables[0].enact(target.transform.position);
-
-        test = false;
-
-    }
 
     void someDebugLogs()
     {

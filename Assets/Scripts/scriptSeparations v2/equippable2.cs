@@ -71,7 +71,7 @@ public class equippable2 : stateHolder, IInteractable
         //      thing.Add(new putInInventory());
         //theInteractionScript.dictOfInteractions[interType.standardClick] = thing;
 
-        Debug.Log("equippable2, add interType.standardClick");
+        //Debug.Log("equippable2, add interType.standardClick");
         dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new putInInventory());
 
         //Debug.Log("equippable2 awake");
