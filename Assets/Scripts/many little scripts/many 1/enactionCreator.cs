@@ -52,9 +52,7 @@ public class enactionCreator : MonoBehaviour
 
     void Awake()
     {
-        //Debug.Log("Awake:  " + this);
         singletonify();
-
     }
     void singletonify()
     {
@@ -66,17 +64,12 @@ public class enactionCreator : MonoBehaviour
         }
         singleton = this;
     }
-
-
-
-
 }
 
 public interface IEnactaBool
 {
     //only for bool inputs!
     buttonCategories gamepadButtonType {  get; set; }
-    //interactionInfo interInfo { get; set; }
     GameObject enactionAuthor { get; set; }
 
     void enact();
@@ -93,8 +86,6 @@ public interface IEnactaVector
 public interface IEnactByTargetVector
 {
     //only for vector inputs!
-    //vectorEnactionSubType theTYPEofSubEnactable { get; set; }  //???
-
     void enact(Vector3 inputVector);
 }
 
@@ -103,25 +94,18 @@ public interface IEnactByTargetVector
 
 public abstract class targetedEnaction : MonoBehaviour, IEnactByTargetVector
 {
-
-
     public abstract void enact(Vector3 inputVector);
-
 }
 
 
 public class navAgent : targetedEnaction, IEnactByTargetVector
 {
-
     //only for vector inputs!
     NavMeshAgent theAgent;
-
 
     public static void addNavAgentEnaction(GameObject objectToAddNavmeshAgentTo)
     {
         navAgent nA = objectToAddNavmeshAgentTo.AddComponent<navAgent>();
-
-
 
         nA.theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
         if (nA.theAgent == null)
@@ -131,19 +115,14 @@ public class navAgent : targetedEnaction, IEnactByTargetVector
         }
 
         nA.theAgent.baseOffset = 1f; //prevent stutter, being in floor
-
-
     }
 
 
     public navAgent(GameObject objectToAddNavmeshAgentTo)
     {
-
-
         theAgent = objectToAddNavmeshAgentTo.GetComponent<NavMeshAgent>();
         if (theAgent == null)
         {
-
             theAgent = objectToAddNavmeshAgentTo.AddComponent<NavMeshAgent>();
         }
 
@@ -153,10 +132,6 @@ public class navAgent : targetedEnaction, IEnactByTargetVector
     //only for vector inputs!
     override public void enact(Vector3 inputVector)
     {
-
-        //Debug.Log("destination:  " + theAgent.destination);
-        //Debug.Log("inputVector:  " + inputVector);
-
         if (theAgent.enabled == false)
         {
             Debug.Log("theAgent.enabled == false, theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
@@ -164,23 +139,13 @@ public class navAgent : targetedEnaction, IEnactByTargetVector
         }
 
         theAgent.SetDestination(inputVector);
-        //theAgent.SetDestination(new Vector3());
-
-        //Debug.Log("2222222222222222destination:  " + theAgent.destination);
-        //Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.green, 5f);
-        //Debug.DrawLine(new Vector3(), inputVector, Color.red, 5f);
-        //Debug.DrawLine(theAgent.transform.position, inputVector, Color.black, 5f);
     }
-
-
 }
 
 public class aimTarget : targetedEnaction, IEnactByTargetVector
 {
-
     //only for vector inputs!
     public vecRotation theVectorRotationEnaction; //????
-
 
     public static void addAaimTargetAndVecRotation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
@@ -208,27 +173,10 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
     //only for vector inputs!
     override public void enact(Vector3 targetPosition)
     {
-        //Debug.Log("aimTarget.  enactionAuthor:  ");
-
         //instantaneous for now
         Vector3 lineFromVertAimerToTarget = targetPosition - theVectorRotationEnaction.thePartToAimVertical.position;
-        //Vector2 theXYvectorCoordinates = calculateVector2(inputVector);
-
-        //theVectorRotationEnaction.enact(theXYvectorCoordinates);
-        //worldScript.singleton.debugToggle =true;
-
-        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,Color.white, 44f);
-        //      Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.yellow, 44f);
-
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
-        //theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(-90));
-        //theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(inputVector)));
-
-        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position,theVectorRotationEnaction.thePartToAimVertical.position + 10*theVectorRotationEnaction.thePartToAimVertical.forward,Color.blue, 44f);
-        //Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, targetPosition,Color.red, 44f);
-
-        //worldScript.singleton.debugToggle = false;
     }
 
 
@@ -236,20 +184,11 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
 
     private float translateAngleIntoYawSpeedEtc(float angle)
     {
-        //Debug.Log(":::::::::::::::::::translateAngleIntoYawSpeedEtc::::::::::::::::::::");
-        //Debug.Log("angle:  " + angle);
-        //Debug.Log("theVectorRotationEnaction.yawSpeed:  " + theVectorRotationEnaction.yawSpeed);
-        //Debug.Log("angle / (theVectorRotationEnaction.yawSpeed):  " + angle / (theVectorRotationEnaction.yawSpeed));
         return angle / (theVectorRotationEnaction.yawSpeed);
     }
 
     private float translateAngleIntoPitchSpeedEtc(float angle)
     {
-        //Debug.Log("----------------------translateAngleIntoPitchSpeedEtc:----------------------");
-        //Debug.Log("angle:  " + angle);
-        //Debug.Log("theVectorRotationEnaction.pitchSpeed:  " + theVectorRotationEnaction.pitchSpeed);
-        //Debug.Log("angle / (theVectorRotationEnaction.pitchSpeed):  " + angle / (theVectorRotationEnaction.pitchSpeed));
-
         return angle / theVectorRotationEnaction.pitchSpeed;
     }
 
@@ -267,7 +206,6 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
         //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
 
         float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, theVectorRotationEnaction.thePartToAimHorizontal.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
-
 
 
         return oneAngle;
@@ -344,8 +282,6 @@ public abstract class rangedEnaction: collisionEnaction
 
 public class projectileLauncher: rangedEnaction, IEnactaBool
 {
-    //public buttonCategories gamepadButtonType { get; set; }
-    //public interactionInfo interInfo { get; set; }
     public projectileToGenerate theprojectileToGenerate;
 
     public static void addProjectileLauncher(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
@@ -372,7 +308,6 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 
     override public void enact()
     {
-        //Debug.Log("enact projectileLauncher");
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
 
@@ -380,15 +315,11 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 
 public class hitscanEnactor: rangedEnaction, IEnactaBool
 {
-    //public interactionInfo interInfo { get; set; }
-
     public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 7f)
     {
         hitscanEnactor hE = objectToAddItTo.AddComponent<hitscanEnactor>();
         hE.gamepadButtonType = gamepadButtonType;
         hE.interInfo = interInfo;
-        //hE.theprojectileToGenerate = theprojectileToGenerate;
-        //hE.theprojectileToGenerate.timeUntilSelfDestruct = 0;
 
         hE.firePoint = firePoint;
         hE.range = range;
@@ -399,8 +330,6 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
     {
         this.gamepadButtonType = gamepadButtonType;
         this.interInfo = interInfo;
-        //this.theprojectileToGenerate = theprojectileToGenerate;
-        //this.theprojectileToGenerate.timeUntilSelfDestruct = 0;
 
         this.firePoint = firePoint;
         this.range = range;
@@ -419,8 +348,6 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
     public void firingByRaycastHit(float theRange)
     {
-        //Debug.Log("range:  "+ theRange);
-
         RaycastHit myHit;
         Ray myRay = new Ray(firePoint.transform.position + firePoint.transform.forward, firePoint.transform.forward);
 
@@ -430,13 +357,8 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
         colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
-        //      Debug.DrawLine(this.enactionAuthor.transform.position, myHit.transform.position, Color.yellow, 0.3f);
         firingCooldown--;
     }
-    
-
-
-
 }
 
 
@@ -452,9 +374,7 @@ public abstract class vectorMovement : MonoBehaviour, IEnactaVector
     public float speed = 0f;
     public buttonCategories gamepadButtonType { get; set; }
 
-
     public abstract void enact(Vector2 inputVector);
-
 }
 
 public class vecTranslation : vectorMovement
@@ -472,13 +392,11 @@ public class vecTranslation : vectorMovement
         vT.gamepadButtonType = gamepadButtonType;
 
 
-
         vT.controller = objectToAddItTo.GetComponent<CharacterController>();
         if (vT.controller == null)
         {
             vT.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
         }
-
     }
 
     public vecTranslation(float inputSpeed, Transform theTransform, buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
@@ -488,20 +406,16 @@ public class vecTranslation : vectorMovement
         this.theTransform = theTransform;
         this.gamepadButtonType = gamepadButtonType;
 
-
-
         controller = theTransform.GetComponent<CharacterController>();
         if (controller == null)
         {
             controller = theTransform.gameObject.AddComponent<CharacterController>();
         }
-
     }
 
 
     public override void enact(Vector2 inputVector)
     {
-        //Debug.Log("inputVector:  " + inputVector);
         Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
         controller.Move(move * speed * Time.deltaTime);
     }
@@ -553,34 +467,26 @@ public class vecRotation : vectorMovement
         thePartToAimHorizontal = theHorizontalTransform;
         thePartToAimVertical = theVerticalTransform;
         this.gamepadButtonType = gamepadButtonType;
-
     }
 
 
 
     public override void enact(Vector2 inputVector)
     {
-        //Debug.Log("inputVector:  " + inputVector);
-
         updatePitch(inputVector.y);
         updateYaw(inputVector.x);
     }
 
     public void updatePitch(float pitchInput)
     {
-        //Debug.Log("11111111111111thePartToAimVertical.transform.gameObject:  " + thePartToAimVertical.transform.gameObject);
-
         limitedPitchRotation -= pitchInput * pitchSpeed;
         limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -pitchRange, pitchRange);
         
         thePartToAimVertical.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
-        
     }
 
     public void updateYaw(float yawInput)
     {
-        //Debug.Log("yawSpeed:  " + yawSpeed);
-
         thePartToAimHorizontal.Rotate(thePartToAimHorizontal.up * yawInput * yawSpeed);
     }
 
@@ -608,14 +514,11 @@ public class turningWithNoStrafe : vectorMovement
         {
             controller = theTransform.gameObject.AddComponent<CharacterController>();
         }
-
     }
 
 
     public override void enact(Vector2 inputVector)
     {
-        //Debug.Log("inputVector:  " + inputVector);
-
         Vector3 translate = theTransform.forward * inputVector.y; //needs to be Y!!!!!!!!!!  //and FORWARD vector!!!!!!!!!!
 
         controller.Move(translate * speed * Time.deltaTime);
@@ -624,14 +527,8 @@ public class turningWithNoStrafe : vectorMovement
 
     void updateYaw(float yawInput)
     {
-        //Debug.Log("thePilotEnactionScript.yawInput:  " + thePilotEnactionScript.yawInput);
         theTransform.Rotate(theTransform.up * yawInput * yawSpeed);
-
     }
-
-
-
-
 }
 
 

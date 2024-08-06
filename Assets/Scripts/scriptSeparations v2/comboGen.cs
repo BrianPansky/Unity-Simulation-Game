@@ -11,7 +11,6 @@ public class comboGen : MonoBehaviour
 
     void Awake()
     {
-        //Debug.Log("Awake:  " + this);
         singletonify();
     }
 
@@ -38,9 +37,6 @@ public class comboGen : MonoBehaviour
         return newInstantInteractionSphere;
     }
 
-
-
-
     public void tankShotExplosion(Vector3 theLocation)
     {
 
@@ -49,14 +45,9 @@ public class comboGen : MonoBehaviour
         MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
         theRenderer.material.color = new Color(1f, 1f, 0f);
 
-        //authorScript1 auth = newProjectile.GetComponent<authorScript1>();
         colliderInteractor theCollisionInteraction = newProjectile.AddComponent<colliderInteractor>();
         List<IEnactaBool> enactableBoolSet = new List<IEnactaBool>();
         theCollisionInteraction.interactionType = enactionCreator.interType.tankShot;
-        //                  theCollisionInteraction.enacting = new hitscanEnactor(this.transform, buttonCategories.aux1, new interactionInfo(interType.tankShot, 0.1f), 1f);
-        //      enactableBoolSet.Add(new intSpherAtor(this.transform, interType.tankShot, buttonCategories.aux1, 1f, false));
-        //          auth.enacting = enactableBoolSet[0];
-        //          auth.enacting.interInfo = new interactionInfo(interType.tankShot);
         theCollisionInteraction.enactionAuthor = this.gameObject;  //uhhhhh super messy for now...
     }
 
@@ -85,7 +76,6 @@ public class comboGen : MonoBehaviour
         projectileScript.selfDestructOnCollision = false;
         selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
         killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
-        //killScript.
         newProjectile.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
 
         growScript1 growScript = newProjectile.AddComponent<growScript1>();
@@ -100,9 +90,6 @@ public class comboGen : MonoBehaviour
         GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, theLocation);
 
 
-
-        //projectile1.genProjectile1(newProjectile, null, new Vector3(0, 0, 0), true);//newProjectile.AddComponent<projectile1>();
-        //projectile1 projectileScript = newProjectile.GetComponent<projectile1>();
         projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
         projectileScript.speed = 2.4f;
         projectileScript.selfDestructOnCollision = false;
@@ -110,23 +97,13 @@ public class comboGen : MonoBehaviour
 
         float randomX = Random.Range(-0.5f, 0.5f);
         float randomZ = Random.Range(-0.5f, 0.5f);
-        //Debug.Log("randomX:  " + randomX);
-        //Debug.Log("randomZ:  " + randomZ);
         projectileScript.Direction = new Vector3(randomX, 1 , randomZ);// Vector3.up + 
         selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
-        //      killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
 
         newProjectile.GetComponent<selfDestructScript1>().timeUntilSelfDestruct = 90;
 
-        //killScript.
-        newProjectile.transform.localScale = new Vector3(1,1,1);//new Vector3(0.2f, 0.2f, 0.2f);
-
-        //..............why isn't THIS working?????
-        //Rigidbody aRigidBody = newProjectile.AddComponent<Rigidbody>();
-        //      newProjectile.AddComponent<Rigidbody>();
+        newProjectile.transform.localScale = new Vector3(1,1,1);
         Rigidbody aRigidBody = newProjectile.GetComponent<Rigidbody>();
-        //Debug.Log("ummmmmm aRigidBody:  " + aRigidBody);
-        //Debug.Log("ummmmmm newProjectile.GetComponent<Rigidbody>():  " + newProjectile.GetComponent<Rigidbody>());
         aRigidBody.useGravity = true;
         aRigidBody.isKinematic = false;
         aRigidBody.mass = 55;
@@ -134,5 +111,4 @@ public class comboGen : MonoBehaviour
 
         return newProjectile;
     }
-
 }

@@ -23,9 +23,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void Awake()
     {
-
         vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
-
     }
 
     public List<IupdateCallable> currentUpdateList { get; set; }
@@ -35,39 +33,24 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         currentNavMeshAgent = genGen.singleton.ensureNavmeshAgent(this.gameObject);
 
-
         makeAdHocPlanToDo();
     }
 
     // Update is called once per frame
     void Update()
     {
-
         adhocCooldown++;
     }
 
 
     public void callableUpdate()
     {
-
         //Debug.Log("=======================callableUpdate()............");
 
         doCurrentPlanStep();
         if (adhocCooldown < 44){return;}
 
         adhocCooldown = 0;
-        //Debug.Log("0000000000000000000destination:  " + currentNavMeshAgent.destination);
-
-        //justSenseNearbyEquipables(numericalVariable.health, false);
-        //justDoRandomByBoolORTarget();
-        //simpleDodge();
-
-        //playable2 thePlayable = this.gameObject.GetComponent<playable2>();
-        //thePlayable.printEnactables();
-        //thePlayable.printInteractions();
-        //thePlayable.printSlots();
-
-        //justDoRandomByBoolORTarget();
         makeAdHocPlanToDo();
     }
 
@@ -78,150 +61,102 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void makeAdHocPlanToDo()
     {
-
-
         plan.Add(equipX(interType.shoot1));
         plan.Add(aimPlan1());
-        //plan.Add(firePlan1());
         plan.Add(firePlan2(interType.shoot1));
-
-        /*
-
-        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
-            new interactionInfo(interType.standardClick));
-
-
-        vecTranslation.addVecTranslation(thePlayable.gameObject, thePlayable.speed, buttonCategories.vector1);
-
-        navAgent.addNavAgentEnaction(thePlayable.gameObject);
-
-        aimTarget.addAaimTargetAndAimTranslation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
-
-
-
-
-
-
-        */
-
 
 
     }
 
     private planEXE equipX(interType interTypeX)
     {
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, getInventory());
 
-        //find inventory equippable with interTypeX
-        //then .........make micro plan to equip it???  ehh?
-
-
-
-        //find inventory equippable with interTypeX
-        //      ummm need the inventory list
-        //      loop through, pick first one with iTX
-        //      ......ignore possibility of finding none for now?  planning failures are a whole other issue?
-
-        inventory1 inventory = this.gameObject.GetComponent<inventory1>();
-
-        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, inventory.inventoryItems);
-
-
-
-
-        //k.  now???
-        //well, i need an enactabool, and "takeFromAndPutBackIntoInventory" is an enactabool!  soooo....fine?
-        //well, it doesn't specify WHICH thing to equip.  how to fix?
-        //      make a new "equip target equippable/gameobject" enaction?
-        //      add equippable/gameobject variable to that specific enactabool, plug it in here....use it in my "enact" interface?  won't that mean player can't just press button?  or that happens if target is null?  what?  all seems very messy.......
-        //
-        //i vote use gameobjects for all lists, then grab specific components when i need them
-
-
-
-
-
-
-        /*
-        GameObject target = pickRandomObjectFromListEXCEPT(threatList, this.gameObject);
-
-
-        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
-        IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
-
-
-        vectEXE exe1 = new vectEXE(testE1, target);
-        */
-        //Debug.Log("working here");
         IEnactaBool testE1 = new takeFromAndPutBackIntoInventory(this.gameObject);
 
         boolEXE exe1 = new boolEXE(testE1, theItemWeWant);
         return exe1;
-        //return null;
     }
+
+    
 
     planEXE aimPlan1()
     {
         //pick random enemy target
         //aim
 
-        List<GameObject> threatList = threatListWithoutSelf();
-        //objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
-        //int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        GameObject target = pickRandomObjectFromListEXCEPT(threatList, this.gameObject);
-
+        GameObject target = pickRandomObjectFromList(threatListWithoutSelf());
 
         playable2 thePlayable = this.gameObject.GetComponent<playable2>();
         IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
 
-
         vectEXE exe1 = new vectEXE(testE1, target);
         return exe1;
-
     }
 
-    planEXE firePlan1()
+    private GameObject pickRandomObjectFromList(List<GameObject> theList)
     {
-        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
-        Transform firePoint = thePlayable.enactionPoint1.transform;
-        buttonCategories theButton = buttonCategories.primary;
-        interType theInterType = interType.standardClick;
 
-        IEnactaBool testE1 = new projectileLauncher(firePoint, theButton,
-            new interactionInfo(theInterType),
-            new projectileToGenerate(1, true, 99, 0));
+        if (theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
 
 
-        boolEXE exe1 = new boolEXE(testE1, null);
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
 
-        return exe1;
+
+        while (numberOfTries > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != null)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
     }
 
     planEXE firePlan2(interType interTypeX)
     {
-        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
 
-        List<GameObject> theList = new List<GameObject>();
-        foreach(var x in thePlayable.equipperSlotsAndContents.Keys)
-        {
-            if(thePlayable.equipperSlotsAndContents[x] == null) { continue; }
-            theList.Add(thePlayable.equipperSlotsAndContents[x]);
-        }
-
-        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, theList);
-
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
 
         //oh no it can be null
         if(theItemWeWant == null) { return null; }//???
 
-
         IEnactaBool grabEnact1 = theItemWeWant.GetComponent<IEnactaBool>();
-
 
         boolEXE exe1 = new boolEXE(grabEnact1, null);
 
         return exe1;
     }
 
+    private List<GameObject> equipperContents()
+    {
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+
+        List<GameObject> theList = new List<GameObject>();
+        foreach (var x in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            if (thePlayable.equipperSlotsAndContents[x] == null) { continue; }
+            theList.Add(thePlayable.equipperSlotsAndContents[x]);
+        }
+
+        return theList;
+    }
 
     void doCurrentPlanStep()
     {
@@ -238,7 +173,11 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     }
 
 
-
+    public List<GameObject> getInventory()
+    {
+        inventory1 inventory = this.gameObject.GetComponent<inventory1>();
+        return inventory.inventoryItems;
+    }
 
     GameObject firstObjectOnListWIthInterTypeX(interType interTypeX, List<GameObject> theList)
     {
@@ -254,9 +193,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
             if (equip.containsIntertype(interTypeX))
             {
-
-
-
                 theItemWeWant = thisObject;
                 break;
             }
@@ -270,8 +206,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     private void justSenseNearbyEquipables(numericalVariable health, bool shouldItBeAddition)
     {
-        
+        throw new System.NotImplementedException();
     }
+
 
     void justDoRandomByINPUT()
     {
@@ -367,14 +304,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
                     CharacterController controller = this.transform.GetComponent<CharacterController>();
                     if (controller != null)
                     {
-                        //Debug.Log("?????????????????????????????????????");
                         controller.enabled = false;
                     }
-
-                    //int x = Random.Range(-8, 8);
-                    //int y = Random.Range(-8, 8);
-
-                    //item.enact(new Vector2(x, y));
 
                     //eh, should i store this elsewhere?  but where else would be best?  for all other objects?
                     //or just ALSO store it here on AIHub3, because AI will USE it often enough?
@@ -382,23 +313,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
                     objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
 
                     int currentZone = tagging2.singleton.zoneOfObject[thisPair];
-                    /*
-                    Debug.Log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
-                    foreach (List<objectIdPair> obidpList in tagging2.singleton.objectsInZone.Values)
-                    {
-                        Debug.Log("obidpList.Count: " + obidpList.Count);
-                        
-                    }
-                    */
-
-                    //GameObject target = tagging2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
                     GameObject target = pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
                     //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
-                    //item.enact(this.transform.position + new Vector3(-3, -0.5f, 0));
-
-                    //Debug.Log("3333333333333333333333333 target: " + target);
-
                 }
                 indexCount++;
             }
@@ -415,76 +332,30 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
-        //Debug.Log("whichToPick:  " + whichToPick);
-
         int indexCount = 0;
 
         if (whichToPick <= bools - 1)
         {
             IEnactaBool enactaBool = null;
-            //Debug.Log("whichToPick <= bools - 1");
-            //Debug.Log("bools - 1:  " + (bools - 1));
 
             foreach (buttonCategories key in vGpad.allCurrentBoolEnactables.Keys)
             {
-                //Debug.Log("22222222222222222222222222");
-
                 if (indexCount == whichToPick)
                 {
-                    //Debug.Log("33333333333333333");
                     if (vGpad.allCurrentBoolEnactables[key] == null)
                     {
-
-                        //Debug.Log("item == null, for this key: " + key);
                         return;
                     }
-
-                          //Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
                     enactaBool = vGpad.allCurrentBoolEnactables[key];
-
-                    //Debug.Log("enactaBool = "+enactaBool );
-                    //vGpad.allCurrentBoolEnactables[key].enact();
                     break;
                 }
                 indexCount++;
             }
 
-            //Debug.Log("enacting:  ");
             enactaBool.enact();
         }
-
-        /*
-        if (whichToPick <= bools - 1)
-        {
-            IEnactaBool enactaBool = null;
-            Debug.Log("whichToPick <= bools - 1");
-            Debug.Log("bools - 1:  " + (bools - 1));
-
-            foreach (buttonCategories key in vGpad.allCurrentBoolEnactables.Keys)
-            {
-                Debug.Log("22222222222222222222222222");
-
-                if (indexCount != whichToPick) { continue; }
-                Debug.Log("33333333333333333");
-                if (vGpad.allCurrentBoolEnactables[key] == null)
-                {
-                    //Debug.Log("item == null, for this key: " + key);
-                    return;
-                }
-
-                      Debug.Log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ enact, for this key:  " + key + "on this object:  " + this.gameObject);
-                enactaBool = vGpad.allCurrentBoolEnactables[key];
-                break;
-
-                indexCount++;
-            }
-
-            enactaBool.enact();
-        }
-        */
         else
         {
-            //Debug.Log("else, doRandomByTarget");
             doRandomByTarget(whichToPick - bools);
         }
 
@@ -495,25 +366,12 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //Debug.Log("_______________________________________doRandomByTarget:  " + whichToPick);
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
-        //Debug.Log("thisId:  " + thisId);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        //Debug.Log("currentZone:  " + currentZone);
-        //Debug.Log("number of objects in currentZone:  " + tagging2.singleton.objectsInZone[currentZone].Count);
         GameObject target = pickRandomObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
-        //Debug.Log("target:  " + target);
-        //Debug.Log("this.transform.position.ToString()):  " + this.transform.position.ToString());
-        //Debug.Log("target.transform.position:  " + target.transform.position.ToString());
-        //Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
-        //Debug.Log("there should be a line, ok" + thisId);
-        //item.enact(target.transform.position);
-        //      Debug.Log("vGpad.allCurrentTARGETbyVectorEnactables[whichToPick]:  " + vGpad.allCurrentTARGETbyVectorEnactables[whichToPick]);
         vGpad.allCurrentTARGETbyVectorEnactables[whichToPick].enact(target.transform.position);
-
-
-
     }
 
     void simpleDodge()
@@ -531,11 +389,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //for now, at least allow normal navigation if there are zero threats
         //[and save some calculation that is pointless if there are no threats]: 
         if (threatList.Count < 1) {
-            //Debug.Log("threatList.Count < 1:  return");
             return; }
 
         //from my older code:
-        //
         spatialDataPoint myData = new spatialDataPoint();
         myData.initializeDataPoint(threatListWithoutSelf(), this.transform.position);
 
@@ -543,13 +399,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         if(currentNavMeshAgent.enabled == true)
         {
-            //Debug.Log("should dodge............");
-            //currentNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 8f);
-            //UnityEngine.Vector3 p1 = this.gameObject.transform.position;
             currentNavMeshAgent.SetDestination(this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 12f);
-
         }
-
 
 
         //Debug.Log("-----------------------------------end of dodge............");
@@ -564,9 +415,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
             new find().allWithOneTag(
                 new find().allInZone(tagging2.singleton.whichZone(this.gameObject)), tagging2.tag2.gamepad));//tagging2.singleton.all
 
-        //Debug.Log("body.theLocalMapZoneScript.threatList.Count:  " + body.theLocalMapZoneScript.threatList.Count);
-        //printAllIdNumbers(body.theLocalMapZoneScript.threatList);
-
         foreach (GameObject threat in thisThreatList)
         {
             UnityEngine.Vector3 p1 = this.gameObject.transform.position;
@@ -576,12 +424,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
             {
                 threatListWithoutSelf.Add(threat);
                 Vector3 threatPosition = threat.gameObject.transform.position;
-                //Debug.Log("threat:  " + threat.name + "    threatPosition x+y+z:  X:  " + threatPosition.x + "  Y:  " + threatPosition.y + "  Z:  " + threatPosition.z);
-
             }
         }
-        //Debug.Log("threatListWithoutSelf.Count:  " + threatListWithoutSelf.Count);
-        //printAllIdNumbers(threatListWithoutSelf);
+
         return threatListWithoutSelf;
     }
 
@@ -603,15 +448,11 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         while (numberOfTries > 0)
         {
-            //Debug.Log("list count is:  " + theList.Count);
             int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            //Debug.Log("random index is:  " + randomIndex);
             thisObject = theList[randomIndex];
-            //Debug.Log("thisObject:  " + thisObject);
 
             if (thisObject != notTHISObject)
             {
-                //Debug.Log("thisObject:  " + thisObject);
                 return thisObject;
             }
 

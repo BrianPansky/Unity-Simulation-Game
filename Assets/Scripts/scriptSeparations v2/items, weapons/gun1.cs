@@ -15,7 +15,7 @@ public class gun1 : equippable2
     {
         //          callableAwake();
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
-        theequippable2Type = interactionCreator.simpleSlot.hands;
+        theEquippable2Type = interactionCreator.simpleSlot.hands;
     }
     */
 

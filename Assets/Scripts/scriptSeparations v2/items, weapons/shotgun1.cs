@@ -27,7 +27,7 @@ public class shotgun1 : equippable2
 
 
 
-        //theequippable2Type = interactionCreator.simpleSlot.hands;
+        //theEquippable2Type = interactionCreator.simpleSlot.hands;
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
             new projectileToGenerate(1, true, 99, 0));

@@ -22,20 +22,6 @@ public class patternScript2 : MonoBehaviour
         singleton = this;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-
 
 
     public List<Vector3> makeLinePattern1(int howMany, int theSpacing)
@@ -46,15 +32,9 @@ public class patternScript2 : MonoBehaviour
 
         while (howMany > 0)
         {
-            //Debug.Log(whichPositionWeAreOn);
             thisList.Add(new Vector3(0, 0, whichPositionWeAreOn * theSpacing));
             whichPositionWeAreOn++;
             howMany--;
-        }
-
-        //foreach(Vector3 thisPosition in thisList) 
-        {
-            //Debug.Log(thisPosition.z);
         }
 
         return thisList;
@@ -67,15 +47,9 @@ public class patternScript2 : MonoBehaviour
 
         while (howMany > 0)
         {
-            //Debug.Log(whichPositionWeAreOn);
             thisList.Add(new Vector3(sideOffset, 0, whichPositionWeAreOn * theSpacing));
             whichPositionWeAreOn++;
             howMany--;
-        }
-
-        //foreach(Vector3 thisPosition in thisList) 
-        {
-            //Debug.Log(thisPosition.z);
         }
 
         return thisList;
@@ -91,7 +65,6 @@ public class patternScript2 : MonoBehaviour
         float fz = 0;
 
         List<Vector3> thePositionList = new List<Vector3>();
-        //Vector3 previousVector3 = new Vector3();
 
         while (theNumberOfPlacesInRow > 0)
         {
@@ -113,11 +86,6 @@ public class patternScript2 : MonoBehaviour
 
             
             theNumberOfPlacesInRow -= 1;
-        }
-
-        //foreach (var thisPosition in thePositionList)
-        {
-            //Debug.Log(thisPosition);
         }
 
         return thePositionList;

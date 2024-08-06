@@ -23,6 +23,4 @@ public class playerInputs : MonoBehaviour
         theVirtualGamePad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
 
     }
-
-
 }

@@ -19,9 +19,7 @@ public class colliderInteractor : MonoBehaviour
         ci.magnitudeOfInteraction = ii.magnitudeOfInteraction;
         ci.level = ii.level;
         ci.enactionAuthor = theEnactable.enactionAuthor;
-
     }
-
 
     void OnTriggerEnter(Collider other)
     {
@@ -39,7 +37,6 @@ public class colliderInteractor : MonoBehaviour
         if (theInteractable == null) { return false; }
         if (theInteractable.dictOfInteractions == null)
         {
-
             Debug.Log("i don't think this should ever happen:   theInteractable.dictOfInteractions == null");
             return false;
         }
