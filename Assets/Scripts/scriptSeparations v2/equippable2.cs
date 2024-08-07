@@ -23,8 +23,14 @@ public class equippable2 : stateHolder, IInteractable
 
     }
 
+    public void test()
+    {
+
+    }
+
     public void Awake()
     {
+        Debug.Log("equippable2 awake");
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
         theEquippable2Type = interactionCreator.simpleSlot.hands;
 
@@ -39,6 +45,7 @@ public class equippable2 : stateHolder, IInteractable
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
 
         dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new putInInventory());
+
     }
 
     // Start is called before the first frame update

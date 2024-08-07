@@ -20,10 +20,12 @@ public class gun1 : equippable2
     */
 
     //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
-    private void Awake()
+    public void Awake()
     {
-        //equippable2.Awake();
-        this.gameObject.GetComponent<equippable2>().Awake();
+        //equippable2.Awake();  //why doesn't this work
+        //equippable2.test();  //ya, doesn't work
+        test();  //well, no error.  which is how i did "callableAwake" before someone on reddit said i could just do "equippable2.Awake()"
+        this.GetComponent<equippable2>().Awake();
 
 
         initializeEnactionPoint1();

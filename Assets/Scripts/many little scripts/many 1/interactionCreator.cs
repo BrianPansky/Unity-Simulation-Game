@@ -73,10 +73,8 @@ public class interactionCreator : MonoBehaviour
         if (dictOfInteractionsX == null)
         {
             dictOfInteractionsX = new Dictionary<enactionCreator.interType, List<Ieffect>>();
-            return dictOfInteractionsX;
         }
-
-        if (dictOfInteractionsX.ContainsKey(interactionType))
+        else if (dictOfInteractionsX.ContainsKey(interactionType))
         {
             dictOfInteractionsX[interactionType].Add(effect);
             return dictOfInteractionsX;
@@ -268,7 +266,9 @@ public class putInInventory : Ieffect
 {
     public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
     {
+        Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
         GameObject author = theCollisionInteractionScript.enactionAuthor;
+        Debug.Log("author:  " + author);
         inventory1 theInventory = author.GetComponent<inventory1>();
         theInventory.putInInventory(objectBeingInteractedWith);
     }

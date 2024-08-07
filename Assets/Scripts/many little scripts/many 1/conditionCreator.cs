@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using static interactionCreator;
 
 public class conditionCreator : MonoBehaviour
 {
@@ -123,7 +126,61 @@ public class conditionCreator : MonoBehaviour
         return whichObjectOnListIsNearest(objectWeWantItClosestTo, tagging2.singleton.listInObjectFormat(listOfObjects));
     }
 
+    internal static bool objectHasInteraction(GameObject thisObject, interactionCreator.numericalVariable variableThatEquippableInteractsWith, bool shouldItBeAddition)
+    {
+        throw new NotImplementedException();
 
+        var enactions = thisObject.GetComponents<collisionEnaction>();
+        if (enactions.Count() < 1) { return false; }
+
+        foreach (collisionEnaction enaction in enactions)
+        {
+            //numericalEffect
+            //numericalVariable
+        }
+
+
+        return true;
+    }
+
+    internal static bool objectHasInteractionType(GameObject thisObject, enactionCreator.interType theInterType)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
+
+public interface condition
+{
+
+    bool met();
+}
+
+public class proximity : condition
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    GameObject object1;
+    GameObject object2;
+    float desiredDistance = 4f;
+
+    public proximity(GameObject object1, GameObject object2, float desiredDistance = 4f)
+    {
+        this.object1 = object1;
+        this.object2 = object2;
+        this.desiredDistance = desiredDistance;
+    }
+
+    public bool met()
+    {
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        if (distance > desiredDistance) { return false; }
+
+        return true;
+    }
+}

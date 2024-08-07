@@ -12,10 +12,35 @@ public class planningAndImagination : MonoBehaviour
 
 }
 
-public interface planEXE
+public abstract class planEXE
 {
-    void executePlan();
-    void target(GameObject theTarget);
+    public List<condition> startConditions = new List<condition> { };
+    public List<condition> endConditions = new List<condition> { };
+
+    public abstract void executePlan();
+    public abstract void target(GameObject theTarget);
+
+    public bool areSTARTconditionsFulfilled()
+    {
+        foreach (condition thisCondition in startConditions)
+        {
+            if (thisCondition.met() == false) { return false; }
+        }
+        return true;
+    }
+
+    public bool areENDconditionsFulfilled()
+    {
+        Debug.Log("areENDconditionsFulfilled?");
+        Debug.Log("endConditions.Count:  " + endConditions.Count);
+        foreach (condition thisCondition in endConditions)
+        {
+            Debug.Log("thisCondition:  " + thisCondition);
+            if (thisCondition.met() == false) { return false; }
+        }
+        Debug.Log("no conditions remain unfulfilled!");
+        return true;
+    }
 
 }
 
@@ -30,7 +55,7 @@ public class boolEXE :  planEXE
         this.theEnaction = theEnaction;
     }
 
-    public void executePlan()
+    override public void executePlan()
     {
         foreach (var planEXE in microPlan)
         {
@@ -40,7 +65,7 @@ public class boolEXE :  planEXE
         theEnaction.enact();
     }
 
-    public void target(GameObject theTarget)
+    override public void target(GameObject theTarget)
     {
 
     }
@@ -59,12 +84,12 @@ public class vectEXE : planEXE
     }
 
 
-    public void executePlan()
+    override public void executePlan()
     {
         theEnaction.enact(theTarget.transform.position);
     }
 
-    public void target(GameObject theTarget)
+    override public void target(GameObject theTarget)
     {
         this.theTarget = theTarget;
     }

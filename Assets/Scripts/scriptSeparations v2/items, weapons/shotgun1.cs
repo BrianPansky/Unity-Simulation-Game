@@ -14,10 +14,17 @@ public class shotgun1 : equippable2
     //void Awake()
     //{
     //}
+    public void Awake()
+    {
+        //equippable2.Awake();  //why doesn't this work
+        //equippable2.test();  //ya, doesn't work
+        test();  //well, no error.  which is how i did "callableAwake" before someone on reddit said i could just do "equippable2.Awake()"
+        this.GetComponent<equippable2>().Awake();
+    }
 
 
-    // Start is called before the first frame update
-    void Start()
+        // Start is called before the first frame update
+        void Start()
     {
         initializeEnactionPoint1();
 

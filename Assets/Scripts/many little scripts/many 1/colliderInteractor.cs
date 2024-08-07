@@ -28,7 +28,7 @@ public class colliderInteractor : MonoBehaviour
 
         foreach(Ieffect thisEffect in theInteractable.dictOfInteractions[this.interactionType])
         {
-            thisEffect.implementEffect(enactionAuthor, this);
+            thisEffect.implementEffect(other.gameObject, this);
         }
     }
 

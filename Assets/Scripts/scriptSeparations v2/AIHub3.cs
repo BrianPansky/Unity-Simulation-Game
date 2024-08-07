@@ -51,6 +51,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         if (adhocCooldown < 44){return;}
 
         adhocCooldown = 0;
+
+        if (plan.Count > 0){ return; }
+
+        Debug.Log("plan.Count > 0 is FALSE");
         makeAdHocPlanToDo();
     }
 
@@ -61,12 +65,46 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void makeAdHocPlanToDo()
     {
+        GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interType.shoot1));
+
+        plan.Add(walkToTarget(target));
+        /*
+        
+        plan.Add(clickOnTarget(target));  //not gonna work, i haven't fixed picking up yet....
         plan.Add(equipX(interType.shoot1));
-        plan.Add(aimPlan1());
+        //plan.Add(aimPlan1());
+
+        target = pickRandomObjectFromList(threatListWithoutSelf());
+        plan.Add(aimTargetPlan1(target));
         plan.Add(firePlan2(interType.shoot1));
+        */
 
 
     }
+
+    void doCurrentPlanStep()
+    {
+        if (plan.Count < 1) { return; }
+        if (plan[0] == null)
+        {
+            Debug.Log("how to handle this");
+            plan.RemoveAt(0);
+            return;
+        }
+
+        if (plan[0].areSTARTconditionsFulfilled())
+        {
+            plan[0].executePlan();
+        }
+
+        if (plan[0].areENDconditionsFulfilled())
+        {
+            Debug.Log("plan[0].areENDconditionsFulfilled() for:  " + plan[0]);
+            plan.RemoveAt(0);
+        }
+        
+    }
+
 
     private planEXE equipX(interType interTypeX)
     {
@@ -78,7 +116,43 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         return exe1;
     }
 
-    
+
+
+    planEXE walkToTarget(GameObject target)
+    {
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
+
+        if (theNavAgent == null) { return null; }
+
+        //now, put it in a planEXE, with the target [and a specified proximity condition for ending the enaction?]
+
+        planEXE theEXE = new vectEXE(theNavAgent, target);
+        proximity condition = new proximity(this.gameObject, target, 3.3f);
+        theEXE.endConditions.Add(condition);
+        //is that it?  is it already set up to work?  [aside from the proximity condition...]
+        return theEXE;
+    }
+
+    planEXE clickOnTarget(GameObject target)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    planEXE aimTargetPlan1(GameObject target)
+    {
+        //pick random enemy target
+        //aim
+        throw new System.NotImplementedException();
+
+        playable2 thePlayable = this.gameObject.GetComponent<playable2>();
+        IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
+
+        vectEXE exe1 = new vectEXE(testE1, target);
+        return exe1;
+    }
+
+
 
     planEXE aimPlan1()
     {
@@ -158,20 +232,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         return theList;
     }
 
-    void doCurrentPlanStep()
-    {
-        if (plan.Count <1) { return; }
-        if(plan[0] == null)
-        {
-            Debug.Log("how to handle this");
-            plan.RemoveAt(0); 
-            return; }
-
-        plan[0].executePlan();
-
-        plan.RemoveAt(0);
-    }
-
+    
 
     public List<GameObject> getInventory()
     {
@@ -204,9 +265,49 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
-    private void justSenseNearbyEquipables(numericalVariable health, bool shouldItBeAddition)
+    public List<GameObject> allNearbyEquippablesWithInterTypeX(interType theInterType)
     {
-        throw new System.NotImplementedException();
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(this.gameObject);
+        List<GameObject> theListOfEquippables = new List<GameObject> ();
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(theInterType))
+            {
+                theListOfEquippables.Add(thisObject);
+            }
+        }
+
+        return theListOfEquippables;
+    }
+    //justSenseNearbyEquipables
+
+
+    public GameObject firstNearbyEquipableWithInteractionType(interType theInterType)
+    {
+
+        GameObject theItemWeWant = null;
+
+        List<GameObject> theList = new find().allObjectsInObjectsZone(this.gameObject);
+
+        theItemWeWant = firstObjectOnListWIthInterTypeX(theInterType,theList);
+        /*
+        foreach (GameObject thisObject in theList)
+        {
+            if (conditionCreator.objectHasInteractionType(thisObject, theInterType))
+            {
+                theItemWeWant = thisObject;
+                break;
+            }
+        }
+        */
+
+        return theItemWeWant;
     }
 
 

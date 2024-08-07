@@ -60,21 +60,6 @@ public class tagging2 : MonoBehaviour
 
 
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-
-
     //funcitons that modify an object's tags
     public void addTag(GameObject theObject, tag2 tag)
     {
@@ -459,7 +444,7 @@ public class find
 
     }
 
-    List<GameObject> allMultipleInZone(int zone, List<tag2> theTags)
+    public List<GameObject> allMultipleInZone(int zone, List<tag2> theTags)
     {
         List<GameObject> newList = new List<GameObject> ();
 
@@ -471,6 +456,13 @@ public class find
         }
 
         return newList;
+    }
+
+    public List<GameObject> allObjectsInObjectsZone(GameObject theObject)
+    {
+        int zone = tagging2.singleton.whichZone(theObject);
+        List<objectIdPair> pairs = allInZone(zone);
+        return tagging2.singleton.listInObjectFormat(pairs);
     }
 
 
