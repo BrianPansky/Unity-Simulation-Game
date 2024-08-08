@@ -14,8 +14,8 @@ public class planningAndImagination : MonoBehaviour
 
 public abstract class planEXE
 {
-    public List<condition> startConditions = new List<condition> { };
-    public List<condition> endConditions = new List<condition> { };
+    public List<condition> startConditions = new List<condition>();
+    public List<condition> endConditions = new List<condition>();
 
     public abstract void executePlan();
     public abstract void target(GameObject theTarget);
@@ -31,14 +31,14 @@ public abstract class planEXE
 
     public bool areENDconditionsFulfilled()
     {
-        Debug.Log("areENDconditionsFulfilled?");
-        Debug.Log("endConditions.Count:  " + endConditions.Count);
+        //Debug.Log("areENDconditionsFulfilled?");
+        //Debug.Log("endConditions.Count:  " + endConditions.Count);
         foreach (condition thisCondition in endConditions)
         {
-            Debug.Log("thisCondition:  " + thisCondition);
+            //Debug.Log("thisCondition:  " + thisCondition);
             if (thisCondition.met() == false) { return false; }
         }
-        Debug.Log("no conditions remain unfulfilled!");
+        //Debug.Log("no conditions remain unfulfilled!");
         return true;
     }
 
@@ -86,6 +86,9 @@ public class vectEXE : planEXE
 
     override public void executePlan()
     {
+
+        //Debug.Log("vectEXE, theTarget:  " + theTarget);
+        //Debug.DrawLine(theTarget.transform.position, new Vector3(), Color.yellow, 6f);
         theEnaction.enact(theTarget.transform.position);
     }
 

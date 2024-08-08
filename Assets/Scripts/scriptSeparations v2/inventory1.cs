@@ -21,11 +21,13 @@ public class inventory1 : MonoBehaviour, IInteractable
         }
 
         takeFromAndPutBackIntoInventory.addTakeFromAndPutBackIntoInventory(this.gameObject);
-        startingItem = genGen.singleton.returnGun1(this.transform.position);
+        //startingItem = genGen.singleton.returnGun1(this.transform.position);
     }
     
     void Start()
     {
+
+        if (startingItem == null) { return; }
         putInInventory(startingItem);
     }
 
@@ -35,6 +37,7 @@ public class inventory1 : MonoBehaviour, IInteractable
 
     public void putInInventory(GameObject theObjectToPutInInventory)
     {
+        if(theObjectToPutInInventory == null) { Debug.Log("theObjectToPutInInventory == null"); return; }
         //should i just be storing a game object?  because maybe someday an inventory item won't be equippable2?
         //i'm doing this so it's easy to write code to equip it.  can worry about edge cases later.
         inventoryItems.Add(theObjectToPutInInventory);

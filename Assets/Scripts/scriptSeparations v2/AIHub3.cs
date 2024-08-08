@@ -8,6 +8,7 @@ using static enactionCreator;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 using static interactionCreator;
+using System.Threading;
 
 
 public class AIHub3 : planningAndImagination, IupdateCallable
@@ -33,7 +34,15 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         currentNavMeshAgent = genGen.singleton.ensureNavmeshAgent(this.gameObject);
 
-        makeAdHocPlanToDo();
+
+        GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interType.shoot1));
+
+        plan.Add(walkToTarget(target));
+        plan.Add(aimTargetPlan1(target));
+        //plan.Add(mouseClickPlan());
+        plan.Add(firePlan2(interType.standardClick));
+        plan.Add(equipX(interType.shoot1));
+
     }
 
     // Update is called once per frame
@@ -65,9 +74,17 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void makeAdHocPlanToDo()
     {
-        GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interType.shoot1));
+        int count = 0;
+        while (count < 15)
+        {
+            GameObject target = pickRandomObjectFromList(threatListWithoutSelf());
+            plan.Add(aimTargetPlan1(target));
+            plan.Add(firePlan2(interType.shoot1, 30));
+            count++;
+        }
 
-        plan.Add(walkToTarget(target));
+        //enactALLtimes(plan, 9);
+
         /*
         
         plan.Add(clickOnTarget(target));  //not gonna work, i haven't fixed picking up yet....
@@ -99,11 +116,13 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         if (plan[0].areENDconditionsFulfilled())
         {
-            Debug.Log("plan[0].areENDconditionsFulfilled() for:  " + plan[0]);
+            //Debug.Log("plan[0].areENDconditionsFulfilled() for:  " + plan[0]);
             plan.RemoveAt(0);
         }
         
     }
+
+
 
 
     private planEXE equipX(interType interTypeX)
@@ -141,10 +160,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     planEXE aimTargetPlan1(GameObject target)
     {
-        //pick random enemy target
-        //aim
-        throw new System.NotImplementedException();
-
         playable2 thePlayable = this.gameObject.GetComponent<playable2>();
         IEnactByTargetVector testE1 = new aimTarget(new vecRotation(thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2));
 
@@ -203,20 +218,86 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     }
 
-    planEXE firePlan2(interType interTypeX)
+    planEXE firePlan2(interType interTypeX, int cooldownMax = 0)
     {
+        //either playable will already have the type, or it might be in equipper slots
+        IEnactaBool grabEnact1;
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interTypeX);
+        if(grabEnact1 == null) {
+            GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
 
-        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
+            //oh no it can be null
+            if (theItemWeWant == null) { return null; }//???
 
-        //oh no it can be null
-        if(theItemWeWant == null) { return null; }//???
+            grabEnact1 = theItemWeWant.GetComponent<IEnactaBool>();
+        }
 
-        IEnactaBool grabEnact1 = theItemWeWant.GetComponent<IEnactaBool>();
+        
 
         boolEXE exe1 = new boolEXE(grabEnact1, null);
+        enactTimes(exe1, 3);
+        if (cooldownMax > 0) { addCooldownConditionToSTART(exe1, cooldownMax); }
 
         return exe1;
     }
+
+
+    public void addCooldownConditionToSTART(planEXE theEXE, int cooldownMax)
+    {
+        cooldown condition = new cooldown(cooldownMax);
+        theEXE.startConditions.Add(condition);
+    }
+
+    public void enactALLtimes(List<planEXE> theEXEList, int times = 1)
+    {
+        foreach (planEXE theEXE in theEXEList) { enactTimes(theEXE, times); }
+    }
+
+
+    public void enactTimes(planEXE theEXE, int times = 1)
+    {
+        if(theEXE == null) { Debug.Log("theEXE == null"); return; }
+        condition theCondition = new enacted(theEXE, times);
+        Debug.Log("theEXE.endConditions:  " + theEXE.endConditions);
+        theEXE.endConditions = new List<condition>();
+        theEXE.endConditions.Add(theCondition);
+    }
+
+
+
+
+    public IEnactaBool enactionWithInterTypeXOnObjectsPlayable(GameObject theObject, interType intertypeX)
+    {
+        foreach (collisionEnaction thisEnaction in listOfIEnactaBoolsOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<IEnactaBool> listOfIEnactaBoolsOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<IEnactaBool> theList = new List<IEnactaBool>();
+
+        foreach (collisionEnaction thisEnaction in theObject.GetComponents<collisionEnaction>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
 
     private List<GameObject> equipperContents()
     {

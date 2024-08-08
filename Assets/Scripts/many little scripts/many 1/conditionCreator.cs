@@ -184,3 +184,56 @@ public class proximity : condition
         return true;
     }
 }
+public class enacted : condition
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    int times = 1;
+    planEXE theEnactionEXE;
+
+    public enacted(planEXE theEnactionEXE, int times =1)
+    {
+        this.times = times;
+        this.theEnactionEXE = theEnactionEXE;
+    }
+
+    public bool met()
+    {
+
+        //Debug.Log("times:  " + times);
+        //Debug.Log("theEnactionEXE.areSTARTconditionsFulfilled()???:  ");
+        if (theEnactionEXE.areSTARTconditionsFulfilled())
+        {
+            //Debug.Log("yes");
+            times--;
+        }
+
+        //Debug.Log("times:  " + times);
+        if (times < 1) { return true; }
+
+        return false;
+    }
+}
+
+public class cooldown : condition
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    int cooldownMax = 30;
+    int cooldownTimer = 0;
+
+    public cooldown(int cooldownMax = 30)
+    {
+        this.cooldownMax = cooldownMax;
+    }
+
+    public bool met()
+    {
+
+        if (cooldownTimer < 1) { cooldownTimer = cooldownMax;  return true; }
+
+        cooldownTimer--;
+
+        return false;
+    }
+}
