@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static stateHolder;
 
 public class interactionCreator : MonoBehaviour
 {
@@ -24,7 +25,8 @@ public class interactionCreator : MonoBehaviour
     public enum numericalVariable
     {
         errorYouDidntSetEnumTypeForNumericalVariable,
-        health
+        health,
+        cooldown
     }
 
 
@@ -140,11 +142,33 @@ public class interactionInfo
 }
 
 
-public class stateHolder: zoneable2
+public class stateHolder : zoneable2
 {
     public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
-}
 
+    //why is this here, but other effects are somewhere else?  which place should they be???
+    public Dictionary<condition, List<Ieffect>> conditionalEffects = new Dictionary<condition, List<Ieffect>>();
+
+    public void callThisWhenInteractedWIth()
+    {
+        //is there a better way to do this?  observer broadcast whatevers?
+        //whatever, try this for now?
+
+        //so, this is called when interacted with [may need to distinguish between BEFORE interaction and AFTER?]
+        //after interaction is done, check all conditional effects to see if any of them have been triggered.
+
+        foreach (condition thisCondition in conditionalEffects.Keys)
+        {
+            if (thisCondition.met() == false) { continue; }
+
+            foreach (Ieffect thisEffect in conditionalEffects[thisCondition])
+            {
+                //ummmm, takes a collider interaction script?!?!?!?  seems now like that's a bad idea...
+                thisEffect.implementEffect(this.gameObject, null);
+            }
+        }
+    }
+}
 
 public interface IInteractable
 {
@@ -176,15 +200,15 @@ public class numericalEffect : Ieffect
     public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
     {
         stateHolder theStateHolder = objectBeingInteractedWith.GetComponent<stateHolder>();
-        if (theStateHolder == null) {return; }
+        if (theStateHolder == null) { return; }
 
         //.............gonna have to re-do all of this in a way that's legible to NPCs for planning..........make it so i can feed imaginary state in?  ya, probably....[just create imaginary whole game object with imaginary stateHolder etc.........]
         if (theCollisionInteractionScript.level < minLevel) { return; }
-        if (theCollisionInteractionScript.level >= maxLevel) 
+        if (theCollisionInteractionScript.level >= maxLevel)
         {
             if (increaseTheVariable == false) { setInteractableVariable(theStateHolder, toAlter, 0); } //how to implement "max" effect if it's addition???
 
-            return; 
+            return;
         }
 
 
@@ -194,7 +218,7 @@ public class numericalEffect : Ieffect
 
         adjustInteractableVariable(theStateHolder, toAlter, amount);
 
-        Debug.Log("theStateHolder.dictOfIvariables[toAlter] += amount;");
+        //Debug.Log("theStateHolder.dictOfIvariables[toAlter] += amount;");
     }
 
     private void adjustInteractableVariable(stateHolder theStateHolder, interactionCreator.numericalVariable toAlter, float amount)
@@ -220,7 +244,7 @@ public class playAsPlayable2 : Ieffect
     {
         //ad hoc for now
         playable2 thePlayable2 = objectBeingInteractedWith.GetComponent<playable2>();
-        if (thePlayable2.occupied == true){Debug.Log("thePlayable2.occupied == true, this playable2 object:  " + objectBeingInteractedWith); return; }
+        if (thePlayable2.occupied == true) { Debug.Log("thePlayable2.occupied == true, this playable2 object:  " + objectBeingInteractedWith); return; }
 
         GameObject author = theCollisionInteractionScript.enactionAuthor;
         virtualGamepad gamepad = author.GetComponent<virtualGamepad>();
@@ -266,10 +290,21 @@ public class putInInventory : Ieffect
 {
     public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
     {
-        Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
+        //Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
+
+
+        //     !!!!!!!!!!!!!!!!!!!     quick way to prevent stealing people's guns!
+        objectBeingInteractedWith.GetComponent<Collider>().enabled = false;
+
+
         GameObject author = theCollisionInteractionScript.enactionAuthor;
-        Debug.Log("author:  " + author);
+        //Debug.Log("author:  " + author);
+        if(author == null)
+        {
+            Debug.Log("author is null");
+        }
         inventory1 theInventory = author.GetComponent<inventory1>();
         theInventory.putInInventory(objectBeingInteractedWith);
     }
 }
+

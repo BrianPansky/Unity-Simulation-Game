@@ -538,15 +538,14 @@ public class spatialDataPoint
         Debug.Log(X);
     }
 
-
-
-
-    //      utility
-
-    //      ad-hoc, try to get rid of
-
-
-
+    internal bool threatLineOfSightBool()
+    {
+        foreach (spatialDataPointFragment thisFragment in fragmentList)
+        {
+            if(thisFragment.lineOfSightBool == true) {return true;}
+        }
+        return false;
+    }
 }
 
 public class spatialDataSet

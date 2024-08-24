@@ -7,7 +7,7 @@ using static enactionCreator;
 public class gun1 : equippable2
 {
 
-
+    public cooldown theCooldown;
 
     //public GameObject enactionPoint1;
     /*
@@ -36,7 +36,10 @@ public class gun1 : equippable2
         //this.gameObject.AddComponent<projectileLauncher>();
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
-            new projectileToGenerate(1, true, 99, 0));
+            new projectileToGenerate(1, true, 99, 0), 30);
+
+        theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
+
     }
 
 
@@ -74,6 +77,12 @@ public class gun1 : equippable2
         enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.2f + this.transform.up * 0.3f;
         enactionPoint1.transform.rotation = this.transform.rotation;
 
+    }
+
+
+    void Update()
+    {
+        theCooldown.cooling();
     }
 
 }

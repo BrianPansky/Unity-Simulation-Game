@@ -5,6 +5,7 @@ using UnityEngine;
 using static UnityEditor.PlayerSettings;
 using static enactionCreator;
 using UnityEngine.XR;
+using UnityEngine.UIElements;
 
 
 public class virtualGamepad : MonoBehaviour
@@ -76,6 +77,10 @@ public class virtualGamepad : MonoBehaviour
 
     internal void receiveAnyNonNullEnactionsForButtons(equippable2 equippable2)
     {
+        foreach (enaction thisEnaction in equippable2.GetComponents<enaction>())
+        {
+            //Debug.Log(":  " + thisEnaction.gamepadButtonType);
+        }
         foreach (IEnactaBool enactaBool in equippable2.GetComponents<IEnactaBool>())
         {
             enactaBool.enactionAuthor = this.transform.gameObject;
@@ -101,6 +106,13 @@ public class virtualGamepad : MonoBehaviour
         }
 
 
+        /*
+        foreach (enaction thisEnaction in thePlayable2.GetComponents<enaction>())
+        {
+            Debug.Log(":  " + thisEnaction.gamepadButtonType);
+        }
+        */
+
         foreach (IEnactaVector enactaV in thePlayable2.GetComponents<IEnactaVector>())
         {
             this.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
@@ -125,6 +137,10 @@ public class virtualGamepad : MonoBehaviour
     {
         //merely remove, do not replace with any defaults in this function
 
+        foreach (enaction thisEnaction in equippable2.GetComponents<enaction>())
+        {
+            Debug.Log(":  " + thisEnaction.gamepadButtonType);
+        }
         foreach (IEnactaBool enactaBool in equippable2.GetComponents<IEnactaBool>())
         {
             allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
@@ -163,7 +179,15 @@ public class virtualGamepad : MonoBehaviour
         public void initializeMouseKeyboard(virtualGamepad inputVirtualGamePad)
         {
             theVirtualGamePad = inputVirtualGamePad;
-            Cursor.lockState = CursorLockMode.Locked;
+            //      Cursor.lockState = CursorLockMode.Locked;
+            //was fine, but now says:
+            //      error CS0104: 'Cursor' is an ambiguous reference between 'UnityEngine.UIElements.Cursor' and 'UnityEngine.Cursor'
+            //like.....
+            //since when?!?
+            //so, which is it???
+            //      UnityEngine.UIElements.Cursor.lockState = CursorLockMode.Locked;
+            //not that one, it has no "lockstate" thing
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             defaultButtonMapping();
         }
 
@@ -255,6 +279,45 @@ public class virtualGamepad : MonoBehaviour
 
 }
 
+public class inputData
+{
+    public bool theBool = false;
+    public Vector2 vect2;
+    public Vector3 vect3;
+
+    public inputData boolean(bool inputBool = true)
+    {
+
+    theBool = inputBool; 
+        return this;
+    }
+
+
+    public inputData vect2Targ(GameObject target)
+    {
+        Debug.Log("wait, how would i do this part?");
+        //vect2 = inputVect;
+        return this;
+    }
+    public inputData vect3Targ(GameObject target)
+    {
+        Debug.Assert(target != null);
+        vect3 = target.transform.position;
+        return this;
+    }
+
+    public inputData vect(Vector2 inputVect)
+    {
+        vect2 = inputVect;
+        return this;
+    }
+    public inputData vect(Vector3 inputVect)
+    {
+        vect3 = inputVect;
+        return this;
+    }
+
+}
 
 public abstract class gamePadButtonable
 {

@@ -28,6 +28,11 @@ public class genGen : MonoBehaviour
         singleton = this;
     }
 
+    public void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)
+    {
+        //just so i can keep the rotation of the object i input, for now:
+        Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
+    }
 
     public GameObject createPrefabAtPointAndRETURN(GameObject thePrefab, Vector3 thePoint)
     {
@@ -35,6 +40,17 @@ public class genGen : MonoBehaviour
         return Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
     }
 
+
+    public GameObject createAndReturnPrefabAtPointWITHNAME(GameObject thePrefab, Vector3 thePoint, string theName)
+    {
+
+        //just so i can keep the rotation of the object i input, for now:
+        GameObject newObject = Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
+
+        newObject.name = theName;
+
+        return newObject;
+    }
 
 
     public GameObject returnNPC5(Vector3 where)
@@ -85,7 +101,7 @@ public class genGen : MonoBehaviour
 
         navAgent.addNavAgentEnaction(thePlayable.gameObject);
 
-        aimTarget.addAaimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
+        aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
     }
 
     private void makeInteractionsBody4(IInteractable theInteractable)

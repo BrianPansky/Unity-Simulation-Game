@@ -7,6 +7,7 @@ using static enactionCreator;
 public class shotgun1 : equippable2
 {
 
+    public cooldown theCooldown;
     //public GameObject enactionPoint1;
 
 
@@ -23,8 +24,8 @@ public class shotgun1 : equippable2
     }
 
 
-        // Start is called before the first frame update
-        void Start()
+    // Start is called before the first frame update
+    void Start()
     {
         initializeEnactionPoint1();
 
@@ -37,7 +38,10 @@ public class shotgun1 : equippable2
         //theEquippable2Type = interactionCreator.simpleSlot.hands;
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
-            new projectileToGenerate(1, true, 99, 0));
+            new projectileToGenerate(1, true, 99, 0), 50);
+
+
+        theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
         /*
         enactableBoolSet.Add(new projectileLauncher(enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
@@ -64,5 +68,14 @@ public class shotgun1 : equippable2
         enactionPoint1.transform.rotation = this.transform.rotation;
 
     }
+
+
+
+    void Update()
+    {
+        theCooldown.cooling();
+    }
+
+
 }
 

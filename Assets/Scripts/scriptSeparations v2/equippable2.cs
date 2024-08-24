@@ -8,6 +8,7 @@ public class equippable2 : stateHolder, IInteractable
 {
     //plug in peices to make each specific weapon/item
 
+    public bool occupied = false;
 
     public GameObject enactionPoint1;
     public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
@@ -30,7 +31,7 @@ public class equippable2 : stateHolder, IInteractable
 
     public void Awake()
     {
-        Debug.Log("equippable2 awake");
+        //Debug.Log("equippable2 awake");
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
         theEquippable2Type = interactionCreator.simpleSlot.hands;
 
@@ -109,6 +110,7 @@ public class equippable2 : stateHolder, IInteractable
 
         thePlayable2.clearTheEquipperSlot(theEquippable2Type);
         thePlayable2.equipperSlotsAndContents[theEquippable2Type] = this.gameObject;
+        occupied = true;
     }
 
 
@@ -121,7 +123,7 @@ public class equippable2 : stateHolder, IInteractable
         gamepad.removeFromGamepadButtons(this);
         //      thePlayable2.replace(this);
         thePlayable2.refilUnusedSlotsAndButtonsFromThisplayable2();
-
+        occupied = false;
         disappearIntoPocket(thePlayable2.gameObject);
     }
 

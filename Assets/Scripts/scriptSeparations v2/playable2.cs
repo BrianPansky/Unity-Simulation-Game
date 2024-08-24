@@ -146,6 +146,10 @@ public class playable2 : stateHolder, IInteractable
 
         occupied = false;
 
+        foreach (enaction thisEnaction in this.GetComponents<enaction>())
+        {
+            Debug.Log(":  " + thisEnaction.gamepadButtonType);
+        }
 
         foreach (IEnactaBool enactaBool in this.GetComponents<IEnactaBool>())
         {

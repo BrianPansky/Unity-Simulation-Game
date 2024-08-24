@@ -179,21 +179,27 @@ public class proximity : condition
         Vector3 vectorBetween = position1 - position2;
         float distance = vectorBetween.magnitude;
 
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
         if (distance > desiredDistance) { return false; }
 
         return true;
     }
 }
+
 public class enacted : condition
 {
     //for when we want the objects to be CLOSER than the desired distance
 
-    int times = 1;
-    planEXE theEnactionEXE;
+    int howManyTimesToEnact = 1;
+    planEXE2 theEnactionEXE;
 
-    public enacted(planEXE theEnactionEXE, int times =1)
+    public enacted(planEXE2 theEnactionEXE, int inputHowManyTimesToEnact = 1)
     {
-        this.times = times;
+        this.howManyTimesToEnact = inputHowManyTimesToEnact;
         this.theEnactionEXE = theEnactionEXE;
     }
 
@@ -202,14 +208,14 @@ public class enacted : condition
 
         //Debug.Log("times:  " + times);
         //Debug.Log("theEnactionEXE.areSTARTconditionsFulfilled()???:  ");
-        if (theEnactionEXE.areSTARTconditionsFulfilled())
+        //if (theEnactionEXE.startConditionsMet())
         {
             //Debug.Log("yes");
-            times--;
+            //timesLeft--;
         }
 
         //Debug.Log("times:  " + times);
-        if (times < 1) { return true; }
+        if (theEnactionEXE.numberOfTimesExecuted >= howManyTimesToEnact) { return true; }
 
         return false;
     }
@@ -219,10 +225,10 @@ public class cooldown : condition
 {
     //for when we want the objects to be CLOSER than the desired distance
 
-    int cooldownMax = 30;
-    int cooldownTimer = 0;
+    public int cooldownMax = 130;
+    public int cooldownTimer = 0;
 
-    public cooldown(int cooldownMax = 30)
+    public cooldown(int cooldownMax = 130)
     {
         this.cooldownMax = cooldownMax;
     }
@@ -230,10 +236,46 @@ public class cooldown : condition
     public bool met()
     {
 
-        if (cooldownTimer < 1) { cooldownTimer = cooldownMax;  return true; }
+        //Debug.Log("cooldownMax:  " + cooldownMax + "  cooldownTimer:  "+ cooldownTimer);
+        if (cooldownTimer < 1) {
+            //Debug.Log("cooldownTimer < 1   TRUEEEE");
+            return true; }
 
-        cooldownTimer--;
+        //cooldownTimer--;
 
         return false;
+    }
+
+    public void cooling()
+    {
+        cooldownTimer--;
+    }
+
+    public void fire()
+    {
+        cooldownTimer = cooldownMax;
+    }
+}
+
+public class planListComplete : condition
+{
+    List<planEXE2> planList;
+
+    public planListComplete(List<planEXE2> planList)
+    {
+        this.planList = planList;
+    }
+
+    public bool met()
+    {
+
+        //Debug.Log("planList.Count:  " + planList.Count);
+        foreach (planEXE2 planEXE in planList)
+        {
+            if (planEXE.endConditionsMet() == false) { return false; }
+        }
+
+        //Debug.Log("planList complete!");
+        return true;
     }
 }

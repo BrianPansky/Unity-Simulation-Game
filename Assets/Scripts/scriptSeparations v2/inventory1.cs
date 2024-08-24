@@ -51,10 +51,10 @@ public class inventory1 : MonoBehaviour, IInteractable
     
 }
 
-public class takeFromAndPutBackIntoInventory :MonoBehaviour, IEnactaBool
+public class takeFromAndPutBackIntoInventory : IEnactaBool
 {
-    public buttonCategories gamepadButtonType { get; set; }
-    public GameObject enactionAuthor { get; set; }
+    //public buttonCategories gamepadButtonType { get; set; }
+    //public GameObject enactionAuthor { get; set; }
 
     public inventory1 theInventory;
     public playable2 thePlayable2;
@@ -99,8 +99,9 @@ public class takeFromAndPutBackIntoInventory :MonoBehaviour, IEnactaBool
         }
     }
 
-    public void enact()
+    override public void enact(inputData theInput)
     {
+        //Debug.Log("YES WE ARE TRYING TO ENACT THE EQUIP ENACTION");
         GameObject theequippable2ToPutAway = thePlayable2.equipperSlotsAndContents[theSlotTypeToCycle]; 
         if (theequippable2ToPutAway == null)
         {

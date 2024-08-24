@@ -479,7 +479,7 @@ public class find
 
         foreach(objectIdPair thisId in theList)
         {
-            if (tagging2.singleton.tagsOnObject.Keys.Contains(thisId) == false) { continue; }
+            //if (tagging2.singleton.tagsOnObject.Keys.Contains(thisId) == false) {Debug.Log("this object lacks this key:  "+ thisId.theObject + "key:  wait, what?");  continue; }
             if (tagging2.singleton.tagsOnObject[thisId].Contains(theTag) == false) { continue; }
 
             newList.Add(thisId);

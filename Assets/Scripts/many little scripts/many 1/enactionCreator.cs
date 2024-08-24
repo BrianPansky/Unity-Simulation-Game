@@ -66,39 +66,87 @@ public class enactionCreator : MonoBehaviour
     }
 }
 
-public interface IEnactaBool
-{
-    //only for bool inputs!
-    buttonCategories gamepadButtonType {  get; set; }
-    GameObject enactionAuthor { get; set; }
 
-    void enact();
+public abstract class enaction : MonoBehaviour
+{
+    public buttonCategories gamepadButtonType { get; set; }
+
+    abstract public void enact(inputData theInput);
+
+    abstract public planEXE2 toEXE(GameObject target);
 }
 
-public interface IEnactaVector
+public abstract class IEnactaBool: enaction
 {
-    //only for vector inputs!
-    buttonCategories gamepadButtonType { get; set; }
 
-    void enact(Vector2 inputVector);
+    public GameObject enactionAuthor { get; set; }
+
+
+
+    public void enact()
+    {
+        enact(new inputData().boolean());
+    }
+
+
+    public override planEXE2 toEXE(GameObject target)
+    {
+        boolEXE2 theEXE = new boolEXE2(this, target);
+        return theEXE;
+    }
 }
 
-public interface IEnactByTargetVector
+public abstract class IEnactaVector : enaction
 {
-    //only for vector inputs!
-    void enact(Vector3 inputVector);
+
+    public void enact(Vector2 inputV2)
+    {
+        //Debug.Log("enact Vector2222222222222222222222222 for:  " + this);
+        enact(new inputData().vect(inputV2));
+    }
+
+
+    public void enact(Vector3 inputV3)
+    {
+        Debug.Log("enact Vector333333333333333 for:  " + this);
+        enact(new inputData().vect(inputV3));
+    }
+
+
+    public override planEXE2 toEXE(GameObject target)
+    {
+        vect3EXE2 theEXE = new vect3EXE2(this, target);
+        return theEXE;
+    }
+}
+
+public abstract class IEnactByTargetVector:enaction
+{
+    //is this redundant?  didn't i already write that here?  what happened to that writing?  or was it somewhere else?
+    public void enact(Vector3 inputV3)
+    {
+        enact(new inputData().vect(inputV3));
+    }
+
+
+    public override planEXE2 toEXE(GameObject target)
+    {
+        vect3EXE2 theEXE = new vect3EXE2(this, target);
+        return theEXE;
+    }
 }
 
 
 
 
-public abstract class targetedEnaction : MonoBehaviour, IEnactByTargetVector
+public abstract class targetedEnaction : IEnactByTargetVector
 {
-    public abstract void enact(Vector3 inputVector);
+    //um, do i need this?  both this abstract class and the abstract function seem redundant
+    public override abstract void enact(inputData theInput);
 }
 
 
-public class navAgent : targetedEnaction, IEnactByTargetVector
+public class navAgent : targetedEnaction
 {
     //only for vector inputs!
     NavMeshAgent theAgent;
@@ -130,7 +178,7 @@ public class navAgent : targetedEnaction, IEnactByTargetVector
     }
 
     //only for vector inputs!
-    override public void enact(Vector3 inputVector)
+    public override void enact(inputData theInput)
     {
         if (theAgent.enabled == false)
         {
@@ -138,16 +186,18 @@ public class navAgent : targetedEnaction, IEnactByTargetVector
             Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.magenta, 200f);
         }
 
-        theAgent.SetDestination(inputVector);
+        Debug.Assert(theAgent != null);
+        Debug.Assert(theInput != null);
+        theAgent.SetDestination(theInput.vect3);
     }
 }
 
-public class aimTarget : targetedEnaction, IEnactByTargetVector
+public class aimTarget : targetedEnaction
 {
     //only for vector inputs!
     public vecRotation theVectorRotationEnaction; //????
 
-    public static void addAaimTargetAndVecRotation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
+    public static void addAimTargetAndVecRotation(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
         aimTarget aT = objectToAddItTo.AddComponent<aimTarget>();
         //new vecRotation(inputSpeed, theHorizontalTransform, theVerticalTransform, gamepadButtonType);
@@ -171,12 +221,18 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
 
 
     //only for vector inputs!
-    override public void enact(Vector3 targetPosition)
+    override public void enact(inputData theInput)
     {
         //instantaneous for now
-        Vector3 lineFromVertAimerToTarget = targetPosition - theVectorRotationEnaction.thePartToAimVertical.position;
+
+        //Debug.Log("OOOOOOOOOOOOOOOOOOOOOOO      enacting:  " + this);
+        Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
+
+
+        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.yellow, 0.6f);
+
     }
 
 
@@ -260,12 +316,13 @@ public class aimTarget : targetedEnaction, IEnactByTargetVector
 
 
 
-public abstract class collisionEnaction: MonoBehaviour, IEnactaBool
+public abstract class collisionEnaction: IEnactaBool
 { 
     public interactionInfo interInfo;
-    public GameObject enactionAuthor { get; set; }
-    public buttonCategories gamepadButtonType { get; set; }
-    abstract public void enact();
+    //public GameObject enactionAuthor { get; set; }
+    //public buttonCategories gamepadButtonType { get; set; }
+
+    public override abstract void enact(inputData theInput);
 }
 
 
@@ -273,26 +330,31 @@ public abstract class rangedEnaction: collisionEnaction
 {
     public Transform firePoint;
     //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
-    public float range = 7f;
+    public float range = 3.6f;
     //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
     public int firingCooldown = 0;
-    public int firingCooldownMax = 0;
+    public int firingCooldownMax = 20;
+
+    //ad-hoc!
+    public cooldown theCooldown;
 
 }
 
-public class projectileLauncher: rangedEnaction, IEnactaBool
+public class projectileLauncher: rangedEnaction
 {
     public projectileToGenerate theprojectileToGenerate;
 
-    public static void addProjectileLauncher(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
+    public static void addProjectileLauncher(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, int infiringCooldownMax, float range = 99f)
     {
         projectileLauncher pL = objectToAddItTo.AddComponent<projectileLauncher>();
         pL.gamepadButtonType = gamepadButtonType;
         pL.interInfo = interInfo;
         pL.theprojectileToGenerate = theprojectileToGenerate;
 
+        pL.firingCooldownMax = infiringCooldownMax;
         pL.firePoint = firePoint;
         pL.range = range;
+        pL.theCooldown = new cooldown(infiringCooldownMax);
     }
 
     public projectileLauncher(Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
@@ -306,16 +368,17 @@ public class projectileLauncher: rangedEnaction, IEnactaBool
 
     }
 
-    override public void enact()
+    override public void enact(inputData theInput)
     {
+        theCooldown.fire();
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
 
 }
 
-public class hitscanEnactor: rangedEnaction, IEnactaBool
+public class hitscanEnactor: rangedEnaction
 {
-    public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 7f)
+    public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 4f)
     {
         hitscanEnactor hE = objectToAddItTo.AddComponent<hitscanEnactor>();
         hE.gamepadButtonType = gamepadButtonType;
@@ -323,6 +386,8 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
         hE.firePoint = firePoint;
         hE.range = range;
+
+        hE.theCooldown = new cooldown(0);
     }
 
 
@@ -338,11 +403,12 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
 
 
-    override public void enact()
+    override public void enact(inputData theInput)
     {
+        //theCooldown.fire();
         firingByRaycastHit(range);
 
-        firingCooldown--;
+        //firingCooldown--;
     }
 
 
@@ -357,6 +423,8 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
         colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
+        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.white, 1f);
+
         firingCooldown--;
     }
 }
@@ -367,14 +435,14 @@ public class hitscanEnactor: rangedEnaction, IEnactaBool
 
 
 
-public abstract class vectorMovement : MonoBehaviour, IEnactaVector
+public abstract class vectorMovement : IEnactaVector
 {
     public CharacterController controller;
     public Transform theTransform;
     public float speed = 0f;
-    public buttonCategories gamepadButtonType { get; set; }
+    //public buttonCategories gamepadButtonType { get; set; }
 
-    public abstract void enact(Vector2 inputVector);
+    public override abstract void enact(inputData theInput);
 }
 
 public class vecTranslation : vectorMovement
@@ -414,9 +482,9 @@ public class vecTranslation : vectorMovement
     }
 
 
-    public override void enact(Vector2 inputVector)
+    public override void enact(inputData theInput)
     {
-        Vector3 move = theTransform.right * inputVector.x + theTransform.forward * inputVector.y;
+        Vector3 move = theTransform.right * theInput.vect2.x + theTransform.forward * theInput.vect2.y;
         controller.Move(move * speed * Time.deltaTime);
     }
 
@@ -471,10 +539,10 @@ public class vecRotation : vectorMovement
 
 
 
-    public override void enact(Vector2 inputVector)
+    public override void enact(inputData theInput)
     {
-        updatePitch(inputVector.y);
-        updateYaw(inputVector.x);
+        updatePitch(theInput.vect2.y);
+        updateYaw(theInput.vect2.x);
     }
 
     public void updatePitch(float pitchInput)
@@ -517,12 +585,12 @@ public class turningWithNoStrafe : vectorMovement
     }
 
 
-    public override void enact(Vector2 inputVector)
+    public override void enact(inputData theInput)
     {
-        Vector3 translate = theTransform.forward * inputVector.y; //needs to be Y!!!!!!!!!!  //and FORWARD vector!!!!!!!!!!
+        Vector3 translate = theTransform.forward * theInput.vect2.y; //needs to be Y!!!!!!!!!!  //and FORWARD vector!!!!!!!!!!
 
         controller.Move(translate * speed * Time.deltaTime);
-        updateYaw(inputVector.x);
+        updateYaw(theInput.vect2.x);
     }
 
     void updateYaw(float yawInput)

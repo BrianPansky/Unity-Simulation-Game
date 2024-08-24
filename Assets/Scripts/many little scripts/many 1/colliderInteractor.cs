@@ -37,19 +37,19 @@ public class colliderInteractor : MonoBehaviour
         if (theInteractable == null) { return false; }
         if (theInteractable.dictOfInteractions == null)
         {
-            Debug.Log("i don't think this should ever happen:   theInteractable.dictOfInteractions == null");
+            //Debug.Log("i don't think this should ever happen:   theInteractable.dictOfInteractions == null");
             return false;
         }
         if (theInteractable.dictOfInteractions.ContainsKey(this.interactionType) != true)
         {
-            Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true, object being interacted with doesn't have this key:  " + this.interactionType);
-            Debug.Log("instead, it only has the following:  ");
+            //Debug.Log("dictOfInteractions.ContainsKey(theAuthorScript.interactionType) != true, object being interacted with doesn't have this key:  " + this.interactionType);
+            //Debug.Log("instead, it only has the following:  ");
 
-            foreach (var key in theInteractable.dictOfInteractions.Keys)
+            //foreach (var key in theInteractable.dictOfInteractions.Keys)
             {
-                Debug.Log(key);
+                //Debug.Log(key);
             }
-            Debug.Log("..........................................................");
+            //Debug.Log("..........................................................");
             return false;
         }
 

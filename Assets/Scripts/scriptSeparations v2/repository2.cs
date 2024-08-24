@@ -66,6 +66,34 @@ public class repository2 : MonoBehaviour
 
     //everything else on this script [below] is WRONG and needs to be deleted, or at least moved
 
+
+
+
+    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0, float startYlocation = 0f)
+    {
+        bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
+
+        foreach (Vector3 thisPosition in patternScript2.singleton.makeLinePattern1(howMany, theSpacing))
+        {
+            Vector3 fullPosition = thisPosition + new Vector3(xValue, startYlocation, startZlocation);
+
+            if (needADuplicate == false)
+            {
+                theGameObject.transform.position = fullPosition;
+                needADuplicate = true;
+            }
+            else
+            {
+                //Debug.Log("fullPosition x:  "+ fullPosition.x);
+                //Debug.Log("fullPosition y:  " + fullPosition.z);
+                genGen.singleton.createPrefabAtPoint(theGameObject, fullPosition);
+            }
+
+        }
+
+    }
+
+
     /*
     public void placeObjectsOnLinePattern(List<GameObject> theObjects, List<Vector3> theLinePattern)
     {
@@ -240,29 +268,6 @@ public class repository2 : MonoBehaviour
     }
 
 
-    public void placeOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0, float startYlocation = 0f)
-    {
-        bool needADuplicate = false; //the first input object can simply be PLACED, only subsequent ones need to be duplicates
-
-        foreach (Vector3 thisPosition in makeLinePattern1(howMany, theSpacing))
-        {
-            Vector3 fullPosition = thisPosition + new Vector3(xValue, startYlocation, startZlocation);
-
-            if(needADuplicate == false)
-            {
-                theGameObject.transform.position = fullPosition;
-                needADuplicate = true;
-            }
-            else
-            {
-                //Debug.Log("fullPosition x:  "+ fullPosition.x);
-                //Debug.Log("fullPosition y:  " + fullPosition.z);
-                createPrefabAtPoint(theGameObject, fullPosition);
-            }
-            
-        }
-
-    }
 
     public void VERTICALplaceOnLineAndDuplicate(GameObject theGameObject, int howMany, int theSpacing, int xValue, int startZlocation = 0, float startYlocation = 0f)
     {
