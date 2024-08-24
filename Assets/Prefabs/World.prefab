@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 411062ad6d6afea49adfc014f3ec60c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  player: {fileID: 859809950099632578, guid: 5d05bc88e193bcc4ca4e69dac0ed537f, type: 3}
   npc2Prefab: {fileID: 1996924758962253453, guid: 29e883423d704e24ea16357bbcf798fb,
     type: 3}
   placeHolderCubePrefab: {fileID: 8620951049736949961, guid: ef0686372dde93640a567e5d2d594b88,
@@ -93,6 +93,8 @@ MonoBehaviour:
   prefab4: {fileID: 0}
   prefab5: {fileID: 0}
   prefab6: {fileID: 0}
+  explosion1: {fileID: 0}
+  smoke1: {fileID: 0}
 --- !u!114 &6387413386904728682
 MonoBehaviour:
   m_ObjectHideFlags: 0
