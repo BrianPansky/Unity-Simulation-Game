@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using static stateHolder;
+using static interactable2;
 
 public class interactionCreator : MonoBehaviour
 {
@@ -98,32 +98,6 @@ public class interactionCreator : MonoBehaviour
         return newList;
     }
 
-    public List<string> makeStringsIntoList(string s1, string s2 = null, string s3 = null, string s4 = null)
-    {
-        //input 4 strings
-        //get backa  list of all of them that are NOT null
-
-        List<string> allStrings = new List<string>();
-        allStrings.Add(s1);
-        allStrings.Add(s2);
-        allStrings.Add(s3);
-        allStrings.Add(s4);
-
-        List<string> nonNullStrings = new List<string>();
-
-        foreach (string thisString in allStrings)
-        {
-            if (thisString != null)
-            {
-                nonNullStrings.Add(thisString);
-            }
-        }
-
-        return nonNullStrings;
-    }
-
-
-
 
 }
 
@@ -133,23 +107,27 @@ public class interactionInfo
     public float magnitudeOfInteraction = 1f;
     public int level = 0;
 
-    public interactionInfo(enactionCreator.interType interactionType, float magnitudeOfInteraction = 1f)
+    public interactionInfo(enactionCreator.interType interactionType, float magnitudeOfInteraction = 1f, int level = 0)
     {
         this.interactionType = interactionType;
         this.magnitudeOfInteraction = magnitudeOfInteraction;
+        this.level = level;
     }
 
 }
 
 
-public class stateHolder : zoneable2
+public class interactable2 : zoneable2
 {
     public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
-    //why is this here, but other effects are somewhere else?  which place should they be???
+
+    public Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
     public Dictionary<condition, List<Ieffect>> conditionalEffects = new Dictionary<condition, List<Ieffect>>();
 
-    public void callThisWhenInteractedWIth()
+
+    //is there a better way to do this?
+    public void doConditionalEffectsIfMet()//call when interacted with?
     {
         //is there a better way to do this?  observer broadcast whatevers?
         //whatever, try this for now?
@@ -163,24 +141,18 @@ public class stateHolder : zoneable2
 
             foreach (Ieffect thisEffect in conditionalEffects[thisCondition])
             {
-                //ummmm, takes a collider interaction script?!?!?!?  seems now like that's a bad idea...
-                thisEffect.implementEffect(this.gameObject, null);
+                thisEffect.implementEffect(this.gameObject, null, null);  //seems messy...
             }
         }
     }
-}
 
-public interface IInteractable
-{
-    Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions { get; set; }
 }
-
 
 
 
 public interface Ieffect
 {
-    void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript);
+    void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
 }
 
 public class numericalEffect : Ieffect
@@ -197,98 +169,51 @@ public class numericalEffect : Ieffect
         this.increaseTheVariable = increaseTheVariable;
     }
 
-    public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
     {
-        stateHolder theStateHolder = objectBeingInteractedWith.GetComponent<stateHolder>();
-        if (theStateHolder == null) { return; }
+        interactable2 theinteractable2 = objectBeingInteractedWith.GetComponent<interactable2>();
+        if (theinteractable2 == null) { return; }
 
-        //.............gonna have to re-do all of this in a way that's legible to NPCs for planning..........make it so i can feed imaginary state in?  ya, probably....[just create imaginary whole game object with imaginary stateHolder etc.........]
-        if (theCollisionInteractionScript.level < minLevel) { return; }
-        if (theCollisionInteractionScript.level >= maxLevel)
+        //.............gonna have to re-do all of this in a way that's legible to NPCs for planning..........make it so i can feed imaginary state in?  ya, probably....[just create imaginary whole game object with imaginary interactable2 etc.........]
+        //also, the following is a CONDITION, not an EFFECT!  indeed, it's a NUMERICAL condition, not a numerical effect
+        if (theInfo.level < minLevel) { return; }
+        if (theInfo.level >= maxLevel)
         {
-            if (increaseTheVariable == false) { setInteractableVariable(theStateHolder, toAlter, 0); } //how to implement "max" effect if it's addition???
+            if (increaseTheVariable == false) { setInteractableVariable(theinteractable2, toAlter, 0); } //how to implement "max" effect if it's addition???
 
             return;
         }
 
 
-        float amount = theCollisionInteractionScript.magnitudeOfInteraction;
+        float amount = theInfo.magnitudeOfInteraction;
         if (increaseTheVariable == false) { amount = -amount; }
 
 
-        adjustInteractableVariable(theStateHolder, toAlter, amount);
+        adjustInteractableVariable(theinteractable2, toAlter, amount);
 
-        //Debug.Log("theStateHolder.dictOfIvariables[toAlter] += amount;");
+        //Debug.Log("theinteractable2.dictOfIvariables[toAlter] += amount;");
     }
 
-    private void adjustInteractableVariable(stateHolder theStateHolder, interactionCreator.numericalVariable toAlter, float amount)
+    private void adjustInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
     {
-        if (theStateHolder.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
+        if (theinteractable2.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
 
-        theStateHolder.dictOfIvariables[toAlter] += amount;
+        theinteractable2.dictOfIvariables[toAlter] += amount;
     }
 
 
-    private void setInteractableVariable(stateHolder theStateHolder, interactionCreator.numericalVariable toAlter, float amount)
+    private void setInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
     {
-        if (theStateHolder.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
+        if (theinteractable2.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
 
-        theStateHolder.dictOfIvariables[toAlter] = amount;
+        theinteractable2.dictOfIvariables[toAlter] = amount;
     }
 
-}
-
-public class playAsPlayable2 : Ieffect
-{
-    public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
-    {
-        //ad hoc for now
-        playable2 thePlayable2 = objectBeingInteractedWith.GetComponent<playable2>();
-        if (thePlayable2.occupied == true) { Debug.Log("thePlayable2.occupied == true, this playable2 object:  " + objectBeingInteractedWith); return; }
-
-        GameObject author = theCollisionInteractionScript.enactionAuthor;
-        virtualGamepad gamepad = author.GetComponent<virtualGamepad>();
-        thePlayable2.playAsPlayable2(gamepad);
-        disableCharacterControllerAndNavmeshAgent(author);
-        interactionCreator.singleton.dockXToY(author, objectBeingInteractedWith);
-    }
-
-    private void disableCharacterControllerAndNavmeshAgent(GameObject objectToDisable)
-    {
-        CharacterController controller = objectToDisable.GetComponent<CharacterController>();
-        if (controller != null)
-        {
-            controller.enabled = false;
-        }
-
-        NavMeshAgent nva = objectToDisable.GetComponent<NavMeshAgent>();
-        if (nva != null)
-        {
-            nva.enabled = false;
-        }
-    }
-}
-
-public class equipequippable2 : Ieffect
-{
-    public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
-    {
-        //do i use this anymore?  moved to the equippable2s and/or equippers.....
-        //well, this was for equipping something INSTANTLY when you pick it up.....
-
-
-        GameObject author = theCollisionInteractionScript.enactionAuthor;
-        playable2 thePlayable2 = author.GetComponent<playable2>();
-        gun1 theGun = objectBeingInteractedWith.GetComponent<gun1>();
-
-        theGun.equipThisequippable2(thePlayable2);
-        interactionCreator.singleton.dockXToY(objectBeingInteractedWith, thePlayable2.enactionPoint1, new Vector3(0.6f, 0.1f, 0));
-    }
 }
 
 public class putInInventory : Ieffect
 {
-    public void implementEffect(GameObject objectBeingInteractedWith, colliderInteractor theCollisionInteractionScript)
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
     {
         //Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
 
@@ -297,13 +222,12 @@ public class putInInventory : Ieffect
         objectBeingInteractedWith.GetComponent<Collider>().enabled = false;
 
 
-        GameObject author = theCollisionInteractionScript.enactionAuthor;
         //Debug.Log("author:  " + author);
-        if(author == null)
+        if(interactionAuthor == null)
         {
             Debug.Log("author is null");
         }
-        inventory1 theInventory = author.GetComponent<inventory1>();
+        inventory1 theInventory = interactionAuthor.GetComponent<inventory1>();
         theInventory.putInInventory(objectBeingInteractedWith);
     }
 }

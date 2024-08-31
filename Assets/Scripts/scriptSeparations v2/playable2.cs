@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
 
-public class playable2 : stateHolder, IInteractable
+public class playable2 : interactable2
 {
 
 
@@ -14,8 +14,7 @@ public class playable2 : stateHolder, IInteractable
     public GameObject enactionPoint1;
     public Transform cameraMount;
     public Dictionary<interactionCreator.simpleSlot, GameObject> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, GameObject>();
-    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set;}
-
+    
 
     public float lookSpeed = 290f;
     public float standardClickDistance = 7.0f;
@@ -54,9 +53,6 @@ public class playable2 : stateHolder, IInteractable
     {
         playable2 thePlayable = theObject.GetComponent<playable2>();
         if (thePlayable != null) { return thePlayable; }
-
-        thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
-        thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
         return thePlayable;
     }
@@ -240,10 +236,6 @@ public class playable2 : stateHolder, IInteractable
 
     public void printEnactables()
     {
-        //enactableBoolSet = new List<IEnactaBool>();
-        //enactableVectorSet = new List<IEnactaVector>();
-        //enactableTARGETVectorSet = new List<IEnactByTargetVector>();
-
         string printout = "printEnactables:  " ;
         foreach(var x in this.GetComponents<IEnactaBool>())
         {

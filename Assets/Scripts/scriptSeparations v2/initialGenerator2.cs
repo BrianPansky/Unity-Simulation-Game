@@ -120,7 +120,7 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 81;
+        int howManyZones = 1;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 10;

@@ -16,18 +16,13 @@ public class selfDestructScript1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (currentCounter == 0)
-        {
-            //this.gameObject.transform.position = new Vector3(0, -500, 0);
-            //Destroy(this.gameObject);
-        }
         if (currentCounter > timeUntilSelfDestruct)
         {
             //Debug.Log("selfDestructScript1, currentCounter > timeUntilSelfDestruct, this.gameObject.name:  " + currentCounter +" > "+ timeUntilSelfDestruct + ", name: " + this.gameObject.name);
 
             Destroy(this.gameObject);
         }
-        currentCounter += 1;
+        currentCounter ++;
     }
 
 }

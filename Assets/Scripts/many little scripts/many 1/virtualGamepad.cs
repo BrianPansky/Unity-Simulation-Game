@@ -105,14 +105,6 @@ public class virtualGamepad : MonoBehaviour
             this.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
         }
 
-
-        /*
-        foreach (enaction thisEnaction in thePlayable2.GetComponents<enaction>())
-        {
-            Debug.Log(":  " + thisEnaction.gamepadButtonType);
-        }
-        */
-
         foreach (IEnactaVector enactaV in thePlayable2.GetComponents<IEnactaVector>())
         {
             this.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
@@ -157,9 +149,6 @@ public class virtualGamepad : MonoBehaviour
         public float mouseSpeed = 290f;
         public Transform playerBody;
         float xRotation = 0f;
-        //need the "playerClickInteraction" script 
-        //(in order to check if we are in a menu or not)
-        //public playerClickInteraction thePlayerClickInteractionScript;
 
         float verticalCameraRotation = 0f;
 
@@ -179,14 +168,6 @@ public class virtualGamepad : MonoBehaviour
         public void initializeMouseKeyboard(virtualGamepad inputVirtualGamePad)
         {
             theVirtualGamePad = inputVirtualGamePad;
-            //      Cursor.lockState = CursorLockMode.Locked;
-            //was fine, but now says:
-            //      error CS0104: 'Cursor' is an ambiguous reference between 'UnityEngine.UIElements.Cursor' and 'UnityEngine.Cursor'
-            //like.....
-            //since when?!?
-            //so, which is it???
-            //      UnityEngine.UIElements.Cursor.lockState = CursorLockMode.Locked;
-            //not that one, it has no "lockstate" thing
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             defaultButtonMapping();
         }
@@ -288,7 +269,7 @@ public class inputData
     public inputData boolean(bool inputBool = true)
     {
 
-    theBool = inputBool; 
+        theBool = inputBool; 
         return this;
     }
 

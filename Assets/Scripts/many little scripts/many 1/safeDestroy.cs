@@ -6,21 +6,11 @@ public class safeDestroy : MonoBehaviour
 {
     void OnDestroy()
     {
-        if (Application.isPlaying)
-        {
-            //this.gameObject.SetActive(false);
-            //Debug.Log("................................preparing to destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
+        if (Application.isPlaying == false) { return; }
 
-            tagging2.singleton.removeALLtags(this.gameObject);
-            //removeIupdateCallableFromItsList
-            if (this.gameObject.GetComponent<IupdateCallable>() != null)
-            {
-                worldScript.singleton.removeIupdateCallableFromItsList(this.gameObject.GetComponent<IupdateCallable>());
-            }
+        tagging2.singleton.removeAllTagsAndZone(this.gameObject);
 
-
-            //Debug.Log("destroy this object:  " + this.gameObject.GetInstanceID() + this.gameObject);
-            //UnityEngine.Object.Destroy(this.gameObject);
-        }
+        if (this.gameObject.GetComponent<IupdateCallable>() == null) { return; }
+        worldScript.singleton.removeIupdateCallableFromItsList(this.gameObject.GetComponent<IupdateCallable>());
     }
 }

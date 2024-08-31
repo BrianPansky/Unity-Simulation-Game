@@ -23,16 +23,21 @@ public class colliderInteractor : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        IInteractable theInteractable = other.GetComponent<IInteractable>();
+        interactable2 theInteractable = other.GetComponent<interactable2>();
         if (conditionsMet(other, theInteractable)==false) { return; }
 
         foreach(Ieffect thisEffect in theInteractable.dictOfInteractions[this.interactionType])
         {
-            thisEffect.implementEffect(other.gameObject, this);
+            thisEffect.implementEffect(other.gameObject, enactionAuthor, thisToInterInfo());
         }
     }
 
-    bool conditionsMet(Collider other, IInteractable theInteractable)
+    private interactionInfo thisToInterInfo()
+    {
+        return new interactionInfo(interactionType, magnitudeOfInteraction, level);
+    }
+
+    bool conditionsMet(Collider other, interactable2 theInteractable)
     {
         if (theInteractable == null) { return false; }
         if (theInteractable.dictOfInteractions == null)

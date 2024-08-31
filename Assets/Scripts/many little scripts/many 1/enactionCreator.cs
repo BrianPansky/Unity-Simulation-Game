@@ -101,14 +101,12 @@ public abstract class IEnactaVector : enaction
 
     public void enact(Vector2 inputV2)
     {
-        //Debug.Log("enact Vector2222222222222222222222222 for:  " + this);
         enact(new inputData().vect(inputV2));
     }
 
 
     public void enact(Vector3 inputV3)
     {
-        Debug.Log("enact Vector333333333333333 for:  " + this);
         enact(new inputData().vect(inputV3));
     }
 
@@ -138,15 +136,7 @@ public abstract class IEnactByTargetVector:enaction
 
 
 
-
-public abstract class targetedEnaction : IEnactByTargetVector
-{
-    //um, do i need this?  both this abstract class and the abstract function seem redundant
-    public override abstract void enact(inputData theInput);
-}
-
-
-public class navAgent : targetedEnaction
+public class navAgent : IEnactByTargetVector
 {
     //only for vector inputs!
     NavMeshAgent theAgent;
@@ -192,7 +182,7 @@ public class navAgent : targetedEnaction
     }
 }
 
-public class aimTarget : targetedEnaction
+public class aimTarget : IEnactByTargetVector
 {
     //only for vector inputs!
     public vecRotation theVectorRotationEnaction; //????
@@ -224,8 +214,6 @@ public class aimTarget : targetedEnaction
     override public void enact(inputData theInput)
     {
         //instantaneous for now
-
-        //Debug.Log("OOOOOOOOOOOOOOOOOOOOOOO      enacting:  " + this);
         Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
@@ -319,9 +307,6 @@ public class aimTarget : targetedEnaction
 public abstract class collisionEnaction: IEnactaBool
 { 
     public interactionInfo interInfo;
-    //public GameObject enactionAuthor { get; set; }
-    //public buttonCategories gamepadButtonType { get; set; }
-
     public override abstract void enact(inputData theInput);
 }
 
@@ -405,10 +390,7 @@ public class hitscanEnactor: rangedEnaction
 
     override public void enact(inputData theInput)
     {
-        //theCooldown.fire();
         firingByRaycastHit(range);
-
-        //firingCooldown--;
     }
 
 
@@ -440,8 +422,6 @@ public abstract class vectorMovement : IEnactaVector
     public CharacterController controller;
     public Transform theTransform;
     public float speed = 0f;
-    //public buttonCategories gamepadButtonType { get; set; }
-
     public override abstract void enact(inputData theInput);
 }
 

@@ -29,18 +29,6 @@ public class mapZoneScript : MonoBehaviour
     }
     
 
-    public void oldZoneTurnOffUNUSED()
-    {
-        if (isItThisZonesTurn)
-        {
-            howManyUpdatesPerEntity--;
-            if (howManyUpdatesPerEntity == 0)
-            {
-                isItThisZonesTurn = false;
-            }
-        }
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         //Debug.Log("Collider other):  " + other );
@@ -49,25 +37,13 @@ public class mapZoneScript : MonoBehaviour
         //add objects to this zone's list, and update their body to reference this zone
         tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
 
-
-        if (tagging2.singleton.allTagsOnObject(other.transform.gameObject).Contains(tagging2.tag2.zoneable))
-        {
-            
-        }
-        else
-        {
-            //Debug.Log("does NOT Contains(tagging2.tag2.zoneable), DON'T addToZone");
-        }
     }
 
     private bool zoneTaggingConditionsMet(Collider other)
     {
-        if (other.gameObject.GetComponent<IInteractable>() == null)
+        if (other.gameObject.GetComponent<interactable2>() == null)
         {
             return false;
-        }
-        else
-        {
         }
 
         if (other.gameObject.tag == "dontAddToZones")

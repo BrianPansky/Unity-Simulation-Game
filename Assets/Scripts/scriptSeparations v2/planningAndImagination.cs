@@ -12,9 +12,6 @@ public class planningAndImagination : MonoBehaviour
     //also, plans and following plans are not the same as plan-"ing"
 
 
-    //public List<planEXE> plan = new List<planEXE>();
-    //public Dictionary<buttonCategories, List<planEXE>> multiPlan = new Dictionary<buttonCategories, List<planEXE>>();
-    //public List<Dictionary<buttonCategories, List<planEXE>>> planOfMultiPlans = new List<Dictionary<buttonCategories, List<planEXE>>>();
     public planEXE2 fullPlan;
 
     public Dictionary<buttonCategories, List<planEXE>> blankMultiPlan()
@@ -24,8 +21,6 @@ public class planningAndImagination : MonoBehaviour
 
     public void multiPlanAdd(planEXE theExeToAdd, Dictionary<buttonCategories, List<planEXE>> multiPlan)
     {
-
-        //Debug.Log("111  multiPlan.Keys.Count:  " + multiPlan.Keys.Count);
         enaction anEnaction = theExeToAdd.theEnaction;
         Debug.Assert(anEnaction != null);
         if (anEnaction == null)
@@ -46,11 +41,6 @@ public class planningAndImagination : MonoBehaviour
         if (planToAddItTo == null) { planToAddItTo = new List<planEXE>(); }
 
         planToAddItTo.Add(theExeToAdd);
-
-
-
-
-        //Debug.Log("222  multiPlan.Keys.Count:  " + multiPlan.Keys.Count);
     }
 
 
@@ -160,7 +150,6 @@ public class vectEXE : planEXE
 
     override public void executePlan()
     {
-
         //Debug.Log("vectEXE, theTarget:  " + theTarget);
         Debug.DrawLine(theTarget.transform.position, new Vector3(), Color.yellow, 6f);
         inputData theInputData = new inputData().vect(theTarget.transform.position);
@@ -182,9 +171,8 @@ public abstract class planEXE2
     public inputData theInputData;
 
 
-    //      !!!!!!!!!!!!!!!  MUST input these into constructor!
-    private List<planEXE2> parallelSet;
-    private List<planEXE2> sequentialSet;
+    //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
+    private List<planEXE2> exeList;
 
     public List<condition> startConditions = new List<condition>();
     public List<condition> endConditions = new List<condition>();
@@ -192,6 +180,12 @@ public abstract class planEXE2
     public int numberOfTimesExecuted = 0;  //don't do it for things that are called every frame, though?
 
     public abstract void execute();
+
+    public void Add(planEXE2 itemToAdd)
+    {
+        if(exeList == null) { exeList = new List<planEXE2>(); }
+        exeList.Add(itemToAdd);
+    }
 
     public bool startConditionsMet()
     {
@@ -223,22 +217,22 @@ public abstract class planEXE2
         return true;
     }
 
-    public void addParallelSet(List<planEXE2> inparallelSet)
+
+    public void atLeastOnce()
     {
-        parallelSet = inparallelSet;
-    }
-    public void addSequentialSet(List<planEXE2> inSequentialSet)
-    {
-        sequentialSet = inSequentialSet;
+        condition thisCondition = new enacted(this);
+        endConditions.Add(thisCondition);
     }
 
+    public void untilListFinished()
+    {
+        if (exeList == null) { exeList = new List<planEXE2>(); }
+        condition thisCondition = new planListComplete(exeList);  //should be fine?  lists are references, so will work even if items are added after this??
+        endConditions.Add(thisCondition);
+    }
 
 
-
-
-
-
-    public void executeSequentialSet()
+    public void executeSequential()
     {
         //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
 
@@ -246,27 +240,36 @@ public abstract class planEXE2
         //      only execute 1st one
         //      remove item from list when its end conditions are met
 
-        if (sequentialSet == null) { Debug.Log("null.....that's an error!"); ; return; }
+        if (exeList == null) { Debug.Log("null.....that's an error!"); return; }
 
-        if (sequentialSet.Count < 1) { Debug.Log("shouldn't happen?"); return; }
+        if (exeList.Count < 1) { Debug.Log("exeList.Count < 1       shouldn't happen?"); return; }
 
-        sequentialSet[0].execute();
+        exeList[0].execute();
 
-        if (sequentialSet[0].endConditionsMet()) { sequentialSet.RemoveAt(0); return; }
+        if (exeList[0].endConditionsMet())
+        {
+            //Debug.Log("exeList[0].endConditionsMet()  for:  " + exeList[0]);
+            if (exeList[0].theEnaction != null)
+            {
+                //Debug.Log("exeList[0].endConditionsMet()  for theEnaction:  " + exeList[0].theEnaction);
+            }
+            
+            exeList.RemoveAt(0); return;
+        }
     }
 
 
-    public void executeParallelSet()
+    public void executeParallel()
     {
 
-        if (parallelSet == null) { Debug.Log("null.....that's an error!"); ; return; }
+        if (exeList == null) { Debug.Log("null.....that's an error!"); ; return; }
 
         //if null.....that's an error!
 
 
         List<planEXE2> completedItems = new List<planEXE2>();
 
-        foreach (planEXE2 plan in parallelSet)
+        foreach (planEXE2 plan in exeList)
         {
             plan.execute();
             if (plan.endConditionsMet()) { completedItems.Add(plan); }
@@ -274,7 +277,7 @@ public abstract class planEXE2
 
         foreach (planEXE2 plan in completedItems)
         {
-            parallelSet.Remove(plan);
+            exeList.Remove(plan);
         }
     }
 
@@ -285,26 +288,17 @@ public class singleEXE : planEXE2
 {
     private GameObject target;
 
-    /*
-    public singleEXE(enaction theInputEnaction, GameObject target)
-    {
-        this.theEnaction = theInputEnaction;
-        this.target = target;
-    }
-    */
+
 
     public override void execute()
     {
 
-        if (theEnaction != null) {
+        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return;}
 
-            if (startConditionsMet() == false) { return; }
+        if (startConditionsMet() == false) { return; }
 
-            theEnaction.enact(theInputData);
-            numberOfTimesExecuted++;
-            return; }
-        //if null.....that's an error!
-        Debug.Log("null.....that's an error!");
+        theEnaction.enact(theInputData);
+        numberOfTimesExecuted++;
     }
 }
 
@@ -322,8 +316,6 @@ public class boolEXE2 : singleEXE
 
 public class vect2EXE2 : singleEXE
 {
-
-    //public IEnactByTargetVector theEnaction;
     public GameObject theTarget;
 
     public vect2EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
@@ -336,8 +328,6 @@ public class vect2EXE2 : singleEXE
 
 public class vect3EXE2 : singleEXE
 {
-
-    //public IEnactByTargetVector theEnaction;
     public GameObject theTarget;
 
     public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
@@ -360,48 +350,81 @@ public class vect3EXE2 : singleEXE
 public class parallelEXE : planEXE2
 {
 
-    public parallelEXE(List<planEXE2> list)
+    public parallelEXE()
     {
-        //parallelSet = new List<planEXE2>();
 
-        addParallelSet(list);
-        endConditions.Add(new planListComplete(list));
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
+    public parallelEXE(planEXE2 item)
+    {
+        Add(item);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public parallelEXE(planEXE2 item1, planEXE2 item2)
+    {
+        Add(item1);
+        Add(item2);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public parallelEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public parallelEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3, planEXE2 item4)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+        Add(item4);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+
 
 
     public override void execute()
     {
-        executeParallelSet();
+        executeParallel();
     }
-
-
-    public void addToParallel(planEXE2 toAdd)
-    {
-
-    }
-
-
 }
 
 public class seriesEXE : planEXE2
 {
-
-    public seriesEXE(List<planEXE2> list)
+    public seriesEXE()
     {
-        //sequentialSet = new List<planEXE2>();
-        addSequentialSet(list);
-        endConditions.Add(new planListComplete(list));
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public seriesEXE(planEXE2 item)
+    {
+        Add(item);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public seriesEXE(planEXE2 item1, planEXE2 item2)
+    {
+        Add(item1);
+        Add(item2);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public seriesEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public seriesEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3, planEXE2 item4)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+        Add(item4);
+        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
 
     public override void execute()
     {
-        executeSequentialSet();
+        executeSequential();
     }
-
-
-    public void addToSequential(planEXE2 toAdd)
-    {
-
-    }
-
 }

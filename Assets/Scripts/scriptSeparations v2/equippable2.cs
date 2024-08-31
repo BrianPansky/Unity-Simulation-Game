@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
 
-public class equippable2 : stateHolder, IInteractable
+public class equippable2 : interactable2
 {
     //plug in peices to make each specific weapon/item
 
     public bool occupied = false;
 
     public GameObject enactionPoint1;
-    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
     public interactionCreator.simpleSlot theEquippable2Type;
 
 
@@ -45,6 +44,10 @@ public class equippable2 : stateHolder, IInteractable
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.equippable2);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);
 
+        //hmm, this isn't how to do this.  correct way:
+        //      have which slots it fits into or whatever.  classify somehow
+        //      entity clicking on this needs to compare to see if it can pick up the object
+        //or something, i dunno.  but an interaction effect built into the gun itself seems a bit odd.
         dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new putInInventory());
 
     }

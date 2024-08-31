@@ -5,10 +5,8 @@ using UnityEngine;
 using static enactionCreator;
 using static equippable2Setup;
 
-public class inventory1 : MonoBehaviour, IInteractable
+public class inventory1 : interactable2
 {
-
-    public Dictionary<interType, List<Ieffect>> dictOfInteractions { get; set; }
     GameObject startingItem;
     public List<GameObject> inventoryItems = new List<GameObject>();
 
@@ -53,9 +51,6 @@ public class inventory1 : MonoBehaviour, IInteractable
 
 public class takeFromAndPutBackIntoInventory : IEnactaBool
 {
-    //public buttonCategories gamepadButtonType { get; set; }
-    //public GameObject enactionAuthor { get; set; }
-
     public inventory1 theInventory;
     public playable2 thePlayable2;
 
@@ -125,10 +120,6 @@ public class takeFromAndPutBackIntoInventory : IEnactaBool
     void rotateInventoryList()
     {
         if (theInventory.inventoryItems.Count < 2) { return; }
-
-        //remove one from end, put it at start:
-        //equippable2 endOne = theInventory.inventoryItems.FindLast();
-        //orrr easier to remove FIRST one, and ADD it to the list [which will put it at end i think?]
 
         GameObject item1 = theInventory.inventoryItems[0];
         theInventory.inventoryItems.RemoveAt(0);

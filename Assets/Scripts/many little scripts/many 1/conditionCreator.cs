@@ -192,8 +192,6 @@ public class proximity : condition
 
 public class enacted : condition
 {
-    //for when we want the objects to be CLOSER than the desired distance
-
     int howManyTimesToEnact = 1;
     planEXE2 theEnactionEXE;
 
@@ -205,16 +203,6 @@ public class enacted : condition
 
     public bool met()
     {
-
-        //Debug.Log("times:  " + times);
-        //Debug.Log("theEnactionEXE.areSTARTconditionsFulfilled()???:  ");
-        //if (theEnactionEXE.startConditionsMet())
-        {
-            //Debug.Log("yes");
-            //timesLeft--;
-        }
-
-        //Debug.Log("times:  " + times);
         if (theEnactionEXE.numberOfTimesExecuted >= howManyTimesToEnact) { return true; }
 
         return false;
@@ -223,8 +211,6 @@ public class enacted : condition
 
 public class cooldown : condition
 {
-    //for when we want the objects to be CLOSER than the desired distance
-
     public int cooldownMax = 130;
     public int cooldownTimer = 0;
 
@@ -235,13 +221,7 @@ public class cooldown : condition
 
     public bool met()
     {
-
-        //Debug.Log("cooldownMax:  " + cooldownMax + "  cooldownTimer:  "+ cooldownTimer);
-        if (cooldownTimer < 1) {
-            //Debug.Log("cooldownTimer < 1   TRUEEEE");
-            return true; }
-
-        //cooldownTimer--;
+        if (cooldownTimer < 1) { return true; }
 
         return false;
     }
@@ -268,14 +248,11 @@ public class planListComplete : condition
 
     public bool met()
     {
-
         //Debug.Log("planList.Count:  " + planList.Count);
         foreach (planEXE2 planEXE in planList)
         {
             if (planEXE.endConditionsMet() == false) { return false; }
         }
-
-        //Debug.Log("planList complete!");
         return true;
     }
 }

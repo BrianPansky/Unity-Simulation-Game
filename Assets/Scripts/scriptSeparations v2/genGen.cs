@@ -104,7 +104,7 @@ public class genGen : MonoBehaviour
         aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
     }
 
-    private void makeInteractionsBody4(IInteractable theInteractable)
+    private void makeInteractionsBody4(interactable2 theInteractable)
     {
         theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, interType.shoot1, new numericalEffect(numericalVariable.health));
     }

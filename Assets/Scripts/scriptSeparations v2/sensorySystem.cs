@@ -20,17 +20,8 @@ using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class sensorySystem : MonoBehaviour
 {
-    //public worldScript theWorldScript;
     public GameObject target;
     public Ray lookingRay;
-
-    //public body1 body;
-
-    //List<GameObject> sensedObjects = new List<GameObject>();
-
-
-
-
 
 
     public List<equippable2> toolsWithIntertypeX(interType intertypeX, List<equippable2> equippable2s)
@@ -42,49 +33,9 @@ public class sensorySystem : MonoBehaviour
             if (thisTool.containsIntertype(intertypeX)) { toolsWithIntertypeX.Add( thisTool); }
         }
 
-        /*
-        foreach (equippable2 thisTool in inventoryItems)
-        {
-            if (thisTool.containsIntertype(intertypeX)) { return thisTool; }
-        }
-
-        */
-
 
         return toolsWithIntertypeX;
     }
-
-
-
-
-
-    /*
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //Debug.DrawRay(this.gameObject.GetComponent<Transform>().position, newVector, Color.white, 0.06f);
-        //Debug.DrawLine(this.gameObject.GetComponent<Transform>().position, other.gameObject.GetComponent<Transform>().position, Color.white, 6f);
-        sensedObjects.Add(other.gameObject);
-    }
-
-    */
-
-
-    public Vector3 pointerOrigin()
-    {
-        //couldn't store this relative position, soooo just generate it when needed >.<
-        return this.gameObject.transform.position + new Vector3(0, 0, 0.69f);
-    }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -247,12 +198,6 @@ public class spatialDataPointFragment
         generalFragmentData1();
 
 
-        //          Vector3 awayOrTowardsUndecided = distanceAsVector;
-        //          Vector3 theOrbitUndecided = lookingAnglePerpendicular;
-
-        //Vector3 awayOrTowardsFinal = towardsIfBehindAwayIfInFront();
-        //Vector3 theOrbitFinal = orbitAwayFromLookingLine();
-
         float orbitCoefficient = 1;
         float entryCoefficient = 1;
 
@@ -262,7 +207,6 @@ public class spatialDataPointFragment
         {
             //have i made sure these andles only go between 0 and 180 degrees??  is that the default?
 
-            //entryCoefficient = lookingAngles[currentIndex]/120;
             entryCoefficient = 0;
             orbitCoefficient = 1;
 
@@ -270,34 +214,10 @@ public class spatialDataPointFragment
         }
         else
         {
-            //entryCoefficient = lookingAngles[currentIndex] / 180;
-            //orbitCoefficient = (180 - lookingAngles[currentIndex])/180;
-            //entryCoefficient = 1;
-            //orbitCoefficient = 0;
             entryCoefficient = (lookingAngle - crossoverAngle) / (180 - crossoverAngle);
             orbitCoefficient = (180 - lookingAngle) / (180 - crossoverAngle);
-            //Debug.Log("towardsTarget.normalized:  " + towardsTarget.normalized);
-            //Debug.Log("-lookingAnglePerpendicular.normalized:  " + -lookingAnglePerpendicular.normalized);
-            //Debug.Log("(entryCoefficient * towardsTarget.normalized):  " + (entryCoefficient * towardsTarget.normalized));
-            //Debug.Log("(orbitCoefficient * (-lookingAnglePerpendicular.normalized)):  " + (orbitCoefficient * (-lookingAnglePerpendicular.normalized)));
-            //Debug.Log("((entryCoefficient * towardsTarget.normalized) + (orbitCoefficient * (-lookingAnglePerpendicular.normalized))):  " + ((entryCoefficient * towardsTarget.normalized) + (orbitCoefficient * (-lookingAnglePerpendicular.normalized))));
-            
-            
-            //entryCoefficient = 1;
-            //orbitCoefficient = 0;
-
             theOutputVector += ((entryCoefficient * (towardsTarget.normalized)) + (orbitCoefficient * orbitCoefficient* orbitCoefficient* orbitCoefficient * (lookingAnglePerpendicular.normalized)));
-            
         }
-
-
-
-        //Debug.Log("lookingAngle:  " + lookingAngle);
-        //Debug.Log("awayFromTarget:  " + awayFromTarget);
-        //Debug.Log("towardsTarget:  " + towardsTarget);
-        //Debug.Log("lookingAnglePerpendicular:  " + lookingAnglePerpendicular);
-        //Debug.Log("theOutputVector:  " + theOutputVector);
-        //Debug.Log("lookingAngle:  " + lookingAngle);
 
 
         return theOutputVector;
@@ -306,8 +226,9 @@ public class spatialDataPointFragment
 
     //      initializing
 
-    public void initializeFragment(GameObject target, Vector3 location)
+    public spatialDataPointFragment(GameObject target, Vector3 location)
     {
+        //should just be done in constructor?
         targetObject = target;
         originLocation = location;
         generalFragmentData1();
@@ -429,12 +350,6 @@ public class spatialDataPointFragment
         //not sure i know how to ensure these point the correct direction:
         return lookingAnglePerpendicular;
     }
-
-
-
-
-    //      ad-hoc, try to get rid of
-
 }
 
 public class spatialDataPoint
@@ -446,7 +361,7 @@ public class spatialDataPoint
 
     public int listLenghts = 0;
 
-    //public List<float> combinedMeasures = new List<float>();
+
     public float combinedMeasures = 0;  //hmmmm....don't i want a VECTOR i can GRAPH?
     public Vector3 thisPoint;
     public Vector3 dontIneedACOMBINEDEndpoint;
@@ -468,10 +383,8 @@ public class spatialDataPoint
     public void graphBetweenTwoPoints2(Vector3 whereToStart, Vector3 whereToEnd, float lengthMultiplier)
     {
         Vector3 startV = whereToStart;
-        Vector3 endV = whereToEnd;//.operator(2);// * someBoolsAdded[thePointIndex];
-        //      Vector3 diffV = (endV - startV);
-        //      Vector3 drawV = endV + diffV * lengthMultiplier * diffV.sqrMagnitude * diffV.sqrMagnitude / 10;
-        //      Debug.DrawLine(startV, drawV, new Color(0f, 0f, 1f), 1f);
+        Vector3 endV = whereToEnd;
+
         Debug.DrawLine(startV, endV, new Color(0f, 0f, 1f), 1f);
     }
 
@@ -510,16 +423,16 @@ public class spatialDataPoint
 
     //      initializing
 
-    public void initializeDataPoint(List<GameObject> targetList, Vector3 inputPoint)
+    public spatialDataPoint(List<GameObject> targetList, Vector3 inputPoint)
     {
+        //should just be done in constructor?
         thisPoint = inputPoint;
 
         //printAllIdNumbers(targetList);
 
         foreach (GameObject thisTarget in targetList)
         {
-            spatialDataPointFragment newFragment = new spatialDataPointFragment();
-            newFragment.initializeFragment(thisTarget, thisPoint);
+            spatialDataPointFragment newFragment = new spatialDataPointFragment(thisTarget, thisPoint);
             fragmentList.Add(newFragment);
         }
     }
@@ -555,7 +468,6 @@ public class spatialDataSet
     public List<spatialDataPoint> theDataSet = null;// new List<spatialDataPoint>();
 
     public List<Vector3> thePoints = new List<Vector3>();
-    //public List<Vector3> endPointsToGraph = new List<Vector3>();
     public List<GameObject> threatList = new List<GameObject>();
     public List<float> combinedData;
     public Vector3 middlePoint;
@@ -564,24 +476,6 @@ public class spatialDataSet
 
 
     //      graphing
-    public void graphFeild(string graphInBlue, string graphInGreen = null, string graphInRed = null, string graphInYellow = null, string graphInMagenta = null)
-    {
-        //what are the strings supposed to be?  tell it what data to graph?  something?  i guess?
-        //so how to do this?
-        //first, use the string to set up the data to graph
-        //then graph it in the corrosponding color
-        //and be able to graph multiple things at once
-        List<string> treatmentList = new List<string>();
-        treatmentList = listOfStringsWITHNulls(graphInBlue, graphInGreen, graphInRed, graphInYellow, graphInMagenta);
-
-        int treatmentCounter = 0;
-
-        foreach (string thisTreatment in treatmentList)
-        {
-
-        }
-
-    }
 
     public void appleGraph()
     {
@@ -643,8 +537,7 @@ public class spatialDataSet
 
         foreach (Vector3 thisPoint in thePoints)
         {
-            spatialDataPoint aDataPoint = new spatialDataPoint();
-            aDataPoint.initializeDataPoint(threatList, thisPoint);
+            spatialDataPoint aDataPoint = new spatialDataPoint(threatList, thisPoint);
             theDataSet.Add(aDataPoint);
         }
     }
@@ -693,8 +586,7 @@ public class spatialDataSet
     //      ad-hoc, try to get rid of
     public Vector3 bestMiddlePoint()
     {
-        spatialDataPoint middleDataPoint = new spatialDataPoint();
-        middleDataPoint.initializeDataPoint(threatList, middlePoint);
+        spatialDataPoint middleDataPoint = new spatialDataPoint(threatList, middlePoint);
 
         return middleDataPoint.applePattern();
     }

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class simpleInteractable : MonoBehaviour, IInteractable
+public class simpleInteractable : interactable2
 {
-    public Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions { get; set; }
-
     public static void genSimpleInteractable(GameObject theObject, enactionCreator.interType interactionType, Ieffect theEffect)
     {
         simpleInteractable theSI = theObject.GetComponent<simpleInteractable>();
@@ -22,18 +20,4 @@ public class simpleInteractable : MonoBehaviour, IInteractable
 
         theSI.dictOfInteractions = interactionCreator.singleton.addInteraction(theSI.dictOfInteractions, interactionType, theEffect);
     }
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
 }
