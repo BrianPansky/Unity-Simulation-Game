@@ -12,6 +12,7 @@ public class equippable2 : interactable2
 
     public GameObject enactionPoint1;
     public interactionCreator.simpleSlot theEquippable2Type;
+    public parallelEXE planshell;
 
 
     //controller plugs in its button categories, and bodies/weapons/items, and vehicles FILL them:
@@ -30,6 +31,16 @@ public class equippable2 : interactable2
 
     public void Awake()
     {
+
+
+
+
+
+
+
+
+
+
         //Debug.Log("equippable2 awake");
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
         theEquippable2Type = interactionCreator.simpleSlot.hands;

@@ -60,9 +60,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(walkToTarget2(target, 1.9f));
+        firstShell.Add(walkToTarget2(target, 1.2f));
         firstShell.Add(aimTargetPlan2(target));
-        firstShell.Add(firePlan2nd2(interType.standardClick, target));
+        firstShell.Add(firePlan3(interType.standardClick, target));
         firstShell.untilListFinished();
 
         return firstShell;
@@ -119,7 +119,46 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //exe1.endConditions.Add(thisCondition);
         return exe1;
     }
-    
+
+
+
+    private planEXE2 firePlan3(interType interTypeX, GameObject target)
+    {
+
+        //either playable will already have the type, or it might be in equipper slots
+        rangedEnaction grabEnact1;
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interTypeX);
+
+        if (grabEnact1 == null)
+        {
+            GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
+
+            //oh no it can ALSO be null
+            if (theItemWeWant == null)
+            {
+                //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
+                return goGrabPlan1(interType.shoot1);
+            }
+
+
+            //Debug.Assert(theItemWeWant != null);
+
+            //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
+            return theItemWeWant.GetComponent<equippable2>().planshell;
+        }
+
+        planEXE2 exe1 = grabEnact1.toEXE(null);
+
+        //Debug.Log("grabEnact1.theCooldown:  " + grabEnact1.theCooldown);
+        //Debug.Log("grabEnact1.theCooldown.cooldownMax:  " + grabEnact1.theCooldown.cooldownMax);
+        //Debug.Log("grabEnact1.theCooldown.cooldownTimer:  " + grabEnact1.theCooldown.cooldownTimer);
+        //      exe1.startConditions.Add(grabEnact1.theCooldown);
+        exe1.atLeastOnce();
+        //condition thisCondition = new enacted(exe1);
+        //exe1.endConditions.Add(thisCondition);
+
+        return exe1;
+    }
 
     private planEXE2 firePlan2nd2(interType interTypeX, GameObject target)
     {

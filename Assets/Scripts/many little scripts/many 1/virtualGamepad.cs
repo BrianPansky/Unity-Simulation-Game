@@ -59,6 +59,8 @@ public class virtualGamepad : MonoBehaviour
         if (isPlayer)
         {
             initializeMouseKeyboardInputs();
+
+
         }
     }
 

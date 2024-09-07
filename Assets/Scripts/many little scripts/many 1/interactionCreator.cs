@@ -49,6 +49,25 @@ public class interactionCreator : MonoBehaviour
     }
 
 
+
+
+
+
+    public interactionInfo arbitraryInterInfo()
+    {
+        interactionInfo newInfo = new interactionInfo(enactionCreator.interType.self, 1, 11);
+
+        return newInfo;
+    }
+    public interactionInfo arbitraryInterInfo(float magnitude)
+    {
+        interactionInfo newInfo = new interactionInfo(enactionCreator.interType.self, magnitude, 11);
+
+        return newInfo;
+    }
+
+
+
     public void dockXToY(GameObject objectX, GameObject objectY, Vector3 offset = new Vector3())
     {
         //really, i shouldn't need an offset.  i should just have "docking" ports positioned correctly on objects....
@@ -141,17 +160,25 @@ public class interactable2 : zoneable2
 
             foreach (Ieffect thisEffect in conditionalEffects[thisCondition])
             {
-                thisEffect.implementEffect(this.gameObject, null, null);  //seems messy...
+                thisEffect.implementEffect(this.gameObject, null, interactionCreator.singleton.arbitraryInterInfo());  //seems messy...
             }
         }
     }
 
+
+
+    void Update()
+    {
+        doConditionalEffectsIfMet();
+    }
 }
 
 
 
 public interface Ieffect
 {
+    //why does it take interactionInfo?  effects should be separate from their causes, so shouldn't need that?  probably no author too?
+    //looks like "theInfo" is used to do some ad-hoc CONDITIONS.  but i should just use my/a condition system for that.
     void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
 }
 

@@ -157,6 +157,14 @@ public interface condition
     bool met();
 }
 
+public class autoCondition : condition
+{
+    bool condition.met()
+    {
+        return true;
+    }
+}
+
 public class proximity : condition
 {
     //for when we want the objects to be CLOSER than the desired distance
@@ -234,6 +242,29 @@ public class cooldown : condition
     public void fire()
     {
         cooldownTimer = cooldownMax;
+    }
+}
+
+public class numericalCondition : condition
+{
+
+    numericalVariable theVariableType;
+    float conditionValue = 0f;
+    float variableReference;
+    Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables;
+
+    public numericalCondition(numericalVariable theVariableTypeIn, Dictionary<interactionCreator.numericalVariable, float> dictOfIvariablesIn, float conditionValueIn = 0f)
+    {
+        this.theVariableType = theVariableTypeIn;
+        this.dictOfIvariables = dictOfIvariablesIn;
+        this.conditionValue = conditionValueIn;
+    }
+
+    public bool met()
+    {
+        if (variableReference < conditionValue) { return true; }
+
+        return false;
     }
 }
 

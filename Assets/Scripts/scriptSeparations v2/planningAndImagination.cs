@@ -288,7 +288,14 @@ public class singleEXE : planEXE2
 {
     private GameObject target;
 
+    public singleEXE()
+    {
 
+    }
+    public singleEXE(enaction theEnactionIn)
+    {
+        this.theEnaction = theEnactionIn;
+    }
 
     public override void execute()
     {
@@ -301,6 +308,7 @@ public class singleEXE : planEXE2
         numberOfTimesExecuted++;
     }
 }
+
 
 
 public class boolEXE2 : singleEXE

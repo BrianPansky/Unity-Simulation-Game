@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
+using static interactionCreator;
 
 
 public class gun1 : equippable2
@@ -19,12 +20,29 @@ public class gun1 : equippable2
 
         initializeEnactionPoint1();
 
+        dictOfIvariables[numericalVariable.cooldown] = 0f;
 
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.shoot1),
             new projectileToGenerate(1, true, 99, 0), 30);
 
-        theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
+        //theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
+        planshell = new parallelEXE();
+        planshell.startConditions.Add(new numericalCondition(numericalVariable.cooldown, dictOfIvariables));
+        planshell.Add(new singleEXE(this.GetComponent<projectileLauncher>()));
+        planshell.Add(new singleEXE(
+            new enactEffect(new numericalEffect(numericalVariable.cooldown),
+                this.gameObject,
+                interactionCreator.singleton.arbitraryInterInfo(30)
+                )
+            ));
+
+
+        //now add cooling down increment:
+        List<Ieffect> list = new List<Ieffect>();
+        Ieffect effect = new numericalEffect(numericalVariable.cooldown);
+        list.Add(effect);
+        conditionalEffects[new autoCondition()] = new List<Ieffect>(list);
 
     }
 
@@ -44,10 +62,5 @@ public class gun1 : equippable2
 
     }
 
-
-    void Update()
-    {
-        theCooldown.cooling();
-    }
 
 }
