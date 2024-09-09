@@ -160,6 +160,7 @@ public class interactable2 : zoneable2
 
             foreach (Ieffect thisEffect in conditionalEffects[thisCondition])
             {
+                //Debug.Log("this.gameObject:  "+ this.gameObject);
                 thisEffect.implementEffect(this.gameObject, null, interactionCreator.singleton.arbitraryInterInfo());  //seems messy...
             }
         }
@@ -219,6 +220,7 @@ public class numericalEffect : Ieffect
         adjustInteractableVariable(theinteractable2, toAlter, amount);
 
         //Debug.Log("theinteractable2.dictOfIvariables[toAlter] += amount;");
+        //Debug.Log(toAlter+" = "+ theinteractable2.dictOfIvariables[toAlter]);
     }
 
     private void adjustInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
@@ -238,8 +240,24 @@ public class numericalEffect : Ieffect
 
 }
 
+public class deathEffect : Ieffect
+{
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    {
+        //Debug.Log("objectBeingInteractedWith:  "+ objectBeingInteractedWith);
+        kill(objectBeingInteractedWith);
+    }
+
+    public void kill(GameObject objectBeingInteractedWith)
+    {
+        GameObject.Destroy(objectBeingInteractedWith);
+    }
+}
+
 public class putInInventory : Ieffect
 {
+    //why would this be an "effect"?  not an "enaction"?
+
     public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
     {
         //Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);

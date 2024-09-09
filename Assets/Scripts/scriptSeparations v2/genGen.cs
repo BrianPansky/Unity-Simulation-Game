@@ -74,8 +74,8 @@ public class genGen : MonoBehaviour
         playable2 thePlayable = newObj.AddComponent<playable2>();
 
 
-        thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
-        thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+        //thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+        //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
         thePlayable.dictOfIvariables[numericalVariable.health] = 2;
         thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
@@ -107,6 +107,17 @@ public class genGen : MonoBehaviour
     private void makeInteractionsBody4(interactable2 theInteractable)
     {
         theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions, interType.shoot1, new numericalEffect(numericalVariable.health));
+
+
+
+
+        //i'll put conditional effects in this function for now
+        condition theCondition = new numericalCondition(numericalVariable.health, theInteractable.dictOfIvariables);
+        Ieffect theEffect = new deathEffect();
+        List<Ieffect> list = new List<Ieffect> { theEffect };
+        theInteractable.conditionalEffects[theCondition] = list;
+
+
     }
 
 

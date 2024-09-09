@@ -120,7 +120,7 @@ public class initialGenerator2 : MonoBehaviour
         //spacing [patternScript2!  dot singleton]
 
 
-        int howManyZones = 1;
+        int howManyZones = 81;
         int howManySetsPerZone = 2;
         int theZSpacing = 25;
         int theXSpacing = 10;
@@ -276,6 +276,8 @@ public class initialGenerator2 : MonoBehaviour
         //objectList.Add(genGen.singleton.returnNPC5(startPosition));
         objectList.Add(genGen.singleton.returnNPC5(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
+        objectList.Add(genGen.singleton.returnNPC5(startPosition));
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         //      objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         //      objectList.Add(genGen.singleton.returnNPC5(startPosition));

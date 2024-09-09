@@ -250,7 +250,7 @@ public class numericalCondition : condition
 
     numericalVariable theVariableType;
     float conditionValue = 0f;
-    float variableReference;
+    //float variableReference;
     Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables;
 
     public numericalCondition(numericalVariable theVariableTypeIn, Dictionary<interactionCreator.numericalVariable, float> dictOfIvariablesIn, float conditionValueIn = 0f)
@@ -262,7 +262,9 @@ public class numericalCondition : condition
 
     public bool met()
     {
-        if (variableReference < conditionValue) { return true; }
+        //Debug.Log("theVariableType:  " + theVariableType);
+        //Debug.Log("conditionValue:  " + conditionValue);
+        if (dictOfIvariables[theVariableType] < conditionValue) { return true; }
 
         return false;
     }
