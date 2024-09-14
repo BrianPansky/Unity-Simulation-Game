@@ -29,8 +29,8 @@ public class gun1 : equippable2
         //theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
         planshell = new parallelEXE();
         planshell.startConditions.Add(new numericalCondition(numericalVariable.cooldown, dictOfIvariables));
-        planshell.Add(new singleEXE(this.GetComponent<projectileLauncher>()));
-        planshell.Add(new singleEXE(
+        planshell.Add(new boolEXE2(this.GetComponent<projectileLauncher>()));
+        planshell.Add(new boolEXE2(
             new enactEffect(new numericalEffect(numericalVariable.cooldown),
                 this.gameObject,
                 interactionCreator.singleton.arbitraryInterInfo(30)

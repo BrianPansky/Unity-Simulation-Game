@@ -85,7 +85,7 @@ public abstract class IEnactaBool: enaction
 
     public void enact()
     {
-        enact(new inputData().boolean());
+        enact(new inputData());
     }
 
 
@@ -101,13 +101,13 @@ public abstract class IEnactaVector : enaction
 
     public void enact(Vector2 inputV2)
     {
-        enact(new inputData().vect(inputV2));
+        enact(new inputData(inputV2));
     }
 
 
     public void enact(Vector3 inputV3)
     {
-        enact(new inputData().vect(inputV3));
+        enact(new inputData(inputV3));
     }
 
 
@@ -123,7 +123,7 @@ public abstract class IEnactByTargetVector:enaction
     //is this redundant?  didn't i already write that here?  what happened to that writing?  or was it somewhere else?
     public void enact(Vector3 inputV3)
     {
-        enact(new inputData().vect(inputV3));
+        enact(new inputData(inputV3));
     }
 
 

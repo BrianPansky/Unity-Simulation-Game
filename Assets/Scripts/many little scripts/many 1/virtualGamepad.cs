@@ -268,6 +268,27 @@ public class inputData
     public Vector2 vect2;
     public Vector3 vect3;
 
+    public inputData()
+    {
+        theBool = true;
+    }
+    public inputData(bool inputBool)
+    {
+        theBool = inputBool;
+    }
+    public inputData(Vector2 inputVect)
+    {
+        vect2 = inputVect;
+    }
+    public inputData(Vector3 inputVect)
+    {
+        vect3 = inputVect;
+    }
+
+
+
+    /*
+
     public inputData boolean(bool inputBool = true)
     {
 
@@ -299,7 +320,7 @@ public class inputData
         vect3 = inputVect;
         return this;
     }
-
+    */
 }
 
 public abstract class gamePadButtonable

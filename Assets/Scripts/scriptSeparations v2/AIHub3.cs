@@ -58,6 +58,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //ad-hoc hand-written plan
         GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
+        if (target == null) { return null; }
 
         planEXE2 firstShell = new seriesEXE();
         firstShell.Add(walkToTarget2(target, 1.2f));
@@ -73,7 +74,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //ad-hoc hand-written plan
         GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
 
-        if(target2 == null) { return new singleEXE(); }
+        if(target2 == null) { return null; }
 
         planEXE2 secondShell = new seriesEXE();
         secondShell.Add(aimTargetPlan2(target2));
@@ -98,7 +99,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         Vector3 adHocThreatAvoidanceVector = new spatialDataPoint(threatListWithoutSelf(), this.transform.position).applePattern();
 
-        placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 4.7f;
+        placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
         
 
         return walkToTarget2(placeholderTarget1, 1.9f);
@@ -209,6 +210,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     private planEXE2 walkToTarget2(GameObject target, float offsetRoom = 0f)
     {
+        if (target == null) {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(target.GetInstanceID());
+            return null; }
         //give it some room so they don't step on object they want to arrive at!
         //just do their navmesh agent enaction.
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
@@ -248,16 +253,22 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public void callableUpdate()
     {
         //Debug.Log("=======================callableUpdate()............");
-
-        //Debug.Log("333      multiPlan.Keys.Count:  " + multiPlan.Keys.Count);
+        conditionalPrint("=======================callableUpdate()............");
 
 
         if (fullPlan == null) { Debug.Log("fullPlan == null");
                                 fullPlan = combatBehaviorPlan1(); return; }
-        if(fullPlan.endConditionsMet() ) { //Debug.Log("fullPlan.endConditionsMet()");
-                                                                fullPlan = combatBehaviorPlan1(); return; }
 
-        //Debug.Log("we have a plan, fullPlan.execute()");
+        fullPlan.conditionalPrint(printThisNPC);
+        if (fullPlan.error()) { fullPlan = null; return; }
+        if (fullPlan.endConditionsMet() )
+        { //Debug.Log("fullPlan.endConditionsMet()");
+            conditionalPrint("fullPlan.endConditionsMet()");
+            fullPlan = combatBehaviorPlan1(); return; }
+
+
+        conditionalPrint("we have a plan, fullPlan.execute()");
+        fullPlan.conditionalPrint(printThisNPC);
         fullPlan.execute();
         
     }
@@ -720,4 +731,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     }
 
+
+    void conditionalPrint(string toPrint)
+    {
+        if(printThisNPC == false) { return; }
+        Debug.Log(toPrint);
+    }
 }

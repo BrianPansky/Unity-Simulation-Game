@@ -14,6 +14,9 @@ public class planningAndImagination : MonoBehaviour
 
     public planEXE2 fullPlan;
 
+
+
+    /*
     public Dictionary<buttonCategories, List<planEXE>> blankMultiPlan()
     {
         return new Dictionary<buttonCategories, List<planEXE>>();
@@ -43,9 +46,9 @@ public class planningAndImagination : MonoBehaviour
         planToAddItTo.Add(theExeToAdd);
     }
 
+    */
 
-
-
+    /*
     public bool noPlansInMultiplan(Dictionary<buttonCategories, List<planEXE>> dictionary)
     {
         bool noPlansInMultiplan = true;
@@ -58,11 +61,15 @@ public class planningAndImagination : MonoBehaviour
         return noPlansInMultiplan;
     }
 
+    */
 
 
 
 }
 
+
+
+/*
 public abstract class planEXE
 {
     public enaction theEnaction;
@@ -112,7 +119,7 @@ public class boolEXE :  planEXE
     //public IEnactaBool theEnaction;
     public List<planEXE> microPlan = new List<planEXE>();
 
-    public boolEXE(IEnactaBool theEnaction, GameObject theTarget)
+    public boolEXE(IEnactaBool theEnaction)
     {
         this.theEnaction = theEnaction;
     }
@@ -126,7 +133,7 @@ public class boolEXE :  planEXE
             planEXE.executePlan();
         }
 
-        theEnaction.enact(new inputData().boolean());
+        theEnaction.enact(new inputData());
     }
 
     override public void target(GameObject theTarget)
@@ -152,7 +159,7 @@ public class vectEXE : planEXE
     {
         //Debug.Log("vectEXE, theTarget:  " + theTarget);
         Debug.DrawLine(theTarget.transform.position, new Vector3(), Color.yellow, 6f);
-        inputData theInputData = new inputData().vect(theTarget.transform.position);
+        inputData theInputData = new inputData(theTarget.transform.position);
         theEnaction.enact(theInputData);
     }
 
@@ -162,17 +169,17 @@ public class vectEXE : planEXE
     }
 }
 
-
+*/
 
 
 public abstract class planEXE2
 {
     public enaction theEnaction;
-    public inputData theInputData;
+    //public inputData theInputData;
 
 
     //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
-    private List<planEXE2> exeList;
+    public List<planEXE2> exeList;
 
     public List<condition> startConditions = new List<condition>();
     public List<condition> endConditions = new List<condition>();
@@ -180,6 +187,60 @@ public abstract class planEXE2
     public int numberOfTimesExecuted = 0;  //don't do it for things that are called every frame, though?
 
     public abstract void execute();
+
+    public abstract bool error();
+
+    public void executeSequential()
+    {
+        //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
+
+        //sequential concerns:
+        //      only execute 1st one
+        //      remove item from list when its end conditions are met
+
+        if (exeList == null) { Debug.Log("null.....that's an error!"); return; }
+
+        if (exeList.Count < 1) { Debug.Log("exeList.Count < 1       shouldn't happen?"); return; }
+
+        exeList[0].execute();
+
+        if (exeList[0].endConditionsMet())
+        {
+            //Debug.Log("exeList[0].endConditionsMet()  for:  " + exeList[0]);
+            if (exeList[0].theEnaction != null)
+            {
+                //Debug.Log("exeList[0].endConditionsMet()  for theEnaction:  " + exeList[0].theEnaction);
+            }
+
+            exeList.RemoveAt(0); return;
+        }
+    }
+
+    public void executeParallel()
+    {
+
+        if (exeList == null) { Debug.Log("null.....that's an error!"); ; return; }
+
+        //if null.....that's an error!
+
+
+        List<planEXE2> completedItems = new List<planEXE2>();
+
+        foreach (planEXE2 plan in exeList)
+        {
+            plan.execute();
+            if (plan.endConditionsMet()) { completedItems.Add(plan); }
+        }
+
+        foreach (planEXE2 plan in completedItems)
+        {
+            exeList.Remove(plan);
+        }
+    }
+
+
+
+
 
     public void Add(planEXE2 itemToAdd)
     {
@@ -232,81 +293,57 @@ public abstract class planEXE2
     }
 
 
-    public void executeSequential()
+    public string asText()
     {
-        //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
+        string theString = "";
 
-        //sequential concerns:
-        //      only execute 1st one
-        //      remove item from list when its end conditions are met
+        theString += this.ToString();
+        theString += ":  ";
+        theString += theEnaction;
 
-        if (exeList == null) { Debug.Log("null.....that's an error!"); return; }
-
-        if (exeList.Count < 1) { Debug.Log("exeList.Count < 1       shouldn't happen?"); return; }
-
-        exeList[0].execute();
-
-        if (exeList[0].endConditionsMet())
-        {
-            //Debug.Log("exeList[0].endConditionsMet()  for:  " + exeList[0]);
-            if (exeList[0].theEnaction != null)
-            {
-                //Debug.Log("exeList[0].endConditionsMet()  for theEnaction:  " + exeList[0].theEnaction);
-            }
-            
-            exeList.RemoveAt(0); return;
-        }
-    }
+        if(exeList ==null) { return theString; }
 
 
-    public void executeParallel()
-    {
-
-        if (exeList == null) { Debug.Log("null.....that's an error!"); ; return; }
-
-        //if null.....that's an error!
-
-
-        List<planEXE2> completedItems = new List<planEXE2>();
-
+        theString += "[ ";
         foreach (planEXE2 plan in exeList)
         {
-            plan.execute();
-            if (plan.endConditionsMet()) { completedItems.Add(plan); }
+            theString += plan.asText();
+            theString += ", ";
         }
 
-        foreach (planEXE2 plan in completedItems)
-        {
-            exeList.Remove(plan);
-        }
+        theString += "]";
+        return theString;
     }
 
+    internal void conditionalPrint(bool printThisNPC)
+    {
+        if (printThisNPC == false) { return; }
+
+        /*
+        Debug.Log("theEnaction:  "+ theEnaction);
+
+        if (exeList == null) { return; }
+        Debug.Log("exeList:  [");
+        foreach (planEXE2 plan in exeList)
+        {
+            plan.conditionalPrint(printThisNPC);
+        }
+        Debug.Log("]");
+        */
+
+        Debug.Log(asText());
+
+    }
 }
 
 
-public class singleEXE : planEXE2
+public abstract class singleEXE : planEXE2
 {
     private GameObject target;
 
-    public singleEXE()
-    {
+    
 
-    }
-    public singleEXE(enaction theEnactionIn)
-    {
-        this.theEnaction = theEnactionIn;
-    }
-
-    public override void execute()
-    {
-
-        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return;}
-
-        if (startConditionsMet() == false) { return; }
-
-        theEnaction.enact(theInputData);
-        numberOfTimesExecuted++;
-    }
+    public abstract override void execute();
 }
 
 
@@ -314,7 +351,29 @@ public class singleEXE : planEXE2
 public class boolEXE2 : singleEXE
 {
     //public IEnactaBool theEnaction;
-    public List<planEXE> microPlan = new List<planEXE>();
+    public List<planEXE2> microPlan = new List<planEXE2>();  //am i still gonna use this?  i don't think so....
+
+    public boolEXE2(enaction theEnactionIn)
+    {
+        this.theEnaction = theEnactionIn;
+    }
+
+    public override void execute()
+    {
+
+        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return; }
+
+        if (startConditionsMet() == false) { return; }
+
+        theEnaction.enact(new inputData());
+        //executeInputData(new inputData());
+        numberOfTimesExecuted++;
+    }
+
+    public override bool error()
+    {
+        return false;
+    }
 
     public boolEXE2(IEnactaBool theInputEnaction, GameObject theTarget)
     {
@@ -322,34 +381,61 @@ public class boolEXE2 : singleEXE
     }
 }
 
+//NPCs won't use this?
+/*
 public class vect2EXE2 : singleEXE
 {
     public GameObject theTarget;
+
+
 
     public vect2EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
         this.theTarget = theTarget;
-        theInputData = new inputData().vect2Targ(theTarget);
     }
 }
+*/
 
 public class vect3EXE2 : singleEXE
 {
     public GameObject theTarget;
 
+
+    public override void execute()
+    {
+
+        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return; }
+        if (theTarget == null) { 
+            Debug.Log("null.....that's an error!");
+            Debug.Log(theTarget.GetInstanceID()); 
+            return; }
+
+        if (startConditionsMet() == false) { return; }
+
+        theEnaction.enact(new inputData(theTarget.transform.position));
+        //executeInputData(new inputData());
+        numberOfTimesExecuted++;
+    }
+
     public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
         this.theTarget = theTarget;
-        theInputData = new inputData().vect3Targ(theTarget);
+    }
+
+
+    public override bool error()
+    {
+        if (theTarget == null) { return true; }
+
+        return false;
     }
 
     public vect3EXE2(IEnactaVector theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
         this.theTarget = theTarget;
-        theInputData = new inputData().vect3Targ(theTarget);
     }
 }
 
@@ -396,6 +482,17 @@ public class parallelEXE : planEXE2
     {
         executeParallel();
     }
+
+
+    public override bool error()
+    {
+        foreach (planEXE2 exe in exeList)
+        {
+            if (exe == null || exe.error()) { return true; }
+        }
+
+        return false;
+    }
 }
 
 public class seriesEXE : planEXE2
@@ -434,5 +531,16 @@ public class seriesEXE : planEXE2
     public override void execute()
     {
         executeSequential();
+    }
+
+
+    public override bool error()
+    {
+        foreach (planEXE2 exe in exeList)
+        {
+            if (exe == null || exe.error()) { return true; }
+        }
+
+        return false;
     }
 }
