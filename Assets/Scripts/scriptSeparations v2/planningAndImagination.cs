@@ -177,6 +177,7 @@ public abstract class planEXE2
     public enaction theEnaction;
     //public inputData theInputData;
 
+    public bool debugPrint = false;
 
     //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
     public List<planEXE2> exeList;
@@ -254,9 +255,14 @@ public abstract class planEXE2
         {
             //Debug.Log("thisCondition:  " + thisCondition);
             //Debug.Log("thisCondition.met():  " + thisCondition.met());
-            if (thisCondition.met() == false) { return false; }
+            if (thisCondition.met() == false) {
+
+                if (debugPrint == true) { Debug.Log("this start condition not met:  " + thisCondition); }
+                
+                return false; }
         }
 
+        if(debugPrint == true) { Debug.Log("no start conditions remain unfulfilled!"); }
         //Debug.Log("no conditions remain unfulfilled!");
         return true;
     }
@@ -264,15 +270,24 @@ public abstract class planEXE2
     {
         //Debug.Log("looking at end conditions for:  " + this);
 
+        if (debugPrint == true) { Debug.Log("-----------------------------looking at end conditions for:  " + theEnaction);
+            Debug.Log("number of end conditions:  " + endConditions.Count);
+        }
         //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
         foreach (condition thisCondition in endConditions)
         {
+
+            if (debugPrint == true) { Debug.Log("thisCondition:  " + thisCondition); }
             //Debug.Log("thisCondition:  " + thisCondition);
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
-            if (thisCondition.met() == false) { return false; }
+            if (thisCondition.met() == false) {
+
+                if (debugPrint == true) { Debug.Log("this end condition not met:  "+ thisCondition); }
+                return false; }
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
+        if (debugPrint == true) { Debug.Log("no end conditions remain unfulfilled!"); }
         //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
 
         return true;
@@ -413,6 +428,8 @@ public class vect3EXE2 : singleEXE
 
         if (startConditionsMet() == false) { return; }
 
+
+        if (debugPrint == true) { Debug.Log("should enact this:  " + this.theEnaction); }
         theEnaction.enact(new inputData(theTarget.transform.position));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
@@ -427,7 +444,11 @@ public class vect3EXE2 : singleEXE
 
     public override bool error()
     {
-        if (theTarget == null) { return true; }
+        if (theTarget == null) {
+
+            if (debugPrint == true) { Debug.Log("null target error"); }
+            
+            return true; }
 
         return false;
     }

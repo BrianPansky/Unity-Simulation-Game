@@ -140,7 +140,7 @@ public class navAgent : IEnactByTargetVector
 {
     //only for vector inputs!
     NavMeshAgent theAgent;
-
+    public bool debugPrint = false;
     public static void addNavAgentEnaction(GameObject objectToAddNavmeshAgentTo)
     {
         navAgent nA = objectToAddNavmeshAgentTo.AddComponent<navAgent>();
@@ -178,6 +178,8 @@ public class navAgent : IEnactByTargetVector
 
         Debug.Assert(theAgent != null);
         Debug.Assert(theInput != null);
+        //if(debugPrint == true) { Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?"); }
+        
         theAgent.SetDestination(theInput.vect3);
     }
 }
@@ -219,7 +221,7 @@ public class aimTarget : IEnactByTargetVector
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
 
 
-        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.yellow, 0.6f);
+        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.cyan, 0.02f);
 
     }
 

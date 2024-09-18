@@ -368,6 +368,9 @@ public class spatialDataPoint
 
 
 
+    public bool debugPrint = false;
+
+
     //          user manual?
     //      when to add threat list?  is it ALWAYS necessary?  well, i might use this for something other than "threats"...
     //      
@@ -403,17 +406,25 @@ public class spatialDataPoint
         //              simply combine both of these
         Vector3 theOutputVector = new Vector3();
 
+
         //generalPointData1();
+
+        if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
 
         foreach (spatialDataPointFragment thisFragment in fragmentList)
         {
+            if (debugPrint == true) { Debug.Log("thisFragment.lineOfSightBool:  " + thisFragment.lineOfSightBool); }
             if (thisFragment.lineOfSightBool == true)
             {
                 Vector3 fragmentVector = new Vector3();
                 fragmentVector = thisFragment.applePattern();
+
+                if (debugPrint == true) { Debug.Log("fragmentVector:  " + fragmentVector); }
                 theOutputVector += fragmentVector;
-                
+
+                if (debugPrint == true) { Debug.Log("theOutputVector:  " + theOutputVector); }
             }
+            
         }
 
         return theOutputVector;

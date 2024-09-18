@@ -24,6 +24,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     int adhocCooldown = 0;
     public bool printThisNPC = false;
+    string storedMessage = "";
     bool test = true;
 
 
@@ -41,7 +42,210 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //Debug.Log("=================================      START      ===============================");
 
-        fullPlan = goGrabThenEquip(interType.shoot1);
+        //fullPlan = goGrabThenEquip(interType.shoot1);
+    }
+
+
+
+
+    // Update is called once per frame
+    void Update()
+    {
+        adhocCooldown++;
+    }
+
+
+
+    public void callableUpdate()
+    {
+        //Debug.Log("=======================callableUpdate()............");
+        conditionalPrint("=======================callableUpdate()............");
+
+        //plan or no plan
+        //threat line of sight or no threat line of sight
+        //has gun or no gun
+
+        if(fullPlan == null)
+        {
+            storedMessage = "(fullPlan == null),  ";
+            storedMessage += "threatLineOfSight(): " + threatLineOfSight() + ",  ";
+            storedMessage += "hasNoGun(): " + hasNoGun() + ",  ";
+            if (threatLineOfSight())
+            {
+                if (hasNoGun())
+                {
+                    storedMessage += "thus combatDodgeWithoutGun()";
+                    fullPlan = combatDodgeWithoutGun();
+                }
+                else
+                {
+                    storedMessage += "thus combatDodgeWithGun()";
+                    fullPlan = combatDodgeWithGun();
+                }
+            }
+            else
+            {
+                if (hasNoGun())
+                {
+                    storedMessage += "thus grabAndEquipPlan2(interType.shoot1)";
+                    fullPlan = grabAndEquipPlan2(interType.shoot1);
+                }
+                else
+                {
+                    storedMessage += "thus randomWanderPlan()";
+                    fullPlan = randomWanderPlan();
+                }
+            }
+        }
+        else
+        {
+            //fullPlan.conditionalPrint(printThisNPC);
+            if (fullPlan.error()) { fullPlan = null;
+
+                conditionalPrint("fullPlan.error()) { fullPlan = null;"); 
+                return; }
+            if (fullPlan.endConditionsMet())
+            { //Debug.Log("fullPlan.endConditionsMet()");
+                conditionalPrint("fullPlan.endConditionsMet()");
+                //storedMessage = "erroneous plan insertion, combatBehaviorPlan1()";
+                //fullPlan = combatBehaviorPlan1();
+                fullPlan = null;
+                return;
+            }
+
+            conditionalPrint(storedMessage);
+            //conditionalPrint("we have a plan, fullPlan.execute()");
+            //fullPlan.conditionalPrint(printThisNPC);
+            fullPlan.execute();
+        }
+
+
+
+
+
+        /*
+        if (fullPlan == null)
+        {
+
+
+            conditionalPrint("fullPlan == null");
+            if (hasNoGun())
+            {
+                fullPlan = goGrabThenEquip(interType.shoot1);
+                return;
+            }
+            fullPlan = combatBehaviorPlan1();
+            return;
+        }
+
+        fullPlan.conditionalPrint(printThisNPC);
+        if (fullPlan.error()) { fullPlan = null; return; }
+        if (fullPlan.endConditionsMet())
+        { //Debug.Log("fullPlan.endConditionsMet()");
+            conditionalPrint("fullPlan.endConditionsMet()");
+            fullPlan = combatBehaviorPlan1(); return;
+        }
+
+
+        conditionalPrint("we have a plan, fullPlan.execute()");
+        fullPlan.conditionalPrint(printThisNPC);
+        fullPlan.execute();
+
+        */
+
+
+    }
+
+
+    private planEXE2 grabAndEquipPlan2(interType interTypeX)
+    {
+
+        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(interTypeX));
+        zerothShell.Add(equipX2(interTypeX));
+        zerothShell.untilListFinished();
+
+        return zerothShell;
+    }
+
+
+    private planEXE2 combatDodgeWithoutGun()
+    {
+        return combatDodgeEXE2();
+    }
+
+    private planEXE2 combatDodgeWithGun()
+    {
+        return combatBehaviorPlan1();
+    }
+
+
+
+
+
+
+
+    private planEXE2 goGrabPlan2(interType interTypeX)
+    {
+
+        //ad-hoc hand-written plan
+        GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
+
+        if (target == null) { return null; }
+
+        debugTargetDistance(this.gameObject, target);
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.Add(walkToTarget2(target, 0.8f));
+        firstShell.Add(aimTargetPlan2(target));
+        firstShell.Add(firePlan4(interType.standardClick, target));
+        firstShell.untilListFinished();
+
+        return firstShell;
+    }
+
+    private planEXE2 firePlan4(interType interTypeX, GameObject target)
+    {
+
+        //either playable will already have the type, or it might be in equipper slots
+        rangedEnaction grabEnact1;
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interTypeX);
+
+        if (grabEnact1 == null)
+        {
+            return getFireEnactionFromEquipperSlots(interTypeX);
+        }
+
+        planEXE2 exe1 = grabEnact1.toEXE(null);
+
+        //Debug.Log("grabEnact1.theCooldown:  " + grabEnact1.theCooldown);
+        //Debug.Log("grabEnact1.theCooldown.cooldownMax:  " + grabEnact1.theCooldown.cooldownMax);
+        //Debug.Log("grabEnact1.theCooldown.cooldownTimer:  " + grabEnact1.theCooldown.cooldownTimer);
+        //      exe1.startConditions.Add(grabEnact1.theCooldown);
+        exe1.atLeastOnce();
+        //condition thisCondition = new enacted(exe1);
+        //exe1.endConditions.Add(thisCondition);
+
+        return exe1;
+    }
+
+    private planEXE2 getFireEnactionFromEquipperSlots(interType interTypeX)
+    {
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
+
+        //oh no it can ALSO be null
+        if (theItemWeWant == null)
+        {
+            conditionalPrint("(theItemWeWant == null)");
+            //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
+            return null;
+            //return goGrabPlan1(interType.shoot1);
+        }
+
+
+        //Debug.Assert(theItemWeWant != null);
+
+        //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
+        return theItemWeWant.GetComponent<equippable2>().planshell;
     }
 
     public planEXE2 goGrabThenEquip(interType interTypeX)
@@ -60,8 +264,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         if (target == null) { return null; }
 
+        debugTargetDistance(this.gameObject, target);
+
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(walkToTarget2(target, 1.2f));
+        firstShell.Add(walkToTarget2(target, 0.8f));
         firstShell.Add(aimTargetPlan2(target));
         firstShell.Add(firePlan3(interType.standardClick, target));
         firstShell.untilListFinished();
@@ -97,10 +303,18 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //look at simpleDodge
         List<GameObject> threatList = threatListWithoutSelf();
 
-        Vector3 adHocThreatAvoidanceVector = new spatialDataPoint(threatListWithoutSelf(), this.transform.position).applePattern();
 
+        //conditionalPrint("inputs, threatList.Count:  " + threatList.Count);
+        //conditionalPrint("inputs, this.transform.position:  " + this.transform.position);
+        spatialDataPoint dataPoint = new spatialDataPoint(threatList, this.transform.position);
+        dataPoint.debugPrint = printThisNPC;
+
+        conditionalPrint("threatLineOfSight():  " + threatLineOfSight());
+        Vector3 adHocThreatAvoidanceVector = dataPoint.applePattern();
+
+        //conditionalPrint("output adHocThreatAvoidanceVector:  " + adHocThreatAvoidanceVector);
         placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
-        
+        //debugTargetDistance(this.gameObject, placeholderTarget1);
 
         return walkToTarget2(placeholderTarget1, 1.9f);
     }
@@ -122,6 +336,72 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     }
 
 
+    public void debugTargetDistance(GameObject object1, GameObject object2)
+    {
+
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (printThisNPC)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.green, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.red, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.magenta, 7f);
+        }
+
+
+    }
+
+
+
+    public bool hasNoGun()
+    {
+        rangedEnaction grabEnact1;
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interType.shoot1);
+
+
+
+        if (grabEnact1 == null)
+        {
+            //ummm sloppy for now
+            grabEnact1 = getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType.shoot1);
+        }
+
+        if (grabEnact1 == null) { return true; }
+
+        return false;
+    }
+
+    private rangedEnaction getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType interTypeX)
+    {
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
+
+        //oh no it can ALSO be null
+        if (theItemWeWant == null)
+        {
+            conditionalPrint("(theItemWeWant == null)");
+            //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
+            return null;
+            //return goGrabPlan1(interType.shoot1);
+        }
+
+
+        //Debug.Assert(theItemWeWant != null);
+
+        //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
+        return theItemWeWant.GetComponent<rangedEnaction>();
+    }
 
     private planEXE2 firePlan3(interType interTypeX, GameObject target)
     {
@@ -226,7 +506,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         planEXE2 theEXE = new vect3EXE2(theNavAgent, placeholderTarget1);
         proximity condition = new proximity(this.gameObject, placeholderTarget1, offsetRoom*1.4f);
+        condition.debugPrint =theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
+
+        theEXE.debugPrint = theNavAgent.debugPrint;
 
         return theEXE;
     }
@@ -241,41 +524,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
-
-    // Update is called once per frame
-    void Update()
-    {
-        adhocCooldown++;
-    }
-
-
-
-    public void callableUpdate()
-    {
-        //Debug.Log("=======================callableUpdate()............");
-        conditionalPrint("=======================callableUpdate()............");
-
-
-        if (fullPlan == null) { Debug.Log("fullPlan == null");
-                                fullPlan = combatBehaviorPlan1(); return; }
-
-        fullPlan.conditionalPrint(printThisNPC);
-        if (fullPlan.error()) { fullPlan = null; return; }
-        if (fullPlan.endConditionsMet() )
-        { //Debug.Log("fullPlan.endConditionsMet()");
-            conditionalPrint("fullPlan.endConditionsMet()");
-            fullPlan = combatBehaviorPlan1(); return; }
-
-
-        conditionalPrint("we have a plan, fullPlan.execute()");
-        fullPlan.conditionalPrint(printThisNPC);
-        fullPlan.execute();
-        
-    }
-
-
-
-    void randomWanderPlan()
+    public planEXE2 randomWanderPlan()
     {
         //ad-hoc hand-coded plan
 
@@ -287,6 +536,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //              enaction anEnaction = walkToTarget(target).theEnaction;
         //              buttonCategories theButtonCategory = anEnaction.gamepadButtonType;
         //              multiPlanAdd(walkToTarget(target), blankMultiPlan());
+
+        return walkToTarget2(target);
     }
 
 

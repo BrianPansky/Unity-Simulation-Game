@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using static interactionCreator;
 
 public class conditionCreator : MonoBehaviour
@@ -172,6 +173,7 @@ public class proximity : condition
     GameObject object1;
     GameObject object2;
     float desiredDistance = 4f;
+    public bool debugPrint = false;
 
     public proximity(GameObject object1, GameObject object2, float desiredDistance = 4f)
     {
@@ -191,6 +193,19 @@ public class proximity : condition
         //Debug.Log("distance:  " + distance);
         //Debug.Log("desiredDistance:  " + desiredDistance);
         //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up*105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
 
         if (distance > desiredDistance) { return false; }
 
