@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using static enactionCreator;
 using static interactionCreator;
 
 public class conditionCreator : MonoBehaviour
@@ -156,13 +157,27 @@ public interface condition
 {
 
     bool met();
+
+    string asText();
+    string asTextSHORT();
 }
 
 public class autoCondition : condition
 {
+
     bool condition.met()
     {
         return true;
+    }
+    
+    public string asText()
+    {
+        return "this is ''autoCondition'' (it is always true/met)";
+    }
+
+    public string asTextSHORT()
+    {
+        return "this is ''autoCondition'' (it is always true/met)";
     }
 }
 
@@ -211,6 +226,76 @@ public class proximity : condition
 
         return true;
     }
+    public string metAsText()
+    {
+        string stringToReturn = "";
+        bool theBool = false;
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
+
+        if (distance > desiredDistance) 
+        { theBool= false; }
+        else
+        {
+            theBool = true;
+        }
+
+
+
+
+
+
+
+
+
+
+        stringToReturn += "met?  " + theBool;
+        stringToReturn += ", distance:  " + distance;
+        stringToReturn += ", desiredDistance:  " + desiredDistance;
+
+        return stringToReturn;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+        stringToReturn += "proximity between 1)  " + object1 + ", and 2)  " + object2;
+        stringToReturn += ", [desiredDistance = " + desiredDistance + "]";
+        stringToReturn += ", [metAsText() = " + metAsText() + "]";
+
+
+        return stringToReturn;
+
+    }
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "aaa";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
 }
 
 public class enacted : condition
@@ -229,6 +314,27 @@ public class enacted : condition
         if (theEnactionEXE.numberOfTimesExecuted >= howManyTimesToEnact) { return true; }
 
         return false;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "bbb";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
     }
 }
 
@@ -258,6 +364,28 @@ public class cooldown : condition
     {
         cooldownTimer = cooldownMax;
     }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "ccc";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
 }
 
 public class numericalCondition : condition
@@ -275,6 +403,7 @@ public class numericalCondition : condition
         this.conditionValue = conditionValueIn;
     }
 
+
     public bool met()
     {
         //Debug.Log("theVariableType:  " + theVariableType);
@@ -282,6 +411,28 @@ public class numericalCondition : condition
         if (dictOfIvariables[theVariableType] < conditionValue) { return true; }
 
         return false;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "ddd";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+
     }
 }
 
@@ -299,8 +450,134 @@ public class planListComplete : condition
         //Debug.Log("planList.Count:  " + planList.Count);
         foreach (planEXE2 planEXE in planList)
         {
+            if(planEXE == null) { continue; } //messy annoying for now
             if (planEXE.endConditionsMet() == false) { return false; }
         }
         return true;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "eee";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+}
+
+
+public class adocThreatLineOfSightCondition : condition
+{
+
+    GameObject theObject;
+    bool returnTrueIfAThreatCanSeeThisObject = true;
+
+    public adocThreatLineOfSightCondition(GameObject theObjectIn, bool returnTrueIfAThreatCanSeeThisObjectIn = true)
+    {
+        theObject = theObjectIn;
+        returnTrueIfAThreatCanSeeThisObject = returnTrueIfAThreatCanSeeThisObjectIn;
+    }
+
+    public bool met()
+    {
+        AIHub3 theHub = theObject.GetComponent<AIHub3>();
+
+        bool threatLineOfSightBool = theHub.threatLineOfSight();
+        //Debug.Log("threatLineOfSightBool:  " + threatLineOfSightBool);
+        //Debug.Log("returnTrueIfAThreatCanSeeThisObject:  " + returnTrueIfAThreatCanSeeThisObject);
+        if (threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject)
+        {
+            //Debug.Log("(threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject), so return true"); 
+            return true; }
+
+        //Debug.Log("(threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject) is FALSE, so return false");
+        return false;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+    public string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfAThreatCanSeeThisObject)
+        {
+            stringToReturn += "do IF this object can be seen";
+        }
+        else
+        {
+            stringToReturn += "do if this object CANNOT be seen";
+        }
+
+        return stringToReturn;
+    }
+}
+
+public class adHocHasNoGunCondition: condition
+{
+
+    GameObject theObject;
+    bool returnTrueIfThereIsNoGun = true;
+
+
+    public adHocHasNoGunCondition(GameObject theObjectIn, bool returnTrueIfThereIsNoGunIn = true)
+    {
+        theObject = theObjectIn;
+        returnTrueIfThereIsNoGun = returnTrueIfThereIsNoGunIn;
+    }
+
+    public bool met()
+    {
+        AIHub3 theHub = theObject.GetComponent<AIHub3>();
+
+        bool hasNoGun = theHub.hasNoGun();
+        if(hasNoGun == returnTrueIfThereIsNoGun) { return true; }
+        return false;
+    }
+
+    public string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+    public string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThereIsNoGun)
+        {
+            stringToReturn += "do IF this object has NO gun";
+        }
+        else
+        {
+            stringToReturn += "do if this object HAS a gun";
+        }
+
+        return stringToReturn;
     }
 }

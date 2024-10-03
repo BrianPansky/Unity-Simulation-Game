@@ -17,6 +17,8 @@ public class shotgun1 : equippable2
     {
         test();  //well, no error.  which is how i did "callableAwake" before someone on reddit said i could just do "equippable2.Awake()"
         this.GetComponent<equippable2>().Awake();
+
+        //Physics.DefaultRaycastLayers;
     }
 
 

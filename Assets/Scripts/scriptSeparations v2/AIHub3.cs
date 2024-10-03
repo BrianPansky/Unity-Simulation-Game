@@ -16,7 +16,7 @@ using UnityEngine.Assertions;
 
 public class AIHub3 : planningAndImagination, IupdateCallable
 {
-
+    nestedLayerDebug debug;
     public NavMeshAgent currentNavMeshAgent;
     virtualGamepad vGpad;
 
@@ -28,21 +28,95 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     bool test = true;
 
 
+    public List<IupdateCallable> currentUpdateList { get; set; }
+
+    //public Dictionary<List<condition>, List<planEXE2>> adHocMultiGoalConditionDictionary = new Dictionary<List<condition>, List<planEXE2>>();
+    //List<adHocPlanRefillThing> adHocParallelPlanTypeThing = new List<adHocPlanRefillThing>();
+    List<planEXE2> SUPERadHocParallelPlanList = new List<planEXE2>();
+
+
     void Awake()
     {
-        placeholderTarget1 = new GameObject();
+        //placeholderTarget1 = new GameObject();
         vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
     }
-
-    public List<IupdateCallable> currentUpdateList { get; set; }
-    
 
     // Start is called before the first frame update
     void Start()
     {
         //Debug.Log("=================================      START      ===============================");
 
+        placeholderTarget1 = new GameObject();
+        placeholderTarget1.transform.parent = this.transform;
+
+        //      SUPERadHocParallelPlanList.Add(new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()));
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(safeGunless(), grabAndEquipPlan2(interType.shoot1)));
+        //adHocParallelPlanTypeThing.Add(new adHocGoGrabAndEquipRefill(safeGunless(), this));
+        //adHocParallelPlanTypeThing.Add(new adHocRandomWanderRefill(safeWithGun(), randomWanderPlan(), this.gameObject));
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(unsafeGunless(), combatDodgeWithoutGun()));
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(unsafeWithGun(), combatDodgeWithGun()));
+        //printThisNPC = true;
+        /*
+        adHocParallelPlanTypeThing.Add(new adHocPlanRefillThing(unsafeGunless(), combatDodgeWithoutGun()));
+        adHocParallelPlanTypeThing.Add(new adHocPlanRefillThing(unsafeWithGun(), combatDodgeWithGun()));
+        */
+
+        /*
+        threatLineOfSight()
+        hasNoGun()
+        adHocGoalConditionDictionary[safeGunless()] = grabAndEquipPlan2(interType.shoot1);
+        adHocGoalConditionDictionary[safeWithGun()] = randomWanderPlan();
+        adHocGoalConditionDictionary[unsafeGunless()] = combatDodgeWithoutGun();
+        adHocGoalConditionDictionary[unsafeWithGun()] = combatDodgeWithGun();
+
+        */
+
         //fullPlan = goGrabThenEquip(interType.shoot1);
+    }
+
+    public void SUPERadHocRefillThing()
+    {
+
+    }
+
+
+    private List<condition> unsafeWithGun()
+    {
+        List<condition> theList = new List<condition>();
+        theList.Add(new adocThreatLineOfSightCondition(this.gameObject));
+        theList.Add(new adHocHasNoGunCondition(this.gameObject, false));
+
+        return theList;
+    }
+
+    private List<condition> unsafeGunless()
+    {
+        List<condition> theList = new List<condition>();
+        theList.Add(new adocThreatLineOfSightCondition(this.gameObject));
+        theList.Add(new adHocHasNoGunCondition(this.gameObject));
+
+
+        return theList;
+    }
+
+    private List<condition> safeWithGun()
+    {
+        List<condition> theList = new List<condition>();
+        theList.Add(new adocThreatLineOfSightCondition(this.gameObject, false));
+        theList.Add(new adHocHasNoGunCondition(this.gameObject, false));
+
+
+        return theList;
+    }
+
+    private List<condition> safeGunless()
+    {
+        List<condition> theList = new List<condition>();
+        theList.Add(new adocThreatLineOfSightCondition(this.gameObject, false));
+        theList.Add(new adHocHasNoGunCondition(this.gameObject));
+
+
+        return theList;
     }
 
 
@@ -51,6 +125,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     // Update is called once per frame
     void Update()
     {
+        //conditionalPrint("=======================     REGULAR     Update()............");
         adhocCooldown++;
     }
 
@@ -59,7 +134,82 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public void callableUpdate()
     {
         //Debug.Log("=======================callableUpdate()............");
-        conditionalPrint("=======================callableUpdate()............");
+        //  conditionalPrint("======================================================callableUpdate()............");
+
+        int whichOne = 1;
+
+
+        SUPERadHocParallelPlanList.Add(null);
+        SUPERadHocParallelPlanList.Add(null);
+        SUPERadHocParallelPlanList.Add(null);
+        SUPERadHocParallelPlanList.Add(null);
+        SUPERadHocParallelPlanList.Add(null);
+
+        if (SUPERadHocParallelPlanList[whichOne - 1] ==null || SUPERadHocParallelPlanList[whichOne-1].error()) 
+        { SUPERadHocParallelPlanList[whichOne-1] = new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()); }
+        SUPERadHocParallelPlanList[whichOne-1].execute();
+
+        whichOne++;
+
+
+        if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
+        { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatDodgeWithoutGun(), unsafeGunless()); }
+        SUPERadHocParallelPlanList[whichOne - 1].execute();
+
+        whichOne++;
+
+        
+        if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
+        { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(randomWanderPlan(), safeWithGun()); }
+        SUPERadHocParallelPlanList[whichOne - 1].execute();
+
+        whichOne++;
+        
+
+
+        combatBehaviorPlan1();
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(unsafeWithGun(), combatDodgeWithGun()));
+
+        if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
+        { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan11(), unsafeWithGun()); }
+        SUPERadHocParallelPlanList[whichOne - 1].execute();
+
+        whichOne++;
+
+
+        if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
+        { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan12(), unsafeWithGun()); }
+        SUPERadHocParallelPlanList[whichOne - 1].execute();
+
+        whichOne++;
+
+
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(safeGunless(), grabAndEquipPlan2(interType.shoot1)));
+        //adHocParallelPlanTypeThing.Add(new adHocGoGrabAndEquipRefill(safeGunless(), this));
+        //adHocParallelPlanTypeThing.Add(new adHocRandomWanderRefill(safeWithGun(), randomWanderPlan(), this.gameObject));
+        //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(unsafeGunless(), combatDodgeWithoutGun()));
+
+        /*
+        foreach (adHocPlanRefillThing thing in adHocParallelPlanTypeThing)
+        {
+            thing.debugPrint = this.printThisNPC;
+            //debugPlanRefillThing(thing);
+            //  conditionalPrint(whichOne + ")  >>>>>>>>>>>>>>>>>>>>time to print an adhoc refill thing, we can identify it by its conditions:  ");
+            //  conditionalPrint(thing.conditionsAsText());
+
+
+
+            //      conditionalPrint("thing.doUpdate()");
+            thing.doUpdate();
+
+
+            //  conditionalPrint("///////////////////////////////////////////////////END of printouts for #" + whichOne);
+            whichOne++;
+        }
+        */
+
+
+        /*
 
         //plan or no plan
         //threat line of sight or no threat line of sight
@@ -120,7 +270,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         }
 
 
-
+        */
 
 
         /*
@@ -157,7 +307,70 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     }
 
 
-    private planEXE2 grabAndEquipPlan2(interType interTypeX)
+
+
+    public planEXE2 combatBehaviorPlan11()
+    {
+        //ad-hoc hand-written plan
+        GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
+
+        if (target2 == null)
+        {
+            //Debug.Log("can't do combat behavior plan, (target2 == null), probably this means the NPC is alone in the map zone, no one else is there to count as a ''threat''");
+            return null;
+        }
+
+        planEXE2 secondShell = new seriesEXE();
+        secondShell.Add(aimTargetPlan2(target2));
+        secondShell.Add(firePlan4(interType.shoot1, target2));
+        secondShell.untilListFinished();
+
+        //planEXE2 parallel = new parallelEXE(secondShell, combatDodgeEXE2());
+        //parallel.untilListFinished();
+        return secondShell;
+    }
+
+    public planEXE2 combatBehaviorPlan12()
+    {
+        return combatDodgeEXE2();
+    }
+
+
+
+
+
+
+
+
+
+
+
+    private void debugPlanRefillThing(adHocPlanRefillThing thing)
+    {
+        //Debug.Log("looooooooooooooop   thing:  " + thing);
+        //      conditionalPrint((":::::::::::::::::::    debugPlanRefillThing    ::::::::::::::::::::::  " + thing));
+        //      conditionalPrint(thing.conditionsAsText());
+        if (thing == null)
+        {
+            conditionalPrint("(thing == null)");
+            //Debug.Log("(thing == null)"); continue;
+        }
+        //Debug.Log("thing.doUpdate()");
+
+        if (thing == null) { return; }
+        if(thing.theCurrentPlan == null) { return; }
+        if (thing.theCurrentPlan.exeList == null) { return; }
+        //      conditionalPrint(("thing.theCurrentPlan.exeList.Count:  " + thing.theCurrentPlan.exeList.Count));
+
+        foreach (planEXE2 thisPlanEXE in thing.theCurrentPlan.exeList)
+        {
+
+            //      conditionalPrint(thisPlanEXE.asText());
+        }
+
+    }
+
+    public planEXE2 grabAndEquipPlan2(interType interTypeX)
     {
 
         planEXE2 zerothShell = new seriesEXE(goGrabPlan2(interTypeX));
@@ -165,6 +378,31 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         zerothShell.untilListFinished();
 
         return zerothShell;
+    }
+
+
+    private planEXE2 walkToObject(GameObject target, float offsetRoom = 0f)
+    {
+        if (target == null)
+        {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(target.GetInstanceID());
+            return null;
+        }
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
+        Debug.Assert(theNavAgent != null);
+
+
+        planEXE2 theEXE = new vect3EXE2(theNavAgent, target);
+        proximity condition = new proximity(this.gameObject, target, offsetRoom * 1.4f);
+        condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        theEXE.debugPrint = theNavAgent.debugPrint;
+
+        return theEXE;
     }
 
 
@@ -191,11 +429,13 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
         if (target == null) { return null; }
+        //Debug.DrawLine(this.gameObject.transform.position, target.transform.position, Color.magenta, 44f);
+
 
         debugTargetDistance(this.gameObject, target);
 
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(walkToTarget2(target, 0.8f));
+        firstShell.Add(walkToTarget2(target, 1.8f));
         firstShell.Add(aimTargetPlan2(target));
         firstShell.Add(firePlan4(interType.standardClick, target));
         firstShell.untilListFinished();
@@ -280,11 +520,15 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //ad-hoc hand-written plan
         GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
 
-        if(target2 == null) { return null; }
+        if(target2 == null) 
+        {
+            //Debug.Log("can't do combat behavior plan, (target2 == null), probably this means the NPC is alone in the map zone, no one else is there to count as a ''threat''");
+            return null; 
+        }
 
         planEXE2 secondShell = new seriesEXE();
         secondShell.Add(aimTargetPlan2(target2));
-        secondShell.Add(firePlan2nd2(interType.shoot1, target2));
+        secondShell.Add(firePlan4(interType.shoot1, target2));
         secondShell.untilListFinished();
 
         planEXE2 parallel = new parallelEXE(secondShell, combatDodgeEXE2());
@@ -313,6 +557,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         Vector3 adHocThreatAvoidanceVector = dataPoint.applePattern();
 
         //conditionalPrint("output adHocThreatAvoidanceVector:  " + adHocThreatAvoidanceVector);
+        //GameObject placeholderTarget1 = new GameObject();
         placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
         //debugTargetDistance(this.gameObject, placeholderTarget1);
 
@@ -390,7 +635,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //oh no it can ALSO be null
         if (theItemWeWant == null)
         {
-            conditionalPrint("(theItemWeWant == null)");
+            //      conditionalPrint("(theItemWeWant == null)");
             //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
             return null;
             //return goGrabPlan1(interType.shoot1);
@@ -501,6 +746,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         Vector3 targetPosition = target.transform.position;
         Vector3 between = targetPosition - this.transform.position;
+        //GameObject placeholderTarget1 = new GameObject();
         placeholderTarget1.transform.position = targetPosition - between.normalized * offsetRoom;
 
 
@@ -532,28 +778,33 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //[though...........those navpoints are never DELETED............]
         //[they should have just ONE "nextNav" object, and just MOVE it around ???]
 
-        GameObject target = createNavpointInRandomDirection();
+        //  GameObject target = createNavpointInRandomDirection();
+        placeholderTarget1.transform.position=this.transform.position;
+        moveToRandomNearbyLocation(placeholderTarget1);
         //              enaction anEnaction = walkToTarget(target).theEnaction;
         //              buttonCategories theButtonCategory = anEnaction.gamepadButtonType;
         //              multiPlanAdd(walkToTarget(target), blankMultiPlan());
 
-        return walkToTarget2(target);
+        return walkToTarget2(placeholderTarget1);
     }
 
 
     public GameObject createNavpointInRandomDirection()
     {
         GameObject theNavpoint = new GameObject();
-
-        float initialDistance = 2f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(0, 33);
-        theNavpoint.transform.position += new Vector3(initialDistance+ randomAdditionalDistance, 0,0);
-        randomAdditionalDistance = UnityEngine.Random.Range(0, 33);
-        theNavpoint.transform.position += new Vector3(0,0, initialDistance + randomAdditionalDistance);
+        moveToRandomNearbyLocation(theNavpoint);
 
         return theNavpoint;
     }
 
+    private static void moveToRandomNearbyLocation(GameObject theObject)
+    {
+        float initialDistance = 0.1f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(20, 443);
+        theObject.transform.position += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(0, 133);
+        theObject.transform.position += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+    }
 
     public bool threatLineOfSight()
     {

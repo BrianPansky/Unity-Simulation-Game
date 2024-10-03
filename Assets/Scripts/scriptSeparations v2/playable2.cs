@@ -66,7 +66,7 @@ public class playable2 : interactable2
     {
         enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1(), playable2 script"); //hmm, shouldn't playable2 AND equippable2s both have this?  a class encompassing them both?
         enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.5f;
+        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.5f + this.transform.up * 0.1f;
         enactionPoint1.transform.rotation = this.transform.rotation;
 
     }

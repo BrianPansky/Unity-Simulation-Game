@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
+using static UnityEngine.GraphicsBuffer;
 
 public class planningAndImagination : MonoBehaviour
 {
@@ -178,6 +179,7 @@ public abstract class planEXE2
     //public inputData theInputData;
 
     public bool debugPrint = false;
+    nestedLayerDebug debug;
 
     //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
     public List<planEXE2> exeList;
@@ -191,19 +193,73 @@ public abstract class planEXE2
 
     public abstract bool error();
 
+
+    public string nestedPlanCountToText()
+    {
+        string stringToReturn = "";
+
+        if (exeList == null) { return "[(exeList == null), no nested plans to count]"; }
+        if (exeList.Count == 0) { return "[(exeList.Count == 0), no nested plans to count]"; }
+
+        stringToReturn += "[exeList.Count = " + exeList.Count;
+
+        foreach(planEXE2 thisPlan in exeList)
+        {
+            if (thisPlan !=null)
+            {
+
+                stringToReturn += thisPlan.nestedPlanCountToText();
+            }
+        }
+
+
+        stringToReturn += "]";
+
+        return stringToReturn;
+    }
+
+
+    public bool standardExecuteErrors()
+    {
+        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return true; }
+
+        //conditionalPrint("startConditionsMet():  "+ startConditionsMet());
+        if (startConditionsMet() == false) { return true; }
+
+        return false;
+    }
+
     public void executeSequential()
     {
+        //conditionalPrint("x1 nestedPlanCountToText():  " + nestedPlanCountToText());
         //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
 
         //sequential concerns:
         //      only execute 1st one
         //      remove item from list when its end conditions are met
 
-        if (exeList == null) { Debug.Log("null.....that's an error!"); return; }
+        if (exeList == null) { //Debug.Log("null.....that's an error!"); 
+            return; }
 
-        if (exeList.Count < 1) { Debug.Log("exeList.Count < 1       shouldn't happen?"); return; }
+        if (exeList.Count < 1) { 
+            //Debug.Log("exeList.Count < 1       shouldn't happen?"); 
+            return; }
 
-        exeList[0].execute();
+
+        if (exeList[0] == null)
+        { //Debug.Log("null.....that's an error!"); 
+            return;
+        }
+
+        exeList[0].debugPrint = debugPrint;
+        //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+        if (startConditionsMet())
+        {
+            exeList[0].execute();
+        }
+
+        //conditionalPrint("x3 nestedPlanCountToText():  " + nestedPlanCountToText());
 
         if (exeList[0].endConditionsMet())
         {
@@ -213,8 +269,17 @@ public abstract class planEXE2
                 //Debug.Log("exeList[0].endConditionsMet()  for theEnaction:  " + exeList[0].theEnaction);
             }
 
-            exeList.RemoveAt(0); return;
+
+            //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
+            //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
+            exeList.RemoveAt(0);
+
+            //conditionalPrint("x5 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+            return;
         }
+
+        //conditionalPrint("x6 nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
     public void executeParallel()
@@ -243,14 +308,9 @@ public abstract class planEXE2
 
 
 
-    public void Add(planEXE2 itemToAdd)
-    {
-        if(exeList == null) { exeList = new List<planEXE2>(); }
-        exeList.Add(itemToAdd);
-    }
-
     public bool startConditionsMet()
     {
+        //Debug.Log("tartConditions.Count:  " + startConditions.Count);
         foreach (condition thisCondition in startConditions)
         {
             //Debug.Log("thisCondition:  " + thisCondition);
@@ -262,32 +322,44 @@ public abstract class planEXE2
                 return false; }
         }
 
-        if(debugPrint == true) { Debug.Log("no start conditions remain unfulfilled!"); }
+        //Debug.Log("no start conditions remain unfulfilled!");
         //Debug.Log("no conditions remain unfulfilled!");
         return true;
     }
+    
     public bool endConditionsMet()
     {
         //Debug.Log("looking at end conditions for:  " + this);
 
-        if (debugPrint == true) { Debug.Log("-----------------------------looking at end conditions for:  " + theEnaction);
-            Debug.Log("number of end conditions:  " + endConditions.Count);
+        if (debugPrint == true) 
+        {
+            if(theEnaction != null)
+            {
+                //  conditionalPrint("-----------------------------looking at end conditions for a single enaction:  " + theEnaction.ToString());
+            }
+            else if(exeList != null)
+            {
+
+                //conditionalPrint("...............................looking at end conditions for an exeList???  the count of the list:  " + exeList.Count);
+            }
+            else
+            {
+                conditionalPrint("uhhhhhhhhh.....???????????? both the enaction AND the exeList are null...........");
+            }
         }
         //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
         foreach (condition thisCondition in endConditions)
         {
-
-            if (debugPrint == true) { Debug.Log("thisCondition:  " + thisCondition); }
+            //conditionalPrint("thisCondition:  " + thisCondition);
             //Debug.Log("thisCondition:  " + thisCondition);
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false) {
-
-                if (debugPrint == true) { Debug.Log("this end condition not met:  "+ thisCondition); }
+                //conditionalPrint("this end condition not met:  "+ thisCondition);
                 return false; }
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
-        if (debugPrint == true) { Debug.Log("no end conditions remain unfulfilled!"); }
+        //conditionalPrint("no end conditions remain unfulfilled!");
         //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
 
         return true;
@@ -316,12 +388,15 @@ public abstract class planEXE2
         theString += ":  ";
         theString += theEnaction;
 
-        if(exeList ==null) { return theString; }
+        theString += conditionsAsText();
+
+        if (exeList ==null) { return theString; }
 
 
         theString += "[ ";
         foreach (planEXE2 plan in exeList)
         {
+            if(plan == null) { theString += "(plan == null)"; continue; }
             theString += plan.asText();
             theString += ", ";
         }
@@ -330,31 +405,66 @@ public abstract class planEXE2
         return theString;
     }
 
-    internal void conditionalPrint(bool printThisNPC)
+
+
+    public string conditionsAsText()
     {
-        if (printThisNPC == false) { return; }
+        string stringToReturn = "";
 
-        /*
-        Debug.Log("theEnaction:  "+ theEnaction);
+        stringToReturn += "number of START conditions:  " + startConditions.Count;
 
-        if (exeList == null) { return; }
-        Debug.Log("exeList:  [");
-        foreach (planEXE2 plan in exeList)
+        foreach (condition condition in startConditions)
         {
-            plan.conditionalPrint(printThisNPC);
+            stringToReturn += ", ";
+            stringToReturn += condition.asText();
         }
-        Debug.Log("]");
-        */
+        stringToReturn += ", number of END conditions:  " + endConditions.Count;
 
-        Debug.Log(asText());
+        foreach (condition condition in endConditions)
+        {
+            stringToReturn += ", ";
+            stringToReturn += condition.asText();
+        }
 
+
+        return stringToReturn;
+    }
+
+
+    internal void conditionalPrint(string thingToPrint)
+    {
+        if (debugPrint == false) { return; }
+
+
+        Debug.Log(thingToPrint);
+
+    }
+
+
+
+
+
+    public void Add(planEXE2 itemToAdd)
+    {
+        if (exeList == null) { exeList = new List<planEXE2>(); }
+        exeList.Add(itemToAdd);
+    }
+
+    internal void Add(List<planEXE2> addFromList)
+    {
+
+        if (exeList == null) { exeList = new List<planEXE2>(); }
+        foreach (planEXE2 item in addFromList)
+        {
+            exeList.Add(item); 
+        }
     }
 }
 
 
 public abstract class singleEXE : planEXE2
 {
-    private GameObject target;
+    //private GameObject target;
 
     
 
@@ -375,15 +485,18 @@ public class boolEXE2 : singleEXE
 
     public override void execute()
     {
+        conditionalPrint("aaaaaa.1111111111111aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        if (standardExecuteErrors()) { return; }
 
-        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return; }
-
-        if (startConditionsMet() == false) { return; }
-
+        conditionalPrint("should enact this:  " + this.theEnaction);
+        theEnaction.debugPrint = debugPrint;
         theEnaction.enact(new inputData());
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
+
+        conditionalPrint("aaaaaa.1111111111111bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
+
 
     public override bool error()
     {
@@ -393,6 +506,17 @@ public class boolEXE2 : singleEXE
     public boolEXE2(IEnactaBool theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
+    }
+
+
+
+    internal void conditionalPrint(string thingToPrint)
+    {
+        if (debugPrint == false) { return; }
+
+
+        Debug.Log(thingToPrint);
+
     }
 }
 
@@ -414,40 +538,89 @@ public class vect2EXE2 : singleEXE
 
 public class vect3EXE2 : singleEXE
 {
-    public GameObject theTarget;
+    public GameObject target;
+    public Vector3 targetAsVector;
+    public float offsetRoom = 0f;
+
+
+    public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget, float offsetRoomIn = 0f)
+    {
+        this.theEnaction = theInputEnaction;
+        this.target = theTarget;
+        this.offsetRoom = offsetRoomIn;
+    }
 
 
     public override void execute()
     {
-
-        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return; }
-        if (theTarget == null) { 
+        //conditionalPrint("aaaaaa.2222222222222aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        if (target == null) { 
             Debug.Log("null.....that's an error!");
-            Debug.Log(theTarget.GetInstanceID()); 
+            Debug.Log(target.GetInstanceID()); 
             return; }
 
-        if (startConditionsMet() == false) { return; }
+        if (standardExecuteErrors()) { return; }
+
+        conditionalPrint("should enact this:  " + this.theEnaction);
+        //Debug.Log("theTarget:  " + target);
 
 
-        if (debugPrint == true) { Debug.Log("should enact this:  " + this.theEnaction); }
-        theEnaction.enact(new inputData(theTarget.transform.position));
+        theEnaction.enact(new inputData(offsetDestination(target.transform.position)));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
+        //conditionalPrint("aaaaaa.2222222222222bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
-    public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
+
+    public Vector3 offsetDestination(Vector3 theOriginalDestination)
     {
-        this.theEnaction = theInputEnaction;
-        this.theTarget = theTarget;
+        Vector3 theOffsetDestination = new Vector3();
+
+
+        Vector3 targetPosition = target.transform.position;
+        Vector3 between = targetPosition - theEnaction.transform.position;
+        //placeholderTarget1.transform.position = targetPosition - between.normalized * offsetRoom;
+        theOffsetDestination = targetPosition - between.normalized * offsetRoom;
+
+
+        return theOffsetDestination;
     }
 
+
+    /*
+
+    public override string asText()
+    {
+        string theString = "";
+
+        theString += this.ToString();
+        theString += ":  ";
+        theString += theEnaction;
+
+        if (exeList == null) { return theString; }
+
+
+        theString += "[ ";
+        foreach (planEXE2 plan in exeList)
+        {
+            theString += plan.asText();
+            theString += ", ";
+        }
+
+        theString += "]";
+        return theString;
+    }
+
+    */
 
     public override bool error()
     {
-        if (theTarget == null) {
+        if (target == null) {
 
-            if (debugPrint == true) { Debug.Log("null target error"); }
-            
+            conditionalPrint("null target error");
+
+            //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,null target error");
+
             return true; }
 
         return false;
@@ -456,7 +629,7 @@ public class vect3EXE2 : singleEXE
     public vect3EXE2(IEnactaVector theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
-        this.theTarget = theTarget;
+        this.target = theTarget;
     }
 }
 
@@ -501,7 +674,9 @@ public class parallelEXE : planEXE2
 
     public override void execute()
     {
+        //conditionalPrint("aaaaaa.3333333333333aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
         executeParallel();
+        //conditionalPrint("aaaaaa.3333333333333bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
@@ -509,7 +684,16 @@ public class parallelEXE : planEXE2
     {
         foreach (planEXE2 exe in exeList)
         {
-            if (exe == null || exe.error()) { return true; }
+            if (exe == null)
+            {
+                conditionalPrint("error (in a parallelEXE):  (exe == null)");
+                return true;
+            }
+            if (exe.error())
+            {
+                conditionalPrint("error (in a parallelEXE):  exe.error(), for THIS exe:  " + exe.asText());
+                return true;
+            }
         }
 
         return false;
@@ -526,6 +710,19 @@ public class seriesEXE : planEXE2
     {
         Add(item);
         //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+    }
+    public seriesEXE(planEXE2 item, List<condition> listOfCOnditionsIn)
+    {
+        Add(item);
+
+        //Debug.Log("0listOfCOnditionsIn.Count:  " + listOfCOnditionsIn.Count);
+        //Debug.Log("1startConditions.Count:  " + startConditions.Count);
+        foreach (var x in listOfCOnditionsIn)
+        {
+            startConditions.Add(x);
+            //Debug.Log("2startConditions.Count:  " + startConditions.Count);
+        }
+        
     }
     public seriesEXE(planEXE2 item1, planEXE2 item2)
     {
@@ -551,17 +748,541 @@ public class seriesEXE : planEXE2
 
     public override void execute()
     {
+        conditionalPrint("aaaaaa.4444444444444aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        //conditionalPrint("exeList.Count:  "+ exeList.Count);
         executeSequential();
+        conditionalPrint("aaaaaa.4444444444444bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
     public override bool error()
     {
+
+        if (exeList == null)
+        {
+            conditionalPrint("error:  (exeList == null)");
+            return true;
+        }
+
+        if (exeList.Count < 1)
+        {
+            conditionalPrint("error:  (exeList.Count < 1) [might often just mean end of plan, i think]");
+            return true;
+        }
+
+        //|| exeList.Count < 1) { return true; }
+
+
+        //hmm, those EXEs should have their OWN ability to check for errors?  but.....well, not if they're NULL they won't.......
         foreach (planEXE2 exe in exeList)
         {
-            if (exe == null || exe.error()) { return true; }
+            if (exe == null)
+            {
+
+                conditionalPrint("error:  (exe == null)");
+                return true;
+            }
+
+            if (exe.error())
+            {
+
+                conditionalPrint("error:  exe.error(), for this exe:  " +exe.asText());
+                return true;
+            }
+
+            // || ) { return true; }
         }
 
         return false;
     }
+}
+
+
+
+public abstract class adHocPlanRefillThing
+{
+    public List<condition> theConditions = new List<condition>();
+
+    public planEXE2 theRefillPlan;
+
+    public planEXE2 theCurrentPlan = new seriesEXE();
+    public bool debugPrint = false;
+    nestedLayerDebug debug;
+
+
+    /*
+    public adHocPlanRefillThing(List<condition> theConditions, planEXE2 theRefillPlan)
+    {
+        //List<condition> theConditionsIn, List<planEXE2> theRefillPlanIn
+        this.theConditions = theConditions;
+        this.theRefillPlan = asSeries(theRefillPlan);
+        //if(this.theRefillPlan == null) { this.error()}
+        theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
+    }
+    */
+
+    public planEXE2 asSeries(planEXE2 theRefillPlan)
+    {
+        //shallow copy!  don't use for current plan!
+
+        if(theRefillPlan == null) {return null; }
+        if(theRefillPlan.exeList == null)
+        {
+            return new seriesEXE(theRefillPlan);
+        }
+
+        return theRefillPlan;
+    }
+
+    public abstract void doUpdate();
+
+
+    public void standardUpdate()
+    {
+
+        //conditionalPrint(">>>>> theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+        //Debug.Log(">>>>>>>trying to do an update for an ''adHocPlanRefillThing''");
+
+        //implement if conditions met, remove completed planEXEs
+        //refill current plan if it's empty
+        //if (theCurrentPlan == null || theCurrentPlan.exeList == null || theCurrentPlan.exeList.Count == 0) { refill(); }
+
+
+        //conditionalPrint("standard update (for adhoc refill thing).  first, does currentPlan have any errors?");
+
+
+        //conditionalPrint("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxrefill thing:  " + theRefillPlan.asText());
+
+        transferDebugBool();
+
+        refillIfNeeded();
+
+
+        //Debug.Log("----------------------------doCurrentPlan():  " + theCurrentPlan.asText());
+        doCurrentPlan();
+    }
+
+    private void transferDebugBool()
+    {
+        if (theCurrentPlan != null)
+        {
+            theCurrentPlan.debugPrint = debugPrint;
+        }
+    }
+
+    private void refillIfNeeded()
+    {
+        if (theCurrentPlan == null)
+        {
+            //Debug.Log("theCurrentPlan == null:  " + (theCurrentPlan == null));
+            refill();
+            //Debug.Log("theCurrentPlan == null:  " + (theCurrentPlan == null));
+        }
+        /*
+        else if (theCurrentPlan.exeList == null)
+        {
+            Debug.Log("theCurrentPlan.exeList == null:  " + (theCurrentPlan.exeList == null));
+            refill();
+            Debug.Log("theCurrentPlan.exeList == null:  " + (theCurrentPlan.exeList == null));
+
+        }
+        else if (theCurrentPlan.exeList.Count == 0)
+        {
+            Debug.Log("theCurrentPlan.exeList.Count == 0:  " + (theCurrentPlan.exeList.Count == 0));
+            refill();
+            Debug.Log("theCurrentPlan.exeList.Count == 0:  " + (theCurrentPlan.exeList.Count == 0));
+        }
+        */
+        else if (theCurrentPlan.error())
+        {
+            conditionalPrint("theCurrentPlan.error(), refilling");
+            refill();
+        }
+        else if (theCurrentPlan.endConditionsMet())
+        {
+            conditionalPrint("theCurrentPlan.endConditionsMet()");
+            refill();
+        }
+    }
+
+    public abstract void refill();
+
+    public void standardRefill()
+    {
+        //conditionalPrint("standardRefill()");
+        //conditionalPrint("1111111111111111111111111111 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+        //Debug.Log("theRefillPlan.asText():  " + theRefillPlan.asText());
+        if (theRefillPlan == null)
+        {
+            //conditionalPrint("(theRefillPlan == null)");
+            return; }  //seems very messy
+
+
+
+        List<planEXE2> refillWithThis = new List<planEXE2>();
+
+
+
+        //conditionalPrint("********************* theRefillPlan.exeList.Count:  " + theRefillPlan.exeList.Count);
+        //conditionalPrint("********************* theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+
+        foreach (planEXE2 plan in theRefillPlan.exeList)
+        {
+            //conditionalPrint("******** add this:  " + plan.asText());
+            refillWithThis.Add(plan);
+        }
+
+
+        theCurrentPlan.Add(refillWithThis);
+
+        //conditionalPrint("this.theCurrentPlan" + this.theCurrentPlan);
+        //conditionalPrint("this.theCurrentPlan.exeList" + this.theCurrentPlan.exeList);
+        //conditionalPrint("this.theCurrentPlan.exeList.Count" + this.theCurrentPlan.exeList.Count);
+        //conditionalPrint("2222222222222222222222222 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+    }
+
+    private void doCurrentPlan()
+    {
+
+        //      conditionalPrint(storedMessage);
+        //conditionalPrint("we have a plan, fullPlan.execute()");
+        //fullPlan.conditionalPrint(printThisNPC);
+
+
+        //conditionalPrint("00000000000000000000000000000 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+
+        //well this is a messy way to do this, only an EXE should do this....ya...i'm reinventing my EXEs.....:
+        if (startConditionsMet())
+        {
+
+            //  conditionalPrint("startConditionsMet(), so execute this:  " + theCurrentPlan.asText());
+            //Debug.Log("theCurrentPlan.execute()");
+            //conditionalPrint("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+            theCurrentPlan.execute();
+            //conditionalPrint("bbbbbbbbbbbbbbbbbbbbbbbbbbbbb theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
+        }
+        else
+        {
+            //  conditionalPrint("start Conditions NOT Met(), so DON'T execute");
+        }
+
+
+    }
+
+
+    public bool startConditionsMet()
+    {
+        foreach (condition thisCondition in theConditions)
+        {
+            //Debug.Log("thisCondition, met?:  " + thisCondition + ",  " + thisCondition.met());
+            //Debug.Log("thisCondition.met():  " + thisCondition.met());
+            if (thisCondition.met() == false)
+            {
+                //Debug.Log("this start condition not met:  " + thisCondition);
+
+                return false;
+            }
+        }
+
+        //Debug.Log("no start conditions remain unfulfilled!");
+        //Debug.Log("no conditions remain unfulfilled!");
+        return true;
+    }
+
+    public abstract string asText();
+
+    public abstract string conditionsAsText();
+
+    public abstract string conditionsAsTextDETAIL();
+
+
+
+
+
+    public void conditionalPrint(string toPrint)
+    {
+        if (debugPrint == false) { return; }
+        Debug.Log(toPrint);
+    }
+
+}
+
+
+
+public class adHocRefillThingGeneral : adHocPlanRefillThing
+{
+    public adHocRefillThingGeneral(List<condition> theConditionsIn, planEXE2 theRefillPlanIn)// : base(theConditions, theRefillPlan)
+    {
+        //why is it requiring me to include this?  especially for the weird reason of what INPUT it has.  who cares what input it has???
+
+        //List<condition> theConditionsIn, List<planEXE2> theRefillPlanIn
+        this.theConditions = theConditionsIn;
+        this.theRefillPlan = asSeries(theRefillPlanIn);
+        //conditionalPrint("this.theRefillPlan" + this.theRefillPlan);
+        //conditionalPrint("this.theRefillPlan.exeList" + this.theRefillPlan.exeList);
+        //conditionalPrint("this.theRefillPlan.exeList.Count" + this.theRefillPlan.exeList.Count);
+        //  this.theCurrentPlan = asSeries(theRefillPlanIn);
+        standardRefill();
+        //conditionalPrint("this.theCurrentPlan" + this.theCurrentPlan);
+        //conditionalPrint("this.theCurrentPlan.exeList" + this.theCurrentPlan.exeList);
+        //conditionalPrint("this.theCurrentPlan.exeList.Count" + this.theCurrentPlan.exeList.Count);
+        //if(this.theRefillPlan == null) { this.error()}
+        if (theCurrentPlan == null)
+        {
+            //can happen.......
+            return;
+        }
+        theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
+
+    }
+
+    public override void doUpdate()
+    {
+        standardUpdate();
+    }
+
+    public override void refill()
+    {
+        standardRefill();
+    }
+
+
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += conditionsAsText();
+
+        return stringToReturn;
+    }
+
+    public override string conditionsAsText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "number of conditions:  " + theConditions.Count;
+
+        foreach (condition condition in theConditions)
+        {
+            stringToReturn += ", ";
+            //stringToReturn += condition.ToString();
+            stringToReturn += condition.asTextSHORT();
+        }
+
+        return stringToReturn;
+    }
+    public override string conditionsAsTextDETAIL()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "number of conditions:  " + theConditions.Count;
+
+        foreach (condition condition in theConditions)
+        {
+            stringToReturn += ", ";
+            stringToReturn += condition.asText();
+        }
+
+        return stringToReturn;
+    }
+
+
+}
+
+public class adHocRandomWanderRefill : adHocPlanRefillThing
+{
+    GameObject enactorObject;
+
+    public adHocRandomWanderRefill(List<condition> theConditionsIn, planEXE2 theRefillPlanIn, GameObject enactorObjectIn)// : base(theConditions, theRefillPlan) //wtf is this???
+    {
+        //why is it requiring me to include this?  especially for the weird reason of what INPUT it has.  who cares what input it has???
+        this.theConditions = theConditionsIn;
+        this.theRefillPlan = theRefillPlanIn;
+        this.enactorObject = enactorObjectIn;
+    }
+
+    public override void doUpdate()
+    {
+        if(theCurrentPlan != null && theCurrentPlan.exeList !=null && theCurrentPlan.exeList.Count > 0)
+        {
+            //Debug.Log("*********************theCurrentPlan.exeList[0].endConditionsMet():  " + theCurrentPlan.exeList[0].endConditionsMet());
+            foreach (condition thisCondition in theCurrentPlan.exeList[0].endConditions)
+            {
+                //Debug.Log(thisCondition.asText());
+            }
+        }
+        standardUpdate();
+    }
+
+    public override void refill()
+    {
+
+        conditionalPrint("[adHocRandomWanderRefill] RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRefilllll!!!!!!!!!!!!!!");
+        theCurrentPlan = asSeries(randomWanderPlan());
+        theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
+    }
+
+
+    private planEXE2 walkToObject(GameObject target, float offsetRoom = 1.10f)
+    {
+
+        //gaggggg what a mess
+
+
+
+        if (target == null)
+        {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(target.GetInstanceID());
+            return null;
+        }
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        //      navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
+        vect3EXE2 theEXE = (vect3EXE2)theRefillPlan.theEnaction.toEXE(target);  //gaaaaaaahhhhhhhhhh messy
+        //theNavAgent.target
+        //Debug.Assert(theNavAgent != null);
+
+
+        //planEXE2 theEXE = new vect3EXE2(theNavAgent, target);
+        //      theEXE.endConditions = theRefillPlan.endConditions;
+        proximity condition = new proximity(enactorObject, target, offsetRoom * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        //theEXE.debugPrint = theNavAgent.debugPrint;
+
+        return theEXE;
+    }
+
+    public planEXE2 randomWanderPlan()
+    {
+        //ad-hoc hand-coded plan
+
+        //k, they go to random navpoints, great
+        //[though...........those navpoints are never DELETED............]
+        //[they should have just ONE "nextNav" object, and just MOVE it around ???]
+
+        //  GameObject target = createNavpointInRandomDirection();
+        GameObject placeholderTarget1 = new GameObject();
+        moveToRandomNearbyLocation(placeholderTarget1);
+        //              enaction anEnaction = walkToTarget(target).theEnaction;
+        //              buttonCategories theButtonCategory = anEnaction.gamepadButtonType;
+        //              multiPlanAdd(walkToTarget(target), blankMultiPlan());
+
+        return walkToObject(placeholderTarget1);
+    }
+
+    private static void moveToRandomNearbyLocation(GameObject theObject)
+    {
+        float initialDistance = 2f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(0, 33);
+        theObject.transform.position += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(0, 33);
+        theObject.transform.position += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+    }
+
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+
+
+        return stringToReturn;
+    }
+
+
+
+
+
+
+    public override string conditionsAsText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "number of conditions:  " + theConditions.Count;
+
+        foreach (condition condition in theConditions)
+        {
+            stringToReturn += ", ";
+            //stringToReturn += condition.ToString();
+            stringToReturn += condition.asTextSHORT();
+        }
+
+        return stringToReturn;
+    }
+
+    public override string conditionsAsTextDETAIL()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "number of conditions:  " + theConditions.Count;
+
+        foreach (condition condition in theConditions)
+        {
+            stringToReturn += ", ";
+            stringToReturn += condition.asText();
+        }
+
+        return stringToReturn;
+    }
+
+
+
+}
+
+public class adHocGoGrabAndEquipRefill : adHocPlanRefillThing
+{
+
+    AIHub3 theAIHub;  //wowwwww very adhoc...really just indicates i need to put the code there instead?  or some kind of refactor
+
+
+
+    public adHocGoGrabAndEquipRefill(List<condition> theConditionsIn, AIHub3 theAIHubIn)
+    {
+        theAIHub = theAIHubIn;
+
+        theRefillPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.shoot1)); //i don't need this, but i had some printouts that needed it, so i'm duct taping it together by giving them this
+
+        this.theConditions = theConditionsIn;
+        standardRefill();
+    }
+
+
+    public override void doUpdate()
+    {
+        standardUpdate();
+    }
+
+    public override void refill()
+    {
+        theCurrentPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.shoot1));
+        theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
+    }
+
+
+
+
+
+
+
+
+
+    public override string asText()
+    {
+        return "asText not implemented";
+    }
+
+    public override string conditionsAsText()
+    {
+        return "conditionsAsText not implemented";
+    }
+
+    public override string conditionsAsTextDETAIL()
+    {
+        return "conditionsAsTextDETAIL not implemented";
+    }
+
 }

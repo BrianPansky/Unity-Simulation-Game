@@ -71,9 +71,21 @@ public abstract class enaction : MonoBehaviour
 {
     public buttonCategories gamepadButtonType { get; set; }
 
+    public bool debugPrint = false;
+
     abstract public void enact(inputData theInput);
 
     abstract public planEXE2 toEXE(GameObject target);
+
+
+    internal void conditionalPrint(string thingToPrint)
+    {
+        if (debugPrint == false) { return; }
+
+
+        Debug.Log(thingToPrint);
+
+    }
 }
 
 public abstract class IEnactaBool: enaction
@@ -140,7 +152,7 @@ public class navAgent : IEnactByTargetVector
 {
     //only for vector inputs!
     NavMeshAgent theAgent;
-    public bool debugPrint = false;
+    //public bool debugPrint = false;
     public static void addNavAgentEnaction(GameObject objectToAddNavmeshAgentTo)
     {
         navAgent nA = objectToAddNavmeshAgentTo.AddComponent<navAgent>();
@@ -179,7 +191,14 @@ public class navAgent : IEnactByTargetVector
         Debug.Assert(theAgent != null);
         Debug.Assert(theInput != null);
         //if(debugPrint == true) { Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?"); }
-        
+
+        //Debug.Log("theInput.vect3:  " + theInput.vect3);
+
+        Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.green, 2f);
+        Debug.DrawLine(theInput.vect3, theAgent.transform.position, Color.blue, 2f);
+        Debug.DrawLine(theInput.vect3, new Vector3(), Color.red, 2f);
+
+        conditionalPrint("nav agent enacting");
         theAgent.SetDestination(theInput.vect3);
     }
 }
@@ -221,6 +240,7 @@ public class aimTarget : IEnactByTargetVector
         theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
 
 
+        conditionalPrint("enacting:  " + this);
         Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.cyan, 0.02f);
 
     }
@@ -392,22 +412,34 @@ public class hitscanEnactor: rangedEnaction
 
     override public void enact(inputData theInput)
     {
+        //conditionalPrint("enacting:  " + this);
         firingByRaycastHit(range);
     }
 
 
     public void firingByRaycastHit(float theRange)
     {
+
+        conditionalPrint("try raycast firing.......");
         RaycastHit myHit;
         Ray myRay = new Ray(firePoint.transform.position + firePoint.transform.forward, firePoint.transform.forward);
 
-        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) == false) { return; }
-        if (myHit.transform == null) { return; }
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) == false) {
 
+            conditionalPrint("raycast = false, so, didn't hit anything?"); 
+            return; }
+        if (myHit.transform == null)
+        {
+            conditionalPrint("(myHit.transform == null), so, didn't hit anything???"); 
+            return; }
+
+
+
+        conditionalPrint("successfully hit SOMETHING, so firing:  " + myHit.transform);
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
         colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
-        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.white, 1f);
+        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.cyan, 7f);
 
         firingCooldown--;
     }

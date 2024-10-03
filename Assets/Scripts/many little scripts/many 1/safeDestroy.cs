@@ -9,7 +9,7 @@ public class safeDestroy : MonoBehaviour
     {
         if (Application.isPlaying == false) { return; }
 
-        Debug.Log("//////////////   safe destroy:  " + this.gameObject.GetInstanceID());
+        //Debug.Log("//////////////   safe destroy:  " + this.gameObject.GetInstanceID());
 
         tagging2.singleton.removeAllTagsAndZone(this.gameObject);
 
