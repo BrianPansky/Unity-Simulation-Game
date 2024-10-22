@@ -20,10 +20,12 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public NavMeshAgent currentNavMeshAgent;
     virtualGamepad vGpad;
 
-    GameObject placeholderTarget1;
+    adHocDebuggerForGoGrabPlan grabberDebug;
+
+    //GameObject placeholderTarget1;
 
     int adhocCooldown = 0;
-    public bool printThisNPC = false;
+    public bool printThisNPC = true;
     string storedMessage = "";
     bool test = true;
 
@@ -37,6 +39,8 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     void Awake()
     {
+        grabberDebug = this.gameObject.AddComponent<adHocDebuggerForGoGrabPlan>();
+        //Debug.Log("!!!!!!!:  " + grabberDebug);
         //placeholderTarget1 = new GameObject();
         vGpad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
     }
@@ -46,8 +50,19 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //Debug.Log("=================================      START      ===============================");
 
+        /*
         placeholderTarget1 = new GameObject();
-        placeholderTarget1.transform.parent = this.transform;
+        placeholderTarget1 = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab, Vector3.zero);
+
+        Renderer objectsRenderer = placeholderTarget1.GetComponent<Renderer>();
+        if (objectsRenderer != null)
+        {
+            objectsRenderer.material.color = new Color(0f, 0f, 1f);
+        }
+
+        placeholderTarget1.transform.position = this.transform.position;
+
+        */
 
         //      SUPERadHocParallelPlanList.Add(new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()));
         //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(safeGunless(), grabAndEquipPlan2(interType.shoot1)));
@@ -134,6 +149,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public void callableUpdate()
     {
         //Debug.Log("=======================callableUpdate()............");
+        //conditionalPrint("=======================callableUpdate()............");
         //  conditionalPrint("======================================================callableUpdate()............");
 
         int whichOne = 1;
@@ -145,8 +161,30 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         SUPERadHocParallelPlanList.Add(null);
         SUPERadHocParallelPlanList.Add(null);
 
+        /*
+
+        if(SUPERadHocParallelPlanList[whichOne - 1] == null)
+        {
+            conditionalPrint("(SUPERadHocParallelPlanList[whichOne - 1] == null)");
+            SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(testGoTo(interType.shoot1));
+
+        }
+        if (SUPERadHocParallelPlanList[whichOne - 1].error())
+        {
+            conditionalPrint("(SUPERadHocParallelPlanList[whichOne - 1].error())");
+            SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(testGoTo(interType.shoot1)); 
+        }
+
+        SUPERadHocParallelPlanList[whichOne - 1].execute();
+        */
+
         if (SUPERadHocParallelPlanList[whichOne - 1] ==null || SUPERadHocParallelPlanList[whichOne-1].error()) 
         { SUPERadHocParallelPlanList[whichOne-1] = new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()); }
+
+        //Debug.Log("???:  " + grabberDebug);
+        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //Debug.Log("SUPERadHocParallelPlanList[whichOne - 1].grabberDebug???:  " + SUPERadHocParallelPlanList[whichOne - 1].grabberDebug);
+        SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne-1].execute();
 
         whichOne++;
@@ -154,6 +192,9 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatDodgeWithoutGun(), unsafeGunless()); }
+
+        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
         whichOne++;
@@ -161,17 +202,23 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(randomWanderPlan(), safeWithGun()); }
+
+        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
         whichOne++;
         
 
 
-        combatBehaviorPlan1();
+        //combatBehaviorPlan1();
         //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(unsafeWithGun(), combatDodgeWithGun()));
 
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan11(), unsafeWithGun()); }
+
+        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
         whichOne++;
@@ -179,9 +226,17 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan12(), unsafeWithGun()); }
+
+        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
         whichOne++;
+
+
+
+
+
 
 
         //adHocParallelPlanTypeThing.Add(new adHocRefillThingGeneral(safeGunless(), grabAndEquipPlan2(interType.shoot1)));
@@ -309,6 +364,111 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
+    public planEXE2 FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
+    {
+        //do NOT MOVE the "placeholderTarget1" anywhere in this script!
+        //ONLY move it INSIDE the actual enactions!
+        //or, don't even use it at all?
+
+
+
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.debugPrint = printThisNPC;
+        firstShell.Add(makeNavAgentPlanEXE(possiblyMobileActualTarget, offset));
+        firstShell.untilListFinished();
+
+        return firstShell;
+
+
+    }
+
+
+    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
+    {
+        //do NOT MOVE the "placeholderTarget1" anywhere in this script!
+        //ONLY move it INSIDE the actual enactions!
+        //or, don't even use it at all?
+
+
+
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.debugPrint = printThisNPC;
+        firstShell.Add(makeNavAgentPlanEXE(stationaryTargetPosition, offset));
+        firstShell.untilListFinished();
+
+        return firstShell;
+
+
+    }
+
+
+    private planEXE2 makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
+
+
+        planEXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        theEXE.debugPrint = printThisNPC;
+
+
+        proximity condition = new proximity(this.gameObject, staticTargetPosition, offsetRoom * 1.4f);
+        condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+
+
+
+    private planEXE2 makeNavAgentPlanEXE(GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
+    {
+        if (possiblyMobileActualTarget == null)
+        {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
+            return null;
+        }
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
+
+
+        planEXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+        theEXE.debugPrint = printThisNPC;
+
+
+        proximity condition = new proximity(this.gameObject, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public planEXE2 combatBehaviorPlan11()
     {
         //ad-hoc hand-written plan
@@ -429,19 +589,87 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
         if (target == null) { return null; }
-        //Debug.DrawLine(this.gameObject.transform.position, target.transform.position, Color.magenta, 44f);
+        Debug.DrawLine(this.gameObject.transform.position, target.transform.position, Color.magenta, 7f);
 
 
-        debugTargetDistance(this.gameObject, target);
+        //      debugTargetDistance(this.gameObject, target);
 
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(walkToTarget2(target, 1.8f));
+        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 1.8f));
         firstShell.Add(aimTargetPlan2(target));
-        firstShell.Add(firePlan4(interType.standardClick, target));
+
+
+        adHocBooleanDeliveryClass signalThatFiringIsDone = new adHocBooleanDeliveryClass();
+
+
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(this.gameObject, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        Debug.Assert(theHitscanEnactor !=null);
+        theHitscanEnactor.firingIsDone = signalThatFiringIsDone;
+        planEXE2 hitscanEXE = standardEXEconversion(theHitscanEnactor);
+        firstShell.Add(hitscanEXE);
         firstShell.untilListFinished();
+
+        playable2 theNPCplayable = this.GetComponent<playable2>();
+        //      condition theRangeCondition = new proximity(theNPCplayable.enactionPoint1, target, 0f);
+
+        //      hitscanEXE.startConditions.Add(theRangeCondition);
+
+        interactable2 theNPCinteractable = this.GetComponent<interactable2>();
+
+        Dictionary<condition, List<Ieffect>> conditionalEffectsIn = theNPCinteractable.conditionalEffects;
+        targetCalculator theTargetCalculator = new movableObjectTargetCalculator(this.gameObject, target);
+
+        firstShell.doConditionalEffectsAdHocDebugThing(theTargetCalculator, theHitscanEnactor, grabberDebug, conditionalEffectsIn, signalThatFiringIsDone);
 
         return firstShell;
     }
+
+    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
+    private planEXE2 standardEXEconversion(enaction theEnactionIn)
+    {
+        planEXE2 exe1 = theEnactionIn.toEXE(null);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+    
+
+
 
     private planEXE2 firePlan4(interType interTypeX, GameObject target)
     {
@@ -507,7 +735,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         debugTargetDistance(this.gameObject, target);
 
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(walkToTarget2(target, 0.8f));
+        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 0.8f));
         firstShell.Add(aimTargetPlan2(target));
         firstShell.Add(firePlan3(interType.standardClick, target));
         firstShell.untilListFinished();
@@ -553,15 +781,15 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         spatialDataPoint dataPoint = new spatialDataPoint(threatList, this.transform.position);
         dataPoint.debugPrint = printThisNPC;
 
-        conditionalPrint("threatLineOfSight():  " + threatLineOfSight());
+        //conditionalPrint("threatLineOfSight():  " + threatLineOfSight());
         Vector3 adHocThreatAvoidanceVector = dataPoint.applePattern();
 
         //conditionalPrint("output adHocThreatAvoidanceVector:  " + adHocThreatAvoidanceVector);
         //GameObject placeholderTarget1 = new GameObject();
-        placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
+        //                      placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
         //debugTargetDistance(this.gameObject, placeholderTarget1);
 
-        return walkToTarget2(placeholderTarget1, 1.9f);
+        return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position), 1.9f);
     }
 
     private planEXE2 equipX2(interType interTypeX)
@@ -733,36 +961,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         return exe1;
     }
 
-    private planEXE2 walkToTarget2(GameObject target, float offsetRoom = 0f)
-    {
-        if (target == null) {
-            Debug.Log("target is null, so plan to walk to target is null");
-            Debug.Log(target.GetInstanceID());
-            return null; }
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-        Debug.Assert(theNavAgent != null);
-
-        Vector3 targetPosition = target.transform.position;
-        Vector3 between = targetPosition - this.transform.position;
-        //GameObject placeholderTarget1 = new GameObject();
-        placeholderTarget1.transform.position = targetPosition - between.normalized * offsetRoom;
-
-
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, placeholderTarget1);
-        proximity condition = new proximity(this.gameObject, placeholderTarget1, offsetRoom*1.4f);
-        condition.debugPrint =theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        theEXE.debugPrint = theNavAgent.debugPrint;
-
-        return theEXE;
-    }
-
-
-
-
 
 
 
@@ -779,13 +977,13 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //[they should have just ONE "nextNav" object, and just MOVE it around ???]
 
         //  GameObject target = createNavpointInRandomDirection();
-        placeholderTarget1.transform.position=this.transform.position;
-        moveToRandomNearbyLocation(placeholderTarget1);
+        //                      placeholderTarget1.transform.position=this.transform.position;
+        //                      moveToRandomNearbyLocation(placeholderTarget1);
         //              enaction anEnaction = walkToTarget(target).theEnaction;
         //              buttonCategories theButtonCategory = anEnaction.gamepadButtonType;
         //              multiPlanAdd(walkToTarget(target), blankMultiPlan());
 
-        return walkToTarget2(placeholderTarget1);
+        return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position));
     }
 
 
@@ -804,6 +1002,18 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         theObject.transform.position += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
         randomAdditionalDistance = UnityEngine.Random.Range(0, 133);
         theObject.transform.position += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+    }
+
+    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
+    {
+        Vector3 vectorToReturn = positionToBeNear;
+        float initialDistance = 15f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(-50, 50);
+        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-50, 50);
+        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+
+        return vectorToReturn;
     }
 
     public bool threatLineOfSight()

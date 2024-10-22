@@ -409,7 +409,7 @@ public class spatialDataPoint
 
         //generalPointData1();
 
-        if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
+        //          if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
 
         foreach (spatialDataPointFragment thisFragment in fragmentList)
         {

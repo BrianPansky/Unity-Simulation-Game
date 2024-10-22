@@ -110,13 +110,14 @@ public abstract class IEnactaBool: enaction
 
 public abstract class IEnactaVector : enaction
 {
+    //???????????????????  is IEnactaVector different from IEnactByTargetVector?????????
 
     public void enact(Vector2 inputV2)
     {
         enact(new inputData(inputV2));
     }
 
-
+    //why the fuck is enact twice here????????????????????????????????????????????????
     public void enact(Vector3 inputV3)
     {
         enact(new inputData(inputV3));
@@ -194,11 +195,17 @@ public class navAgent : IEnactByTargetVector
 
         //Debug.Log("theInput.vect3:  " + theInput.vect3);
 
-        Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.green, 2f);
-        Debug.DrawLine(theInput.vect3, theAgent.transform.position, Color.blue, 2f);
-        Debug.DrawLine(theInput.vect3, new Vector3(), Color.red, 2f);
+        /*
+        if (debugPrint == true)
+        {
 
-        conditionalPrint("nav agent enacting");
+            Debug.DrawLine(new Vector3(), theAgent.transform.position, Color.green, 2f);
+            Debug.DrawLine(theInput.vect3, theAgent.transform.position, Color.blue, 2f);
+            Debug.DrawLine(theInput.vect3, new Vector3(), Color.red, 2f);
+        }
+        */
+
+        conditionalPrint("~~~~~~~~~~   nav agent enacting   ~~~~~~~~");
         theAgent.SetDestination(theInput.vect3);
     }
 }
@@ -337,7 +344,7 @@ public abstract class rangedEnaction: collisionEnaction
 {
     public Transform firePoint;
     //or put these in projectile info?  i guess here makes sense, ALL the info in this class is projectile info, but divide by PARTS, the bullet is a different part than the gun or whatever
-    public float range = 3.6f;
+    public float range = 113.6f;
     //need to put these in a gun class, or "launcher"/"firer" class or something...and all the "generator" stuff above?:
     public int firingCooldown = 0;
     public int firingCooldownMax = 20;
@@ -385,18 +392,28 @@ public class projectileLauncher: rangedEnaction
 
 public class hitscanEnactor: rangedEnaction
 {
-    public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 4f)
+
+    GameObject raycastHitOut;
+    public targetCalculator theHitCalculatorOut;
+    public adHocBooleanDeliveryClass firingIsDone;
+
+    public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 114f)
     {
-        hitscanEnactor hE = objectToAddItTo.AddComponent<hitscanEnactor>();
-        hE.gamepadButtonType = gamepadButtonType;
-        hE.interInfo = interInfo;
+        hitscanEnactor newHitscanEnactor = objectToAddItTo.AddComponent<hitscanEnactor>();
+        newHitscanEnactor.gamepadButtonType = gamepadButtonType;
+        newHitscanEnactor.interInfo = interInfo;
 
-        hE.firePoint = firePoint;
-        hE.range = range;
+        newHitscanEnactor.firePoint = firePoint;
+        newHitscanEnactor.range = range;
 
-        hE.theCooldown = new cooldown(0);
+        newHitscanEnactor.theCooldown = new cooldown(0);
+
+
     }
 
+
+
+    /*
 
     public hitscanEnactor(Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 7f)
     {
@@ -408,7 +425,7 @@ public class hitscanEnactor: rangedEnaction
 
     }
 
-
+    */
 
     override public void enact(inputData theInput)
     {
@@ -422,7 +439,7 @@ public class hitscanEnactor: rangedEnaction
 
         conditionalPrint("try raycast firing.......");
         RaycastHit myHit;
-        Ray myRay = new Ray(firePoint.transform.position + firePoint.transform.forward, firePoint.transform.forward);
+        Ray myRay = new Ray(firePoint.transform.position, firePoint.transform.forward);
 
         if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) == false) {
 
@@ -436,10 +453,16 @@ public class hitscanEnactor: rangedEnaction
 
 
         conditionalPrint("successfully hit SOMETHING, so firing:  " + myHit.transform);
+        theHitCalculatorOut = new movableObjectTargetCalculator(this.gameObject, myHit.transform.gameObject);
+        if(firingIsDone != null)  //player doesn't have these fancy debug things!  so causes error if player does it....
+        {
+
+            firingIsDone.theBoolSignal = true;
+        }
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
         colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
-        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.cyan, 7f);
+        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.cyan, 17f);
 
         firingCooldown--;
     }

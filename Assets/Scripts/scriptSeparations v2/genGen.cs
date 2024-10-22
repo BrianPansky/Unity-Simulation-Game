@@ -65,6 +65,9 @@ public class genGen : MonoBehaviour
 
 
         newObj.AddComponent<CapsuleCollider>();
+
+
+        //newObj.transform.localScale = new Vector3(1, 0.5f, 1);
         return newObj;
     }
 
@@ -138,6 +141,7 @@ public class genGen : MonoBehaviour
     public GameObject returnShotgun1(Vector3 where)
     {
         GameObject newObj = Instantiate(repository2.singleton.shotgun1, where, Quaternion.identity);
+        //      newObj.transform.localScale = new Vector3(128, 1, 8);
 
         return newObj;
     }

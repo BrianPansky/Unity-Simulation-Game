@@ -142,6 +142,7 @@ public class interactable2 : zoneable2
 
 
     public Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+    //hmm, i should just build these conditional effects into CONDITIONS THEMSELVES?  [except i want some to require MULTIPLE conditions......sooo....make a "condition set" class?  put it all in there?][i mean mulit-condition IS a condition, so is "if ANY one of these conditions is met" or "if any TWO of these conditions is met", etc][thus, conditions ARE the condition shell, some just need to be multi-condition conditions that accept other conditions too.  but all of them, even SINGLE conditions ones, have built in ability to do effects]
     public Dictionary<condition, List<Ieffect>> conditionalEffects = new Dictionary<condition, List<Ieffect>>();
 
 
@@ -154,8 +155,10 @@ public class interactable2 : zoneable2
         //so, this is called when interacted with [may need to distinguish between BEFORE interaction and AFTER?]
         //after interaction is done, check all conditional effects to see if any of them have been triggered.
 
+        //Debug.Log("for this object:  " + this.gameObject + ", conditionalEffects.Keys.Count:  " + conditionalEffects.Keys.Count);
         foreach (condition thisCondition in conditionalEffects.Keys)
         {
+            //Debug.Log("thisCondition:  "+ thisCondition);
             if (thisCondition.met() == false) { continue; }
 
             foreach (Ieffect thisEffect in conditionalEffects[thisCondition])
@@ -170,6 +173,7 @@ public class interactable2 : zoneable2
 
     void Update()
     {
+        //Debug.Log("?????????????????????????????????????????");
         doConditionalEffectsIfMet();
     }
 }
@@ -181,6 +185,28 @@ public interface Ieffect
     //why does it take interactionInfo?  effects should be separate from their causes, so shouldn't need that?  probably no author too?
     //looks like "theInfo" is used to do some ad-hoc CONDITIONS.  but i should just use my/a condition system for that.
     void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
+}
+
+public class adHocDebugEffect : Ieffect
+{
+
+    adHocDebuggerForGoGrabPlan theDebugger;
+    condition theCondition;
+
+    public adHocDebugEffect(adHocDebuggerForGoGrabPlan theDebuggerIn, condition theCondition)
+    {
+        theDebugger = theDebuggerIn;
+        this.theCondition = theCondition;
+    }
+
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    {
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //addToReport
+        //report += "[ raycast did NOT hit intended target.  -(intendedTarget:  " + intendedTarget + " - whatRaycastHit: " + whatRaycastHit + ")-";
+
+        theDebugger.recordFailedCondition(theCondition);
+    }
 }
 
 public class numericalEffect : Ieffect
@@ -277,3 +303,41 @@ public class putInInventory : Ieffect
     }
 }
 
+
+
+public class conditionalEffects
+{
+    public Dictionary<condition, List<Ieffect>> theDictionary = new Dictionary<condition, List<Ieffect>>();
+
+
+    public conditionalEffects(condition condition1, Ieffect effect1)
+    {
+        List<Ieffect> anEffectList = new List<Ieffect>();
+        anEffectList.Add(effect1);
+        theDictionary.Add(condition1, anEffectList);
+    }
+
+    public void doConditionalEffectsIfMet()//call when interacted with?
+    {
+        //is there a better way to do this?  observer broadcast whatevers?
+        //whatever, try this for now?
+
+        //so, this is called when interacted with [may need to distinguish between BEFORE interaction and AFTER?]
+        //after interaction is done, check all conditional effects to see if any of them have been triggered.
+
+        //Debug.Log("for this object:  " + this.gameObject + ", conditionalEffects.Keys.Count:  " + conditionalEffects.Keys.Count);
+        foreach (condition thisCondition in theDictionary.Keys)
+        {
+            //Debug.Log("thisCondition:  "+ thisCondition);
+            if (thisCondition.met() == false) { continue; }
+
+            foreach (Ieffect thisEffect in theDictionary[thisCondition])
+            {
+                //Debug.Log("this.gameObject:  "+ this.gameObject);
+                //yaaaaaaaaaaaaa nullls, so need to fix somehow.....
+                thisEffect.implementEffect(null, null, interactionCreator.singleton.arbitraryInterInfo());  //seems messy...
+            }
+        }
+    }
+
+}

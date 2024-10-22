@@ -180,6 +180,7 @@ public abstract class planEXE2
 
     public bool debugPrint = false;
     nestedLayerDebug debug;
+    public adHocDebuggerForGoGrabPlan grabberDebug;// = new adHocDebuggerForGoGrabPlan();
 
     //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
     public List<planEXE2> exeList;
@@ -192,6 +193,24 @@ public abstract class planEXE2
     public abstract void execute();
 
     public abstract bool error();
+
+
+    public void doConditionalEffectsAdHocDebugThing(targetCalculator theTargetCalculatorIn, hitscanEnactor theHitscanEnactorIn, adHocDebuggerForGoGrabPlan grabberDebugIn, Dictionary<condition, List<Ieffect>> conditionalEffectsIn, adHocBooleanDeliveryClass signalThatFiringIsDone)
+    {
+        //okSuperAdhocPlaceToDoThisDebugNonsense
+
+        targetMatchesHitscanOutput theCondition = new targetMatchesHitscanOutput(theTargetCalculatorIn);//, theHitCalculatorIn);
+
+        theCondition.firingIsDone = signalThatFiringIsDone;
+        theCondition.theHitScanner = theHitscanEnactorIn;
+
+        Ieffect theEffect = new adHocDebugEffect(grabberDebugIn, theCondition);
+        List<Ieffect> theEffects = new List<Ieffect>();
+        theEffects.Add(theEffect);
+        conditionalEffectsIn[theCondition] = theEffects;
+    }
+
+
 
 
     public string nestedPlanCountToText()
@@ -231,6 +250,8 @@ public abstract class planEXE2
 
     public void executeSequential()
     {
+
+        //conditionalPrint("executeSequential()");
         //conditionalPrint("x1 nestedPlanCountToText():  " + nestedPlanCountToText());
         //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
 
@@ -252,10 +273,19 @@ public abstract class planEXE2
         }
 
         exeList[0].debugPrint = debugPrint;
+
+        exeList[0].grabberDebug = grabberDebug;
+        //      conditionalPrint("5555555555555555555555555555grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
+        //      grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
         //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
 
         if (startConditionsMet())
         {
+
+            //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
+            //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
+            //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
+            //conditionalPrint("///////////////////////////////////////////////////////////////////////");
             exeList[0].execute();
         }
 
@@ -284,7 +314,6 @@ public abstract class planEXE2
 
     public void executeParallel()
     {
-
         if (exeList == null) { Debug.Log("null.....that's an error!"); ; return; }
 
         //if null.....that's an error!
@@ -294,6 +323,8 @@ public abstract class planEXE2
 
         foreach (planEXE2 plan in exeList)
         {
+
+            plan.grabberDebug = grabberDebug;
             plan.execute();
             if (plan.endConditionsMet()) { completedItems.Add(plan); }
         }
@@ -310,6 +341,7 @@ public abstract class planEXE2
 
     public bool startConditionsMet()
     {
+        grabberDebug.debugPrintBool = debugPrint;
         //Debug.Log("tartConditions.Count:  " + startConditions.Count);
         foreach (condition thisCondition in startConditions)
         {
@@ -317,8 +349,8 @@ public abstract class planEXE2
             //Debug.Log("thisCondition.met():  " + thisCondition.met());
             if (thisCondition.met() == false) {
 
-                if (debugPrint == true) { Debug.Log("this start condition not met:  " + thisCondition); }
-                
+                //if (debugPrint == true) { Debug.Log("this start condition not met:  " + thisCondition); }
+                //      grabberDebug.rep
                 return false; }
         }
 
@@ -485,16 +517,18 @@ public class boolEXE2 : singleEXE
 
     public override void execute()
     {
-        conditionalPrint("aaaaaa.1111111111111aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        //conditionalPrint("7777777777777777777777777777grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
+        grabberDebug.recordCurrentEnaction(this.theEnaction);
+        //conditionalPrint("aaaaaa.1111111111111aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
         if (standardExecuteErrors()) { return; }
 
-        conditionalPrint("should enact this:  " + this.theEnaction);
+        //conditionalPrint("should enact this:  " + this.theEnaction);
         theEnaction.debugPrint = debugPrint;
         theEnaction.enact(new inputData());
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
 
-        conditionalPrint("aaaaaa.1111111111111bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        //conditionalPrint("aaaaaa.1111111111111bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
@@ -538,53 +572,82 @@ public class vect2EXE2 : singleEXE
 
 public class vect3EXE2 : singleEXE
 {
-    public GameObject target;
-    public Vector3 targetAsVector;
-    public float offsetRoom = 0f;
+    //public GameObject possiblyMobileActualTarget;
+    //public Vector3 stationaryTargetAsVector;
+    //public float offsetRoom = 0f;
+
+    targetCalculator theTargetCalculator;
 
 
-    public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget, float offsetRoomIn = 0f)
+    public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject possiblyMobileActualTargetIn, float offsetRoomIn = 1.8f)
     {
         this.theEnaction = theInputEnaction;
-        this.target = theTarget;
-        this.offsetRoom = offsetRoomIn;
+        //this.possiblyMobileActualTarget = possiblyMobileActualTargetIn;
+        //this.offsetRoom = offsetRoomIn;
+
+        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn, offsetRoomIn);
+    }
+
+
+    public vect3EXE2(IEnactByTargetVector theInputEnaction, Vector3 stationaryTargetAsVectorIn, float offsetRoomIn = 1.8f)
+    {
+        this.theEnaction = theInputEnaction;
+        //this.stationaryTargetAsVector = stationaryTargetAsVectorIn;
+        //this.offsetRoom = offsetRoomIn;
+
+        theTargetCalculator = new staticVectorTargetCalculator(this.theEnaction.transform.gameObject, stationaryTargetAsVectorIn, offsetRoomIn);
+
+    }
+
+    public vect3EXE2(IEnactaVector theInputEnaction, GameObject possiblyMobileActualTargetIn, float offsetRoomIn = 1.8f)
+    {
+        //!!!!!!!!!!!!! used to fix this error:
+        //cannot convert from 'IEnactaVector' to 'IEnactByTargetVector'
+        //!!!!!!!!!!!
+
+
+        this.theEnaction = theInputEnaction;
+        //this.possiblyMobileActualTarget = theTarget;
+        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn, offsetRoomIn);
+
     }
 
 
     public override void execute()
     {
-        //conditionalPrint("aaaaaa.2222222222222aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
-        if (target == null) { 
-            Debug.Log("null.....that's an error!");
-            Debug.Log(target.GetInstanceID()); 
-            return; }
 
         if (standardExecuteErrors()) { return; }
 
-        conditionalPrint("should enact this:  " + this.theEnaction);
+        //conditionalPrint("should enact this:  " + this.theEnaction);
         //Debug.Log("theTarget:  " + target);
 
 
-        theEnaction.enact(new inputData(offsetDestination(target.transform.position)));
+        //theEnaction.enact(new inputData(offsetDestination(target.transform.position)));
+        //conditionalPrint("(target:  " + target);
+        //conditionalPrint("(target.transform.position:  " + target.transform.position);
+
+        inputData theInput = new inputData();
+
+        if (debugPrint == true)
+        {
+            Debug.DrawLine(new Vector3(), theEnaction.transform.position, Color.green, 2f);
+            Debug.DrawLine(theInput.vect3, theEnaction.transform.position, Color.blue, 2f);
+        }
+
+        if (debugPrint == true)
+        {
+            Debug.DrawLine(theInput.vect3, theEnaction.transform.position, Color.red, 3f);
+        }
+
+
+        //conditionalPrint("8888888888888888888888888888grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
+        grabberDebug.recordCurrentEnaction(theEnaction);
+        theEnaction.enact(new inputData(theTargetCalculator.targetPosition()));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
         //conditionalPrint("aaaaaa.2222222222222bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
-
-    public Vector3 offsetDestination(Vector3 theOriginalDestination)
-    {
-        Vector3 theOffsetDestination = new Vector3();
-
-
-        Vector3 targetPosition = target.transform.position;
-        Vector3 between = targetPosition - theEnaction.transform.position;
-        //placeholderTarget1.transform.position = targetPosition - between.normalized * offsetRoom;
-        theOffsetDestination = targetPosition - between.normalized * offsetRoom;
-
-
-        return theOffsetDestination;
-    }
 
 
     /*
@@ -615,22 +678,9 @@ public class vect3EXE2 : singleEXE
 
     public override bool error()
     {
-        if (target == null) {
-
-            conditionalPrint("null target error");
-
-            //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,null target error");
-
-            return true; }
-
         return false;
     }
 
-    public vect3EXE2(IEnactaVector theInputEnaction, GameObject theTarget)
-    {
-        this.theEnaction = theInputEnaction;
-        this.target = theTarget;
-    }
 }
 
 
@@ -748,10 +798,13 @@ public class seriesEXE : planEXE2
 
     public override void execute()
     {
-        conditionalPrint("aaaaaa.4444444444444aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        //conditionalPrint("execute()");
+        //Debug.Log("???:  "+ grabberDebug);
+        grabberDebug.debugPrintBool = debugPrint;
+        //conditionalPrint("aaaaaa.4444444444444aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
         //conditionalPrint("exeList.Count:  "+ exeList.Count);
         executeSequential();
-        conditionalPrint("aaaaaa.4444444444444bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
+        //conditionalPrint("aaaaaa.4444444444444bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
@@ -779,7 +832,7 @@ public class seriesEXE : planEXE2
             if (exe == null)
             {
 
-                conditionalPrint("error:  (exe == null)");
+                //                  conditionalPrint("error:  (exe == null)");
                 return true;
             }
 
@@ -1285,4 +1338,82 @@ public class adHocGoGrabAndEquipRefill : adHocPlanRefillThing
         return "conditionsAsTextDETAIL not implemented";
     }
 
+}
+
+
+
+public abstract class targetCalculator
+{
+    public GameObject targeter;
+    public float offset = 1.8f;
+
+    public abstract Vector3 targetPosition();
+    public abstract Vector3 realPositionOfTarget();
+
+    public string asTextString = "";
+
+    public Vector3 calculateOffsetTargetPosition(GameObject targeter, Vector3 targetPositionVector)
+    {
+
+        Vector3 between = targetPositionVector - targeter.transform.position;
+        //GameObject placeholderTarget1 = new GameObject();
+        Vector3 calculatedOffsetTarget = targetPositionVector - between.normalized * offset;
+        //Debug.DrawLine(this.gameObject.transform.position, //placeholderTarget1.transform.position, Color.black, 7f);
+
+        return calculatedOffsetTarget;
+    }
+
+
+    internal string asText()
+    {
+        return asTextString;
+    }
+}
+
+public class movableObjectTargetCalculator : targetCalculator
+{
+    GameObject target;
+
+    public movableObjectTargetCalculator(GameObject targeterIn, GameObject targetIn, float offsetIn = 1.8f)
+    {
+        targeter = targeterIn;
+        target = targetIn;
+        offset = offsetIn;
+        asTextString= targeterIn.ToString();
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        return target.transform.position;
+    }
+
+    public override Vector3 targetPosition()
+    {
+        return calculateOffsetTargetPosition(targeter, target.transform.position);
+    }
+
+
+}
+
+public class staticVectorTargetCalculator : targetCalculator
+{
+    Vector3 targetPositionVector;
+
+    public staticVectorTargetCalculator(GameObject targeterIn, Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    {
+        targeter = targeterIn;
+        targetPositionVector = targetPositionVectorIn;
+        offset = offsetIn;
+        asTextString = "static vector:  " + targetPositionVectorIn;
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        return targetPositionVector;
+    }
+
+    public override Vector3 targetPosition()
+    {
+        return calculateOffsetTargetPosition(targeter, targetPositionVector);
+    }
 }

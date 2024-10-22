@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class debugTools : MonoBehaviour
     {
         
     }
+
+
 }
 
 
@@ -67,4 +70,145 @@ public class nestedLayerDebug
 
         Debug.Log(toPrint);
     }
+}
+
+
+public class adHocDebuggerForGoGrabPlan: MonoBehaviour
+{
+    public bool debugPrintBool = false;
+    string report = "";
+    //string recordOfCurrentEnaction = "";
+    string recordOfEnactionThisFrame = "";
+    string recordOfEnactionPreviousFrame = "";
+
+    //"true" means going, "false" means stopped
+    bool stopStartBoolThisFrame = false;
+    bool stopStartBoolPreviousFrame = false;
+
+    public void Update()
+    {
+
+        //conditionalPrint("this.GetInstanceID():  " + this.GetInstanceID());
+        quickStopStartNote();
+        if (reportConditionsMet() == false)
+        {
+
+            //conditionalPrint("xxxxxxxxxxxxxxxxxxxxxxxx     (reportConditionsMet() == false)        xxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            return;
+        }
+
+
+        conditionalPrint("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@     report        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        report += recordOfEnactionThisFrame;
+        conditionalPrint(report);
+
+        report = "";
+    }
+
+    private void quickStopStartNote()
+    {
+        //"true" means going, "false" means stopped
+        if (stopStartBoolThisFrame == false && stopStartBoolPreviousFrame == true)
+        {
+            conditionalPrint("enaction STOPPED");
+        }
+        else
+        if (stopStartBoolThisFrame == true && stopStartBoolPreviousFrame == false)
+        {
+            conditionalPrint("enaction STARTED");
+        }
+    }
+
+    private bool reportConditionsMet()
+    {
+        //hmm, no, lots if this should be moved to the other funtions?  i think?  like i'm doing in "didRaycastHitCorrectTarget"
+        //well, no, i want to prevent ALL reports unless some criteria are met?  maybe?  eh, dunno
+        if (debugPrintBool == false) { return false; }
+
+
+        //conditionalPrint("recordOfEnactionThisFrame:  " + recordOfEnactionThisFrame);
+        //conditionalPrint("recordOfEnactionPreviousFrame:  " + recordOfEnactionPreviousFrame);
+        //conditionalPrint("recordOfEnactionThisFrame==recordOfEnactionPreviousFrame???" + (recordOfEnactionThisFrame == recordOfEnactionPreviousFrame));
+        if (recordOfEnactionThisFrame==recordOfEnactionPreviousFrame) { return false; }
+
+        return true;
+    }
+
+    public void recordCurrentEnaction(enaction theEnaction)
+    {
+        //conditionalPrint("recordCurrentEnaction");
+        recordOfEnactionPreviousFrame = recordOfEnactionThisFrame;
+        if (theEnaction == null)
+        {
+            //conditionalPrint("(theEnaction == null)");
+            recordOfEnactionThisFrame = "(theEnaction == null)";
+            return ;
+        }
+
+
+        //conditionalPrint("1recordOfEnactionPreviousFrame:  " + recordOfEnactionPreviousFrame);
+        recordOfEnactionPreviousFrame = recordOfEnactionThisFrame;
+        //conditionalPrint("2recordOfEnactionPreviousFrame:  " + recordOfEnactionPreviousFrame);
+
+        //conditionalPrint("**********************************       recordOfEnactionThisFrame = theEnaction.ToString();     ****************************************");
+        recordOfEnactionThisFrame = "[''theEnaction.ToString()'' = "+theEnaction.ToString() + "]";
+        //conditionalPrint("recordOfEnactionThisFrame:  " + recordOfEnactionThisFrame);
+        //conditionalPrint("3recordOfEnactionPreviousFrame:  " + recordOfEnactionPreviousFrame);
+
+
+        //conditionalPrint("////////////////////////////////////////////////////////");
+    }
+
+
+    public void recordFailedCondition(condition theCondition)
+    {
+        report += "[condition FAILED:  ";
+        //  report += theCondition.whyDidItFail();
+        //report += theCondition.asTextSHORT();
+        report += theCondition.asText();
+        report += "]";
+    }
+
+
+
+    /*
+
+    public void didRaycastHitCorrectTarget(GameObject intendedTarget, GameObject whatRaycastHit)
+    {
+        if(whatRaycastHit == intendedTarget) { return ; }
+
+        report += "[ raycast did NOT hit intended target.  -(intendedTarget:  " + intendedTarget+ " - whatRaycastHit: " + whatRaycastHit +")-";
+    }
+
+    public void didRaycastHitCorrectTarget(Vector3 intendedTarget, Vector3 whatRaycastHit, float marginOfError = 3f)
+    {
+
+    }
+
+    */
+
+
+    public void addToReport(string addThisToTheReport)
+    {
+        report += addThisToTheReport;
+    }
+
+
+    void conditionalPrint(string toPrint)
+    {
+        if (debugPrintBool == false) { return; }
+        //if (layerNumber > layerToPrintCutoff) { return; }
+
+        Debug.Log(toPrint);
+    }
+
+
+}
+
+
+public class adHocBooleanDeliveryClass
+{
+    //reeeeeeeallly need a better way to do this.
+
+    public bool theBoolSignal = false;
 }
