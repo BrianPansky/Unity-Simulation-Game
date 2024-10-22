@@ -172,6 +172,7 @@ MonoBehaviour:
   theCamera: {fileID: 859809950337065639}
   playingAs: {fileID: 0}
   isPlayer: 1
+  allCurrentTARGETbyVectorEnactables: []
 --- !u!1 &859809950337065639
 GameObject:
   m_ObjectHideFlags: 0
