@@ -385,6 +385,7 @@ public class projectileLauncher: rangedEnaction
     override public void enact(inputData theInput)
     {
         theCooldown.fire();
+        //Debug.Log("hello??????????????");
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
 

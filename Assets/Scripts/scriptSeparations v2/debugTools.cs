@@ -99,7 +99,7 @@ public class adHocDebuggerForGoGrabPlan: MonoBehaviour
 
 
         conditionalPrint("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@     report        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        report += recordOfEnactionThisFrame;
+        addToReport(recordOfEnactionThisFrame);
         conditionalPrint(report);
 
         report = "";
@@ -162,11 +162,11 @@ public class adHocDebuggerForGoGrabPlan: MonoBehaviour
 
     public void recordFailedCondition(condition theCondition)
     {
-        report += "[condition FAILED:  ";
+        addToReport("[condition FAILED:  ");
         //  report += theCondition.whyDidItFail();
         //report += theCondition.asTextSHORT();
-        report += theCondition.asText();
-        report += "]";
+        addToReport(theCondition.asText());
+        addToReport("]");
     }
 
 
@@ -190,7 +190,8 @@ public class adHocDebuggerForGoGrabPlan: MonoBehaviour
 
     public void addToReport(string addThisToTheReport)
     {
-        report += addThisToTheReport;
+        //need to change it so it only adds NEW info!  and resets to an empty string?  not creating longer and longer and longer string forever!
+        //      report += addThisToTheReport;
     }
 
 

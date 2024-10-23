@@ -156,4 +156,27 @@ public class equippable2 : interactable2
 
         return false;
     }
+
+    public enaction enactionWithIntertype(interType intertypeX)
+    {
+        foreach (collisionEnaction thisEnaction in this.gameObject.GetComponents<collisionEnaction>())
+        {
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnaction; }
+        }
+
+        return null;
+    }
+
+
+
+    public rangedEnaction rangedEnactionWithIntertype(interType intertypeX)
+    {
+        foreach (rangedEnaction thisEnaction in this.gameObject.GetComponents<collisionEnaction>())
+        {
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnaction; }
+        }
+
+        return null;
+    }
+
 }

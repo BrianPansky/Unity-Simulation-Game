@@ -281,7 +281,7 @@ public abstract class planEXE2
 
         if (startConditionsMet())
         {
-
+            //Debug.Log("start conitions met, should do this:  " + exeList[0].staticEnactionNamesInPlanStructure());
             //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
             //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
             //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
@@ -414,6 +414,17 @@ public abstract class planEXE2
 
     public string asText()
     {
+
+        string theString = "";
+
+        theString += staticEnactionNamesInPlanStructure();
+
+        return theString;
+    }
+
+
+    public string infoString3()
+    {
         string theString = "";
 
         theString += this.ToString();
@@ -422,14 +433,39 @@ public abstract class planEXE2
 
         theString += conditionsAsText();
 
-        if (exeList ==null) { return theString; }
+        if (exeList == null) { return theString; }
 
 
         theString += "[ ";
         foreach (planEXE2 plan in exeList)
         {
-            if(plan == null) { theString += "(plan == null)"; continue; }
+            if (plan == null) { theString += "(plan == null)"; continue; }
             theString += plan.asText();
+            theString += ", ";
+        }
+
+        theString += "]";
+        return theString;
+    }
+
+
+
+    public string staticEnactionNamesInPlanStructure()
+    {
+        string theString = "";
+
+        theString += this.ToString();
+        theString += ":  ";
+        theString += theEnaction;
+
+        if (exeList == null) { return theString; }
+
+
+        theString += "[ ";
+        foreach (planEXE2 plan in exeList)
+        {
+            if (plan == null) { theString += "(plan == null)"; continue; }
+            theString += plan.staticEnactionNamesInPlanStructure();
             theString += ", ";
         }
 

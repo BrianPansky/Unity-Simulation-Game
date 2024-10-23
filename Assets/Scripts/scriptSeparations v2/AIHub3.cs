@@ -25,7 +25,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     //GameObject placeholderTarget1;
 
     int adhocCooldown = 0;
-    public bool printThisNPC = true;
+    public bool printThisNPC = false;//true;
     string storedMessage = "";
     bool test = true;
 
@@ -208,7 +208,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
         whichOne++;
-        
+
 
 
         //combatBehaviorPlan1();
@@ -361,8 +361,14 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     }
 
+    private planEXE2 combatBehaviorDebugPlan()
+    {
 
+        //ad-hoc hand-written plan
+        GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
 
+        return firePlan4(interType.shoot1, target2);
+    }
 
     public planEXE2 FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
     {
@@ -673,22 +679,24 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     private planEXE2 firePlan4(interType interTypeX, GameObject target)
     {
-
+        //Debug.Log("firePlan4");
         //either playable will already have the type, or it might be in equipper slots
         rangedEnaction grabEnact1;
         grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interTypeX);
 
         if (grabEnact1 == null)
         {
+            //Debug.Log("(grabEnact1 == null)");
             return getFireEnactionFromEquipperSlots(interTypeX);
         }
 
+        //Debug.Log("grabEnact1:  " + grabEnact1 +", obj:  " +grabEnact1.transform.gameObject);
         planEXE2 exe1 = grabEnact1.toEXE(null);
 
         //Debug.Log("grabEnact1.theCooldown:  " + grabEnact1.theCooldown);
         //Debug.Log("grabEnact1.theCooldown.cooldownMax:  " + grabEnact1.theCooldown.cooldownMax);
         //Debug.Log("grabEnact1.theCooldown.cooldownTimer:  " + grabEnact1.theCooldown.cooldownTimer);
-        //      exe1.startConditions.Add(grabEnact1.theCooldown);
+        exe1.startConditions.Add(grabEnact1.theCooldown);
         exe1.atLeastOnce();
         //condition thisCondition = new enacted(exe1);
         //exe1.endConditions.Add(thisCondition);
@@ -710,11 +718,37 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         }
 
 
-        //Debug.Assert(theItemWeWant != null);
+        Debug.Assert(theItemWeWant != null);
 
         //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
-        return theItemWeWant.GetComponent<equippable2>().planshell;
+        //      return theItemWeWant.GetComponent<equippable2>().planshell;
+
+        rangedEnaction theFireEnaction = firstEnactionWithInterTypeX(interTypeX, theItemWeWant);
+
+        planEXE2 thePlan = standardEXEconversion(theFireEnaction);
+        thePlan.startConditions.Add(theFireEnaction.theCooldown);
+
+        return thePlan;
     }
+
+
+
+
+
+
+    rangedEnaction firstEnactionWithInterTypeX(interType interTypeX, GameObject obj)
+    {
+        //looking at the INTERACTION TYPES of their enactions
+
+        equippable2 equip = obj.GetComponent<equippable2>();
+        if (equip == null) { return null; }
+
+        return equip.rangedEnactionWithIntertype(interTypeX);
+    }
+
+
+
+
 
     public planEXE2 goGrabThenEquip(interType interTypeX)
     {
