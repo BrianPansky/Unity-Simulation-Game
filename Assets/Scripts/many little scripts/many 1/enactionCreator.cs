@@ -5,6 +5,7 @@ using UnityEditor;
 //using System.Numerics;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SocialPlatforms;
 using static enactionCreator;
 using static UnityEngine.GraphicsBuffer;
 
@@ -142,8 +143,11 @@ public abstract class IEnactByTargetVector:enaction
 
     public override planEXE2 toEXE(GameObject target)
     {
-        vect3EXE2 theEXE = new vect3EXE2(this, target);
+        //OFFSET NEEDS TO BE ZERO FOR "aimtarget" to actually aim at the target [otherwise it aims at a sorta navpoint NEAR the target,,,,which can be BEHIND or BELOW the npc trying to target something in front of them!
+        //are there any situations where i'll want to use "toEXE" with a NON-zero offset???
+        vect3EXE2 theEXE = new vect3EXE2(this, target, 0f);
         return theEXE;
+    
     }
 }
 
@@ -242,13 +246,21 @@ public class aimTarget : IEnactByTargetVector
     override public void enact(inputData theInput)
     {
         //instantaneous for now
-        Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
+        //  Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
+        Vector3 lineFromVertAimerToTarget = theInput.vect3 - this.transform.position;
+        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
+        //conditionalPrint("theVectorRotationEnaction.thePartToAimVertical.position.vect3 = " + theVectorRotationEnaction.thePartToAimVertical.position);
+        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
-        theVectorRotationEnaction.updatePitch(translateAngleIntoPitchSpeedEtc(getVerticalAngle(lineFromVertAimerToTarget)));
+        lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
+
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 4f);
+        theVectorRotationEnaction.updatePitch(getVerticalAngle(lineFromVertAimerToTarget), theVectorRotationEnaction.thePartToAimVertical);
+        //theVectorRotationEnaction.updatePitch(0, theVectorRotationEnaction.thePartToAimVertical);
 
 
-        conditionalPrint("enacting:  " + this);
-        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.cyan, 0.02f);
+        //conditionalPrint("enacting:  " + this);
+        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.red, 0.02f);
 
     }
 
@@ -280,14 +292,33 @@ public class aimTarget : IEnactByTargetVector
 
         float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, theVectorRotationEnaction.thePartToAimHorizontal.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
 
+        //float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, this.transform.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
 
         return oneAngle;
     }
 
     private float getVerticalAngle(Vector3 lineToTarget)
     {
-        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimHorizontal.right);
+
+        Vector3 start = theVectorRotationEnaction.thePartToAimVertical.position;
+        Vector3 offset = new Vector3(0.01f, 0.01f, 0.01f);
+        Debug.DrawLine(start + offset, start + lineToTarget.normalized + offset, Color.white, 4f);
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget, theVectorRotationEnaction.thePartToAimVertical.forward, theVectorRotationEnaction.thePartToAimVertical.right);
         //fixed it!  my input vector was just target position!  i needed to be using line from aiming object to the target it is aiming at!  position relative to the person doing the aiming, basically
+
+
+
+
+
+
+
+
+        conditionalPrint("calculated horizontalAngle = " + oneAngle);
+        //Debug.DrawLine(start + offset, start + lineToTarget.normalized + offset, Color.white, 4f);
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position - offset, theVectorRotationEnaction.thePartToAimVertical.position + theVectorRotationEnaction.thePartToAimVertical.forward - offset, Color.black, 4f);
+
+
 
         //this one has to be negative for some reason??
         return -oneAngle;
@@ -609,20 +640,30 @@ public class vecRotation : vectorMovement
 
     public override void enact(inputData theInput)
     {
-        updatePitch(theInput.vect2.y);
+        updatePitch(theInput.vect2.y, thePartToAimVertical);
         updateYaw(theInput.vect2.x);
     }
 
-    public void updatePitch(float pitchInput)
+    public void updatePitch(float pitchInput, Transform theTransformToRotate)
     {
-        limitedPitchRotation -= pitchInput * pitchSpeed;
+
+        //CONFIRMED, THIS CODE MEANS "limitedPitchRotation" = THE ANGLE WE WANT TO SET IT TO!
+
+
+        //float initial = limitedPitchRotation;
+        limitedPitchRotation -= pitchInput;// * pitchSpeed;
         limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -pitchRange, pitchRange);
-        
-        thePartToAimVertical.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+
+        //float relativeAngle = initial - limitedPitchRotation;
+
+        //this.transform.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+        theTransformToRotate.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+        //thePartToAimVertical.Rotate(thePartToAimVertical.right, relativeAngle);
     }
 
     public void updateYaw(float yawInput)
     {
+        conditionalPrint("yawInput = "+ yawInput);
         thePartToAimHorizontal.Rotate(thePartToAimHorizontal.up * yawInput * yawSpeed);
     }
 

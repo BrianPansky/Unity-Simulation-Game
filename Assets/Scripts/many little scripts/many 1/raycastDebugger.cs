@@ -9,6 +9,9 @@ public class raycastDebugger : MonoBehaviour
     int numberOfRaysToFire = 15;
     float angleIncrement = 3.2f;
     float currentAngle = 0;
+    bool done = false;
+
+    float limitedPitchRotation = 0f;
 
 
     string theRedString = "Cube floor (UnityEngine.BoxCollider)";
@@ -31,9 +34,91 @@ public class raycastDebugger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (delay()) { return; }
+        if (done || delay()) { return; }
+
+        //testRaycast();
+        testPitchRotation();
+
+        done = true;
+    }
+
+    private void testPitchRotation()
+    {
+        List<float> pitchesToIncrement = new List<float>();
+        pitchesToIncrement.Add(0f);
+        //pitchesToIncrement.Add(1f);
+        pitchesToIncrement.Add(18f);
+        pitchesToIncrement.Add(48f);
+        pitchesToIncrement.Add(125f);
+        //pitchesToIncrement.Add(90f);
+        //pitchesToIncrement.Add(180f);
+        //pitchesToIncrement.Add(30f);
+        //pitchesToIncrement.Add(15f);
+        //pitchesToIncrement.Add( 15f);
+        pitchesToIncrement.Add(0f);
+        pitchSet(pitchesToIncrement);
+    }
 
 
+    private void pitchSet(List<float> pitchesToIncrement)
+    {
+
+        float offset = 0.03f;
+        Vector3 startPoint = this.transform.position;
+
+        foreach (float pitchIncrement in pitchesToIncrement)
+        {
+
+            Debug.DrawLine(startPoint, startPoint + this.transform.forward, Color.magenta, 7f);
+
+            updatePitch(pitchIncrement, this.transform);
+            startPoint.x += offset;
+        }
+    }
+
+
+    private void pitchSpray()
+    {
+
+        //int whichIncrrement = 0;
+        float pitchInput = 6f;
+        float offset = 0.03f;
+        Vector3 startPoint = this.transform.position;
+
+        while (numberOfRaysToFire > 0)
+        {
+            Debug.DrawLine(startPoint, startPoint + this.transform.forward, Color.magenta, 7f);
+
+            updatePitch(pitchInput, this.transform);
+            startPoint.x += offset;
+            numberOfRaysToFire--;
+        }
+    }
+
+
+    public void updatePitch(float pitchInput, Transform theTransformToRotate)
+    {
+        //CONFIRMED, THIS CODE MEANS "limitedPitchRotation" = THE ANGLE WE WANT TO SET IT TO!
+
+
+        //float initial = limitedPitchRotation;
+        limitedPitchRotation -= pitchInput;// * pitchSpeed;
+        //limitedPitchRotation = Mathf.Clamp(limitedPitchRotation, -pitchRange, pitchRange);
+
+        //float relativeAngle = initial - limitedPitchRotation;
+
+        theTransformToRotate.localRotation = Quaternion.Euler(limitedPitchRotation, 0f, 0f);
+        //thePartToAimVertical.Rotate(thePartToAimVertical.right, relativeAngle);
+    }
+
+
+
+
+
+
+
+    private void testRaycast()
+    {
         while (numberOfRaysToFire > 0)
         {
             fireRaycastHit();
@@ -42,10 +127,7 @@ public class raycastDebugger : MonoBehaviour
             rotateFiringPoint();
             numberOfRaysToFire--;
         }
-
-
     }
-
 
     void tryingRaycastALL()
     {

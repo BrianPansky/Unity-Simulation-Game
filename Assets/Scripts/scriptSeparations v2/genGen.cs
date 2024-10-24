@@ -83,16 +83,45 @@ public class genGen : MonoBehaviour
         thePlayable.dictOfIvariables[numericalVariable.health] = 2;
         thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
         thePlayable.initializeEnactionPoint1();
+        addArrowForward(thePlayable.enactionPoint1);
+        addCube(thePlayable.enactionPoint1, 0.1f);
         thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
-
-
+        addArrowForward(newObj, 5f, 0f, 1.2f);
         makeEnactionsBody4(thePlayable);
         makeInteractionsBody4(thePlayable);
 
 
         inventory1 theirInventory = newObj.AddComponent<inventory1>();
     }
+    private void addCube(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    {
+        Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
+        GameObject newObj = Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
 
+        newObj.transform.parent = inputObject.transform;
+
+    }
+
+    private void addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    {
+        Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
+        GameObject newObj = Instantiate(repository2.singleton.arrowForward, where, Quaternion.identity);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        newObj.transform.parent = inputObject.transform;
+
+    }
+
+    private void addArrowUp(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    {
+        Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
+        GameObject newObj = Instantiate(repository2.singleton.arrowUp, where, Quaternion.identity);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        newObj.transform.parent = inputObject.transform;
+
+    }
 
     void makeEnactionsBody4(playable2 thePlayable)
     {
