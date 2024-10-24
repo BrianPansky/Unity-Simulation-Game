@@ -90,6 +90,9 @@ MonoBehaviour:
     type: 3}
   shotgun1: {fileID: 8237283253626521563, guid: e3efedad745406947b000094ecc5607b,
     type: 3}
+  arrowUp: {fileID: -927199367670048503, guid: 740d4d11880018b4f91437b2b02b1ce1, type: 3}
+  arrowForward: {fileID: -927199367670048503, guid: 5bff13c531d26f840a73090e6197f951,
+    type: 3}
   prefab4: {fileID: 0}
   prefab5: {fileID: 0}
   prefab6: {fileID: 0}
