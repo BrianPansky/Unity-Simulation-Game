@@ -198,7 +198,7 @@ public class proximity : condition
     float desiredDistance = 4f;
     public bool debugPrint = false;
 
-    conditionalEffects adHocConditionalEffects;
+    conditionalEffects2 adHocConditionalEffects;
 
     public proximity(GameObject object1, GameObject object2, float desiredDistance = 4f)
     {
@@ -714,38 +714,5 @@ public class targetMatchesHitscanOutput : condition
 
 
 
-}
-
-public class targetIsWithinRange:condition
-{
-    targetCalculator theTargetCalc;
-
-    float desiredRange;
-
-    public string asText()
-    {
-        string stringToReturn = "";
-
-        stringToReturn += "met?  " + met() + ", ";
-
-        stringToReturn += this.ToString();
-
-        return stringToReturn;
-    }
-
-
-    public string asTextSHORT()
-    {
-        return this.ToString();
-    }
-
-    public bool met()
-    {
-        Vector3 between = theTargetCalc.realPositionOfTarget() - theTargetCalc.targeter.transform.position;
-
-        if(between.magnitude < desiredRange) {return true;}
-
-        return false;
-    }
 }
 

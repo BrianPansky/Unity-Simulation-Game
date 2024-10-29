@@ -111,12 +111,14 @@ public class playable2 : interactable2
         playAsPlayable2(gamepad);
     }
 
-    public void playAs(virtualGamepad gamepad)
-    {
-        //better way, just plug whole thing in, lol
-        occupied = true;
-        gamepad.playingAs = this;
-    }
+
+
+
+
+
+
+
+
 
     public void playAsPlayable2(virtualGamepad gamepad)
     {
@@ -125,12 +127,48 @@ public class playable2 : interactable2
 
         if (cameraMount != null && gamepad.theCamera != null)
         {
-
             gamepad.theCamera.transform.SetParent(cameraMount, false);
         }
 
         gamepad.updateALLGamepadButtonsFromplayable2(this);
     }
+
+    internal void clearTheEquipperSlot(interactionCreator.simpleSlot theEquippable2Type)
+    {
+        if (equipperSlotsAndContents[theEquippable2Type] != null)
+        {
+            GameObject item1 = equipperSlotsAndContents[theEquippable2Type];
+            equippable2 equip = item1.GetComponent<equippable2>();
+            equip.unequip(this);
+        }
+    }
+
+    internal void refilUnusedSlotsAndButtonsFromThisplayable2()
+    {
+        //equip ONLY those things that are not blocked by other things in those equipper slots or buttons
+
+        virtualGamepad gamepad = this.gameObject.GetComponent<virtualGamepad>();
+        if (gamepad == null) { return; }
+
+
+        foreach (IEnactaBool enactaBool in this.GetComponents<IEnactaBool>())
+        {
+            if (gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] != null) { continue; }
+            enactaBool.enactionAuthor = gamepad.transform.gameObject;
+            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
+        }
+
+
+        foreach (IEnactaVector enactaV in this.GetComponents<IEnactaVector>())
+        {
+            if (gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] != null) { continue; }
+            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
+        }
+    }
+
+
+
+
 
     public void UNplayAsPlayable2(virtualGamepad gamepad)
     {
@@ -169,53 +207,6 @@ public class playable2 : interactable2
         }
     }
 
-    internal void clearTheEquipperSlot(interactionCreator.simpleSlot theEquippable2Type)
-    {
-        if (equipperSlotsAndContents[theEquippable2Type] != null)
-        {
-            GameObject item1 = equipperSlotsAndContents[theEquippable2Type];
-            equippable2 equip = item1.GetComponent<equippable2>();
-            equip.unequip(this);
-        }
-    }
-
-
-    internal void refilUnusedSlotsAndButtonsFromThisplayable2()
-    {
-        //equip ONLY those things that are not blocked by other things in those equipper slots or buttons
-
-        virtualGamepad gamepad = this.gameObject.GetComponent<virtualGamepad>();
-        if (gamepad == null) { return; }
-
-
-        foreach (IEnactaBool enactaBool in this.GetComponents<IEnactaBool>())
-        {
-            if (gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] != null) { continue; }
-            enactaBool.enactionAuthor = gamepad.transform.gameObject;
-            gamepad.allCurrentBoolEnactables[enactaBool.gamepadButtonType] = enactaBool;
-        }
-
-
-        foreach (IEnactaVector enactaV in this.GetComponents<IEnactaVector>())
-        {
-            if (gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] != null) { continue; }
-            gamepad.allCurrentVectorEnactables[enactaV.gamepadButtonType] = enactaV;
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     internal void replace(GameObject equippable2)
     {
 
@@ -233,6 +224,10 @@ public class playable2 : interactable2
 
 
 
+
+
+
+    //debugging
 
     public void printEnactables()
     {

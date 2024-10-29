@@ -11,7 +11,6 @@ using UnityEngine.UIElements;
 public class virtualGamepad : MonoBehaviour
 {
     public GameObject theCamera = null;
-    public playable2 playingAs;
     public bool isPlayer = false;
     playerMouseKeyboardInputs mouseKeyboardInputs;
 
@@ -140,6 +139,7 @@ public class virtualGamepad : MonoBehaviour
             allCurrentBoolEnactables[enactaBool.gamepadButtonType] = null;
         }
     }
+
 
     public class playerMouseKeyboardInputs
     {

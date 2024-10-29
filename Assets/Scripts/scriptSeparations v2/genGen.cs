@@ -146,12 +146,26 @@ public class genGen : MonoBehaviour
         //i'll put conditional effects in this function for now
         condition theCondition = new numericalCondition(numericalVariable.health, theInteractable.dictOfIvariables);
         Ieffect theEffect = new deathEffect();
-        List<Ieffect> list = new List<Ieffect> { theEffect };
-        theInteractable.conditionalEffects[theCondition] = list;
-
+        //List<Ieffect> list = new List<Ieffect> { theEffect };
+        //theInteractable.conditionalEffects[theCondition] = list;
+        addConditionalEffect(theInteractable.transform.gameObject, theCondition, theEffect);
 
     }
 
+
+    public void addConditionalEffect(GameObject theObject, condition theCondition, Ieffect theEffect)
+    {
+        conditionalEffects2 theComponent = theObject.GetComponent<conditionalEffects2>();
+        if(theComponent == null)
+        {
+            theComponent = theObject.AddComponent<conditionalEffects2>();
+        }
+
+
+        theComponent.add(theCondition, theEffect);
+
+
+    }
 
     public GameObject returnPineTree1(Vector3 where)
     {

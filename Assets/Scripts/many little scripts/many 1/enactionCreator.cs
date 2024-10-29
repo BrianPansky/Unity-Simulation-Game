@@ -79,6 +79,20 @@ public abstract class enaction : MonoBehaviour
     abstract public planEXE2 toEXE(GameObject target);
 
 
+    public planEXE2 standardEXEconversion()
+    {
+        //just put this in "toEXE", right?
+        planEXE2 exe1 = this.toEXE(null);
+        exe1.debugPrint = this.debugPrint; //huh, i think this indicates we're moving in a bottom-up direction, nice
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+
+
     internal void conditionalPrint(string thingToPrint)
     {
         if (debugPrint == false) { return; }
@@ -170,6 +184,7 @@ public class navAgent : IEnactByTargetVector
         }
 
         nA.theAgent.baseOffset = 1f; //prevent stutter, being in floor
+        //nA.theAgent.angularSpeed = 0;
     }
 
 

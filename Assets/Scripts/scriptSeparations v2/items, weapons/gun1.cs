@@ -39,10 +39,12 @@ public class gun1 : equippable2
 
 
         //now add cooling down increment:
-        List<Ieffect> list = new List<Ieffect>();
+        //List<Ieffect> list = new List<Ieffect>();
         Ieffect effect = new numericalEffect(numericalVariable.cooldown);
-        list.Add(effect);
-        conditionalEffects[new autoCondition()] = new List<Ieffect>(list);
+        //list.Add(effect);
+        //conditionalEffects[new autoCondition()] = new List<Ieffect>(list);
+
+        genGen.singleton.addConditionalEffect(this.gameObject, new autoCondition(), effect);
 
     }
 

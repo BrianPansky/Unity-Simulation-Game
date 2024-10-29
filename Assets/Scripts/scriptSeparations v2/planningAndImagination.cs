@@ -16,161 +16,8 @@ public class planningAndImagination : MonoBehaviour
     public planEXE2 fullPlan;
 
 
-
-    /*
-    public Dictionary<buttonCategories, List<planEXE>> blankMultiPlan()
-    {
-        return new Dictionary<buttonCategories, List<planEXE>>();
-    }
-
-    public void multiPlanAdd(planEXE theExeToAdd, Dictionary<buttonCategories, List<planEXE>> multiPlan)
-    {
-        enaction anEnaction = theExeToAdd.theEnaction;
-        Debug.Assert(anEnaction != null);
-        if (anEnaction == null)
-        {
-            Debug.Log("enaction is null");
-            Debug.Log("for this theExeToAdd:  " + theExeToAdd);
-        }
-
-        buttonCategories theButtonCategory = anEnaction.gamepadButtonType;
-
-        if (multiPlan.ContainsKey(theButtonCategory) == false)
-        {
-            multiPlan[theButtonCategory] = new List<planEXE>();
-        }
-
-        List<planEXE> planToAddItTo = multiPlan[theButtonCategory];
-
-        if (planToAddItTo == null) { planToAddItTo = new List<planEXE>(); }
-
-        planToAddItTo.Add(theExeToAdd);
-    }
-
-    */
-
-    /*
-    public bool noPlansInMultiplan(Dictionary<buttonCategories, List<planEXE>> dictionary)
-    {
-        bool noPlansInMultiplan = true;
-
-        foreach(var key in dictionary.Keys)
-        {
-            if (dictionary[key].Count > 0) { return false; }
-        }
-
-        return noPlansInMultiplan;
-    }
-
-    */
-
-
-
 }
 
-
-
-/*
-public abstract class planEXE
-{
-    public enaction theEnaction;
-    public List<condition> startConditions = new List<condition>();
-    public List<condition> endConditions = new List<condition>();
-
-    public abstract void executePlan();
-    public abstract void target(GameObject theTarget);
-
-    public bool areSTARTconditionsFulfilled()
-    {
-        //Debug.Log("areSTARTconditionsFulfilled?  for:  " + this.theEnaction);
-
-        foreach (condition thisCondition in startConditions)
-        {
-            if (thisCondition.met() == false) { return false; }
-        }
-
-        //Debug.Log("no conditions remain unfulfilled!");
-        return true;
-    }
-
-    public bool areENDconditionsFulfilled()
-    {
-        //Debug.Log("areENDconditionsFulfilled?  for:  "+ this.theEnaction);
-        //Debug.Log("endConditions.Count:  " + endConditions.Count);
-        foreach (condition thisCondition in endConditions)
-        {
-            //Debug.Log("thisCondition:  " + thisCondition);
-            if (thisCondition.met() == false) { return false; }
-        }
-        //Debug.Log("no conditions remain unfulfilled!");
-        return true;
-    }
-
-}
-
-
-
-
-
-
-
-
-public class boolEXE :  planEXE
-{
-    //public IEnactaBool theEnaction;
-    public List<planEXE> microPlan = new List<planEXE>();
-
-    public boolEXE(IEnactaBool theEnaction)
-    {
-        this.theEnaction = theEnaction;
-    }
-
-    override public void executePlan()
-    {
-        //Debug.Log("executePlan for:  "+ this.theEnaction);
-
-        foreach (var planEXE in microPlan)
-        {
-            planEXE.executePlan();
-        }
-
-        theEnaction.enact(new inputData());
-    }
-
-    override public void target(GameObject theTarget)
-    {
-
-    }
-
-}
-public class vectEXE : planEXE
-{
-
-    //public IEnactByTargetVector theEnaction;
-    public GameObject theTarget;
-
-    public vectEXE(IEnactByTargetVector theEnaction, GameObject theTarget)
-    {
-        this.theEnaction = theEnaction;
-        this.theTarget = theTarget;
-    }
-
-
-    override public void executePlan()
-    {
-        //Debug.Log("vectEXE, theTarget:  " + theTarget);
-        Debug.DrawLine(theTarget.transform.position, new Vector3(), Color.yellow, 6f);
-        inputData theInputData = new inputData(theTarget.transform.position);
-        theEnaction.enact(theInputData);
-    }
-
-    override public void target(GameObject theTarget)
-    {
-        this.theTarget = theTarget;
-    }
-}
-
-*/
 
 
 public abstract class planEXE2
@@ -590,22 +437,6 @@ public class boolEXE2 : singleEXE
     }
 }
 
-//NPCs won't use this?
-/*
-public class vect2EXE2 : singleEXE
-{
-    public GameObject theTarget;
-
-
-
-    public vect2EXE2(IEnactByTargetVector theInputEnaction, GameObject theTarget)
-    {
-        this.theEnaction = theInputEnaction;
-        this.theTarget = theTarget;
-    }
-}
-*/
-
 public class vect3EXE2 : singleEXE
 {
     //public GameObject possiblyMobileActualTarget;
@@ -686,31 +517,6 @@ public class vect3EXE2 : singleEXE
 
 
 
-    /*
-
-    public override string asText()
-    {
-        string theString = "";
-
-        theString += this.ToString();
-        theString += ":  ";
-        theString += theEnaction;
-
-        if (exeList == null) { return theString; }
-
-
-        theString += "[ ";
-        foreach (planEXE2 plan in exeList)
-        {
-            theString += plan.asText();
-            theString += ", ";
-        }
-
-        theString += "]";
-        return theString;
-    }
-
-    */
 
     public override bool error()
     {
@@ -727,25 +533,25 @@ public class parallelEXE : planEXE2
     public parallelEXE()
     {
 
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+
     }
     public parallelEXE(planEXE2 item)
     {
         Add(item);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+
     }
     public parallelEXE(planEXE2 item1, planEXE2 item2)
     {
         Add(item1);
         Add(item2);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+
     }
     public parallelEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3)
     {
         Add(item1);
         Add(item2);
         Add(item3);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+
     }
     public parallelEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3, planEXE2 item4)
     {
@@ -753,16 +559,14 @@ public class parallelEXE : planEXE2
         Add(item2);
         Add(item3);
         Add(item4);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
+
     }
 
 
 
     public override void execute()
     {
-        //conditionalPrint("aaaaaa.3333333333333aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
         executeParallel();
-        //conditionalPrint("aaaaaa.3333333333333bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
@@ -790,19 +594,15 @@ public class seriesEXE : planEXE2
 {
     public seriesEXE()
     {
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
     public seriesEXE(planEXE2 item)
     {
         Add(item);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
     public seriesEXE(planEXE2 item, List<condition> listOfCOnditionsIn)
     {
         Add(item);
 
-        //Debug.Log("0listOfCOnditionsIn.Count:  " + listOfCOnditionsIn.Count);
-        //Debug.Log("1startConditions.Count:  " + startConditions.Count);
         foreach (var x in listOfCOnditionsIn)
         {
             startConditions.Add(x);
@@ -814,14 +614,12 @@ public class seriesEXE : planEXE2
     {
         Add(item1);
         Add(item2);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
     public seriesEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3)
     {
         Add(item1);
         Add(item2);
         Add(item3);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
     public seriesEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3, planEXE2 item4)
     {
@@ -829,18 +627,12 @@ public class seriesEXE : planEXE2
         Add(item2);
         Add(item3);
         Add(item4);
-        //      !!!!!!!!!!!!!!!!!   endConditions.Add(new planListComplete(list));
     }
 
     public override void execute()
     {
-        //conditionalPrint("execute()");
-        //Debug.Log("???:  "+ grabberDebug);
         grabberDebug.debugPrintBool = debugPrint;
-        //conditionalPrint("aaaaaa.4444444444444aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
-        //conditionalPrint("exeList.Count:  "+ exeList.Count);
         executeSequential();
-        //conditionalPrint("aaaaaa.4444444444444bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
     }
 
 
@@ -899,17 +691,6 @@ public abstract class adHocPlanRefillThing
     nestedLayerDebug debug;
 
 
-    /*
-    public adHocPlanRefillThing(List<condition> theConditions, planEXE2 theRefillPlan)
-    {
-        //List<condition> theConditionsIn, List<planEXE2> theRefillPlanIn
-        this.theConditions = theConditions;
-        this.theRefillPlan = asSeries(theRefillPlan);
-        //if(this.theRefillPlan == null) { this.error()}
-        theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
-    }
-    */
-
     public planEXE2 asSeries(planEXE2 theRefillPlan)
     {
         //shallow copy!  don't use for current plan!
@@ -963,25 +744,8 @@ public abstract class adHocPlanRefillThing
     {
         if (theCurrentPlan == null)
         {
-            //Debug.Log("theCurrentPlan == null:  " + (theCurrentPlan == null));
             refill();
-            //Debug.Log("theCurrentPlan == null:  " + (theCurrentPlan == null));
         }
-        /*
-        else if (theCurrentPlan.exeList == null)
-        {
-            Debug.Log("theCurrentPlan.exeList == null:  " + (theCurrentPlan.exeList == null));
-            refill();
-            Debug.Log("theCurrentPlan.exeList == null:  " + (theCurrentPlan.exeList == null));
-
-        }
-        else if (theCurrentPlan.exeList.Count == 0)
-        {
-            Debug.Log("theCurrentPlan.exeList.Count == 0:  " + (theCurrentPlan.exeList.Count == 0));
-            refill();
-            Debug.Log("theCurrentPlan.exeList.Count == 0:  " + (theCurrentPlan.exeList.Count == 0));
-        }
-        */
         else if (theCurrentPlan.error())
         {
             conditionalPrint("theCurrentPlan.error(), refilling");
@@ -998,9 +762,6 @@ public abstract class adHocPlanRefillThing
 
     public void standardRefill()
     {
-        //conditionalPrint("standardRefill()");
-        //conditionalPrint("1111111111111111111111111111 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
-        //Debug.Log("theRefillPlan.asText():  " + theRefillPlan.asText());
         if (theRefillPlan == null)
         {
             //conditionalPrint("(theRefillPlan == null)");
@@ -1011,10 +772,6 @@ public abstract class adHocPlanRefillThing
         List<planEXE2> refillWithThis = new List<planEXE2>();
 
 
-
-        //conditionalPrint("********************* theRefillPlan.exeList.Count:  " + theRefillPlan.exeList.Count);
-        //conditionalPrint("********************* theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
-
         foreach (planEXE2 plan in theRefillPlan.exeList)
         {
             //conditionalPrint("******** add this:  " + plan.asText());
@@ -1024,22 +781,10 @@ public abstract class adHocPlanRefillThing
 
         theCurrentPlan.Add(refillWithThis);
 
-        //conditionalPrint("this.theCurrentPlan" + this.theCurrentPlan);
-        //conditionalPrint("this.theCurrentPlan.exeList" + this.theCurrentPlan.exeList);
-        //conditionalPrint("this.theCurrentPlan.exeList.Count" + this.theCurrentPlan.exeList.Count);
-        //conditionalPrint("2222222222222222222222222 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
     }
 
     private void doCurrentPlan()
     {
-
-        //      conditionalPrint(storedMessage);
-        //conditionalPrint("we have a plan, fullPlan.execute()");
-        //fullPlan.conditionalPrint(printThisNPC);
-
-
-        //conditionalPrint("00000000000000000000000000000 theRefillPlan.nestedPlanCountToText():  " + theRefillPlan.nestedPlanCountToText());
-
         //well this is a messy way to do this, only an EXE should do this....ya...i'm reinventing my EXEs.....:
         if (startConditionsMet())
         {
