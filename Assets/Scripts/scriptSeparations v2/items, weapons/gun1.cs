@@ -14,11 +14,16 @@ public class gun1 : equippable2
     //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
     public void Awake()
     {
-        test();  //well, no error.  which is how i did "callableAwake" before someone on reddit said i could just do "equippable2.Awake()"
-        this.GetComponent<equippable2>().Awake();
+       this.GetComponent<equippable2>().Awake();
 
 
-        initializeEnactionPoint1();
+
+
+
+
+
+
+        /*
 
         dictOfIvariables[numericalVariable.cooldown] = 0f;
 
@@ -46,6 +51,19 @@ public class gun1 : equippable2
 
         genGen.singleton.addConditionalEffect(this.gameObject, new autoCondition(), effect);
 
+        */
+
+        
+
+
+
+
+        initializeStandardEnactionPoint1(this, 0.2f, 0.3f);
+
+        genGen.singleton.standardGun(this);
+
+        theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
+
     }
 
 
@@ -55,14 +73,10 @@ public class gun1 : equippable2
 
     }
 
-    void initializeEnactionPoint1()
+
+    void Update()
     {
-        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1() line 58, gun1 script");
-        enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.2f + this.transform.up * 0.3f;
-        enactionPoint1.transform.rotation = this.transform.rotation;
-
+        theCooldown.cooling();
     }
-
 
 }

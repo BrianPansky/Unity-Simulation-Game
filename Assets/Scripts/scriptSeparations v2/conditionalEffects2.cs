@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class conditionalEffects2 : MonoBehaviour
 {
-    public Dictionary<condition, List<Ieffect>> theDictionary = new Dictionary<condition, List<Ieffect>>();
+    public Dictionary<condition, List<Ieffect>> theDictionary;// = new Dictionary<condition, List<Ieffect>>();
 
     void Awake()
     {
@@ -26,6 +26,7 @@ public class conditionalEffects2 : MonoBehaviour
 
     void Update()
     {
+        //Debug.Log("???????????????????????????????????????????????????????");
         doConditionalEffectsIfMet();
     }
 
@@ -49,17 +50,19 @@ public class conditionalEffects2 : MonoBehaviour
         //so, this is called when interacted with [may need to distinguish between BEFORE interaction and AFTER?]
         //after interaction is done, check all conditional effects to see if any of them have been triggered.
 
-        //Debug.Log("for this object:  " + this.gameObject + ", conditionalEffects.Keys.Count:  " + conditionalEffects.Keys.Count);
+        //Debug.Log("for this object:  " + this.gameObject + ", conditionalEffects.Keys.Count:  " + theDictionary.Keys.Count);
         foreach (condition thisCondition in theDictionary.Keys)
         {
             //Debug.Log("thisCondition:  "+ thisCondition);
             if (thisCondition.met() == false) { continue; }
 
+
+
+            //Debug.Log("theDictionary[thisCondition].Count:  " + theDictionary[thisCondition].Count);
+
             foreach (Ieffect thisEffect in theDictionary[thisCondition])
             {
-                //Debug.Log("this.gameObject:  "+ this.gameObject);
-                //yaaaaaaaaaaaaa nullls, so need to fix somehow.....
-                thisEffect.implementEffect(null, null, interactionCreator.singleton.arbitraryInterInfo());  //seems messy...
+                thisEffect.implementEffect();
             }
         }
     }

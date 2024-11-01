@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static enactionCreator;
+using static interactionCreator;
 
 public class equippable2 : interactable2
 {
@@ -11,7 +12,7 @@ public class equippable2 : interactable2
     public bool occupied = false;
 
     public GameObject enactionPoint1;
-    public interactionCreator.simpleSlot theEquippable2Type;
+    public simpleSlot theEquippable2Type;
     public parallelEXE planshell;
 
 
@@ -24,26 +25,13 @@ public class equippable2 : interactable2
 
     }
 
-    public void test()
-    {
-
-    }
 
     public void Awake()
     {
 
-
-
-
-
-
-
-
-
-
         //Debug.Log("equippable2 awake");
         //needs to be in awake, otherwise noy properly initialized if it is put in inventory [and thus disabled] immediately upon its creation...
-        theEquippable2Type = interactionCreator.simpleSlot.hands;
+        theEquippable2Type = simpleSlot.hands;
 
 
         if (tagging2.singleton == null)
@@ -59,16 +47,17 @@ public class equippable2 : interactable2
         //      have which slots it fits into or whatever.  classify somehow
         //      entity clicking on this needs to compare to see if it can pick up the object
         //or something, i dunno.  but an interaction effect built into the gun itself seems a bit odd.
-        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, enactionCreator.interType.standardClick, new putInInventory());
+        dictOfInteractions = interactionCreator.singleton.addInteraction(dictOfInteractions, interType.standardClick, new putInInventory());
 
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        initializeEnactionPoint1();
+        //initializeEnactionPoint1();
     }
 
+    /*
     void initializeEnactionPoint1()
     {
         enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1() line 91, equippable2 script");
@@ -76,6 +65,16 @@ public class equippable2 : interactable2
         enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.2f + this.transform.up * 0.3f;
         enactionPoint1.transform.rotation = this.transform.rotation;
     }
+    */
+
+    public void initializeStandardEnactionPoint1(MonoBehaviour theObject, float forwardOffset, float upwardOffset)
+    {
+        enactionPoint1 = new GameObject("enactionPoint1");
+        enactionPoint1.transform.parent = theObject.transform;
+        enactionPoint1.transform.position = theObject.transform.position + theObject.transform.forward * forwardOffset + theObject.transform.up * upwardOffset;
+        enactionPoint1.transform.rotation = theObject.transform.rotation;
+    }
+
 
     public void plugIntoGamepadIfThereIsOne()
     {

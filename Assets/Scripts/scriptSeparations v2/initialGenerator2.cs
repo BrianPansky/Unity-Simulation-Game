@@ -124,8 +124,8 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        int howManyZones = 41;
-        int howManySetsPerZone = 1;
+        int howManyZones = 81;
+        int howManySetsPerZone = 2;
         int theZSpacing = regularThinZoneSpacing;
         //int theZSpacing = oneBIGzoneSpacint;
         int theXSpacing = 10;
@@ -276,9 +276,10 @@ public class initialGenerator2 : MonoBehaviour
         //GameObject testCube = genGen.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
-        //objectList.Add(genGen.singleton.returnGun1(startPosition));
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
         //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         //objectList.Add(genGen.singleton.returnNPC5(startPosition));
+        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         //  objectList.Add(genGen.singleton.returnGun1(startPosition));
         //  objectList.Add(genGen.singleton.returnNPC5(startPosition));
@@ -286,13 +287,15 @@ public class initialGenerator2 : MonoBehaviour
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         //      objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         //      objectList.Add(genGen.singleton.returnNPC5(startPosition));
-        objectList.Add(genGen.singleton.returnShotgun1(startPosition));
+        //objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         objectList.Add(genGen.singleton.returnNPC5(startPosition));
         //  objectList.Add(genGen.singleton.returnNPC5(startPosition));
         //objectList.Add(genGen.singleton.returnNPC4(startPosition));
         //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
+        //objectList.Add(genGen.singleton.returnShotgun1(startPosition));
 
+        //objectList.Add(genGen.singleton.returnGun1(startPosition));
 
         //objectList.Add(genGen.singleton.returnPineTree1(startPosition + new Vector3(0, 0, theXSpacing + theXSpacing)));
 

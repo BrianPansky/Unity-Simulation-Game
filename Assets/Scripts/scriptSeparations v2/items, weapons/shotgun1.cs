@@ -15,8 +15,7 @@ public class shotgun1 : equippable2
     //}
     public void Awake()
     {
-        test();  //well, no error.  which is how i did "callableAwake" before someone on reddit said i could just do "equippable2.Awake()"
-        this.GetComponent<equippable2>().Awake();
+        this.GetComponent<equippable2>().Awake();  //lol does THIS work?
 
         //Physics.DefaultRaycastLayers;
     }
@@ -25,25 +24,13 @@ public class shotgun1 : equippable2
     // Start is called before the first frame update
     void Start()
     {
-        initializeEnactionPoint1();
+        initializeStandardEnactionPoint1(this, 0.7f,0.3f);
 
-
-        projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
-            new interactionInfo(interType.shoot1),
-            new projectileToGenerate(1, true, 99, 0), 50);
-
+        genGen.singleton.standardGun(this);
 
         theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
     }
 
-    void initializeEnactionPoint1()
-    {
-        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1() line 52, shotgun1 script");
-        enactionPoint1.transform.parent = transform;
-        enactionPoint1.transform.position = this.transform.position + this.transform.forward * 0.7f + this.transform.up * 0.3f;
-        enactionPoint1.transform.rotation = this.transform.rotation;
-
-    }
 
 
 
@@ -51,7 +38,5 @@ public class shotgun1 : equippable2
     {
         theCooldown.cooling();
     }
-
-
 }
 

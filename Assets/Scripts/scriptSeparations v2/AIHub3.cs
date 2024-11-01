@@ -249,6 +249,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //debugTargetDistance(this.gameObject, placeholderTarget1);
 
         return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position), 1.9f);
+        //return FIXEDgoToTargetForSTATIONARYtargets(adHocThreatAvoidanceVector, 1.9f);
     }
 
 

@@ -185,6 +185,7 @@ public class navAgent : IEnactByTargetVector
 
         nA.theAgent.baseOffset = 1f; //prevent stutter, being in floor
         //nA.theAgent.angularSpeed = 0;
+        nA.theAgent.speed = 5.5f;
     }
 
 
@@ -431,7 +432,7 @@ public class projectileLauncher: rangedEnaction
     override public void enact(inputData theInput)
     {
         theCooldown.fire();
-        //Debug.Log("hello??????????????");
+        //Debug.Log("firing projectile??????????????????????????????????????????????????????????????");
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
 
@@ -521,31 +522,16 @@ public class enactEffect : IEnactaBool
 {
     Ieffect theEffect;
 
-    GameObject objectBeingInteractedWith;
-    GameObject interactionAuthor = null;
-    interactionInfo theInfo;
 
     public enactEffect()
     {
 
     }
 
-    public enactEffect(Ieffect theEffectIn, GameObject objectBeingInteractedWithIN)
-    {
-        this.theEffect = theEffectIn;
-        this.objectBeingInteractedWith = objectBeingInteractedWithIN;
-    }
-
-    public enactEffect(Ieffect theEffectIn, GameObject objectBeingInteractedWithIN, interactionInfo theInfoIn)
-    {
-        this.theEffect = theEffectIn;
-        this.objectBeingInteractedWith = objectBeingInteractedWithIN;
-        this.theInfo= theInfoIn;
-    }
 
     public override void enact(inputData theInput)
     {
-        theEffect.implementEffect(objectBeingInteractedWith,interactionAuthor,theInfo);
+        theEffect.implementEffect();
     }
 }
 
