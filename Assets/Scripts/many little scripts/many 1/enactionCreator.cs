@@ -432,7 +432,7 @@ public class projectileLauncher: rangedEnaction
     override public void enact(inputData theInput)
     {
         theCooldown.fire();
-        //Debug.Log("firing projectile??????????????????????????????????????????????????????????????");
+        //Debug.Log("hello??????????????");
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
 
@@ -522,16 +522,31 @@ public class enactEffect : IEnactaBool
 {
     Ieffect theEffect;
 
+    GameObject objectBeingInteractedWith;
+    GameObject interactionAuthor = null;
+    interactionInfo theInfo;
 
     public enactEffect()
     {
 
     }
 
+    public enactEffect(Ieffect theEffectIn, GameObject objectBeingInteractedWithIN)
+    {
+        this.theEffect = theEffectIn;
+        this.objectBeingInteractedWith = objectBeingInteractedWithIN;
+    }
+
+    public enactEffect(Ieffect theEffectIn, GameObject objectBeingInteractedWithIN, interactionInfo theInfoIn)
+    {
+        this.theEffect = theEffectIn;
+        this.objectBeingInteractedWith = objectBeingInteractedWithIN;
+        this.theInfo= theInfoIn;
+    }
 
     public override void enact(inputData theInput)
     {
-        theEffect.implementEffect();
+        theEffect.implementEffect(objectBeingInteractedWith,interactionAuthor,theInfo);
     }
 }
 

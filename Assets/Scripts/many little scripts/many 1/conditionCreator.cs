@@ -168,86 +168,8 @@ public abstract class condition
     public abstract string asTextSHORT();
     //string whyDidItFail();
 
-
-
-    public string standardAsText()
-    {
-        string stringToReturn = "";
-
-        stringToReturn += "met?  " + met() + ", ";
-
-        stringToReturn += this.ToString();
-
-        return stringToReturn;
-    }
-
-    public string standardAsTextSHORT()
-    {
-
-        string stringToReturn = "[condition:  ";
-
-        stringToReturn += this.ToString();
-        stringToReturn += "]";
-
-        return stringToReturn;
-    }
 }
 
-public class multicondition : condition
-{
-    List<condition> conditionList;
-
-
-    public multicondition(condition c1)
-    {
-        conditionList = new List<condition>();
-        conditionList.Add(c1);
-    }
-    public multicondition(condition c1, condition c2)
-    {
-        conditionList = new List<condition>();
-        conditionList.Add(c1);
-        conditionList.Add(c2);
-    }
-    public multicondition(condition c1, condition c2, condition c3)
-    {
-        conditionList = new List<condition>();
-        conditionList.Add(c1);
-        conditionList.Add(c2);
-        conditionList.Add(c3);
-    }
-
-
-
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-
-    public override bool met()
-    {
-        foreach (condition condition in conditionList)
-        {
-            if (condition.met() == false) { return false; }
-        }
-
-        return true;
-    }
-}
-
-
-//public class useDynamicInputConditionAsStaticCondition
-
-
-
-//static/preset variables?????????
 public class autoCondition : condition
 {
 
@@ -267,154 +189,6 @@ public class autoCondition : condition
     }
 }
 
-public class enacted : condition
-{
-    int howManyTimesToEnact = 1;
-    planEXE2 theEnactionEXE;
-
-    public enacted(planEXE2 theEnactionEXE, int inputHowManyTimesToEnact = 1)
-    {
-        this.howManyTimesToEnact = inputHowManyTimesToEnact;
-        this.theEnactionEXE = theEnactionEXE;
-    }
-
-    public override bool met()
-    {
-        if (theEnactionEXE.numberOfTimesExecuted >= howManyTimesToEnact) { return true; }
-
-        return false;
-    }
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-}
-
-public class cooldown : condition
-{
-    public int cooldownMax = 130;
-    public int cooldownTimer = 0;
-
-    public cooldown(int cooldownMax = 130)
-    {
-        this.cooldownMax = cooldownMax;
-    }
-
-    public override bool met()
-    {
-        if (cooldownTimer < 1) { return true; }
-
-        return false;
-    }
-
-    public void cooling()
-    {
-        cooldownTimer--;
-    }
-
-    public void fire()
-    {
-        cooldownTimer = cooldownMax;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-}
-
-public class planListComplete : condition
-{
-    List<planEXE2> planList;
-
-    public planListComplete(List<planEXE2> planList)
-    {
-        this.planList = planList;
-    }
-
-    public override bool met()
-    {
-        //Debug.Log("planList.Count:  " + planList.Count);
-        foreach (planEXE2 planEXE in planList)
-        {
-            if (planEXE == null) { continue; } //messy annoying for now
-            if (planEXE.endConditionsMet() == false) { return false; }
-        }
-        return true;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-}
-
-public class adHocHasNoGunCondition : condition
-{
-
-    GameObject theObject;
-    bool returnTrueIfThereIsNoGun = true;
-
-
-    public adHocHasNoGunCondition(GameObject theObjectIn, bool returnTrueIfThereIsNoGunIn = true)
-    {
-        theObject = theObjectIn;
-        returnTrueIfThereIsNoGun = returnTrueIfThereIsNoGunIn;
-    }
-
-    public override bool met()
-    {
-        AIHub3 theHub = theObject.GetComponent<AIHub3>();
-
-        bool hasNoGun = theHub.hasNoGun();
-        if (hasNoGun == returnTrueIfThereIsNoGun) { return true; }
-        return false;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        string stringToReturn = "";
-        if (returnTrueIfThereIsNoGun)
-        {
-            stringToReturn += "do IF this object has NO gun";
-        }
-        else
-        {
-            stringToReturn += "do if this object HAS a gun";
-        }
-
-        return stringToReturn;
-    }
-}
-
-
-
-
-//dynamic/input variables??????????
 public class proximity : condition
 {
     //for when we want the objects to be CLOSER than the desired distance
@@ -539,9 +313,201 @@ public class proximity : condition
 
     public override string asTextSHORT()
     {
-        return standardAsTextSHORT();
+        string stringToReturn = "aaa";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+    public string whyDidItFail()
+    {
+        throw new NotImplementedException();
     }
 }
+
+public class enacted : condition
+{
+    int howManyTimesToEnact = 1;
+    planEXE2 theEnactionEXE;
+
+    public enacted(planEXE2 theEnactionEXE, int inputHowManyTimesToEnact = 1)
+    {
+        this.howManyTimesToEnact = inputHowManyTimesToEnact;
+        this.theEnactionEXE = theEnactionEXE;
+    }
+
+    public override bool met()
+    {
+        if (theEnactionEXE.numberOfTimesExecuted >= howManyTimesToEnact) { return true; }
+
+        return false;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "bbb";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+}
+
+public class cooldown : condition
+{
+    public int cooldownMax = 130;
+    public int cooldownTimer = 0;
+
+    public cooldown(int cooldownMax = 130)
+    {
+        this.cooldownMax = cooldownMax;
+    }
+
+    public override bool met()
+    {
+        if (cooldownTimer < 1) { return true; }
+
+        return false;
+    }
+
+    public void cooling()
+    {
+        cooldownTimer--;
+    }
+
+    public void fire()
+    {
+        cooldownTimer = cooldownMax;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "ccc";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+}
+
+public class numericalCondition : condition
+{
+
+    numericalVariable theVariableType;
+    float conditionValue = 0f;
+    //float variableReference;
+    Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables;
+
+    public numericalCondition(numericalVariable theVariableTypeIn, Dictionary<interactionCreator.numericalVariable, float> dictOfIvariablesIn, float conditionValueIn = 0f)
+    {
+        this.theVariableType = theVariableTypeIn;
+        this.dictOfIvariables = dictOfIvariablesIn;
+        this.conditionValue = conditionValueIn;
+    }
+
+
+    public override bool met()
+    {
+        //Debug.Log("theVariableType:  " + theVariableType);
+        //Debug.Log("conditionValue:  " + conditionValue);
+        //Debug.Log("dictOfIvariables[theVariableType]:  " + dictOfIvariables[theVariableType]);
+        //Debug.Log("(dictOfIvariables[theVariableType] < conditionValue):  " + (dictOfIvariables[theVariableType] < conditionValue));
+        if (dictOfIvariables[theVariableType] < conditionValue) { return true; }
+
+        return false;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "ddd";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+
+    }
+}
+
+public class planListComplete : condition
+{
+    List<planEXE2> planList;
+
+    public planListComplete(List<planEXE2> planList)
+    {
+        this.planList = planList;
+    }
+
+    public override bool met()
+    {
+        //Debug.Log("planList.Count:  " + planList.Count);
+        foreach (planEXE2 planEXE in planList)
+        {
+            if(planEXE == null) { continue; } //messy annoying for now
+            if (planEXE.endConditionsMet() == false) { return false; }
+        }
+        return true;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "eee";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+}
+
 
 public class adocThreatLineOfSightCondition : condition
 {
@@ -565,8 +531,7 @@ public class adocThreatLineOfSightCondition : condition
         if (threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject)
         {
             //Debug.Log("(threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject), so return true"); 
-            return true;
-        }
+            return true; }
 
         //Debug.Log("(threatLineOfSightBool == returnTrueIfAThreatCanSeeThisObject) is FALSE, so return false");
         return false;
@@ -574,9 +539,14 @@ public class adocThreatLineOfSightCondition : condition
 
     public override string asText()
     {
-        return standardAsText();
-    }
+        string stringToReturn = "";
 
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
     public override string asTextSHORT()
     {
         string stringToReturn = "";
@@ -587,6 +557,55 @@ public class adocThreatLineOfSightCondition : condition
         else
         {
             stringToReturn += "do if this object CANNOT be seen";
+        }
+
+        return stringToReturn;
+    }
+}
+
+public class adHocHasNoGunCondition: condition
+{
+
+    GameObject theObject;
+    bool returnTrueIfThereIsNoGun = true;
+
+
+    public adHocHasNoGunCondition(GameObject theObjectIn, bool returnTrueIfThereIsNoGunIn = true)
+    {
+        theObject = theObjectIn;
+        returnTrueIfThereIsNoGun = returnTrueIfThereIsNoGunIn;
+    }
+
+    public override bool met()
+    {
+        AIHub3 theHub = theObject.GetComponent<AIHub3>();
+
+        bool hasNoGun = theHub.hasNoGun();
+        if(hasNoGun == returnTrueIfThereIsNoGun) { return true; }
+        return false;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThereIsNoGun)
+        {
+            stringToReturn += "do IF this object has NO gun";
+        }
+        else
+        {
+            stringToReturn += "do if this object HAS a gun";
         }
 
         return stringToReturn;
@@ -611,15 +630,27 @@ public class targetMatchesHitscanOutput : condition
         //whatRaycastHit = theHitCalculatorIn;
     }
 
-
     public override string asText()
     {
-        return standardAsText();
+
+        string stringToReturn = "";
+
+        stringToReturn += "(met (means mismatch detected between target and what was hit) = " + met() + "), ";
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
     }
 
     public override string asTextSHORT()
     {
-        return standardAsTextSHORT();
+
+        string stringToReturn = "[condition:  ";
+
+        stringToReturn += this.ToString();
+        stringToReturn += "]";
+
+        return stringToReturn;
     }
 
     public override bool met()
@@ -629,11 +660,11 @@ public class targetMatchesHitscanOutput : condition
 
         //Debug.Log("theTargetCalculator:  " + theTargetCalculator);
         //Debug.Log("whatRaycastHit:  " + theHitScanner.theHitCalculatorOut);
-        if (didRaycastHitCorrectTarget(theTargetCalculator.targetPosition(), theHitScanner.theHitCalculatorOut.targetPosition()) == true)
+        if (didRaycastHitCorrectTarget(theTargetCalculator.targetPosition(), theHitScanner.theHitCalculatorOut.targetPosition()) == true) 
         {
 
             //Debug.Log("]]]]]]]]]]]]]]]]]]]]]]]]]    failed because (didRaycastHitCorrectTarget(theTargetCalculator.targetPosition(), whatRaycastHit.targetPosition()) == true)"); 
-            return false;
+            return false; 
         }
 
         //Debug.Log("]]]]]]]]]]]]]]]]]]]]]]]]]    condition met, should do debug report!!!!!!!!!!!!!!!!!!!");
@@ -672,7 +703,7 @@ public class targetMatchesHitscanOutput : condition
     {
         float distance = distanceBetweenPositions(intendedTargetVector, whatRaycastHitVector);
 
-        if (distance < marginOfError) { return true; }
+        if(distance < marginOfError) {return true;}
 
         return false;
 
@@ -688,50 +719,4 @@ public class targetMatchesHitscanOutput : condition
 
 
 }
-
-
-
-
-//either?  unsure?
-public class numericalCondition : condition
-{
-
-    numericalVariable theVariableType;
-    float conditionValue = 0f;
-    //float variableReference;
-    Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables;
-
-    public numericalCondition(numericalVariable theVariableTypeIn, Dictionary<interactionCreator.numericalVariable, float> dictOfIvariablesIn, float conditionValueIn = 0f)
-    {
-        this.theVariableType = theVariableTypeIn;
-        this.dictOfIvariables = dictOfIvariablesIn;
-        this.conditionValue = conditionValueIn;
-    }
-
-
-    public override bool met()
-    {
-        //Debug.Log("theVariableType:  " + theVariableType);
-        //Debug.Log("conditionValue:  " + conditionValue);
-        //Debug.Log("dictOfIvariables[theVariableType]:  " + dictOfIvariables[theVariableType]);
-        //Debug.Log("(dictOfIvariables[theVariableType] < conditionValue):  " + (dictOfIvariables[theVariableType] < conditionValue));
-        if (dictOfIvariables[theVariableType] > conditionValue) { return false; }
-
-        return true;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-}
-
-
-
 

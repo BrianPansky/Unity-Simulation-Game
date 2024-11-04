@@ -50,32 +50,12 @@ public class projectile1 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("projectile collision self destruct????????" + Time.fixedTime + this.GetInstanceID());
         //technically, this is an interaction.  but whatever?  just put it here.
-        //Debug.Log("other.gameObject.tag:  "+ other.gameObject.tag);
 
-        
-        if (selfDestructOnCollision == false) { return; }
-        if (other.CompareTag("aMapZone")) { return; }//other.CompareTag(String tagName)  //https://stackoverflow.com/questions/46248022/not-destroying-objects-fast-enough-and-causing-another-collision
-
-
-
-        Destroy(this.gameObject);
-
-        /*
         if (selfDestructOnCollision && other.gameObject.tag != "aMapZone")
         {
-            //selfDestructOnCollision = false;
-            //enabled = false;
-            //Debug.Log("YES projectile collision self destruct!!!" + Time.fixedTime + this.GetInstanceID());
             Destroy(this.gameObject);
         }
-        else
-        {
-
-            //Debug.Log("no  " + Time.fixedTime + this.GetInstanceID());
-        }
-        */
     }
 
     void OnDestroy()

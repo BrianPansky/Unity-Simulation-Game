@@ -89,22 +89,22 @@ public class interactionCreator : MonoBehaviour
     }
 
 
-    internal Dictionary<enactionCreator.interType, List<IInteraction>> addInteraction(Dictionary<enactionCreator.interType, List<IInteraction>> dictOfInteractionsX, enactionCreator.interType interactionType, IInteraction interaction)
+    internal Dictionary<enactionCreator.interType, List<Ieffect>> addInteraction(Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractionsX, enactionCreator.interType interactionType, Ieffect effect)
     {
         if (dictOfInteractionsX == null)
         {
-            dictOfInteractionsX = new Dictionary<enactionCreator.interType, List<IInteraction>>();
+            dictOfInteractionsX = new Dictionary<enactionCreator.interType, List<Ieffect>>();
         }
         else if (dictOfInteractionsX.ContainsKey(interactionType))
         {
-            dictOfInteractionsX[interactionType].Add(interaction);
+            dictOfInteractionsX[interactionType].Add(effect);
             return dictOfInteractionsX;
         }
 
 
         //sigh, need to add the key first, which means the list it unlocks as well...
-        List<IInteraction> list = new List<IInteraction>();
-        list.Add(interaction);
+        List<Ieffect> list = new List<Ieffect>();
+        list.Add(effect);
         dictOfInteractionsX.Add(interactionType, list);
 
         return dictOfInteractionsX;
@@ -141,7 +141,7 @@ public class interactable2 : zoneable2
     public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
 
-    public Dictionary<enactionCreator.interType, List<IInteraction>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<IInteraction>>();
+    public Dictionary<enactionCreator.interType, List<Ieffect>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
     
     /*
     
@@ -184,14 +184,11 @@ public class interactable2 : zoneable2
 
 
 
-
-//effects
-
 public interface Ieffect
 {
     //why does it take interactionInfo?  effects should be separate from their causes, so shouldn't need that?  probably no author too?
     //looks like "theInfo" is used to do some ad-hoc CONDITIONS.  but i should just use my/a condition system for that.
-    void implementEffect();
+    void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
 }
 
 public class adHocDebugEffect : Ieffect
@@ -206,7 +203,7 @@ public class adHocDebugEffect : Ieffect
         this.theCondition = theCondition;
     }
 
-    public void implementEffect()
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
     {
         //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //addToReport
@@ -216,56 +213,34 @@ public class adHocDebugEffect : Ieffect
     }
 }
 
-public class deathEffect : Ieffect
-{
-    GameObject theObjectToKill;
-
-
-    public deathEffect(GameObject theObjectToKillIn)
-    {
-        theObjectToKill = theObjectToKillIn;
-    }
-
-    public void implementEffect()
-    {
-        //Debug.Log("objectBeingInteractedWith:  "+ objectBeingInteractedWith);
-        kill();
-    }
-
-    public void kill()
-    {
-        GameObject.Destroy(theObjectToKill);
-    }
-}
-
-
-
-
-//interactions
-
-public abstract class IInteraction
-{
-    public abstract void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
-}
-
-public class numericalInteraction : IInteraction
+public class numericalEffect : Ieffect
 {
     public interactionCreator.numericalVariable toAlter;
     public bool increaseTheVariable = false;  //if false, we DECREASE the variable
-    //public int minLevel = 0;  //the minimum interaction level required to implement the effect
-    //public int maxLevel = 10;  //at or beyond max level, effect is simply 100%?  in between it's normal math
+    public int minLevel = 0;  //the minimum interaction level required to implement the effect
+    public int maxLevel = 10;  //at or beyond max level, effect is simply 100%?  in between it's normal math
 
 
-    public numericalInteraction(interactionCreator.numericalVariable toAlter, bool increaseTheVariable = false)
+    public numericalEffect(interactionCreator.numericalVariable toAlter, bool increaseTheVariable = false)
     {
         this.toAlter = toAlter;
         this.increaseTheVariable = increaseTheVariable;
     }
 
-    public override void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
     {
         interactable2 theinteractable2 = objectBeingInteractedWith.GetComponent<interactable2>();
         if (theinteractable2 == null) { return; }
+
+        //.............gonna have to re-do all of this in a way that's legible to NPCs for planning..........make it so i can feed imaginary state in?  ya, probably....[just create imaginary whole game object with imaginary interactable2 etc.........]
+        //also, the following is a CONDITION, not an EFFECT!  indeed, it's a NUMERICAL condition, not a numerical effect
+        if (theInfo.level < minLevel) { return; }
+        if (theInfo.level >= maxLevel)
+        {
+            if (increaseTheVariable == false) { setInteractableVariable(theinteractable2, toAlter, 0); } //how to implement "max" effect if it's addition???
+
+            return;
+        }
 
 
         float amount = theInfo.magnitudeOfInteraction;
@@ -276,7 +251,6 @@ public class numericalInteraction : IInteraction
 
         //Debug.Log("theinteractable2.dictOfIvariables[toAlter] += amount;");
         //Debug.Log(toAlter+" = "+ theinteractable2.dictOfIvariables[toAlter]);
-        //Debug.Log("now theinteractable2.dictOfIvariables[toAlter] = " + theinteractable2.dictOfIvariables[toAlter]);
     }
 
     private void adjustInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
@@ -296,13 +270,34 @@ public class numericalInteraction : IInteraction
 
 }
 
-public class putInInventory : IInteraction
+public class deathEffect : Ieffect
 {
+    GameObject theObjectToKill;
 
 
-    public override void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    public deathEffect(GameObject theObjectToKillIn)
     {
+        theObjectToKill = theObjectToKillIn;
+    }
 
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    {
+        //Debug.Log("objectBeingInteractedWith:  "+ objectBeingInteractedWith);
+        kill();
+    }
+
+    public void kill()
+    {
+        GameObject.Destroy(theObjectToKill);
+    }
+}
+
+public class putInInventory : Ieffect
+{
+    //why would this be an "effect"?  not an "enaction"?
+
+    public void implementEffect(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    {
         //Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
 
 
@@ -311,7 +306,7 @@ public class putInInventory : IInteraction
 
 
         //Debug.Log("author:  " + author);
-        if (interactionAuthor == null)
+        if(interactionAuthor == null)
         {
             Debug.Log("author is null");
         }
@@ -321,103 +316,3 @@ public class putInInventory : IInteraction
 }
 
 
-public class interactionEffect : IInteraction
-{
-    List<Ieffect> theEffects = new List<Ieffect>();
-
-
-    public interactionEffect(Ieffect e1)
-    {
-        theEffects.Add(e1);
-    }
-
-    public interactionEffect(Ieffect e1, Ieffect e2)
-    {
-        theEffects.Add(e1);
-        theEffects.Add(e2);
-    }
-    public interactionEffect(Ieffect e1, Ieffect e2, Ieffect e3)
-    {
-        theEffects.Add(e1);
-        theEffects.Add(e2);
-        theEffects.Add(e3);
-    }
-
-
-
-    public override void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
-    {
-        foreach (Ieffect thisEffect in theEffects)
-        {
-            thisEffect.implementEffect();
-        }
-    }
-}
-
-
-//conditional interaction
-public class conditionalInteraction: IInteraction
-{
-    List<interactionCondition> theinteractionConditions = new List<interactionCondition>();
-    List<IInteraction> theInteractions = new List<IInteraction>();
-
-    public conditionalInteraction(interactionCondition c1, IInteraction i1)
-    {
-        theinteractionConditions.Add(c1);
-        theInteractions.Add(i1);
-    }
-
-    public override void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
-    {
-        //Debug.Log("==================" + Time.fixedTime);
-
-        //only does them if conditions met
-
-        foreach (interactionCondition thisCondition in theinteractionConditions)
-        {
-            if (thisCondition.met(objectBeingInteractedWith, interactionAuthor, theInfo) == false) { return; }
-        }
-
-        foreach (IInteraction thisInteraction in theInteractions)
-        {
-            thisInteraction.doInteraction(objectBeingInteractedWith, interactionAuthor, theInfo);
-        }
-    }
-}
-
-
-
-//interaction Conditions
-
-public abstract class interactionCondition
-{
-
-    public abstract bool met(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo);
-}
-
-public class interactionLevel: interactionCondition
-{
-
-    public interactionCreator.numericalVariable toCompare;
-
-    public int levelCutoff = 1;
-
-
-
-    public interactionLevel(int levelCutoffInput)
-    {
-        levelCutoff = levelCutoffInput;
-    }
-
-
-
-    public override bool met(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
-    {
-        interactable2 theinteractable2 = objectBeingInteractedWith.GetComponent<interactable2>();
-        if (theinteractable2 == null) { return false; }
-
-        if (theInfo.level < levelCutoff) { return false; }
-
-        return true;
-    }
-}
