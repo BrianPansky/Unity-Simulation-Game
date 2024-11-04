@@ -124,7 +124,7 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        int howManyZones = 61;
+        int howManyZones = 81;
         int howManySetsPerZone = 2;
         int theZSpacing = regularThinZoneSpacing;
         //int theZSpacing = oneBIGzoneSpacint;
@@ -276,7 +276,7 @@ public class initialGenerator2 : MonoBehaviour
         //GameObject testCube = genGen.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
-        //objectList.Add(genGen.singleton.returnGun1(startPosition));
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
         //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         //objectList.Add(genGen.singleton.returnNPC5(startPosition));
         objectList.Add(genGen.singleton.returnShotgun1(startPosition));

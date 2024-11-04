@@ -11,6 +11,24 @@ public class colliderInteractor : MonoBehaviour
     public GameObject enactionAuthor;
 
 
+    //to prevent multiple happening per frame for some reason,
+    //even if bullet supposedly has already self destructed!  [doesn't actually destroy until end of frame].
+    //won't help if i WANT multiple things to get hit on same frame.....???  ughhhh
+    //like...splash damage?
+    //in that case, (in collision trigger) add to a list ONLY if they aren't already on the list, then do stuff to them in UPDATE?
+    //bool doneCollisionThisFrame = false; 
+    //List<Collider> thingsWeHitThisFrame = new List<Collider>();
+    List<GameObject> thingsWeHitThisFrame = new List<GameObject>();
+
+
+    void Update()
+    {
+        //doneCollisionThisFrame = false;
+
+        //thingsWeHitThisFrame = new List<Collider>();
+        thingsWeHitThisFrame = new List<GameObject>();
+    }
+
     public static void genColliderInteractor(GameObject newObjectForProjectile, collisionEnaction theEnactable)
     {
         colliderInteractor ci = newObjectForProjectile.AddComponent<colliderInteractor>();
@@ -23,13 +41,33 @@ public class colliderInteractor : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        interactable2 theInteractable = other.GetComponent<interactable2>();
-        if (conditionsMet(other, theInteractable)==false) { return; }
+        //Debug.Log("thingsWeHitThisFrame.Count:  " + thingsWeHitThisFrame.Count);
+        if (thingsWeHitThisFrame.Contains(other.gameObject)) { return; }
 
-        foreach(Ieffect thisEffect in theInteractable.dictOfInteractions[this.interactionType])
+        thingsWeHitThisFrame.Add(other.gameObject);
+        //Debug.Log("thingsWeHitThisFrame.Count:  " + thingsWeHitThisFrame.Count);
+        //Debug.Log("other:  " + other);
+        //Debug.Log("other.GetInstanceID():  " + other.GetInstanceID());
+        //Debug.Log("other.gameObject:  " + other.gameObject);
+
+        theInteractionCode(other);
+    }
+
+    private void theInteractionCode(Collider other)
+    {
+        //if (doneCollisionThisFrame) { return; }
+        //Debug.Log("................ONE COLLISION TRIGGER ENTER..............." + Time.fixedTime);
+        interactable2 theInteractable = other.GetComponent<interactable2>();
+        if (noErrors(other, theInteractable) == false) { return; }
+
+        //Debug.Log("theInteractable.dictOfInteractions[this.interactionType].Count" + theInteractable.dictOfInteractions[this.interactionType].Count);
+
+        foreach (IInteraction thisInteraction in theInteractable.dictOfInteractions[this.interactionType])
         {
-            thisEffect.implementEffect(other.gameObject, enactionAuthor, thisToInterInfo());
+            thisInteraction.doInteraction(other.gameObject, enactionAuthor, thisToInterInfo());
         }
+
+        //doneCollisionThisFrame = true;
     }
 
     private interactionInfo thisToInterInfo()
@@ -37,7 +75,7 @@ public class colliderInteractor : MonoBehaviour
         return new interactionInfo(interactionType, magnitudeOfInteraction, level);
     }
 
-    bool conditionsMet(Collider other, interactable2 theInteractable)
+    bool noErrors(Collider other, interactable2 theInteractable)
     {
         if (theInteractable == null) { return false; }
         if (theInteractable.dictOfInteractions == null)

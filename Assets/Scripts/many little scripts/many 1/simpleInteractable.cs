@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class simpleInteractable : interactable2
 {
-    public static void genSimpleInteractable(GameObject theObject, enactionCreator.interType interactionType, Ieffect theEffect)
+    public static void genSimpleInteractable(GameObject theObject, enactionCreator.interType interactionType, IInteraction theInteraction)
     {
         simpleInteractable theSI = theObject.GetComponent<simpleInteractable>();
         if (theSI != null)
@@ -14,10 +14,10 @@ public class simpleInteractable : interactable2
         }
         theSI = theObject.AddComponent<simpleInteractable>();
         
-        List<Ieffect> needAList = new List<Ieffect>();
+        //List<IInteraction> needAList = new List<IInteraction>();
         //needAList.Add(theEffect);
         //theSI.dictOfInteractions[interactionType] = needAList;
 
-        theSI.dictOfInteractions = interactionCreator.singleton.addInteraction(theSI.dictOfInteractions, interactionType, theEffect);
+        theSI.dictOfInteractions = interactionCreator.singleton.addInteraction(theSI.dictOfInteractions, interactionType, theInteraction);
     }
 }

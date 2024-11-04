@@ -62,10 +62,7 @@ public class conditionalEffects2 : MonoBehaviour
 
             foreach (Ieffect thisEffect in theDictionary[thisCondition])
             {
-                //Debug.Log("this.gameObject:  " + this.gameObject);
-                //Debug.Log("thisEffect:  " + thisEffect);
-                //yaaaaaaaaaaaaa nullls, so need to fix somehow.....
-                thisEffect.implementEffect(null, null, interactionCreator.singleton.arbitraryInterInfo());  //seems messy...
+                thisEffect.implementEffect();
             }
         }
     }
