@@ -87,7 +87,7 @@ public abstract class planEXE2
 
     public bool standardExecuteErrors()
     {
-        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return true; }
+        if (theEnaction == null) { Debug.Log("null.....that's an error!"); return true; } //is it, though?
 
         //conditionalPrint("startConditionsMet():  "+ startConditionsMet());
         if (startConditionsMet() == false) { return true; }
@@ -188,7 +188,7 @@ public abstract class planEXE2
 
     public bool startConditionsMet()
     {
-        grabberDebug.debugPrintBool = debugPrint;
+        //grabberDebug.debugPrintBool = debugPrint;
         //Debug.Log("tartConditions.Count:  " + startConditions.Count);
         foreach (condition thisCondition in startConditions)
         {
@@ -401,7 +401,7 @@ public class boolEXE2 : singleEXE
     public override void execute()
     {
         //conditionalPrint("7777777777777777777777777777grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
-        grabberDebug.recordCurrentEnaction(this.theEnaction);
+        //      grabberDebug.recordCurrentEnaction(this.theEnaction);
         //conditionalPrint("aaaaaa.1111111111111aaaaaaa theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
         if (standardExecuteErrors()) { return; }
 
@@ -677,6 +677,75 @@ public class seriesEXE : planEXE2
         return false;
     }
 }
+
+public class simultaneousEXE : planEXE2
+{
+
+    public simultaneousEXE()
+    {
+
+
+    }
+    public simultaneousEXE(planEXE2 item)
+    {
+        Add(item);
+
+    }
+    public simultaneousEXE(planEXE2 item1, planEXE2 item2)
+    {
+        Add(item1);
+        Add(item2);
+
+    }
+    public simultaneousEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+
+    }
+    public simultaneousEXE(planEXE2 item1, planEXE2 item2, planEXE2 item3, planEXE2 item4)
+    {
+        Add(item1);
+        Add(item2);
+        Add(item3);
+        Add(item4);
+
+    }
+
+
+
+    public override void execute()
+    {
+        executeAll();
+    }
+
+    private void executeAll()
+    {
+        foreach (planEXE2 exe in exeList) { exe.execute(); }
+    }
+
+    public override bool error()
+    {
+        foreach (planEXE2 exe in exeList)
+        {
+            if (exe == null)
+            {
+                conditionalPrint("error (in a parallelEXE):  (exe == null)");
+                return true;
+            }
+            if (exe.error())
+            {
+                conditionalPrint("error (in a parallelEXE):  exe.error(), for THIS exe:  " + exe.asText());
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
 
 
 

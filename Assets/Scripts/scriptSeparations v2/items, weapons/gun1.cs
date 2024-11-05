@@ -8,7 +8,7 @@ using static interactionCreator;
 public class gun1 : equippable2
 {
 
-    public cooldown theCooldown;
+    //public cooldown theCooldown;
 
 
     //can't have this, because it prevents the "awake" function from being called in "equippable2"?!?  -_____-
@@ -62,7 +62,7 @@ public class gun1 : equippable2
 
         genGen.singleton.standardGun(this);
 
-        theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
+        //theCooldown = this.GetComponent<projectileLauncher>().theCooldown;
 
     }
 
@@ -76,7 +76,8 @@ public class gun1 : equippable2
 
     void Update()
     {
-        theCooldown.cooling();
+        doCooldown();
+        //theCooldown.cooling();
     }
 
 }

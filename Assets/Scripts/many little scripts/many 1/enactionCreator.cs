@@ -34,6 +34,7 @@ public class enactionCreator : MonoBehaviour
     public enum buttonCategories
     {
         errorYouDidntSetEnumTypeForBUTTONCATEGORIES,
+        thisButtonCategoryIntentionallyLeftBlank,
         primary,
         aux1,
         vector1,
@@ -71,6 +72,7 @@ public class enactionCreator : MonoBehaviour
 public abstract class enaction : MonoBehaviour
 {
     public buttonCategories gamepadButtonType { get; set; }
+    public List<condition> prereqs = new List<condition>();
 
     public bool debugPrint = false;
 
@@ -85,6 +87,11 @@ public abstract class enaction : MonoBehaviour
         planEXE2 exe1 = this.toEXE(null);
         exe1.debugPrint = this.debugPrint; //huh, i think this indicates we're moving in a bottom-up direction, nice
         exe1.atLeastOnce();
+
+        foreach (condition thisCondition in this.prereqs)
+        {
+            exe1.startConditions.Add(thisCondition);
+        }
 
         return exe1;
     }
@@ -397,7 +404,7 @@ public abstract class rangedEnaction: collisionEnaction
     public int firingCooldownMax = 20;
 
     //ad-hoc!
-    public cooldown theCooldown;
+    //public cooldown theCooldown;
 
 }
 
@@ -415,7 +422,27 @@ public class projectileLauncher: rangedEnaction
         pL.firingCooldownMax = infiringCooldownMax;
         pL.firePoint = firePoint;
         pL.range = range;
-        pL.theCooldown = new cooldown(infiringCooldownMax);
+        /*
+        //pL.theCooldown = new cooldown(infiringCooldownMax);
+        if(pL.prereqs == null)
+        {
+            pL.prereqs = new List<condition>();
+        }
+        Debug.Assert(pL.prereqs != null);
+        Debug.Assert(objectToAddItTo.GetComponent<interactable2>() != null);
+        pL.prereqs.Add(new numericalCondition(interactionCreator.numericalVariable.cooldown, objectToAddItTo.GetComponent<interactable2>().dictOfIvariables));
+        */
+        pL.Add(new numericalCondition(interactionCreator.numericalVariable.cooldown, objectToAddItTo.GetComponent<interactable2>().dictOfIvariables));
+    }
+
+    private void Add(condition c1)
+    {
+        if (prereqs == null)
+        {
+            prereqs = new List<condition>();
+        }
+
+        prereqs.Add(c1);
     }
 
     public projectileLauncher(Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, projectileToGenerate theprojectileToGenerate, float range = 99f)
@@ -431,7 +458,7 @@ public class projectileLauncher: rangedEnaction
 
     override public void enact(inputData theInput)
     {
-        theCooldown.fire();
+        //theCooldown.fire();
         //Debug.Log("firing projectile??????????????????????????????????????????????????????????????");
         genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
     }
@@ -454,7 +481,7 @@ public class hitscanEnactor: rangedEnaction
         newHitscanEnactor.firePoint = firePoint;
         newHitscanEnactor.range = range;
 
-        newHitscanEnactor.theCooldown = new cooldown(0);
+        //newHitscanEnactor.theCooldown = new cooldown(0);
 
 
     }
@@ -523,11 +550,14 @@ public class enactEffect : IEnactaBool
     Ieffect theEffect;
 
 
-    public enactEffect()
+
+    public static void addEnactEffect(GameObject objectToAddItTo, Ieffect theEffectIn)
     {
 
-    }
+        enactEffect newEnactEffect = objectToAddItTo.AddComponent<enactEffect>();
 
+        newEnactEffect.theEffect = theEffectIn;
+    }
 
     public override void enact(inputData theInput)
     {
@@ -535,6 +565,141 @@ public class enactEffect : IEnactaBool
     }
 }
 
+public class compoundEnactaBool : IEnactaBool
+{
+
+    public List<IEnactaBool> theEnactions = new List<IEnactaBool>();
+
+    public static void addCompoundEnactaBool(GameObject objectToAddItTo, buttonCategories theButtonType, IEnactaBool enaction1)
+    {
+
+        compoundEnactaBool newCompoundEnactaBool = objectToAddItTo.AddComponent<compoundEnactaBool>();
+
+        newCompoundEnactaBool.gamepadButtonType = theButtonType;
+        newCompoundEnactaBool.theEnactions.Add(enaction1);
+    }
+
+    public static void addCompoundEnactaBool(GameObject objectToAddItTo, buttonCategories theButtonType, IEnactaBool enaction1, IEnactaBool enaction2)
+    {
+
+        compoundEnactaBool newCompoundEnactaBool = objectToAddItTo.AddComponent<compoundEnactaBool>();
+        newCompoundEnactaBool.gamepadButtonType = theButtonType;
+
+        newCompoundEnactaBool.theEnactions.Add(enaction1);
+        newCompoundEnactaBool.theEnactions.Add(enaction2);
+
+
+
+    }
+
+
+    public static void addCompoundEnactaBool(GameObject objectToAddItTo, buttonCategories theButtonType, IEnactaBool enaction1, IEnactaBool enaction2, condition condition1)
+    {
+
+        compoundEnactaBool newCompoundEnactaBool = objectToAddItTo.AddComponent<compoundEnactaBool>();
+        newCompoundEnactaBool.gamepadButtonType = theButtonType;
+
+        newCompoundEnactaBool.theEnactions.Add(enaction1);
+        newCompoundEnactaBool.theEnactions.Add(enaction2);
+
+        newCompoundEnactaBool.prereqs.Add(condition1);
+
+
+    }
+    public static void addCompoundEnactaBool(GameObject objectToAddItTo, buttonCategories theButtonType, IEnactaBool enaction1, IEnactaBool enaction2, IEnactaBool enaction3)
+    {
+
+        compoundEnactaBool newCompoundEnactaBool = objectToAddItTo.AddComponent<compoundEnactaBool>();
+        newCompoundEnactaBool.gamepadButtonType = theButtonType;
+
+        newCompoundEnactaBool.theEnactions.Add(enaction1);
+        newCompoundEnactaBool.theEnactions.Add(enaction2);
+        newCompoundEnactaBool.theEnactions.Add(enaction3);
+    }
+
+    public override void enact(inputData theInput)
+    {
+        foreach (IEnactaBool thisEnaction in theEnactions)
+        {
+            thisEnaction.enact();
+        }
+    }
+
+
+
+
+    public override planEXE2 toEXE(GameObject target)
+    {
+        //boolEXE2 theEXE = new boolEXE2(this, target);
+        return standardEXEconversionWithBundledEffects();
+    }
+
+    public planEXE2 standardEXEconversionWithBundledEffects()
+    {
+
+        //planEXE2 exe1 = new simultaneousEXE(new boolEXE2(this));
+        planEXE2 exe1 = new boolEXE2(this);
+        //Debug.Assert(exe1.theEnaction !=null);
+
+        //Debug.Assert(new boolEXE2(this).theEnaction != null);
+        //theEnaction.toEXE(null);
+        exe1.debugPrint = this.debugPrint; //huh, i think this indicates we're moving in a bottom-up direction, nice
+        exe1.atLeastOnce();
+
+        foreach (condition thisCondition in this.prereqs)
+        {
+            //Debug.Log("thisCondition:  " + thisCondition);
+            exe1.startConditions.Add(thisCondition);
+        }
+
+
+
+        //redundant!  this enaction does them all!
+        /*
+        foreach (enaction thisEnaction in this.theEnactions)
+        {
+            //Debug.Log("thisEnaction:  "+ thisEnaction);
+            planEXE2 toAdd = thisEnaction.toEXE(null);
+            Debug.Assert(toAdd.theEnaction != null);
+            toAdd.debugPrint = this.debugPrint;
+            exe1.exeList.Add(toAdd);
+        }
+        */
+
+        return exe1;
+    }
+
+
+    /*
+    internal bool containsIntertype(interType intertypeX)
+    {
+
+        //uhhhhhhhhhhhh, messyyyyyyyyyyyyy
+
+        foreach (enaction thisEnaction in theEnactions)
+        {
+            if (thisEnaction.GetType() == collisionEnaction.GetType()) { return true; }
+        }
+
+
+
+
+
+        foreach (collisionEnaction thisEnaction in theEnactions)
+        {
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return true; }
+        }
+
+        foreach (compoundEnactaBool thisEnaction in theEnactions)
+        {
+            if (thisEnaction.containsIntertype(intertypeX)) { return true; }
+        }
+
+
+        return false;
+    }
+    */
+}
 
 
 public abstract class vectorMovement : IEnactaVector

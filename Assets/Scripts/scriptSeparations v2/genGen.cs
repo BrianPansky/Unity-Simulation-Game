@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.WSA;
 using static enactionCreator;
 using static interactionCreator;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
@@ -105,6 +106,7 @@ public class genGen : MonoBehaviour
 
     public void projectileGenerator(projectileToGenerate theprojectileToGenerate, collisionEnaction theEnactable, Vector3 startPoint, Vector3 direction)//(rangedEnaction enInfo, interactionInfo interINFO, IEnactaBool theEnactable)
     {
+
         GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
         projectile1.genProjectile1(newObjectForProjectile, theprojectileToGenerate, direction);//enInfo, interINFO, theEnactable);
         growScript1.genGrowScript1(newObjectForProjectile, theprojectileToGenerate.growthSpeed);
@@ -209,13 +211,60 @@ public class genGen : MonoBehaviour
 
     public void standardGun(equippable2 theEquippable, float magnitudeOfInteraction = 1f, int level = 0, bool sdOnCollision = true, float speed = 1f)
     {
+        theEquippable.dictOfIvariables[numericalVariable.cooldown] = 0f;
 
+        /*
+        projectileLauncher theShooter = new projectileLauncher(theEquippable.enactionPoint1.transform, 
+            buttonCategories.errorYouDidntSetEnumTypeForBUTTONCATEGORIES, 
+            new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0));
+        */
+
+
+        //bit messy?  made "thisButtonCategoryIntentionallyLeftBlank" so that i can add component to object [thus easy search object for component of that type] WITHOUT having it plug into a gamepad button when equipped......
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.thisButtonCategoryIntentionallyLeftBlank,
+            new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 99, 0),
+            20);
+
+
+        enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown,90));
+
+
+
+        projectileLauncher theShooter = theEquippable.transform.gameObject.GetComponent<projectileLauncher>();
+        enactEffect theFiringEffectOnCooldown = theEquippable.transform.gameObject.GetComponent<enactEffect>();
+
+        //IEnactaBool theFiringEffectOnCooldown = enactEffect.returnEnactEffect(new numericalEffect(theEquippable, numericalVariable.cooldown));
+
+        
+
+
+
+        //Debug.Assert(enactEffect.returnEnactEffect(new deathEffect(theEquippable.transform.gameObject)) != null);
+        //Debug.Assert(theFiringEffectOnCooldown != null);
+        Debug.Assert(theFiringEffectOnCooldown != null);
+
+        condition cooldownCondition = new numericalCondition(numericalVariable.cooldown, theEquippable.dictOfIvariables);
+
+        compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
+
+
+
+
+
+
+        /*
         projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
             theEquippable.enactionPoint1.transform,
             buttonCategories.primary,
             new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
             new projectileToGenerate(speed, sdOnCollision, 999, 0),
             20);
+
+        */
 
     }
 

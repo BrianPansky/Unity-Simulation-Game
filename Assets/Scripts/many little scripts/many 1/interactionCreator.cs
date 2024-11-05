@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using static interactable2;
+using static interactionCreator;
 
 public class interactionCreator : MonoBehaviour
 {
@@ -142,7 +143,16 @@ public class interactable2 : zoneable2
 
 
     public Dictionary<enactionCreator.interType, List<IInteraction>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<IInteraction>>();
-    
+
+
+    public void doCooldown()
+    {
+        if (dictOfIvariables[numericalVariable.cooldown] > 0)
+        {
+            dictOfIvariables[numericalVariable.cooldown]--;
+        }
+    }
+
     /*
     
     //hmm, i should just build these conditional effects into CONDITIONS THEMSELVES?  [except i want some to require MULTIPLE conditions......sooo....make a "condition set" class?  put it all in there?][i mean mulit-condition IS a condition, so is "if ANY one of these conditions is met" or "if any TWO of these conditions is met", etc][thus, conditions ARE the condition shell, some just need to be multi-condition conditions that accept other conditions too.  but all of them, even SINGLE conditions ones, have built in ability to do effects]
@@ -238,6 +248,47 @@ public class deathEffect : Ieffect
     }
 }
 
+public class numericalEffect : Ieffect
+{
+    public interactionCreator.numericalVariable toAlter;
+    //public bool increaseTheVariable = false;  //if false, we DECREASE the variable
+    //public int minLevel = 0;  //the minimum interaction level required to implement the effect
+    //public int maxLevel = 10;  //at or beyond max level, effect is simply 100%?  in between it's normal math
+    float amount = 1f;
+    interactable2 theInteractable;
+
+    public numericalEffect(interactable2 theInteractableIn, interactionCreator.numericalVariable toAlter, float amountIn = 1f, bool increaseTheVariable = false)
+    {
+        this.toAlter = toAlter;
+        //this.increaseTheVariable = increaseTheVariable;
+        this.amount = -amountIn;
+        if (increaseTheVariable == false) { amount = -amount; }
+
+        theInteractable = theInteractableIn;
+    }
+
+    public void implementEffect()
+    {
+        adjustInteractableVariable(theInteractable, toAlter, amount);
+    }
+
+
+    private void adjustInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
+    {
+        if (theinteractable2.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
+
+        theinteractable2.dictOfIvariables[toAlter] += amount;
+    }
+
+
+    private void setInteractableVariable(interactable2 theinteractable2, interactionCreator.numericalVariable toAlter, float amount)
+    {
+        if (theinteractable2.dictOfIvariables.ContainsKey(toAlter) == false) { Debug.Log("ivars.dictOfIvariables.ContainsKey(toAlter) == false.......should never happen?"); return; }
+
+        theinteractable2.dictOfIvariables[toAlter] = amount;
+    }
+
+}
 
 
 

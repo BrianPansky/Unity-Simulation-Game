@@ -391,7 +391,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //Debug.Log("firePlan4");
         //either playable will already have the type, or it might be in equipper slots
-        rangedEnaction grabEnact1;
+        enaction grabEnact1;
         grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interTypeX);
 
         if (grabEnact1 == null)
@@ -406,7 +406,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //Debug.Log("grabEnact1.theCooldown:  " + grabEnact1.theCooldown);
         //Debug.Log("grabEnact1.theCooldown.cooldownMax:  " + grabEnact1.theCooldown.cooldownMax);
         //Debug.Log("grabEnact1.theCooldown.cooldownTimer:  " + grabEnact1.theCooldown.cooldownTimer);
-        exe1.startConditions.Add(grabEnact1.theCooldown);
+        //exe1.startConditions.Add(grabEnact1.theCooldown);
         exe1.atLeastOnce();
         //condition thisCondition = new enacted(exe1);
         //exe1.endConditions.Add(thisCondition);
@@ -485,10 +485,26 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
         //      return theItemWeWant.GetComponent<equippable2>().planshell;
 
-        rangedEnaction theFireEnaction = firstEnactionWithInterTypeX(interTypeX, theItemWeWant);
 
-        planEXE2 thePlan = theFireEnaction.standardEXEconversion();
-        thePlan.startConditions.Add(theFireEnaction.theCooldown);
+
+
+
+
+
+        //rangedEnaction theFireEnaction = firstEnactionWithInterTypeX(interTypeX, theItemWeWant);
+        enaction theFireEnaction = enactionWithInterTypeXOnObjectsPlayable(theItemWeWant, interTypeX);
+
+
+        
+
+
+
+
+
+
+
+        planEXE2 thePlan = theFireEnaction.toEXE(null);
+        //thePlan.startConditions.Add(theFireEnaction.theCooldown);
 
         return thePlan;
     }
@@ -573,17 +589,36 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         return theItemWeWant.GetComponent<rangedEnaction>();
     }
 
-    public rangedEnaction enactionWithInterTypeXOnObjectsPlayable(GameObject theObject, interType intertypeX)
+    public enaction enactionWithInterTypeXOnObjectsPlayable(GameObject theObject, interType intertypeX)
     {
         foreach (rangedEnaction thisEnaction in listOfIEnactaBoolsOnObject(theObject))
         {
 
-            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnaction; }
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnactionOrAnyBundleItsIn(theObject, thisEnaction); }
         }
 
 
 
         return null;
+    }
+
+    private enaction thisEnactionOrAnyBundleItsIn(GameObject theObject, IEnactaBool possibleEnaction)
+    {
+        //bit annoying, is there a better way?
+
+        foreach (compoundEnactaBool thisCompoundEnaction in theObject.GetComponents<compoundEnactaBool>())
+        {
+            foreach(IEnactaBool subEnaction in thisCompoundEnaction.theEnactions)
+            {
+                if (subEnaction == possibleEnaction) 
+                {
+                    return thisCompoundEnaction; 
+                }
+            }
+        }
+
+
+        return possibleEnaction;
     }
 
     private List<IEnactaBool> listOfIEnactaBoolsOnObject(GameObject theObject)
@@ -732,7 +767,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
     public bool hasNoGun()
     {
-        rangedEnaction grabEnact1;
+        enaction grabEnact1;
         grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interType.shoot1);
 
 

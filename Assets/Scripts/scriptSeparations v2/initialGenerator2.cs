@@ -276,11 +276,11 @@ public class initialGenerator2 : MonoBehaviour
         //GameObject testCube = genGen.singleton.createAndReturnPrefabAtPointWITHNAME(repository2.singleton.placeHolderCubePrefab, startPoint.transform.position, "testCube");
 
         //objectList.Add(returnTestKey1());
-        objectList.Add(genGen.singleton.returnGun1(startPosition));
+        //objectList.Add(genGen.singleton.returnGun1(startPosition));
         //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));
         //objectList.Add(genGen.singleton.returnNPC5(startPosition));
         objectList.Add(genGen.singleton.returnShotgun1(startPosition));
-        objectList.Add(genGen.singleton.returnPineTree1(startPosition));
+        //objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         //  objectList.Add(genGen.singleton.returnGun1(startPosition));
         //  objectList.Add(genGen.singleton.returnNPC5(startPosition));
         //  objectList.Add(genGen.singleton.returnGun1(startPosition));
@@ -290,6 +290,7 @@ public class initialGenerator2 : MonoBehaviour
         //objectList.Add(genGen.singleton.returnShotgun1(startPosition));
         objectList.Add(genGen.singleton.returnPineTree1(startPosition));
         objectList.Add(genGen.singleton.returnNPC5(startPosition));
+        objectList.Add(genGen.singleton.returnGun1(startPosition));
         //  objectList.Add(genGen.singleton.returnNPC5(startPosition));
         //objectList.Add(genGen.singleton.returnNPC4(startPosition));
         //objectList.Add(genGen.singleton.returnSimpleTank2(startPosition));

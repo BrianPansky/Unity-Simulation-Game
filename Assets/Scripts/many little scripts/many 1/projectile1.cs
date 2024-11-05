@@ -14,6 +14,7 @@ public class projectile1 : MonoBehaviour
     public bool selfDestructOnCollision = true;
     public bool gravity = false;
     public float gavityRamp = 0f; //ad hoc for now
+    public bool canWeDebugThisOrWhat = false;
 
     void Awake()
     {
@@ -28,6 +29,7 @@ public class projectile1 : MonoBehaviour
 
         projectile1 projectileScript = theObject.AddComponent<projectile1>();
 
+        //Debug.Log("inputprojectileToGenerate.speed:  "+ inputprojectileToGenerate.speed);
         projectileScript.speed = inputprojectileToGenerate.speed;
         projectileScript.Direction = direction;
         projectileScript.selfDestructOnCollision = inputprojectileToGenerate.sdOnCollision;
@@ -40,8 +42,17 @@ public class projectile1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        speed = 1.5f;
+
         this.gameObject.transform.position = this.gameObject.transform.position + Direction*speed;
-        if(gravity == true)
+        if (canWeDebugThisOrWhat)
+        {
+
+            Debug.Log("......this.gameObject:  " + this.gameObject);
+            Debug.Log("Direction:  " + Direction);
+            Debug.Log("speed:  " + speed);
+        }
+        if (gravity == true)
         {
             this.gameObject.transform.position += 9 * gavityRamp * new Vector3(0,-1,0);
             gavityRamp += 0.018f;

@@ -153,6 +153,7 @@ public class equippable2 : interactable2
             if (thisEnaction.interInfo.interactionType == intertypeX) { return true; }
         }
 
+
         return false;
     }
 
