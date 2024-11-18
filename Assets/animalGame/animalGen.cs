@@ -19,10 +19,12 @@ public class animalGen : MonoBehaviour
         genGen.singleton.returnShotgun1(new Vector3(-36, 5, 13));
         //returnArrowForward(location,3);
         returnBasicAnimal1(location, stuffType.fruit, 1);
+        location = new Vector3(10, 0, 5);
+        returnBasicAnimal1(location, stuffType.meat1, 1);
         //genGen.singleton.returnNPC5(location);
 
         returnBasicGrabbable(stuffType.fruit, new Vector3(-5, 2, 8));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 23));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 19));
         returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 2, -4));
 
     }
@@ -46,11 +48,34 @@ public class animalGen : MonoBehaviour
         //wander1.addWander1(newObj);
         //grabGun1.addGrabGun1(newObj, interType.shoot1);
 
-        newObj.AddComponent<animalUpdate>();
+        stuffStuff.addStuffStuff(newObj, stuffType.meat1);
+
+        //Debug.Log("?????????????????????????????????????????????????????");
+        animalUpdate theUpdate= newObj.AddComponent<animalUpdate>();
+        //Debug.Log("?????????????????????    2   ??????????????????????????");
+        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+
+
+        newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
+
+        //Debug.Log("????????????????????      3   ???????????????????????");
         //grabStuffStuff.addGrabStuffStuff(newObj, stuffTypeX);
 
         return newObj;
     }
+    
+    public GameObject returnBasicPredator1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
+    {
+        GameObject newObj = returnBasicAnimal1(where,stuffTypeX ,scale);
+
+        //genGen.singleton.ensureVirtualGamePad(newObj);
+
+        animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
+        //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+
+        return newObj;
+    }
+
 
     public GameObject returnBasicGrabbable(stuffType stuffX, Vector3 where, float scale = 1f)
     {
@@ -108,50 +133,14 @@ public class animalGen : MonoBehaviour
 
 
 
-    void makeEmptyZones(int howManyZones, int theZSpacing)
-    {
-
-        List<Vector3> zonePositions = patternScript2.singleton.makeLinePattern1(howManyZones, theZSpacing);
 
 
-        foreach (Vector3 thisPoint in zonePositions)
-        {
-            //Instantiate(prefab, thisPoint, default);
-            GameObject newObj = Instantiate(repository2.singleton.mapZone2, thisPoint, Quaternion.identity);
-            newObj.transform.localScale = new Vector3(400f, 10f, 1f * theZSpacing);
-
-        }
-    }
-}
-
-public class animalUpdate:MonoBehaviour
-{
-
-    depletablePlan plan;
-    permaPlan2 perma1;
-    simpleExactRepeatOfPerma simpleRepeat1;
-    repeatWithTargetPicker repeatWithTargetPickerTest;
-
-    animalFSM theFSM;
-
-    void Start()
-    {
-        //setupTest2();
-        //setupTest3();
-        //setupTest4();
-        //setupTest5();
-        setupTest6(stuffType.fruit);
-    }
-
-    void Update()
-    {
-        //plan.doTheDepletablePlan();
-        //simpleRepeat1.doThisThing();
-        //repeatWithTargetPickerTest.doThisThing();
-        theFSM = theFSM.doAFrame();
-    }
 
 
+
+    //behavior
+
+    /*
     void setupTest2()
     {
         //then, to test it, call "plan.doTheDepletablePlan();" in the update
@@ -174,7 +163,7 @@ public class animalUpdate:MonoBehaviour
 
 
     }
-    
+
     void setupTest3()
     {
         //then do "simpleRepeat1.doThisThing();" in update
@@ -216,27 +205,40 @@ public class animalUpdate:MonoBehaviour
         repeatWithTargetPickerTest = grabTheStuff(stuffType.fruit);
     }
 
-    void setupTest6(stuffType stuffX)
+    */
+
+
+    private animalFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
-        //then, to test it, call "theFSM = theFSM.doAFrame();" in the update
 
-        condition switchCondition = new canSeeStuffStuff(this.gameObject, stuffX);
+        condition switchCondition = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
 
-        theFSM = new animalFSM(randomWanderRepeatable(), switchCondition, grabTheStuff(stuffX));
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), switchCondition, grabTheStuff(theObjectDoingTheEnaction, stuffX));
+
+        return theFSM;
     }
 
-    private repeatWithTargetPicker randomWanderRepeatable()
+    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
-        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
-        perma1 = new permaPlan2(step1);
+        condition switchCondition = new stickyCondition( new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX),90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX));
+
+        return theFSM;
+    }
+
+    private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
+    {
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
+        permaPlan2 perma1 = new permaPlan2(step1);
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnaction));
 
         return repeatWithTargetPickerTest;
     }
-    private repeatWithTargetPicker grabTheStuff(stuffType stuffX)
+    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
         //perma1 = new permaPlan2(step1);
@@ -244,18 +246,51 @@ public class animalUpdate:MonoBehaviour
         //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
 
 
-        return new ummAllThusStuffForGrab(this.gameObject, stuffX).returnTheRepeatTargetThing();
+        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
     }
-    private repeatWithTargetPicker goToStuff(stuffType stuffX)
+
+
+
+
+
+
+
+
+    void makeEmptyZones(int howManyZones, int theZSpacing)
     {
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        //perma1 = new permaPlan2(step1);
 
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+        List<Vector3> zonePositions = patternScript2.singleton.makeLinePattern1(howManyZones, theZSpacing);
 
 
-        return new ummAllThusStuffForGrab(this.gameObject, stuffX).returnTheGoToThing();
+        foreach (Vector3 thisPoint in zonePositions)
+        {
+            //Instantiate(prefab, thisPoint, default);
+            GameObject newObj = Instantiate(repository2.singleton.mapZone2, thisPoint, Quaternion.identity);
+            newObj.transform.localScale = new Vector3(400f, 10f, 1f * theZSpacing);
+
+        }
     }
+}
+
+public class animalUpdate:MonoBehaviour
+{
+    public animalFSM theFSM;
+
+    void Start()
+    {
+
+        //Debug.Log("sssssssssssssssssssssssssssssssss");
+    }
+
+    void Update()
+    {
+        //plan.doTheDepletablePlan();
+        //simpleRepeat1.doThisThing();
+        //repeatWithTargetPickerTest.doThisThing();
+        theFSM = theFSM.doAFrame();
+    }
+
+
 }
 
 
@@ -460,6 +495,7 @@ public class animalFSM
 {
     Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
 
+    
     //planEXE2 repeatingPlan;
     //planEXE2 currentPlan;;
 
@@ -510,6 +546,7 @@ public class animalFSM
         toSwitchTo = firstMeSwitchtCondition();
         if (toSwitchTo != null)
         {
+            //Debug.Log("switch");
             return toSwitchTo;
         }
 
@@ -769,7 +806,7 @@ public class repeatWithTargetPicker:repeater
 
     public override void doThisThing()
     {
-        Debug.Log("======================================================================");
+        //Debug.Log("======================================================================");
         refillIfNeeded();
 
         theDepletablePlan.doTheDepletablePlan();
@@ -782,12 +819,12 @@ public class repeatWithTargetPicker:repeater
         //Debug.Log("refillIfNeeded()");
         if (theDepletablePlan.endConditionsMet())
         {
-            Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
+            //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
             theDepletablePlan = convertToDepletableWithNextTarget();
             return;
         }
 
-        Debug.Log("NOT met.........");
+        //Debug.Log("NOT met.........");
     }
 
 
@@ -804,22 +841,19 @@ public class repeatWithTargetPicker:repeater
         //Debug.Log("newTarget.targetPosition():  " + newTarget.targetPosition());
         //Debug.Log("newTarget.GetHashCode():  " + newTarget.GetHashCode());
 
-        Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
+        //Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
 
         foreach (singleEXE thisOne in thePerma.convertToDepletable().thePlan)
         {
             //thisOne.theEnaction.targ//ohhhhhhhhh, not all enactions HAVE a target, i see.....how to handle....
             //Debug.Log("ooooooooooooooo????????????");
             thisOne.setTarget(newTarget);
-            foreach(condition thisCondition in thisOne.endConditions)
-            {
 
-            }
             newThing.add(thisOne);
         }
 
 
-        Debug.Log("newThing.Count:  " + newThing.thePlan.Count);
+        //Debug.Log("newThing.Count:  " + newThing.thePlan.Count);
 
 
 
@@ -1207,7 +1241,7 @@ public class depletablePlan
 
         if (thePlan[0].endConditionsMet())
         {
-            Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
+            //Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
 
             //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
             //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
@@ -1261,7 +1295,7 @@ public class depletablePlan
 
     public bool endConditionsMet()
     {
-        Debug.Log("looking at end conditions for:  " + this);
+        //Debug.Log("looking at end conditions for:  " + this);
 
         //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
         foreach (condition thisCondition in endConditions)
@@ -1270,12 +1304,12 @@ public class depletablePlan
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false)
             {
-                Debug.Log("this end condition not met:  " + thisCondition);
+                //Debug.Log("this end condition not met:  " + thisCondition);
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
                 return false;
             }
 
-            Debug.Log("thisCondition MET:  " + thisCondition);
+            //Debug.Log("thisCondition MET:  " + thisCondition);
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
