@@ -214,7 +214,7 @@ public abstract class planEXE2
     
     public bool endConditionsMet()
     {
-        Debug.Log("looking at end conditions for:  " + this);
+        Debug.Log("looking at end conditions for:  " + this.asText());
 
         if (debugPrint == true) 
         {
@@ -1321,6 +1321,13 @@ public class movableObjectTargetCalculator : targetCalculator
     public override Vector3 targetPosition()
     {
         //Debug.Log("***********************************  target.GetHashCode():  "+target.GetHashCode());
+
+        //ad-hoc duct tape!
+        if(target == null)
+        {
+            //return Vector3.zero;
+            return targeter.transform.position;
+        }
         return calculateOffsetTargetPosition(targeter, target.transform.position);
     }
 

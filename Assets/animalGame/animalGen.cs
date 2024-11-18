@@ -13,7 +13,7 @@ public class animalGen : MonoBehaviour
     {
         Vector3 location = Vector3.zero;
 
-        location = new Vector3(6, 0, -15);
+        location = new Vector3(20, 0, -15);
         makeEmptyZones(1,520);
 
         genGen.singleton.returnShotgun1(new Vector3(-36, 5, 13));
@@ -519,11 +519,12 @@ public class ummAllThusStuffForGrab
         navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
 
 
-        singleEXE theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+                                                                                  //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        //proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnactions, theEXE, offsetRoom * 1.4f);
         //condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1102,11 +1103,14 @@ public class wander1: behavior
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(this.gameObject, staticTargetPosition, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
+
+
+
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1275,11 +1279,11 @@ public class grabGun1 : behavior
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(this.gameObject, staticTargetPosition, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1300,11 +1304,11 @@ public class grabGun1 : behavior
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(this.gameObject, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1492,11 +1496,11 @@ public class grabStuffStuff : behavior
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(this.gameObject, staticTargetPosition, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1517,11 +1521,11 @@ public class grabStuffStuff : behavior
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        planEXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(this.gameObject, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -1900,7 +1904,7 @@ public class depletablePlan
 
         if (thePlan[0].endConditionsMet())
         {
-            Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0]);
+            Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
             
             //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
             //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
