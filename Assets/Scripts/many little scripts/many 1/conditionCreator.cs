@@ -126,6 +126,73 @@ public class conditionCreator : MonoBehaviour
 
         return theClosestSoFar;
     }
+    public GameObject whichObjectOnListIsNearestExceptSELF(GameObject objectWeWantItClosestTo, List<GameObject> listOfObjects)
+    {
+        GameObject theClosestSoFar = null;
+
+        Debug.Log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  objectWeWantItClosestTo:  " + objectWeWantItClosestTo);
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            Debug.Log("thisObject:  " + thisObject);
+            if (thisObject == objectWeWantItClosestTo)
+            {
+                continue;
+            }
+            else if (theClosestSoFar != null)
+            {
+                float distanceToThisObject = Vector3.Distance(thisObject.transform.position, objectWeWantItClosestTo.transform.position);
+                float distanceToTheClosestSoFar = Vector3.Distance(theClosestSoFar.transform.position, objectWeWantItClosestTo.transform.position);
+
+                if (distanceToThisObject < distanceToTheClosestSoFar)
+                {
+                    theClosestSoFar = thisObject;
+                }
+            }
+            else
+            {
+                theClosestSoFar = thisObject;
+            }
+        }
+
+        return theClosestSoFar;
+    }
+
+
+    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    {
+        if (theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != notTHISObject)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
+    }
+
+
 
     public GameObject whichObjOnIDPAIRListIsNearest(GameObject objectWeWantItClosestTo, List<objectIdPair> listOfObjects)
     {
@@ -672,10 +739,10 @@ public class proximityRef : condition
         float distance = vectorBetween.magnitude;
 
         //Debug.Log("condition:  " + this);
-        //Debug.Log("distance:  " + distance);
-        //Debug.Log("desiredDistance:  " + desiredDistance);
+        Debug.Log("distance:  " + distance);
+        Debug.Log("desiredDistance:  " + desiredDistance);
         //Debug.Log("theTargetHolder.theTargetCalculator.GetHashCode():  " + theTargetHolder.theTargetCalculator.GetHashCode());
-        //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.targetPosition());
+        Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.targetPosition());
         //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.tar);
         Debug.DrawLine(position1, position2, Color.magenta, 0.1f);
 
@@ -694,6 +761,8 @@ public class proximityRef : condition
 
         if (distance > (desiredDistance+ allowedMargin)) { return false; }
 
+
+        Debug.Log("met");
         return true;
     }
     public string metAsText()

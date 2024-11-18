@@ -19,12 +19,18 @@ public class animalGen : MonoBehaviour
         genGen.singleton.returnShotgun1(new Vector3(-36, 5, 13));
         //returnArrowForward(location,3);
         returnBasicAnimal1(location, stuffType.fruit, 1);
+        
+        returnBasicAnimal1(new Vector3(20, 0, 5), stuffType.fruit, 1);
+        returnBasicAnimal1(new Vector3(10, 0, 15), stuffType.fruit, 1);
+        returnBasicAnimal1(new Vector3(15, 0, -5), stuffType.fruit, 1);
+        returnBasicAnimal1(new Vector3(-10, 0, -15), stuffType.fruit, 1);
+        
         location = new Vector3(10, 0, 5);
-        returnBasicPredator1(location, stuffType.meat1, 1);
+        returnBasicPredator1(location, stuffType.meat1, 2f);
         //genGen.singleton.returnNPC5(location);
 
         returnBasicGrabbable(stuffType.fruit, new Vector3(-5, 2, 8));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
+        //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
         returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 2, -4));
 
     }
@@ -69,7 +75,7 @@ public class animalGen : MonoBehaviour
         GameObject newObj = returnBasicAnimal1(where,stuffTypeX ,scale);
 
         playable2 thePlayable = newObj.GetComponent<playable2>();
-        Debug.Log("?????????????????????????????????????????????????????");
+        //Debug.Log("?????????????????????????????????????????????????????");
         hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.melee));
 
@@ -80,6 +86,10 @@ public class animalGen : MonoBehaviour
         theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
         //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+
+
+        MeshRenderer theRenderer = newObj.GetComponent<MeshRenderer>();
+        theRenderer.material.color = new Color(1f, 0f, 0f);
 
         return newObj;
     }
@@ -230,10 +240,10 @@ public class animalGen : MonoBehaviour
         condition switchCondition2 = new canSeeNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health);
 
 
-        wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
         wander.addSwitchAndReverse(new stickyCondition(switchCondition2, 90), killPrey);
 
-        killPrey.addSwitch(new stickyCondition(switchCondition1, 90), grabMeat);
+        //killPrey.addSwitch(new stickyCondition(switchCondition1, 90), grabMeat);
 
 
         return wander;
@@ -242,10 +252,15 @@ public class animalGen : MonoBehaviour
     private repeater returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(GameObject theObjectDoingTheEnactions, numericalVariable numVarX, interType interTypeX)
     {
 
-        targetPicker getter = new pickRandom(theObjectDoingTheEnactions, new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions, 
+            new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
 
         //USING FAKE INPUTS FOR TARGETS
-        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()), aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), fireHitscan(theObjectDoingTheEnactions, interTypeX));
+        permaPlan2 perma1 = new permaPlan2(
+            genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, 
+                getter.pickNext().realPositionOfTarget()), 
+                aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), 
+                fireHitscan(theObjectDoingTheEnactions, interTypeX));
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
@@ -1667,7 +1682,7 @@ public class pickNextVisibleStuffStuff : targetPicker
     {
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
         GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
-
+        //pickNearest???
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
 
         return targ;
@@ -1689,6 +1704,52 @@ public class pickRandom : targetPicker
     {
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
         GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+public class pickNearest : targetPicker
+{
+    GameObject objectToBeNear;
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickNearest(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearest(objectToBeNear ,theObjectSetGrabber.grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+public class pickNearestExceptSelf : targetPicker
+{
+    GameObject objectToBeNear;
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickNearestExceptSelf(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearestExceptSELF(objectToBeNear, theObjectSetGrabber.grab());
+
+        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! target:  " + target);
 
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
 
