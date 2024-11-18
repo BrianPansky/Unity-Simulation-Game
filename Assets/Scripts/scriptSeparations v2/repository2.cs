@@ -78,10 +78,11 @@ public class repository2 : MonoBehaviour
 
     public GameObject pickRandomObjectFromList(List<GameObject> theList)
     {
+        //Debug.Log("theList.Count:  "+theList.Count);
 
         if (theList.Count == 0)
         {
-            //Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
             return null;
         }
 
@@ -98,6 +99,9 @@ public class repository2 : MonoBehaviour
 
             if (thisObject != null)
             {
+                //Debug.Log(thisObject + " #:  "+ thisObject.GetHashCode());
+                //Debug.Log("thisObject.transform.position:  " + thisObject.transform.position);
+
                 return thisObject;
             }
 

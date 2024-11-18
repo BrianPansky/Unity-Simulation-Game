@@ -34,7 +34,7 @@ public class mapZoneScript : MonoBehaviour
     {
         if(zoneTaggingConditionsMet(other) == false)
         {
-            Debug.Log("(zoneTaggingConditionsMet(other) == false),  Collider other):  " + other);
+            //Debug.Log("(zoneTaggingConditionsMet(other) == false),  Collider other):  " + other);
             return; 
         }
 

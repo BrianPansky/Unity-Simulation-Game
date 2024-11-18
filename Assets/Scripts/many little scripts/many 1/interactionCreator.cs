@@ -117,6 +117,18 @@ public class interactionCreator : MonoBehaviour
         return dictOfInteractionsX;
     }
 
+    internal void addInteraction(GameObject objectToAddItTo, enactionCreator.interType interactionType, IInteraction interaction)
+    {
+        interactable2 theInter = objectToAddItTo.GetComponent<interactable2>();
+        if (theInter == null)
+        {
+            theInter = objectToAddItTo.AddComponent<interactable2>();
+        }
+
+        theInter.dictOfInteractions = addInteraction(theInter.dictOfInteractions, interactionType, interaction);
+
+    }
+
     public List<Ieffect> makeEffectIntoList(Ieffect e1)
     {
         List<Ieffect> newList = new List<Ieffect>();
@@ -148,6 +160,7 @@ public class interactable2 : zoneable2
     public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
 
+    //umm, why isn't this in "interactable2"???
     public Dictionary<enactionCreator.interType, List<IInteraction>> dictOfInteractions = new Dictionary<enactionCreator.interType, List<IInteraction>>();
 
 
@@ -498,7 +511,7 @@ public class gravityToFall : MonoBehaviour
             return;
         }
 
-        Debug.Log("currentFallRate:  "+ currentFallRate);
+        //Debug.Log("currentFallRate:  "+ currentFallRate);
 
         fall();
 

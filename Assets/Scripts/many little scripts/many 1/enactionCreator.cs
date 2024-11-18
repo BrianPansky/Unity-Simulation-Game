@@ -80,7 +80,7 @@ public abstract class enaction : MonoBehaviour
 
     abstract public planEXE2 toEXE(GameObject target);
 
-
+    
     public planEXE2 standardEXEconversion()
     {
         //just put this in "toEXE", right?
@@ -128,6 +128,8 @@ public abstract class IEnactaBool: enaction
         boolEXE2 theEXE = new boolEXE2(this, target);
         return theEXE;
     }
+
+
 }
 
 public abstract class IEnactaVector : enaction
@@ -151,6 +153,8 @@ public abstract class IEnactaVector : enaction
         vect3EXE2 theEXE = new vect3EXE2(this, target);
         return theEXE;
     }
+
+
 }
 
 public abstract class IEnactByTargetVector:enaction
@@ -170,6 +174,8 @@ public abstract class IEnactByTargetVector:enaction
         return theEXE;
     
     }
+
+
 }
 
 
@@ -277,7 +283,9 @@ public class aimTarget : IEnactByTargetVector
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
 
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 4f);
+        Debug.Log("aim..................");
+
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 7f);
         theVectorRotationEnaction.updatePitch(getVerticalAngle(lineFromVertAimerToTarget), theVectorRotationEnaction.thePartToAimVertical);
         //theVectorRotationEnaction.updatePitch(0, theVectorRotationEnaction.thePartToAimVertical);
 
@@ -505,6 +513,7 @@ public class hitscanEnactor: rangedEnaction
     override public void enact(inputData theInput)
     {
         //conditionalPrint("enacting:  " + this);
+        Debug.Log("FIRE.........");
         firingByRaycastHit(range);
     }
 
@@ -537,7 +546,7 @@ public class hitscanEnactor: rangedEnaction
         GameObject newInstantInteractionSphere = comboGen.singleton.instantInteractionSphere(myHit.point);
         colliderInteractor.genColliderInteractor(newInstantInteractionSphere, this);
 
-        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.cyan, 17f);
+        Debug.DrawLine(newInstantInteractionSphere.transform.position, firePoint.transform.position, Color.green, 17f);
 
         firingCooldown--;
     }

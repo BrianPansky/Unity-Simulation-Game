@@ -41,6 +41,7 @@ public abstract class planEXE2
 
     public abstract bool error();
 
+    abstract public void setTarget(targetCalculator targetCalc);
 
     public void doConditionalEffectsAdHocDebugThing(targetCalculator theTargetCalculatorIn, hitscanEnactor theHitscanEnactorIn, adHocDebuggerForGoGrabPlan grabberDebugIn, Dictionary<condition, List<Ieffect>> conditionalEffectsIn, adHocBooleanDeliveryClass signalThatFiringIsDone)
     {
@@ -58,6 +59,11 @@ public abstract class planEXE2
     }
 
 
+
+    public void resetEnactionCounter()
+    {
+        numberOfTimesExecuted = 0;
+    }
 
 
     public string nestedPlanCountToText()
@@ -208,7 +214,7 @@ public abstract class planEXE2
     
     public bool endConditionsMet()
     {
-        //Debug.Log("looking at end conditions for:  " + this);
+        Debug.Log("looking at end conditions for:  " + this);
 
         if (debugPrint == true) 
         {
@@ -230,13 +236,16 @@ public abstract class planEXE2
         foreach (condition thisCondition in endConditions)
         {
             //conditionalPrint("thisCondition:  " + thisCondition);
-            //Debug.Log("thisCondition:  " + thisCondition);
+            Debug.Log("thisCondition:  " + thisCondition);
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
-            if (thisCondition.met() == false) {
+            if (thisCondition.met() == false) 
+            {
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
-                return false; }
+                Debug.Log("this end condition not met:  " + thisCondition);
+                return false; 
+            }
         }
-        //Debug.Log("no conditions remain unfulfilled!");
+        Debug.Log("no conditions remain unfulfilled!");
 
         //conditionalPrint("no end conditions remain unfulfilled!");
         //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
@@ -420,6 +429,12 @@ public class boolEXE2 : singleEXE
         return false;
     }
 
+    override public void setTarget(targetCalculator targetCalc)
+    {
+        //Debug.Log("ahh..........?????????????");
+    }
+
+
     public boolEXE2(IEnactaBool theInputEnaction, GameObject theTarget)
     {
         this.theEnaction = theInputEnaction;
@@ -443,7 +458,7 @@ public class vect3EXE2 : singleEXE
     //public Vector3 stationaryTargetAsVector;
     //public float offsetRoom = 0f;
 
-    targetCalculator theTargetCalculator;
+    public targetCalculator theTargetCalculator;
 
 
     public vect3EXE2(IEnactByTargetVector theInputEnaction, GameObject possiblyMobileActualTargetIn, float offsetRoomIn = 1.8f)
@@ -523,6 +538,18 @@ public class vect3EXE2 : singleEXE
         return false;
     }
 
+
+
+    override public void setTarget(targetCalculator targetCalc)
+    {
+        theTargetCalculator = targetCalc;
+
+
+        //Debug.Log("theTargetCalculator:  " + theTargetCalculator);
+        //Debug.Log("newTtheTargetCalculatorarget.targetPosition():  " + theTargetCalculator.targetPosition());
+        //Debug.Log("theTargetCalculator.GetHashCode():  " + theTargetCalculator.GetHashCode());
+    }
+
 }
 
 
@@ -587,6 +614,15 @@ public class parallelEXE : planEXE2
         }
 
         return false;
+    }
+
+
+    override public void setTarget(targetCalculator targetCalc)
+    {
+        foreach(planEXE2 exe in exeList)
+        {
+            exe.setTarget(targetCalc);
+        }
     }
 }
 
@@ -676,6 +712,15 @@ public class seriesEXE : planEXE2
 
         return false;
     }
+
+
+    override public void setTarget(targetCalculator targetCalc)
+    {
+        foreach (planEXE2 exe in exeList)
+        {
+            exe.setTarget(targetCalc);
+        }
+    }
 }
 
 public class simultaneousEXE : planEXE2
@@ -742,6 +787,15 @@ public class simultaneousEXE : planEXE2
         }
 
         return false;
+    }
+
+
+    override public void setTarget(targetCalculator targetCalc)
+    {
+        foreach (planEXE2 exe in exeList)
+        {
+            exe.setTarget(targetCalc);
+        }
     }
 }
 
@@ -1192,6 +1246,33 @@ public class adHocGoGrabAndEquipRefill : adHocPlanRefillThing
 
 
 
+
+public class agnosticTargetCalc:targetCalculator
+{
+    targetCalculator theTargetCalc;
+
+
+    public agnosticTargetCalc(GameObject targeterIn, Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    {
+        theTargetCalc = new staticVectorTargetCalculator(targeterIn, targetPositionVectorIn, offsetIn);
+    }
+
+    public agnosticTargetCalc(GameObject targeterIn, GameObject targetIn, float offsetIn = 1.8f)
+    {
+        theTargetCalc = new movableObjectTargetCalculator(targeterIn, targetIn, offsetIn);
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        return theTargetCalc.realPositionOfTarget();
+    }
+
+    public override Vector3 targetPosition()
+    {
+        return theTargetCalc.targetPosition();
+    }
+}
+
 public abstract class targetCalculator
 {
     public GameObject targeter;
@@ -1239,6 +1320,7 @@ public class movableObjectTargetCalculator : targetCalculator
 
     public override Vector3 targetPosition()
     {
+        //Debug.Log("***********************************  target.GetHashCode():  "+target.GetHashCode());
         return calculateOffsetTargetPosition(targeter, target.transform.position);
     }
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -170,6 +171,11 @@ public abstract class condition
 
 
 
+    public condition returnInverseBool()
+    {
+        return new reverseCondition(this);
+    }
+
     public string standardAsText()
     {
         string stringToReturn = "";
@@ -190,6 +196,35 @@ public abstract class condition
         stringToReturn += "]";
 
         return stringToReturn;
+    }
+}
+
+
+public class reverseCondition : condition
+{
+    condition theConditionToReverse;
+
+    public reverseCondition(condition theConditionToReverseIn)
+    {
+        this.theConditionToReverse = theConditionToReverseIn;
+    }
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        return standardAsTextSHORT();
+    }
+
+    public override bool met()
+    {
+        bool originalBool = theConditionToReverse.met();
+
+        if(originalBool==true) {return false;}
+        return true;
     }
 }
 
@@ -424,16 +459,18 @@ public class proximity : condition
     //Vector3 targetLocation2;
     targetCalculator targetCalc;
     float desiredDistance = 4f;
+    float allowedMargin = 2f;
     public bool debugPrint = false;
 
     conditionalEffects2 adHocConditionalEffects;
 
-    public proximity(GameObject object1, GameObject object2, float desiredDistance = 4f)
+    public proximity(GameObject object1, GameObject object2, float desiredDistance = 4f, float allowedMargin = 2f)
     {
         this.object1 = object1;
         //this.object2 = object2;
-        targetCalc = new movableObjectTargetCalculator(object1, object2,desiredDistance);
+        targetCalc = new movableObjectTargetCalculator(object1, object2, desiredDistance);
         this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
     }
 
     public proximity(GameObject object1, Vector3 targetLocation2In, float desiredDistance = 4f)
@@ -456,6 +493,7 @@ public class proximity : condition
         //Debug.Log("condition:  " + this);
         //Debug.Log("distance:  " + distance);
         //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("(desiredDistance + allowedMargin):  " + (desiredDistance + allowedMargin));
         //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
 
 
@@ -463,6 +501,7 @@ public class proximity : condition
         {
             Debug.Log("distance:  " + distance);
             Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.Log("(desiredDistance + allowedMargin):  " + (desiredDistance + allowedMargin));
             Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
 
             Debug.DrawLine(position1, position1 + (Vector3.up*105), Color.white, 7f);
@@ -471,8 +510,11 @@ public class proximity : condition
         }
 
 
-        if (distance > desiredDistance) { return false; }
+        if (distance > (desiredDistance + allowedMargin)) { return false; }
 
+
+
+        //Debug.Log("YESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
         return true;
     }
     public string metAsText()
@@ -542,6 +584,135 @@ public class proximity : condition
         return standardAsTextSHORT();
     }
 }
+
+
+public class proximityRef : condition
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    GameObject object1;
+    //GameObject object2;
+    //Vector3 targetLocation2;
+    //targetCalculator targetCalc;
+    float desiredDistance = 4f;
+    float allowedMargin = 2f;
+    vect3EXE2 theTargetHolder;
+    public bool debugPrint = false;
+
+    conditionalEffects2 adHocConditionalEffects;
+
+    public proximityRef(GameObject object1, vect3EXE2 theTargetHolderIn, float desiredDistance = 4f, float allowedMarginIn = 2f)
+    {
+        this.object1 = object1;
+        theTargetHolder = theTargetHolderIn;
+        //this.object2 = object2;
+        //targetCalc = new movableObjectTargetCalculator(object1, object2, desiredDistance);
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMarginIn;
+    }
+
+
+    public override bool met()
+    {
+        //return false;
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = theTargetHolder.theTargetCalculator.targetPosition();// object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("theTargetHolder.theTargetCalculator.GetHashCode():  " + theTargetHolder.theTargetCalculator.GetHashCode());
+        //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.targetPosition());
+        //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.tar);
+        Debug.DrawLine(position1, position2, Color.magenta, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
+
+        if (distance > (desiredDistance+ allowedMargin)) { return false; }
+
+        return true;
+    }
+    public string metAsText()
+    {
+        string stringToReturn = "";
+        bool theBool = false;
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = theTargetHolder.theTargetCalculator.targetPosition();// object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
+
+        if (distance > desiredDistance)
+        { theBool = false; }
+        else
+        {
+            theBool = true;
+        }
+
+
+
+
+
+
+
+
+
+
+        stringToReturn += "met?  " + theBool;
+        stringToReturn += ", distance:  " + distance;
+        stringToReturn += ", desiredDistance:  " + desiredDistance;
+
+        return stringToReturn;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+        stringToReturn += "proximity between 1)  " + object1 + ", and 2)  " + theTargetHolder.theTargetCalculator.asText();// object2;
+        stringToReturn += ", [desiredDistance = " + desiredDistance + "]";
+        stringToReturn += ", [metAsText() = " + metAsText() + "]";
+
+
+        return stringToReturn;
+
+    }
+
+    public override string asTextSHORT()
+    {
+        return standardAsTextSHORT();
+    }
+}
+
 
 public class adocThreatLineOfSightCondition : condition
 {

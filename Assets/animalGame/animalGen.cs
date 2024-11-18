@@ -65,6 +65,9 @@ public class animalGen : MonoBehaviour
 
         stuffStuff.addStuffStuff(newObj, stuffX);
 
+        interactionCreator.singleton.addInteraction(newObj, interType.standardClick, new interactionEffect(new deathEffect(newObj)));
+
+
         return newObj;
     }
 
@@ -858,21 +861,16 @@ public class repeatWithTargetPicker:repeater
         //Debug.Log("refillIfNeeded()");
         if (theDepletablePlan.endConditionsMet())
         {
-            //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
+            Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
             theDepletablePlan = convertToDepletableWithNextTarget();
             return;
         }
 
-        //Debug.Log("NOT met.........");
+        Debug.Log("NOT met.........");
     }
 
 
 
-
-    public abstract class thingSwitcher
-    {
-
-    }
 
 
 
@@ -884,6 +882,8 @@ public class repeatWithTargetPicker:repeater
         //Debug.Log("newTarget:  " + newTarget);
         //Debug.Log("newTarget.targetPosition():  " + newTarget.targetPosition());
         //Debug.Log("newTarget.GetHashCode():  " + newTarget.GetHashCode());
+
+        Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
 
         foreach (singleEXE thisOne in thePerma.convertToDepletable().thePlan)
         {
@@ -897,6 +897,11 @@ public class repeatWithTargetPicker:repeater
             newThing.add(thisOne);
         }
 
+
+        Debug.Log("newThing.Count:  " + newThing.thePlan.Count);
+
+
+
         return newThing;
     }
 
@@ -905,6 +910,11 @@ public class repeatWithTargetPicker:repeater
 }
 
 
+
+public abstract class thingSwitcher
+{
+
+}
 
 
 
@@ -1653,6 +1663,7 @@ public class permaPlan2
 
         foreach (singleEXE thisOne in thePlan)
         {
+            thisOne.resetEnactionCounter();
             newThing.add(thisOne);
         }
 
@@ -1943,7 +1954,7 @@ public class depletablePlan
 
     public bool endConditionsMet()
     {
-        //Debug.Log("looking at end conditions for:  " + this);
+       Debug.Log("looking at end conditions for:  " + this);
 
         //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
         foreach (condition thisCondition in endConditions)
@@ -1952,12 +1963,12 @@ public class depletablePlan
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false)
             {
-                //      Debug.Log("this end condition not met:  " + thisCondition);
+                Debug.Log("this end condition not met:  " + thisCondition);
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
                 return false;
             }
 
-            //Debug.Log("thisCondition MET:  " + thisCondition);
+            Debug.Log("thisCondition MET:  " + thisCondition);
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
@@ -1986,8 +1997,12 @@ public class depletableSingleEXEListComplete : condition
         foreach (singleEXE planEXE in planList)
         {
             if (planEXE == null) { continue; } //messy annoying for now
-            if (planEXE.endConditionsMet() == false) { return false; }
+            if (planEXE.endConditionsMet() == false) 
+            { 
+                return false; 
+            }
         }
+
         return true;
     }
 

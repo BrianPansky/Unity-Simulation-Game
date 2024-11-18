@@ -130,6 +130,16 @@ public class sensorySystem : MonoBehaviour
 
 
 
+
+
+public abstract class objectSetGrabber
+{
+    public abstract List<GameObject> grab();
+}
+
+
+
+
 public class spatialDataPointFragment
 {
     //basically, i hate having anything significant nested inside of my "foreach" loops.
