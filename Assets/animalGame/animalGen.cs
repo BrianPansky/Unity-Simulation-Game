@@ -224,6 +224,11 @@ public class animalUpdate:MonoBehaviour
 
     void setupTest5()
     {
+        repeatWithTargetPickerTest = goToStuff(stuffType.fruit);
+    }
+
+    void setupTest5_2()
+    {
         repeatWithTargetPickerTest = grabTheStuff(stuffType.fruit);
     }
 
@@ -257,6 +262,16 @@ public class animalUpdate:MonoBehaviour
 
         return new ummAllThusStuffForGrab(this.gameObject, stuffX).returnTheRepeatTargetThing();
     }
+    private repeatWithTargetPicker goToStuff(stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return new ummAllThusStuffForGrab(this.gameObject, stuffX).returnTheGoToThing();
+    }
 }
 
 
@@ -273,6 +288,29 @@ public class ummAllThusStuffForGrab
     {
         theObjectDoingTheEnactions = theObjectDoingTheEnactionsIn;
         theStuffTypeToGrab = theStuffTypeToGrabIn;
+    }
+
+
+
+
+    public repeatWithTargetPicker returnTheGoToThing()
+    {
+
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+        targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(makeNavAgentPlanEXE(getter.pickNext().realPositionOfTarget()));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
+
+
+        return repeatWithTargetPickerTest;
     }
 
 
@@ -452,11 +490,12 @@ public class ummAllThusStuffForGrab
         navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
 
 
-        singleEXE theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
         //theEXE.debugPrint = printThisNPC;
 
 
-        proximity condition = new proximity(theObjectDoingTheEnactions, staticTargetPosition, offsetRoom * 1.4f);
+        //proximity condition = new proximity(theObjectDoingTheEnactions, staticTargetPosition, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnactions, theEXE, offsetRoom * 1.4f);
         condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -773,7 +812,7 @@ public class repeatWithTargetPicker
 
     public void doThisThing()
     {
-        Debug.Log("======================================================================");
+        //Debug.Log("======================================================================");
         refillIfNeeded();
 
         theDepletablePlan.doTheDepletablePlan();
@@ -783,15 +822,15 @@ public class repeatWithTargetPicker
 
     private void refillIfNeeded()
     {
-        Debug.Log("refillIfNeeded()");
+        //Debug.Log("refillIfNeeded()");
         if (theDepletablePlan.endConditionsMet())
         {
-            Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
+            //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
             theDepletablePlan = convertToDepletableWithNextTarget();
             return;
         }
 
-        Debug.Log("NOT met.........");
+        //Debug.Log("NOT met.........");
     }
 
 
@@ -818,6 +857,10 @@ public class repeatWithTargetPicker
             //thisOne.theEnaction.targ//ohhhhhhhhh, not all enactions HAVE a target, i see.....how to handle....
             //Debug.Log("ooooooooooooooo????????????");
             thisOne.setTarget(newTarget);
+            foreach(condition thisCondition in thisOne.endConditions)
+            {
+
+            }
             newThing.add(thisOne);
         }
 
@@ -1801,7 +1844,7 @@ public class depletablePlan
 
         if (startConditionsMet()&& thePlan[0].startConditionsMet())
         {
-            Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
+            //Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
             //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
             //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
             //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
@@ -1876,12 +1919,12 @@ public class depletablePlan
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false)
             {
-                Debug.Log("this end condition not met:  " + thisCondition);
+                //      Debug.Log("this end condition not met:  " + thisCondition);
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
                 return false;
             }
 
-            Debug.Log("thisCondition MET:  " + thisCondition);
+            //Debug.Log("thisCondition MET:  " + thisCondition);
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
