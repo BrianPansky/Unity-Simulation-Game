@@ -136,16 +136,16 @@ public class animalUpdate:MonoBehaviour
         //setupTest2();
         //setupTest3();
         //setupTest4();
-        setupTest5();
-        //setupTest6(stuffType.fruit);
+        //setupTest5();
+        setupTest6(stuffType.fruit);
     }
 
     void Update()
     {
         //plan.doTheDepletablePlan();
         //simpleRepeat1.doThisThing();
-        repeatWithTargetPickerTest.doThisThing();
-        //theFSM = theFSM.doAFrame();
+        //repeatWithTargetPickerTest.doThisThing();
+        theFSM = theFSM.doAFrame();
     }
 
     private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
@@ -556,24 +556,24 @@ public class animalFSM
     //planEXE2 currentPlan;;
 
     //these are lists, AKA simultaneous plans
-    List<permaPlan> repeatingPlans = new List<permaPlan>();
-    List<depletablePlan> currentPlans = new List<depletablePlan>();
+    //List<permaPlan> repeatingPlans = new List<permaPlan>();
+    List<repeater> repeatingPlans = new List<repeater>();
+    //List<depletablePlan> currentPlans = new List<depletablePlan>();
 
 
-    repeatWithTargetPicker justDoThisForNow;
+    //repeatWithTargetPicker justDoThisForNow;
 
-    public repeatWithTargetPicker RepeatWithTargetPicker1 { get; }
-    public condition SwitchCondition { get; }
-    public repeatWithTargetPicker RepeatWithTargetPicker2 { get; }
 
     public animalFSM()
     {
         //      new permaPlan();
     }
 
-    public animalFSM(repeatWithTargetPicker doThisImmediately, condition switchCondition, repeatWithTargetPicker doThisAfterSwitchCondition)
+    public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
     {
-        justDoThisForNow = doThisImmediately;
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
 
 
 
@@ -582,10 +582,11 @@ public class animalFSM
         switchBoard[new multicondition(switchCondition)] = otherFSM;
     }
 
-    public animalFSM(repeatWithTargetPicker doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
+    public animalFSM(repeater doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
     {
-        justDoThisForNow = doThisImmediately;
+        //justDoThisForNow = doThisImmediately;
 
+        repeatingPlans.Add(doThisImmediately);
 
 
         //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
@@ -595,6 +596,7 @@ public class animalFSM
 
     public animalFSM doAFrame()
     {
+
         animalFSM toSwitchTo = null;
 
         toSwitchTo = firstMeSwitchtCondition();
@@ -605,16 +607,36 @@ public class animalFSM
 
 
 
+
+
+        /*
+        
         if (currentPlans.Count < 1)
         {
+            Debug.Log("(currentPlans.Count < 1), refill.......");
             currentPlans = refillPlans();
         }
 
         executeCurrentPlans();
 
+
+        Debug.Log("(currentPlans.Count < 1), refill.......");
+        
+        */
+        foreach (repeatWithTargetPicker plan in repeatingPlans)
+        {
+            plan.doThisThing();
+        }
+
+
+
+
         return this;
     }
 
+
+
+    /*
     private void executeCurrentPlans()
     {
 
@@ -646,6 +668,8 @@ public class animalFSM
     private List<depletablePlan> refillPlans()
     {
         List<depletablePlan> newList = new List<depletablePlan>();
+        Debug.Log(repeatingPlans.Count.ToString());
+        Debug.Log(repeatingPlans.Count);
         foreach (permaPlan plan in repeatingPlans)
         {
             newList.Add(plan.convertToDepletable());
@@ -653,6 +677,9 @@ public class animalFSM
 
         return newList;
     }
+
+
+    */
 
     /*
     private List<permaPlan> duplicateTheRepeatingPlans()
@@ -794,12 +821,18 @@ public class allNearbyStuffStuff : objectSetGrabber
 }
 
 
-
-public class repeatWithTargetPicker
+public abstract class repeater
 {
-    permaPlan2 thePerma;
-    depletablePlan theDepletablePlan;
 
+    public permaPlan2 thePerma;
+    public depletablePlan theDepletablePlan;
+
+    public abstract void doThisThing();
+}
+
+
+public class repeatWithTargetPicker:repeater
+{
     targetPicker theTargetPicker;
 
 
@@ -810,9 +843,9 @@ public class repeatWithTargetPicker
         theDepletablePlan = convertToDepletableWithNextTarget();
     }
 
-    public void doThisThing()
+    public override void doThisThing()
     {
-        //Debug.Log("======================================================================");
+        Debug.Log("======================================================================");
         refillIfNeeded();
 
         theDepletablePlan.doTheDepletablePlan();
