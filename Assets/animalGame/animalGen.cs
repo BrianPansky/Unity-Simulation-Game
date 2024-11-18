@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
 using UnityEngine.XR;
 using static enactionCreator;
@@ -127,15 +126,18 @@ public class animalUpdate:MonoBehaviour
 
     depletablePlan plan;
     permaPlan2 perma1;
+    simpleExactRepeatOfPerma simpleRepeat1;
 
     void Start()
     {
-        setupTest2();
+        //setupTest2();
+        setupTest3();
     }
 
     void Update()
     {
-        plan.doTheDepletablePlan();
+        //plan.doTheDepletablePlan();
+        simpleRepeat1.doThisThing();
     }
 
     private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
@@ -156,7 +158,7 @@ public class animalUpdate:MonoBehaviour
 
         return theEXE;
     }
-    
+
     void setupTest2()
     {
         //then, to test it, call "plan.doTheDepletablePlan();" in the update
@@ -179,6 +181,29 @@ public class animalUpdate:MonoBehaviour
 
 
     }
+    
+    void setupTest3()
+    {
+        //then, to test it, call "plan.doTheDepletablePlan();" in the update
+        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step2 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step3 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+        perma1 = new permaPlan2(step1, step2, step3);
+
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+
+        simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+
+        //now
+        //      how to make random wander take...ONE step?  but generate new location each time?
+        //      generate location OUTSIDE the simple class, and input it........?
+        //          and, what, that input........always takes vector3?  or sometimes GameObject?  so use "target calculator" as input?
+        //              i' doing that in animalFSM?  the switch conditions ALSO provide stuff like threats/target/navpoint?
+
+
+    }
 }
 
 
@@ -187,11 +212,18 @@ public class animalUpdate:MonoBehaviour
 
 public class simpleExactRepeatOfPerma
 {
-    permaPlan thePerma;
+    permaPlan2 thePerma;
     depletablePlan theDepletablePlan;
 
 
-    void doThisThing()
+
+    public simpleExactRepeatOfPerma(permaPlan2 thePermaIn)
+    {
+        this.thePerma = thePermaIn;
+        theDepletablePlan = thePerma.convertToDepletable();
+    }
+
+    public void doThisThing()
     {
         refillIfNeeded();
 
