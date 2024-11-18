@@ -151,32 +151,13 @@ public class animalUpdate:MonoBehaviour
         theFSM = theFSM.doAFrame();
     }
 
-    private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-                                                                            //theEXE.debugPrint = printThisNPC;
-        //singleEXE theEXEsingle = theEXE;
-
-        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, 2f);// offsetRoom * 1.4f);
-        //condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
 
     void setupTest2()
     {
         //then, to test it, call "plan.doTheDepletablePlan();" in the update
-        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        singleEXE step2 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        singleEXE step3 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step2 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step3 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
 
         perma1 = new permaPlan2(step1, step2, step3);
 
@@ -197,7 +178,7 @@ public class animalUpdate:MonoBehaviour
     void setupTest3()
     {
         //then do "simpleRepeat1.doThisThing();" in update
-        singleEXE exe = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE exe = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
 
         perma1 = new permaPlan2(exe);
 
@@ -211,7 +192,7 @@ public class animalUpdate:MonoBehaviour
     void setupTest4()
     {
         //then, to test it, call "repeatWithTargetPickerTest.doThisThing();" in the update
-        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
 
 
         perma1 = new permaPlan2(step1);
@@ -246,7 +227,7 @@ public class animalUpdate:MonoBehaviour
 
     private repeatWithTargetPicker randomWanderRepeatable()
     {
-        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(this.gameObject, patternScript2.singleton.randomNearbyVector(this.transform.position));
         perma1 = new permaPlan2(step1);
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
@@ -305,7 +286,7 @@ public class ummAllThusStuffForGrab
         targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
 
         //USING FAKE INPUTS FOR TARGETS
-        permaPlan2 perma1 = new permaPlan2(makeNavAgentPlanEXE(getter.pickNext().realPositionOfTarget()));
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()));
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
@@ -324,7 +305,7 @@ public class ummAllThusStuffForGrab
 
 
         //USING FAKE INPUTS FOR TARGETS
-        permaPlan2 perma1 = new permaPlan2(makeNavAgentPlanEXE(theObjectDoingTheEnactions), aimTargetPlan2(theObjectDoingTheEnactions), fireHitscanClick());
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, theObjectDoingTheEnactions.transform.position), aimTargetPlan2(theObjectDoingTheEnactions), fireHitscanClick());
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
@@ -359,7 +340,7 @@ public class ummAllThusStuffForGrab
         }
 
         planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 1.8f));
+        firstShell.Add(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, target, 1.8f));
         firstShell.Add(aimTargetPlan2(target));
 
 
@@ -466,70 +447,8 @@ public class ummAllThusStuffForGrab
 
 
 
-    public singleEXE FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
-    {
-        singleEXE theSingleEXE = makeNavAgentPlanEXE(possiblyMobileActualTarget, offset);
-
-        theSingleEXE.untilListFinished();
-
-        return theSingleEXE;
-    }
 
 
-    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
-    {
-        singleEXE theSingleEXE = makeNavAgentPlanEXE(stationaryTargetPosition, offset);
-
-        theSingleEXE.untilListFinished();
-
-        return theSingleEXE;
-    }
-
-    private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        //proximity condition = new proximity(theObjectDoingTheEnactions, staticTargetPosition, offsetRoom * 1.4f);
-        proximityRef condition = new proximityRef(theObjectDoingTheEnactions, theEXE, offsetRoom * 1.4f);
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-
-    private singleEXE makeNavAgentPlanEXE(GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
-    {
-        if (possiblyMobileActualTarget == null)
-        {
-            Debug.Log("target is null, so plan to walk to target is null");
-            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
-            return null;
-        }
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
-                                                                                  //theEXE.debugPrint = printThisNPC;
-
-
-        //proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
-        proximityRef condition = new proximityRef(theObjectDoingTheEnactions, theEXE, offsetRoom * 1.4f);
-        //condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
 
 
 
@@ -718,6 +637,7 @@ public class animalFSM
 
 
 
+//conditions
 
 public class canSeeStuffStuff : condition
 {
@@ -773,57 +693,52 @@ public class canSeeStuffStuff : condition
 
 }
 
-
-public class allNearbyStuffStuff : objectSetGrabber
+public class depletableSingleEXEListComplete : condition
 {
-    GameObject theObjectWeWantStuffNear;
-    stuffType theStuffTypeX;
+    List<singleEXE> planList;
 
-    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
+    public depletableSingleEXEListComplete(List<singleEXE> planList)
     {
-        theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
-        theStuffTypeX = theStuffTypeXIn;
+        this.planList = planList;
     }
 
-
-    public override List<GameObject> grab()
+    public override bool met()
     {
-        return allNearbyObjectsWithStuffTypeX(theStuffTypeX);
-    }
-
-
-    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
-    {
-
-        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWeWantStuffNear);  //lol forgot, this is ONE way to grab functions
-        List<GameObject> theListOfObjects = new List<GameObject>();
-
-        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
-
-        foreach (GameObject thisObject in theListOfALL)
+        //Debug.Log("planList.Count:  " + planList.Count);
+        foreach (singleEXE planEXE in planList)
         {
-
-            //Debug.Log("thisObject:  " + thisObject);
-            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
-
-            if (theComponent == null)
+            if (planEXE == null) { continue; } //messy annoying for now
+            if (planEXE.endConditionsMet() == false)
             {
-
-                //Debug.Log("(theComponent == null)");
-                continue;
-            }
-
-            if (theComponent.theTypeOfStuff == theStuffTypeX)
-            {
-                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
-                theListOfObjects.Add(thisObject);
+                return false;
             }
         }
 
-        return theListOfObjects;
+        return true;
+    }
+
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        return standardAsTextSHORT();
     }
 }
 
+
+
+
+
+
+
+
+
+
+//repeaters [can make a non-repeating super class, and then it can replace my "seriesEXE"???
 
 public abstract class repeater
 {
@@ -834,6 +749,26 @@ public abstract class repeater
     public abstract void doThisThing();
 }
 
+public class agnostRepeater: repeater
+{
+    repeater theRepeater;
+
+    public agnostRepeater(permaPlan2 thePermaIn)
+    {
+        theRepeater = new simpleExactRepeatOfPerma(thePermaIn);
+    }
+
+    public agnostRepeater(permaPlan2 thePermaIn, targetPicker theTargetPickerIn)
+    {
+        theRepeater = new repeatWithTargetPicker(thePermaIn, theTargetPickerIn);
+    }
+
+
+    public override void doThisThing()
+    {
+        theRepeater.doThisThing();
+    }
+}
 
 public class repeatWithTargetPicker:repeater
 {
@@ -910,80 +845,8 @@ public class repeatWithTargetPicker:repeater
 
 }
 
-
-
-public abstract class thingSwitcher
+public class simpleExactRepeatOfPerma : repeater
 {
-
-}
-
-
-
-
-
-
-public abstract class targetPicker
-{
-    public abstract agnosticTargetCalc pickNext();
-}
-
-
-
-public class pickRandomNearbyLocation : targetPicker
-{
-    GameObject objectToBeNear;
-    float spreadFactor = 1.0f;
-
-    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
-    {
-        objectToBeNear = objectToBeNearIn;
-        spreadFactor = spreadFactorIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-        return targ;
-    }
-}
-
-
-public class pickNextVisibleStuffStuff : targetPicker
-{
-    GameObject objectToBeNear;
-    stuffType theType;
-
-    public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
-    {
-        objectToBeNear = objectToBeNearIn;
-        theType = theTypeIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
-
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-
-        return targ;
-    }
-}
-
-
-
-
-
-
-
-
-public class simpleExactRepeatOfPerma
-{
-    permaPlan2 thePerma;
-    depletablePlan theDepletablePlan;
-
-
 
     public simpleExactRepeatOfPerma(permaPlan2 thePermaIn)
     {
@@ -991,7 +854,7 @@ public class simpleExactRepeatOfPerma
         theDepletablePlan = thePerma.convertToDepletable();
     }
 
-    public void doThisThing()
+    public override void doThisThing()
     {
         refillIfNeeded();
 
@@ -1008,548 +871,6 @@ public class simpleExactRepeatOfPerma
         }
     }
 }
-
-
-
-
-public class reproduce : IEnactaBool
-{
-    public override void enact(inputData theInput)
-    {
-        throw new System.NotImplementedException();
-    }
-}
-
-public class meleeAttack : IEnactaBool
-{
-    public override void enact(inputData theInput)
-    {
-        throw new System.NotImplementedException();
-    }
-}
-
-public class sleep : IEnactaBool
-{
-    public override void enact(inputData theInput)
-    {
-        throw new System.NotImplementedException();
-    }
-}
-
-
-
-public abstract class behavior:MonoBehaviour
-{
-    planEXE2 thePlan;
-
-
-    void Update()
-    {
-        doBehavior();
-    }
-
-    void doBehavior()
-    {
-        if (thePlan == null || thePlan.error())
-        { 
-            thePlan = replacementPlan(); 
-        }
-
-        //thePlan.debugPrint = printThisNPC;
-        thePlan.execute();
-    }
-
-    public abstract planEXE2 replacementPlan();
-}
-
-public class wander1: behavior
-{
-
-
-    public static wander1 addWander1(GameObject objectToAddItTo)
-    {
-
-        wander1 newWanderBehavior = objectToAddItTo.AddComponent<wander1>();
-
-        //newWanderBehavior.gamepadButtonType = theButtonType;
-        //newWanderBehavior.theEnactions.Add(enaction1);
-
-        return newWanderBehavior;
-    }
-
-
-    public override planEXE2 replacementPlan()
-    {
-        return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position));
-    }
-
-
-
-    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
-    {
-        planEXE2 firstShell = new seriesEXE();
-        //firstShell.debugPrint = printThisNPC;
-        firstShell.Add(makeNavAgentPlanEXE(stationaryTargetPosition, offset));
-        firstShell.untilListFinished();
-
-        return firstShell;
-    }
-
-    private planEXE2 makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
-
-
-
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
-
-}
-
-
-
-public class grabGun1 : behavior
-{
-    interType interTypeToGrab;
-
-    public static grabGun1 addGrabGun1(GameObject objectToAddItTo, interType interTypeToGrabIn)
-    {
-
-        grabGun1 newGrabGun1 = objectToAddItTo.AddComponent<grabGun1>();
-
-        newGrabGun1.interTypeToGrab = interTypeToGrabIn;
-        //newWanderBehavior.gamepadButtonType = theButtonType;
-        //newWanderBehavior.theEnactions.Add(enaction1);
-
-        return newGrabGun1;
-    }
-
-
-    public override planEXE2 replacementPlan()
-    {
-
-        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(interTypeToGrab));
-        return zerothShell;
-    }
-
-    private planEXE2 goGrabPlan2(interType interTypeX)
-    {
-        //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
-
-        if (target == null) { return null; }
-
-        planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 1.8f));
-        firstShell.Add(aimTargetPlan2(target));
-
-
-
-
-        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(this.gameObject, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
-
-        Debug.Assert(theHitscanEnactor != null);
-        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
-        firstShell.Add(hitscanEXE);
-        firstShell.untilListFinished();
-
-
-        return firstShell;
-    }
-
-
-
-    public List<GameObject> allNearbyEquippablesWithInterTypeX(interType theInterType)
-    {
-
-        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(this.gameObject);  //lol forgot, this is ONE way to grab functions
-        List<GameObject> theListOfEquippables = new List<GameObject>();
-
-        foreach (GameObject thisObject in theListOfALL)
-        {
-
-            equippable2 equip = thisObject.GetComponent<equippable2>();
-            if (equip == null) { continue; }
-
-            if (equip.containsIntertype(theInterType))
-            {
-                theListOfEquippables.Add(thisObject);
-            }
-        }
-
-        return theListOfEquippables;
-    }
-
-
-    private planEXE2 aimTargetPlan2(GameObject target)
-    {
-        aimTarget testE1 = this.gameObject.GetComponent<aimTarget>();
-
-        planEXE2 exe1 = testE1.toEXE(target);
-        exe1.atLeastOnce();
-
-        return exe1;
-    }
-
-
-
-    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
-    {
-
-        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
-        {
-
-            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
-        }
-
-
-
-        return null;
-    }
-
-    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
-    {
-        //hmm:
-        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
-
-
-        List<hitscanEnactor> theList = new List<hitscanEnactor>();
-
-        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
-        {
-            theList.Add(thisEnaction);
-        }
-
-
-        return theList;
-    }
-
-
-
-    public planEXE2 FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
-    {
-        planEXE2 firstShell = new seriesEXE();
-        //firstShell.debugPrint = printThisNPC;
-        firstShell.Add(makeNavAgentPlanEXE(possiblyMobileActualTarget, offset));
-        firstShell.untilListFinished();
-
-        return firstShell;
-    }
-
-
-    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
-    {
-        planEXE2 firstShell = new seriesEXE();
-        //firstShell.debugPrint = printThisNPC;
-        firstShell.Add(makeNavAgentPlanEXE(stationaryTargetPosition, offset));
-        firstShell.untilListFinished();
-
-        return firstShell;
-    }
-
-    private planEXE2 makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-
-    private planEXE2 makeNavAgentPlanEXE(GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
-    {
-        if (possiblyMobileActualTarget == null)
-        {
-            Debug.Log("target is null, so plan to walk to target is null");
-            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
-            return null;
-        }
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-
-
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
-
-}
-
-
-
-public class grabStuffStuff : behavior
-{
-    stuffType theStuffTypeToGrab;
-
-    public static grabStuffStuff addGrabStuffStuff(GameObject objectToAddItTo, stuffType theStuffTypeToGrabIn)
-    {
-
-        grabStuffStuff newComponent = objectToAddItTo.AddComponent<grabStuffStuff>();
-
-        newComponent.theStuffTypeToGrab = theStuffTypeToGrabIn;
-        //newWanderBehavior.gamepadButtonType = theButtonType;
-        //newWanderBehavior.theEnactions.Add(enaction1);
-
-        return newComponent;
-    }
-
-
-    public override planEXE2 replacementPlan()
-    {
-
-        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(theStuffTypeToGrab));
-        return zerothShell;
-    }
-
-    private planEXE2 goGrabPlan2(stuffType theStuffTypeX)
-    {
-        //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyObjectsWithStuffTypeX(theStuffTypeX));
-
-
-        Debug.Assert(target!=null);
-
-        if (target == null) 
-        {
-            return null; 
-        }
-
-        planEXE2 firstShell = new seriesEXE();
-        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 1.8f));
-        firstShell.Add(aimTargetPlan2(target));
-
-
-
-
-        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(this.gameObject, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
-
-        Debug.Assert(theHitscanEnactor != null);
-        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
-        firstShell.Add(hitscanEXE);
-        firstShell.untilListFinished();
-
-
-        return firstShell;
-    }
-
-
-
-    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
-    {
-
-        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(this.gameObject);  //lol forgot, this is ONE way to grab functions
-        List<GameObject> theListOfObjects = new List<GameObject>();
-
-        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
-
-        foreach (GameObject thisObject in theListOfALL)
-        {
-
-            //Debug.Log("thisObject:  " + thisObject);
-            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
-            
-            if (theComponent == null) 
-            {
-
-                //Debug.Log("(theComponent == null)");
-                continue; 
-            }
-
-            if (theComponent.theTypeOfStuff == theStuffTypeX)
-            {
-                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
-                theListOfObjects.Add(thisObject);
-            }
-        }
-
-        return theListOfObjects;
-    }
-
-
-    private planEXE2 aimTargetPlan2(GameObject target)
-    {
-        aimTarget testE1 = this.gameObject.GetComponent<aimTarget>();
-
-        planEXE2 exe1 = testE1.toEXE(target);
-        exe1.atLeastOnce();
-
-        return exe1;
-    }
-
-
-
-    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
-    {
-
-        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
-        {
-
-            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
-        }
-
-
-
-        return null;
-    }
-
-    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
-    {
-        //hmm:
-        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
-
-
-        List<hitscanEnactor> theList = new List<hitscanEnactor>();
-
-        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
-        {
-            theList.Add(thisEnaction);
-        }
-
-
-        return theList;
-    }
-
-
-
-    public planEXE2 FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
-    {
-        planEXE2 firstShell = new seriesEXE();
-        //firstShell.debugPrint = printThisNPC;
-        firstShell.Add(makeNavAgentPlanEXE(possiblyMobileActualTarget, offset));
-        firstShell.untilListFinished();
-
-        return firstShell;
-    }
-
-
-    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
-    {
-        planEXE2 firstShell = new seriesEXE();
-        //firstShell.debugPrint = printThisNPC;
-        firstShell.Add(makeNavAgentPlanEXE(stationaryTargetPosition, offset));
-        firstShell.untilListFinished();
-
-        return firstShell;
-    }
-
-    private planEXE2 makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-
-    private planEXE2 makeNavAgentPlanEXE(GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
-    {
-        if (possiblyMobileActualTarget == null)
-        {
-            Debug.Log("target is null, so plan to walk to target is null");
-            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
-            return null;
-        }
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
-
-
-        proximityRef condition = new proximityRef(this.gameObject, theEXE, offsetRoom * 1.4f);
-        condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-
-
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
-
-}
-
-
-
 
 
 
@@ -1678,7 +999,6 @@ public class permaPlan2
 
 }
 
-
 public class permaPlan
 {
     //boil things down so it's EASY to generate [other] abstract classes
@@ -1794,16 +1114,14 @@ public class permaPlan
     }
 }
 
-
-
 public class depletablePlan
 {
     //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalFSM] holds PARALLEL.
     //so here:  just use singleEXE instead of enaction?  [for "inputData" for enacting]
     //List<enaction> thePlan = new List<enaction>();
     public List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
-                                                      //no further layers below the single enaction within it?  we'll see.  
-    //List<enactable> thePlan = new List<enactable>();  //call it an enactable?
+                                                             //no further layers below the single enaction within it?  we'll see.  
+                                                             //List<enactable> thePlan = new List<enactable>();  //call it an enactable?
 
     public List<condition> startConditions = new List<condition>();
     public List<condition> endConditions = new List<condition>();
@@ -1867,21 +1185,21 @@ public class depletablePlan
         //      remove item from list when its end conditions are met
 
         if (thePlan == null)
-        { 
-            Debug.Log("null.....that's an error!"); 
+        {
+            Debug.Log("null.....that's an error!");
             return;
         }
 
         if (thePlan.Count < 1)
         {
-            Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end"); 
+            Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end");
             return;
         }
 
 
         if (thePlan[0] == null)
-        { 
-            Debug.Log("null.....that's an error!"); 
+        {
+            Debug.Log("null.....that's an error!");
             return;
         }
 
@@ -1890,7 +1208,7 @@ public class depletablePlan
         //      grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
         //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
 
-        if (startConditionsMet()&& thePlan[0].startConditionsMet())
+        if (startConditionsMet() && thePlan[0].startConditionsMet())
         {
             //Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
             //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
@@ -1905,7 +1223,7 @@ public class depletablePlan
         if (thePlan[0].endConditionsMet())
         {
             Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
-            
+
             //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
             //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
             thePlan.RemoveAt(0);
@@ -1915,7 +1233,7 @@ public class depletablePlan
             return;
         }
 
-        
+
         //????????
         if (endConditionsMet())
         {
@@ -1958,7 +1276,7 @@ public class depletablePlan
 
     public bool endConditionsMet()
     {
-       Debug.Log("looking at end conditions for:  " + this);
+        Debug.Log("looking at end conditions for:  " + this);
 
         //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
         foreach (condition thisCondition in endConditions)
@@ -1986,41 +1304,477 @@ public class depletablePlan
 
 
 
-public class depletableSingleEXEListComplete : condition
-{
-    List<singleEXE> planList;
 
-    public depletableSingleEXEListComplete(List<singleEXE> planList)
+
+
+
+
+
+//targeting
+
+public abstract class targetPicker
+{
+    public abstract agnosticTargetCalc pickNext();
+}
+
+public class pickRandomNearbyLocation : targetPicker
+{
+    GameObject objectToBeNear;
+    float spreadFactor = 1.0f;
+
+    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
     {
-        this.planList = planList;
+        objectToBeNear = objectToBeNearIn;
+        spreadFactor = spreadFactorIn;
     }
 
-    public override bool met()
+    public override agnosticTargetCalc pickNext()
     {
-        //Debug.Log("planList.Count:  " + planList.Count);
-        foreach (singleEXE planEXE in planList)
+        Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        return targ;
+    }
+}
+
+public class pickNextVisibleStuffStuff : targetPicker
+{
+    GameObject objectToBeNear;
+    stuffType theType;
+
+    public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theType = theTypeIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+
+
+public class allNearbyStuffStuff : objectSetGrabber
+{
+    GameObject theObjectWeWantStuffNear;
+    stuffType theStuffTypeX;
+
+    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
+    {
+        theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
+        theStuffTypeX = theStuffTypeXIn;
+    }
+
+
+    public override List<GameObject> grab()
+    {
+        return allNearbyObjectsWithStuffTypeX(theStuffTypeX);
+    }
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWeWantStuffNear);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
         {
-            if (planEXE == null) { continue; } //messy annoying for now
-            if (planEXE.endConditionsMet() == false) 
-            { 
-                return false; 
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
             }
         }
 
-        return true;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
+        return theListOfObjects;
     }
 }
+
+
+
+
+
+
+
+
+
+
+//enactions
+
+public class reproduce : IEnactaBool
+{
+    public override void enact(inputData theInput)
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+public class meleeAttack : IEnactaBool
+{
+    public override void enact(inputData theInput)
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+public class sleep : IEnactaBool
+{
+    public override void enact(inputData theInput)
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+
+
+
+
+
+
+//"behaviors" [maybe scrap]
+
+public abstract class behavior:MonoBehaviour
+{
+    planEXE2 thePlan;
+
+
+    void Update()
+    {
+        doBehavior();
+    }
+
+    void doBehavior()
+    {
+        if (thePlan == null || thePlan.error())
+        { 
+            thePlan = replacementPlan(); 
+        }
+
+        //thePlan.debugPrint = printThisNPC;
+        thePlan.execute();
+    }
+
+    public abstract planEXE2 replacementPlan();
+}
+
+public class wander1: behavior
+{
+
+
+    public static wander1 addWander1(GameObject objectToAddItTo)
+    {
+
+        wander1 newWanderBehavior = objectToAddItTo.AddComponent<wander1>();
+
+        //newWanderBehavior.gamepadButtonType = theButtonType;
+        //newWanderBehavior.theEnactions.Add(enaction1);
+
+        return newWanderBehavior;
+    }
+
+
+    public override planEXE2 replacementPlan()
+    {
+        return genGen.singleton.makeNavAgentPlanEXE(this.gameObject,randomNearbyVector(this.transform.position));
+    }
+
+
+    
+    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
+    {
+        Vector3 vectorToReturn = positionToBeNear;
+        float initialDistance = 0f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+
+        return vectorToReturn;
+    }
+
+}
+
+public class grabGun1 : behavior
+{
+    interType interTypeToGrab;
+
+    public static grabGun1 addGrabGun1(GameObject objectToAddItTo, interType interTypeToGrabIn)
+    {
+
+        grabGun1 newGrabGun1 = objectToAddItTo.AddComponent<grabGun1>();
+
+        newGrabGun1.interTypeToGrab = interTypeToGrabIn;
+        //newWanderBehavior.gamepadButtonType = theButtonType;
+        //newWanderBehavior.theEnactions.Add(enaction1);
+
+        return newGrabGun1;
+    }
+
+
+    public override planEXE2 replacementPlan()
+    {
+
+        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(interTypeToGrab));
+        return zerothShell;
+    }
+
+    private planEXE2 goGrabPlan2(interType interTypeX)
+    {
+        //ad-hoc hand-written plan
+        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
+
+        if (target == null) { return null; }
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.Add(genGen.singleton.makeNavAgentPlanEXE(this.gameObject,target, 1.8f));
+        firstShell.Add(aimTargetPlan2(target));
+
+
+
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(this.gameObject, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        Debug.Assert(theHitscanEnactor != null);
+        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
+        firstShell.Add(hitscanEXE);
+        firstShell.untilListFinished();
+
+
+        return firstShell;
+    }
+
+
+
+    public List<GameObject> allNearbyEquippablesWithInterTypeX(interType theInterType)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(this.gameObject);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfEquippables = new List<GameObject>();
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(theInterType))
+            {
+                theListOfEquippables.Add(thisObject);
+            }
+        }
+
+        return theListOfEquippables;
+    }
+
+
+    private planEXE2 aimTargetPlan2(GameObject target)
+    {
+        aimTarget testE1 = this.gameObject.GetComponent<aimTarget>();
+
+        planEXE2 exe1 = testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
+
+}
+
+public class grabStuffStuff : behavior
+{
+    stuffType theStuffTypeToGrab;
+
+    public static grabStuffStuff addGrabStuffStuff(GameObject objectToAddItTo, stuffType theStuffTypeToGrabIn)
+    {
+
+        grabStuffStuff newComponent = objectToAddItTo.AddComponent<grabStuffStuff>();
+
+        newComponent.theStuffTypeToGrab = theStuffTypeToGrabIn;
+        //newWanderBehavior.gamepadButtonType = theButtonType;
+        //newWanderBehavior.theEnactions.Add(enaction1);
+
+        return newComponent;
+    }
+
+
+    public override planEXE2 replacementPlan()
+    {
+
+        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(theStuffTypeToGrab));
+        return zerothShell;
+    }
+
+    private planEXE2 goGrabPlan2(stuffType theStuffTypeX)
+    {
+        //ad-hoc hand-written plan
+        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyObjectsWithStuffTypeX(theStuffTypeX));
+
+
+        Debug.Assert(target!=null);
+
+        if (target == null) 
+        {
+            return null; 
+        }
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.Add(genGen.singleton.makeNavAgentPlanEXE(this.gameObject, target, 1.8f));
+        firstShell.Add(aimTargetPlan2(target));
+
+
+
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(this.gameObject, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        Debug.Assert(theHitscanEnactor != null);
+        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
+        firstShell.Add(hitscanEXE);
+        firstShell.untilListFinished();
+
+
+        return firstShell;
+    }
+
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(this.gameObject);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+            
+            if (theComponent == null) 
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue; 
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+
+
+    private planEXE2 aimTargetPlan2(GameObject target)
+    {
+        aimTarget testE1 = this.gameObject.GetComponent<aimTarget>();
+
+        planEXE2 exe1 = testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
+
+}
+
+
+
+
 
 
 /*

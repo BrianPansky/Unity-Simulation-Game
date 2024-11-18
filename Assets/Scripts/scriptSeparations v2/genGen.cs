@@ -321,12 +321,69 @@ public class genGen : MonoBehaviour
 
 
 
-    
 
 
-    
 
-    
+
+
+    //plan EXE2s
+
+
+    public singleEXE makeNavAgentPlanEXE(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+                                                                            //theEXE.debugPrint = printThisNPC;
+                                                                            //singleEXE theEXEsingle = theEXE;
+
+        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// offsetRoom * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+    public singleEXE makeNavAgentPlanEXE(GameObject theObjectDoingTheEnaction, GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
+    {
+        if (possiblyMobileActualTarget == null)
+        {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
+            return null;
+        }
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+                                                                                  //theEXE.debugPrint = printThisNPC;
+
+
+        //proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     internal inventory1 ensureInventory1Script(GameObject onThisObject)
     {

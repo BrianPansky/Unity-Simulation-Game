@@ -535,10 +535,14 @@ public class vect3EXE2 : singleEXE
 
     public override bool error()
     {
-        return false;
+        return targetError();
     }
 
+    public bool targetError()
+    {
 
+        return theTargetCalculator.error();
+    }
 
     override public void setTarget(targetCalculator targetCalc)
     {
@@ -1271,6 +1275,12 @@ public class agnosticTargetCalc:targetCalculator
     {
         return theTargetCalc.targetPosition();
     }
+
+
+    public override bool error()
+    {
+        return theTargetCalc.error();
+    }
 }
 
 public abstract class targetCalculator
@@ -1299,6 +1309,9 @@ public abstract class targetCalculator
     {
         return asTextString;
     }
+
+
+    public abstract bool error();
 }
 
 public class movableObjectTargetCalculator : targetCalculator
@@ -1311,6 +1324,11 @@ public class movableObjectTargetCalculator : targetCalculator
         target = targetIn;
         offset = offsetIn;
         asTextString= targeterIn.ToString();
+    }
+
+    public override bool error()
+    {
+        return (target == null);
     }
 
     public override Vector3 realPositionOfTarget()
@@ -1354,5 +1372,10 @@ public class staticVectorTargetCalculator : targetCalculator
     public override Vector3 targetPosition()
     {
         return calculateOffsetTargetPosition(targeter, targetPositionVector);
+    }
+
+    public override bool error()
+    {
+        return false;
     }
 }
