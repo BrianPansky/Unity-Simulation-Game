@@ -127,17 +127,25 @@ public class animalUpdate:MonoBehaviour
     depletablePlan plan;
     permaPlan2 perma1;
     simpleExactRepeatOfPerma simpleRepeat1;
+    repeatWithTargetPicker repeatWithTargetPickerTest;
+
+    animalFSM theFSM;
 
     void Start()
     {
         //setupTest2();
-        setupTest3();
+        //setupTest3();
+        //setupTest4();
+        setupTest5();
+        //setupTest6(stuffType.fruit);
     }
 
     void Update()
     {
         //plan.doTheDepletablePlan();
-        simpleRepeat1.doThisThing();
+        //simpleRepeat1.doThisThing();
+        repeatWithTargetPickerTest.doThisThing();
+        //theFSM = theFSM.doAFrame();
     }
 
     private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
@@ -148,11 +156,12 @@ public class animalUpdate:MonoBehaviour
         navAgent theNavAgent = this.gameObject.GetComponent<navAgent>();
 
 
-        singleEXE theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-        //theEXE.debugPrint = printThisNPC;
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+                                                                            //theEXE.debugPrint = printThisNPC;
+        //singleEXE theEXEsingle = theEXE;
 
-
-        proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
+        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, 2f);// offsetRoom * 1.4f);
         //condition.debugPrint = theNavAgent.debugPrint;
         theEXE.endConditions.Add(condition);
 
@@ -184,27 +193,699 @@ public class animalUpdate:MonoBehaviour
     
     void setupTest3()
     {
-        //then, to test it, call "plan.doTheDepletablePlan();" in the update
-        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        singleEXE step2 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        singleEXE step3 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //then do "simpleRepeat1.doThisThing();" in update
+        singleEXE exe = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
 
-        perma1 = new permaPlan2(step1, step2, step3);
+        perma1 = new permaPlan2(exe);
 
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
 
         simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
 
-        //now
-        //      how to make random wander take...ONE step?  but generate new location each time?
-        //      generate location OUTSIDE the simple class, and input it........?
-        //          and, what, that input........always takes vector3?  or sometimes GameObject?  so use "target calculator" as input?
-        //              i' doing that in animalFSM?  the switch conditions ALSO provide stuff like threats/target/navpoint?
+    }
 
+    void setupTest4()
+    {
+        //then, to test it, call "repeatWithTargetPickerTest.doThisThing();" in the update
+        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+        perma1 = new permaPlan2(step1);
+
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+
+        repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
 
     }
+
+    void setupTest5()
+    {
+        repeatWithTargetPickerTest = grabTheStuff(stuffType.fruit);
+    }
+
+    void setupTest6(stuffType stuffX)
+    {
+        //then, to test it, call "theFSM = theFSM.doAFrame();" in the update
+
+        condition switchCondition = new canSeeStuffStuff(this.gameObject, stuffX);
+
+        theFSM = new animalFSM(randomWanderRepeatable(), switchCondition, grabTheStuff(stuffX));
+    }
+
+    private repeatWithTargetPicker randomWanderRepeatable()
+    {
+        singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        perma1 = new permaPlan2(step1);
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+        return repeatWithTargetPickerTest;
+    }
+    private repeatWithTargetPicker grabTheStuff(stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return new ummAllThusStuffForGrab(this.gameObject, stuffX).returnTheRepeatTargetThing();
+    }
 }
+
+
+
+public class ummAllThusStuffForGrab
+{
+
+    GameObject theObjectDoingTheEnactions;
+
+    stuffType theStuffTypeToGrab;
+
+
+    public ummAllThusStuffForGrab(GameObject theObjectDoingTheEnactionsIn, stuffType theStuffTypeToGrabIn)
+    {
+        theObjectDoingTheEnactions = theObjectDoingTheEnactionsIn;
+        theStuffTypeToGrab = theStuffTypeToGrabIn;
+    }
+
+
+    public repeatWithTargetPicker returnTheRepeatTargetThing()
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(makeNavAgentPlanEXE(theObjectDoingTheEnactions), aimTargetPlan2(theObjectDoingTheEnactions), fireHitscanClick());
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab));
+        
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+
+    public planEXE2 replacementPlan()
+    {
+
+        planEXE2 zerothShell = new seriesEXE(goGrabPlan2(theStuffTypeToGrab));
+        return zerothShell;
+    }
+
+    private planEXE2 goGrabPlan2(stuffType theStuffTypeX)
+    {
+        //ad-hoc hand-written plan
+        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
+
+
+        Debug.Assert(target != null);
+
+        if (target == null)
+        {
+            return null;
+        }
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.Add(FIXEDgoToTargetForMOBILEtargets(target, 1.8f));
+        firstShell.Add(aimTargetPlan2(target));
+
+
+
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(theObjectDoingTheEnactions, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        Debug.Assert(theHitscanEnactor != null);
+        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
+        firstShell.Add(hitscanEXE);
+        firstShell.untilListFinished();
+
+
+        return firstShell;
+    }
+
+    public singleEXE fireHitscanClick()
+    {
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(theObjectDoingTheEnactions, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        singleEXE theSingle = (singleEXE)theHitscanEnactor.standardEXEconversion();
+        theSingle.untilListFinished();
+
+        return theSingle;
+    }
+
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectDoingTheEnactions);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+
+
+    private singleEXE aimTargetPlan2(GameObject target)
+    {
+        aimTarget testE1 = theObjectDoingTheEnactions.GetComponent<aimTarget>();
+
+        singleEXE exe1 = (singleEXE)testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
+    public singleEXE FIXEDgoToTargetForMOBILEtargets(GameObject possiblyMobileActualTarget, float offset = 1.8f)
+    {
+        singleEXE theSingleEXE = makeNavAgentPlanEXE(possiblyMobileActualTarget, offset);
+
+        theSingleEXE.untilListFinished();
+
+        return theSingleEXE;
+    }
+
+
+    public planEXE2 FIXEDgoToTargetForSTATIONARYtargets(Vector3 stationaryTargetPosition, float offset = 1.8f)
+    {
+        singleEXE theSingleEXE = makeNavAgentPlanEXE(stationaryTargetPosition, offset);
+
+        theSingleEXE.untilListFinished();
+
+        return theSingleEXE;
+    }
+
+    private singleEXE makeNavAgentPlanEXE(Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
+
+
+        singleEXE theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+        //theEXE.debugPrint = printThisNPC;
+
+
+        proximity condition = new proximity(theObjectDoingTheEnactions, staticTargetPosition, offsetRoom * 1.4f);
+        condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+    private singleEXE makeNavAgentPlanEXE(GameObject possiblyMobileActualTarget, float offsetRoom = 0f)
+    {
+        if (possiblyMobileActualTarget == null)
+        {
+            Debug.Log("target is null, so plan to walk to target is null");
+            Debug.Log(possiblyMobileActualTarget.GetInstanceID());
+            return null;
+        }
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnactions.GetComponent<navAgent>();
+
+
+        singleEXE theEXE = new vect3EXE2(theNavAgent, possiblyMobileActualTarget);//placeholderTarget1);
+        //theEXE.debugPrint = printThisNPC;
+
+
+        proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+
+
+    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
+    {
+        Vector3 vectorToReturn = positionToBeNear;
+        float initialDistance = 0f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+
+        return vectorToReturn;
+    }
+
+}
+
+
+
+
+
+
+public class animalFSM
+{
+    Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
+
+    //planEXE2 repeatingPlan;
+    //planEXE2 currentPlan;;
+
+    //these are lists, AKA simultaneous plans
+    List<permaPlan> repeatingPlans = new List<permaPlan>();
+    List<depletablePlan> currentPlans = new List<depletablePlan>();
+
+
+    repeatWithTargetPicker justDoThisForNow;
+
+    public repeatWithTargetPicker RepeatWithTargetPicker1 { get; }
+    public condition SwitchCondition { get; }
+    public repeatWithTargetPicker RepeatWithTargetPicker2 { get; }
+
+    public animalFSM()
+    {
+        //      new permaPlan();
+    }
+
+    public animalFSM(repeatWithTargetPicker doThisImmediately, condition switchCondition, repeatWithTargetPicker doThisAfterSwitchCondition)
+    {
+        justDoThisForNow = doThisImmediately;
+
+
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+
+        switchBoard[new multicondition(switchCondition)] = otherFSM;
+    }
+
+    public animalFSM(repeatWithTargetPicker doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
+    {
+        justDoThisForNow = doThisImmediately;
+
+
+
+        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+
+        switchBoard[new multicondition(switchCondition)] = doThisAfterSwitchCondition;
+    }
+
+    public animalFSM doAFrame()
+    {
+        animalFSM toSwitchTo = null;
+
+        toSwitchTo = firstMeSwitchtCondition();
+        if (toSwitchTo != null)
+        {
+            return toSwitchTo;
+        }
+
+
+
+        if (currentPlans.Count < 1)
+        {
+            currentPlans = refillPlans();
+        }
+
+        executeCurrentPlans();
+
+        return this;
+    }
+
+    private void executeCurrentPlans()
+    {
+
+        List<depletablePlan> newList = new List<depletablePlan>();
+
+        foreach (depletablePlan plan in currentPlans)
+        {
+            if (plan.endConditionsMet())
+            {
+                continue;
+            }
+
+            if (plan.startConditionsMet())
+            {
+                plan.doTheDepletablePlan();
+            }
+
+            if (plan.endConditionsMet())
+            {
+                continue;
+            }
+
+            newList.Add(plan);
+        }
+
+        currentPlans = newList;
+    }
+
+    private List<depletablePlan> refillPlans()
+    {
+        List<depletablePlan> newList = new List<depletablePlan>();
+        foreach (permaPlan plan in repeatingPlans)
+        {
+            newList.Add(plan.convertToDepletable());
+        }
+
+        return newList;
+    }
+
+    /*
+    private List<permaPlan> duplicateTheRepeatingPlans()
+    {
+        List<permaPlan> newList = new List<permaPlan>();
+        foreach (permaPlan plan in repeatingPlans)
+        {
+            newList.Add(plan.duplicate());
+        }
+
+        return newList;
+    }
+    */
+
+
+    private animalFSM firstMeSwitchtCondition()
+    {
+        foreach (multicondition theseConditions in switchBoard.Keys)
+        {
+            if (theseConditions.met())
+            {
+                return switchBoard[theseConditions];
+            }
+        }
+
+        return null;
+    }
+
+}
+
+
+
+
+
+
+public class canSeeStuffStuff : condition
+{
+
+    stuffType theStuffType;
+
+
+    GameObject theObjectThatIsLooking;
+    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
+
+    public canSeeStuffStuff(GameObject theObjectThatIsLookingIn, stuffType theStuffTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
+        theStuffType = theStuffTypeIn;
+    }
+
+
+    public override bool met()
+    {
+        spatialDataPoint myData = new spatialDataPoint(new allNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
+
+
+        bool threatLineOfSightBool = myData.threatLineOfSightBool();
+
+        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            stringToReturn += "do IF this object can see stuffStuff";
+        }
+        else
+        {
+            stringToReturn += "do if this object CANNOT see stuffStuff";
+        }
+
+        return stringToReturn;
+    }
+
+}
+
+
+public class allNearbyStuffStuff : objectSetGrabber
+{
+    GameObject theObjectWeWantStuffNear;
+    stuffType theStuffTypeX;
+
+    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
+    {
+        theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
+        theStuffTypeX = theStuffTypeXIn;
+    }
+
+
+    public override List<GameObject> grab()
+    {
+        return allNearbyObjectsWithStuffTypeX(theStuffTypeX);
+    }
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWeWantStuffNear);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+}
+
+
+
+public class repeatWithTargetPicker
+{
+    permaPlan2 thePerma;
+    depletablePlan theDepletablePlan;
+
+    targetPicker theTargetPicker;
+
+
+    public repeatWithTargetPicker(permaPlan2 thePermaIn, targetPicker theTargetPickerIn)
+    {
+        this.thePerma = thePermaIn;
+        theTargetPicker = theTargetPickerIn;
+        theDepletablePlan = convertToDepletableWithNextTarget();
+    }
+
+    public void doThisThing()
+    {
+        Debug.Log("======================================================================");
+        refillIfNeeded();
+
+        theDepletablePlan.doTheDepletablePlan();
+
+        refillIfNeeded();
+    }
+
+    private void refillIfNeeded()
+    {
+        Debug.Log("refillIfNeeded()");
+        if (theDepletablePlan.endConditionsMet())
+        {
+            Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
+            theDepletablePlan = convertToDepletableWithNextTarget();
+            return;
+        }
+
+        Debug.Log("NOT met.........");
+    }
+
+
+
+
+    public abstract class thingSwitcher
+    {
+
+    }
+
+
+
+    internal depletablePlan convertToDepletableWithNextTarget()
+    {
+        depletablePlan newThing = new depletablePlan();
+        agnosticTargetCalc newTarget = theTargetPicker.pickNext();
+
+        //Debug.Log("newTarget:  " + newTarget);
+        //Debug.Log("newTarget.targetPosition():  " + newTarget.targetPosition());
+        //Debug.Log("newTarget.GetHashCode():  " + newTarget.GetHashCode());
+
+        foreach (singleEXE thisOne in thePerma.convertToDepletable().thePlan)
+        {
+            //thisOne.theEnaction.targ//ohhhhhhhhh, not all enactions HAVE a target, i see.....how to handle....
+            //Debug.Log("ooooooooooooooo????????????");
+            thisOne.setTarget(newTarget);
+            newThing.add(thisOne);
+        }
+
+        return newThing;
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+public abstract class targetPicker
+{
+    public abstract agnosticTargetCalc pickNext();
+}
+
+
+
+public class pickRandomNearbyLocation : targetPicker
+{
+    GameObject objectToBeNear;
+    float spreadFactor = 1.0f;
+
+    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
+    {
+        objectToBeNear = objectToBeNearIn;
+        spreadFactor = spreadFactorIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        return targ;
+    }
+}
+
+
+public class pickNextVisibleStuffStuff : targetPicker
+{
+    GameObject objectToBeNear;
+    stuffType theType;
+
+    public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theType = theTypeIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+
+
 
 
 
@@ -782,112 +1463,6 @@ public class grabStuffStuff : behavior
 
 
 
-public class animalFSM
-{
-    Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
-
-    //planEXE2 repeatingPlan;
-    //planEXE2 currentPlan;;
-
-    List<permaPlan> repeatingPlans;
-    List<depletablePlan> currentPlans = new List<depletablePlan>();
-
-
-    public animalFSM()
-    {
-        //      new permaPlan();
-    }
-
-    public animalFSM doAFrame()
-    {
-        animalFSM toSwitchTo = null;
-
-        toSwitchTo = firstMeSwitchtCondition();
-        if(toSwitchTo != null)
-        {
-            return toSwitchTo;
-        }
-
-
-
-        if(currentPlans.Count <1)
-        {
-            currentPlans = refillPlans();
-        }
-
-        executeCurrentPlans();
-
-        return this;
-    }
-
-    private void executeCurrentPlans()
-    {
-
-        List<depletablePlan> newList = new List<depletablePlan>();
-
-        foreach (depletablePlan plan in currentPlans)
-        {
-            if (plan.endConditionsMet())
-            {
-                continue;
-            }
-
-            if (plan.startConditionsMet())
-            {
-                plan.doTheDepletablePlan();
-            }
-
-            if (plan.endConditionsMet())
-            {
-                continue;
-            }
-
-            newList.Add(plan);
-        }
-
-        currentPlans = newList;
-    }
-
-    private List<depletablePlan> refillPlans()
-    {
-        List<depletablePlan> newList = new List<depletablePlan>();
-        foreach (permaPlan plan in repeatingPlans)
-        {
-            newList.Add(plan.convertToDepletable());
-        }
-
-        return newList;
-    }
-
-    /*
-    private List<permaPlan> duplicateTheRepeatingPlans()
-    {
-        List<permaPlan> newList = new List<permaPlan>();
-        foreach (permaPlan plan in repeatingPlans)
-        {
-            newList.Add(plan.duplicate());
-        }
-
-        return newList;
-    }
-    */
-
-
-    private animalFSM firstMeSwitchtCondition()
-    {
-        foreach(multicondition theseConditions in switchBoard.Keys)
-        {
-            if (theseConditions.met())
-            {
-                return switchBoard[theseConditions];
-            }
-        }
-
-        return null;
-    }
-
-}
-
 
 public class permaPlan2
 {
@@ -1135,12 +1710,12 @@ public class depletablePlan
     //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalFSM] holds PARALLEL.
     //so here:  just use singleEXE instead of enaction?  [for "inputData" for enacting]
     //List<enaction> thePlan = new List<enaction>();
-    List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
+    public List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
                                                       //no further layers below the single enaction within it?  we'll see.  
     //List<enactable> thePlan = new List<enactable>();  //call it an enactable?
 
-    List<condition> startConditions = new List<condition>();
-    List<condition> endConditions = new List<condition>();
+    public List<condition> startConditions = new List<condition>();
+    public List<condition> endConditions = new List<condition>();
 
     public depletablePlan()
     {
@@ -1202,20 +1777,20 @@ public class depletablePlan
 
         if (thePlan == null)
         { 
-            //Debug.Log("null.....that's an error!"); 
+            Debug.Log("null.....that's an error!"); 
             return;
         }
 
         if (thePlan.Count < 1)
         {
-            //Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end"); 
+            Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end"); 
             return;
         }
 
 
         if (thePlan[0] == null)
         { 
-            //Debug.Log("null.....that's an error!"); 
+            Debug.Log("null.....that's an error!"); 
             return;
         }
 
@@ -1226,7 +1801,7 @@ public class depletablePlan
 
         if (startConditionsMet()&& thePlan[0].startConditionsMet())
         {
-            //Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
+            Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
             //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
             //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
             //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
@@ -1238,7 +1813,7 @@ public class depletablePlan
 
         if (thePlan[0].endConditionsMet())
         {
-            //Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0]);
+            Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0]);
             
             //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
             //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
@@ -1253,7 +1828,7 @@ public class depletablePlan
         //????????
         if (endConditionsMet())
         {
-            //Debug.Log("exeList[0].endConditionsMet()  for:  " + this);
+            Debug.Log("exeList[0].endConditionsMet()  for:  " + this);
 
             //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
             //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
@@ -1298,13 +1873,15 @@ public class depletablePlan
         foreach (condition thisCondition in endConditions)
         {
             //conditionalPrint("thisCondition:  " + thisCondition);
-            //Debug.Log("thisCondition:  " + thisCondition);
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false)
             {
+                Debug.Log("this end condition not met:  " + thisCondition);
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
                 return false;
             }
+
+            Debug.Log("thisCondition MET:  " + thisCondition);
         }
         //Debug.Log("no conditions remain unfulfilled!");
 
