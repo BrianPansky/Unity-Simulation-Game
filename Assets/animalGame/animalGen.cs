@@ -449,21 +449,6 @@ public class ummAllThusStuffForGrab
 
 
 
-
-
-
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
-
 }
 
 
@@ -1334,6 +1319,7 @@ public class pickRandomNearbyLocation : targetPicker
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
         return targ;
     }
+
 }
 
 public class pickNextVisibleStuffStuff : targetPicker
@@ -1495,22 +1481,9 @@ public class wander1: behavior
 
     public override planEXE2 replacementPlan()
     {
-        return genGen.singleton.makeNavAgentPlanEXE(this.gameObject,randomNearbyVector(this.transform.position));
+        return genGen.singleton.makeNavAgentPlanEXE(this.gameObject,patternScript2.singleton.randomNearbyVector(this.transform.position));
     }
 
-
-    
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
 
 }
 
