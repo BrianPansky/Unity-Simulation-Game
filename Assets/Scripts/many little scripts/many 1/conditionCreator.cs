@@ -446,6 +446,57 @@ public class adHocHasNoGunCondition : condition
     }
 }
 
+public class stickyCondition : condition
+{
+    condition nestedCondition;
+
+    int countdown = 0;
+    int maxTimer = 2;
+
+
+    public stickyCondition(condition nestedConditionIn, int maxTimerIn =2)
+    {
+        nestedCondition = nestedConditionIn;
+        maxTimer = maxTimerIn;
+    }
+
+
+    public override bool met()
+    {
+        if (nestedCondition.met())
+        {
+            countdown = maxTimer;
+            return true;
+        }
+
+        countdown--;
+        
+        
+        if (countdown < 1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        return standardAsTextSHORT();
+    }
+
+}
+
+
 
 
 

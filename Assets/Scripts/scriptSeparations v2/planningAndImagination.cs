@@ -214,7 +214,7 @@ public abstract class planEXE2
     
     public bool endConditionsMet()
     {
-        Debug.Log("looking at end conditions for:  " + this.asText());
+        //Debug.Log("looking at end conditions for:  " + this.asText());
 
         if (debugPrint == true) 
         {
@@ -236,16 +236,16 @@ public abstract class planEXE2
         foreach (condition thisCondition in endConditions)
         {
             //conditionalPrint("thisCondition:  " + thisCondition);
-            Debug.Log("thisCondition:  " + thisCondition);
+            //Debug.Log("thisCondition:  " + thisCondition);
             //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
             if (thisCondition.met() == false) 
             {
                 //conditionalPrint("this end condition not met:  "+ thisCondition);
-                Debug.Log("this end condition not met:  " + thisCondition);
+                //Debug.Log("this end condition not met:  " + thisCondition);
                 return false; 
             }
         }
-        Debug.Log("no conditions remain unfulfilled!");
+        //Debug.Log("no conditions remain unfulfilled!");
 
         //conditionalPrint("no end conditions remain unfulfilled!");
         //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
@@ -476,7 +476,10 @@ public class vect3EXE2 : singleEXE
         this.theEnaction = theInputEnaction;
         //this.stationaryTargetAsVector = stationaryTargetAsVectorIn;
         //this.offsetRoom = offsetRoomIn;
-
+        Debug.Assert(this != null);
+        Debug.Assert(this.theEnaction != null);
+        Debug.Assert(this.theEnaction.transform != null);
+        Debug.Assert(this.theEnaction.transform.gameObject != null);
         theTargetCalculator = new staticVectorTargetCalculator(this.theEnaction.transform.gameObject, stationaryTargetAsVectorIn, offsetRoomIn);
 
     }
@@ -1205,7 +1208,7 @@ public class adHocGoGrabAndEquipRefill : adHocPlanRefillThing
     {
         theAIHub = theAIHubIn;
 
-        theRefillPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.shoot1)); //i don't need this, but i had some printouts that needed it, so i'm duct taping it together by giving them this
+        theRefillPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.peircing)); //i don't need this, but i had some printouts that needed it, so i'm duct taping it together by giving them this
 
         this.theConditions = theConditionsIn;
         standardRefill();
@@ -1219,7 +1222,7 @@ public class adHocGoGrabAndEquipRefill : adHocPlanRefillThing
 
     public override void refill()
     {
-        theCurrentPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.shoot1));
+        theCurrentPlan = asSeries(theAIHub.grabAndEquipPlan2(interType.peircing));
         theCurrentPlan.atLeastOnce();  //hmmmm, seems silly to always need  this
     }
 
@@ -1333,6 +1336,13 @@ public class movableObjectTargetCalculator : targetCalculator
 
     public override Vector3 realPositionOfTarget()
     {
+        //ad-hoc duct tape!
+        if (target == null)
+        {
+            //return Vector3.zero;
+            return targeter.transform.position;
+        }
+
         return target.transform.position;
     }
 

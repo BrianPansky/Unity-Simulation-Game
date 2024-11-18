@@ -17,6 +17,27 @@ public class debugTools : MonoBehaviour
 
 
 
+public class debugSwitchboard : MonoBehaviour
+{
+    public bool ALL = false;
+
+    //just:  what something IS, whether or not it FIRES/succeeds
+    public bool enactionShallow = false;
+    public bool conditionShallow = false;
+    public bool planEXEShallow = false;
+    public bool repeaterShallow = false;
+    public bool FSMShallow = false;
+
+
+    //inner processes:
+    public bool enactionDeep = false;
+    public bool conditionDeep = false;
+    public bool planEXEDeep = false;
+    public bool repeaterDeep = false;
+    public bool FSMDeep = false;
+}
+
+
 
 public class nestedLayerDebug
 {

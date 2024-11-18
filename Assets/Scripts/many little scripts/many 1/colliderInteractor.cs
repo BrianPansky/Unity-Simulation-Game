@@ -41,6 +41,7 @@ public class colliderInteractor : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log("this.interactionType:  " + this.interactionType);
         //Debug.Log("thingsWeHitThisFrame.Count:  " + thingsWeHitThisFrame.Count);
         if (thingsWeHitThisFrame.Contains(other.gameObject)) { return; }
 

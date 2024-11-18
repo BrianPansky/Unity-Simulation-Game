@@ -19,9 +19,10 @@ public class enactionCreator : MonoBehaviour
         errorYouDidntSetEnumTypeForINTERTYPE,
         self,
         standardClick,
-        shoot1,
+        peircing,
         shootFlamethrower1,
-        tankShot
+        tankShot,
+        melee
     }
     public enum vectorEnactionSubType  // "legibleType"???  "legibleUse"???
     {
@@ -283,7 +284,7 @@ public class aimTarget : IEnactByTargetVector
         theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
         lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
 
-        Debug.Log("aim..................");
+        //Debug.Log("aim..................");
 
         Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 7f);
         theVectorRotationEnaction.updatePitch(getVerticalAngle(lineFromVertAimerToTarget), theVectorRotationEnaction.thePartToAimVertical);
@@ -482,7 +483,11 @@ public class hitscanEnactor: rangedEnaction
 
     public static void addHitscanEnactor(GameObject objectToAddItTo, Transform firePoint, buttonCategories gamepadButtonType, interactionInfo interInfo, float range = 114f)
     {
-        hitscanEnactor newHitscanEnactor = objectToAddItTo.AddComponent<hitscanEnactor>();
+
+        hitscanEnactor newHitscanEnactor = objectToAddItTo.GetComponent<hitscanEnactor>(); 
+        Debug.Log("OLD newHitscanEnactor:  "+ newHitscanEnactor);
+        newHitscanEnactor = objectToAddItTo.AddComponent<hitscanEnactor>();
+        Debug.Log("NEW newHitscanEnactor:  " + newHitscanEnactor);
         newHitscanEnactor.gamepadButtonType = gamepadButtonType;
         newHitscanEnactor.interInfo = interInfo;
 

@@ -20,11 +20,11 @@ public class animalGen : MonoBehaviour
         //returnArrowForward(location,3);
         returnBasicAnimal1(location, stuffType.fruit, 1);
         location = new Vector3(10, 0, 5);
-        returnBasicAnimal1(location, stuffType.meat1, 1);
+        returnBasicPredator1(location, stuffType.meat1, 1);
         //genGen.singleton.returnNPC5(location);
 
         returnBasicGrabbable(stuffType.fruit, new Vector3(-5, 2, 8));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 19));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
         returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 2, -4));
 
     }
@@ -46,9 +46,9 @@ public class animalGen : MonoBehaviour
         addAnimalBody1ToObject(newObj);
         genGen.singleton.addArrowForward(newObj, 1f, 0f, 1.2f);
         //wander1.addWander1(newObj);
-        //grabGun1.addGrabGun1(newObj, interType.shoot1);
+        //grabGun1.addGrabGun1(newObj, interType.peircing);
 
-        stuffStuff.addStuffStuff(newObj, stuffType.meat1);
+        //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
 
         //Debug.Log("?????????????????????????????????????????????????????");
         animalUpdate theUpdate= newObj.AddComponent<animalUpdate>();
@@ -68,9 +68,17 @@ public class animalGen : MonoBehaviour
     {
         GameObject newObj = returnBasicAnimal1(where,stuffTypeX ,scale);
 
-        //genGen.singleton.ensureVirtualGamePad(newObj);
+        playable2 thePlayable = newObj.GetComponent<playable2>();
+        Debug.Log("?????????????????????????????????????????????????????");
+        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.melee));
 
-        animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
+
+
+        //genGen.singleton.ensureVirtualGamePad(newObj);
+        animalUpdate theUpdate = newObj.GetComponent<animalUpdate>();
+        theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+
         //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
         return newObj;
@@ -116,13 +124,13 @@ public class animalGen : MonoBehaviour
         //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
 
         thePlayable.dictOfIvariables[numericalVariable.health] = 2;
-        thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+        //thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
         thePlayable.initializeEnactionPoint1();
         //addArrowForward(thePlayable.enactionPoint1);
         //genGen.singleton.addCube(thePlayable.enactionPoint1, 0.1f);
         thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
         //addArrowForward(newObj, 5f, 0f, 1.2f);
-        genGen.singleton.makeEnactionsBody4(thePlayable);
+        genGen.singleton.makeBasicEnactions(thePlayable);
         genGen.singleton.makeInteractionsBody4(thePlayable);
 
 
@@ -211,11 +219,42 @@ public class animalGen : MonoBehaviour
     private animalFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
 
-        condition switchCondition = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), switchCondition, grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM wander = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new allNearbyStuffStuff(stuffX)));
+        animalFSM killPrey = new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(theObjectDoingTheEnaction, numericalVariable.health, interType.melee));
 
-        return theFSM;
+
+        condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchCondition2 = new canSeeNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        wander.addSwitchAndReverse(new stickyCondition(switchCondition2, 90), killPrey);
+
+        killPrey.addSwitch(new stickyCondition(switchCondition1, 90), grabMeat);
+
+
+        return wander;
+    }
+
+    private repeater returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(GameObject theObjectDoingTheEnactions, numericalVariable numVarX, interType interTypeX)
+    {
+
+        targetPicker getter = new pickRandom(theObjectDoingTheEnactions, new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()), aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), fireHitscan(theObjectDoingTheEnactions, interTypeX));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
+
+
+        return repeatWithTargetPickerTest;
+
     }
 
     animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
@@ -250,6 +289,174 @@ public class animalGen : MonoBehaviour
     }
 
 
+
+
+
+    public repeatWithTargetPicker returnTheGoToThingOfTypeXAndInteractWithTypeY(GameObject theObjectDoingTheEnactions, stuffType stuffX, interType interTypeX)
+    {
+        
+
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+        targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX);
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()), aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), fireHitscan(theObjectDoingTheEnactions, interTypeX));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+    public repeatWithTargetPicker returnTheRepeatTargetThing(GameObject theObjectDoingTheEnactions, stuffType stuffX, interType interTypeX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, theObjectDoingTheEnactions.transform.position), aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), fireHitscan(theObjectDoingTheEnactions, interTypeX));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX));
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+
+
+
+
+    private planEXE2 goGrabPlan2(GameObject theObjectDoingTheEnactions, stuffType theStuffTypeX)
+    {
+        //ad-hoc hand-written plan
+        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
+
+
+        Debug.Assert(target != null);
+
+        if (target == null)
+        {
+            return null;
+        }
+
+        planEXE2 firstShell = new seriesEXE();
+        firstShell.Add(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, target, 1.8f));
+        firstShell.Add(aimTargetPlan2(theObjectDoingTheEnactions, target));
+
+
+
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(theObjectDoingTheEnactions, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        Debug.Assert(theHitscanEnactor != null);
+        planEXE2 hitscanEXE = theHitscanEnactor.standardEXEconversion();
+        firstShell.Add(hitscanEXE);
+        firstShell.untilListFinished();
+
+
+        return firstShell;
+    }
+
+    public singleEXE fireHitscan(GameObject theObjectDoingTheEnactions, interType interTypeX)
+    {
+
+        hitscanEnactor theHitscanEnactor = grabHitscanEnaction(theObjectDoingTheEnactions, interTypeX); //hitscanClickPlan(interType.standardClick, target);
+
+        singleEXE theSingle = (singleEXE)theHitscanEnactor.standardEXEconversion();
+        theSingle.untilListFinished();
+
+        return theSingle;
+    }
+
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(GameObject theObjectDoingTheEnactions, stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectDoingTheEnactions);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+
+
+    private vect3EXE2 aimTargetPlan2(GameObject theObjectDoingTheEnactions, GameObject target)
+    {
+        aimTarget testE1 = theObjectDoingTheEnactions.GetComponent<aimTarget>();
+
+        vect3EXE2 exe1 = (vect3EXE2)testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+    private hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    private List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
 
 
 
@@ -405,7 +612,7 @@ public class ummAllThusStuffForGrab
 
 
 
-    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(GameObject theObjectDoingTheEnactions, stuffType theStuffTypeX)
     {
 
         List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectDoingTheEnactions);  //lol forgot, this is ONE way to grab functions
@@ -513,6 +720,13 @@ public class animalFSM
         //      new permaPlan();
     }
 
+    public animalFSM(repeater doThisImmediately)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+    }
     public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
@@ -579,6 +793,34 @@ public class animalFSM
         return this;
     }
 
+
+
+
+    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+
+        switchBoard[new multicondition(switchCondition)] = otherFSM;
+    }
+    public void addSwitch(condition switchCondition, animalFSM otherFSM)
+    {
+        switchBoard[new multicondition(switchCondition)] = otherFSM;
+    }
+
+    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+
+        switchBoard[new multicondition(switchCondition)] = otherFSM;
+        otherFSM.switchBoard[new multicondition(new reverseCondition(switchCondition))] = this;
+    }
+    public void addSwitchAndReverse(condition switchCondition, animalFSM otherFSM)
+    {
+        switchBoard[new multicondition(switchCondition)] = otherFSM;
+        otherFSM.switchBoard[new multicondition(new reverseCondition(switchCondition))] = this;
+    }
 
 
     /*
@@ -681,6 +923,60 @@ public class canSeeStuffStuff : condition
     public override bool met()
     {
         spatialDataPoint myData = new spatialDataPoint(new allNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
+
+
+        bool threatLineOfSightBool = myData.threatLineOfSightBool();
+
+        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            stringToReturn += "do IF this object can see stuffStuff";
+        }
+        else
+        {
+            stringToReturn += "do if this object CANNOT see stuffStuff";
+        }
+
+        return stringToReturn;
+    }
+
+}
+
+public class canSeeNumericalVariable : condition
+{
+
+    numericalVariable theVariableType;
+
+
+    GameObject theObjectThatIsLooking;
+    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
+
+    public canSeeNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
+        theVariableType = theVariableTypeIn;
+    }
+
+
+    public override bool met()
+    {
+        spatialDataPoint myData = new spatialDataPoint(new allNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
 
 
         bool threatLineOfSightBool = myData.threatLineOfSightBool();
@@ -1378,6 +1674,29 @@ public class pickNextVisibleStuffStuff : targetPicker
     }
 }
 
+public class pickRandom : targetPicker
+{
+    GameObject objectToBeNear;
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickRandom(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+
 
 
 public class allNearbyStuffStuff : objectSetGrabber
@@ -1429,6 +1748,62 @@ public class allNearbyStuffStuff : objectSetGrabber
         return theListOfObjects;
     }
 }
+public class allNearbyNumericalVariable : objectSetGrabber
+{
+    numericalVariable theVariableType;
+
+
+    GameObject theObjectThatIsLooking;
+    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
+
+    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
+        theVariableType = theVariableTypeIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        return allNearbyObjectsWithVariableX(theVariableType);
+    }
+
+
+    public List<GameObject> allNearbyObjectsWithVariableX(numericalVariable theVariableTypeIn)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectThatIsLooking);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            interactable2 theComponent = thisObject.GetComponent<interactable2>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.dictOfIvariables.ContainsKey(theVariableType))
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+}
+
+
+
+
 
 
 

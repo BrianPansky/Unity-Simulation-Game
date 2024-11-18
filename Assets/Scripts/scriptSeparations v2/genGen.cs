@@ -180,14 +180,14 @@ public class genGen : MonoBehaviour
         addCube(thePlayable.enactionPoint1, 0.1f);
         thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
         addArrowForward(newObj, 5f, 0f, 1.2f);
-        makeEnactionsBody4(thePlayable);
+        makeBasicEnactions(thePlayable);
         makeInteractionsBody4(thePlayable);
 
 
         inventory1 theirInventory = newObj.AddComponent<inventory1>();
     }
 
-    public void makeEnactionsBody4(playable2 thePlayable)
+    public void makeBasicEnactions(playable2 thePlayable)
     {
         hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.standardClick));
@@ -202,7 +202,8 @@ public class genGen : MonoBehaviour
 
     public void makeInteractionsBody4(interactable2 theInteractable)
     {
-        createWeaponLevels(theInteractable, interType.shoot1, 0, 4);
+        createWeaponLevels(theInteractable, interType.peircing, 0, 4);
+        createWeaponLevels(theInteractable, interType.melee, 0, 4);
         //createWeaponLevels(theInteractable, interType.shootFlamethrower1, 0, 5);
         //createWeaponLevels(theInteractable, interType.tankShot, 0, 0);
 
@@ -216,7 +217,7 @@ public class genGen : MonoBehaviour
         /*
         projectileLauncher theShooter = new projectileLauncher(theEquippable.enactionPoint1.transform, 
             buttonCategories.errorYouDidntSetEnumTypeForBUTTONCATEGORIES, 
-            new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
             new projectileToGenerate(speed, sdOnCollision, 999, 0));
         */
 
@@ -225,21 +226,18 @@ public class genGen : MonoBehaviour
         projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
             theEquippable.enactionPoint1.transform,
             buttonCategories.thisButtonCategoryIntentionallyLeftBlank,
-            new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
             new projectileToGenerate(speed, sdOnCollision, 99, 0),
             20);
 
-
-        enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown,90));
-
-
+        numericalEffect(theEquippable, numericalVariable.cooldown, 90);
 
         projectileLauncher theShooter = theEquippable.transform.gameObject.GetComponent<projectileLauncher>();
         enactEffect theFiringEffectOnCooldown = theEquippable.transform.gameObject.GetComponent<enactEffect>();
 
         //IEnactaBool theFiringEffectOnCooldown = enactEffect.returnEnactEffect(new numericalEffect(theEquippable, numericalVariable.cooldown));
 
-        
+
 
 
 
@@ -260,7 +258,7 @@ public class genGen : MonoBehaviour
         projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
             theEquippable.enactionPoint1.transform,
             buttonCategories.primary,
-            new interactionInfo(interType.shoot1, magnitudeOfInteraction, level),
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
             new projectileToGenerate(speed, sdOnCollision, 999, 0),
             20);
 
@@ -268,10 +266,10 @@ public class genGen : MonoBehaviour
 
     }
 
-
-
-
-
+    private static void numericalEffect(equippable2 theEquippable, numericalVariable numVarX, int amountToSubtract = 1)
+    {
+        enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown, amountToSubtract));
+    }
 
     void deathWhenHealthIsZero(interactable2 theInteractable)
     {

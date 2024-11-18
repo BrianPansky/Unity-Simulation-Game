@@ -82,7 +82,7 @@ public class repository2 : MonoBehaviour
 
         if (theList.Count == 0)
         {
-            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            //Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
             return null;
         }
 

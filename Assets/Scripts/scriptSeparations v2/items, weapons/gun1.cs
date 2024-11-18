@@ -28,7 +28,7 @@ public class gun1 : equippable2
         dictOfIvariables[numericalVariable.cooldown] = 0f;
 
         projectileLauncher.addProjectileLauncher(this.gameObject, enactionPoint1.transform, buttonCategories.primary,
-            new interactionInfo(interType.shoot1),
+            new interactionInfo(interType.peircing),
             new projectileToGenerate(1, true, 99, 0), 30);
 
         //theCooldown = this.GetComponent<projectileLauncher>().theCooldown;

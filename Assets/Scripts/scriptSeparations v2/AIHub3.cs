@@ -116,7 +116,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
         if (SUPERadHocParallelPlanList[whichOne - 1] ==null || SUPERadHocParallelPlanList[whichOne-1].error()) 
-        { SUPERadHocParallelPlanList[whichOne-1] = new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()); }
+        { SUPERadHocParallelPlanList[whichOne-1] = new seriesEXE(grabAndEquipPlan2(interType.peircing), safeGunless()); }
 
 
         //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
@@ -211,7 +211,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         planEXE2 secondShell = new seriesEXE();
         secondShell.Add(aimTargetPlan2(target2));
-        secondShell.Add(firePlan4(interType.shoot1, target2));
+        secondShell.Add(firePlan4(interType.peircing, target2));
         secondShell.untilListFinished();
 
         return secondShell;
@@ -476,7 +476,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
             conditionalPrint("(theItemWeWant == null)");
             //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
             return null;
-            //return goGrabPlan1(interType.shoot1);
+            //return goGrabPlan1(interType.peircing);
         }
 
 
@@ -579,7 +579,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
             //      conditionalPrint("(theItemWeWant == null)");
             //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
             return null;
-            //return goGrabPlan1(interType.shoot1);
+            //return goGrabPlan1(interType.peircing);
         }
 
 
@@ -768,14 +768,14 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public bool hasNoGun()
     {
         enaction grabEnact1;
-        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interType.shoot1);
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(this.gameObject, interType.peircing);
 
 
 
         if (grabEnact1 == null)
         {
             //ummm sloppy for now
-            grabEnact1 = getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType.shoot1);
+            grabEnact1 = getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType.peircing);
         }
 
         if (grabEnact1 == null) { return true; }
@@ -989,7 +989,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //ad-hoc hand-written plan
         GameObject target2 = repository2.singleton.pickRandomObjectFromList(threatListWithoutSelf());
 
-        return firePlan4(interType.shoot1, target2);
+        return firePlan4(interType.peircing, target2);
     }
     public void debugTargetDistance(GameObject object1, GameObject object2)
     {
