@@ -119,7 +119,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         { SUPERadHocParallelPlanList[whichOne-1] = new seriesEXE(grabAndEquipPlan2(interType.shoot1), safeGunless()); }
 
 
-        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
 
         SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne-1].execute();
@@ -130,7 +130,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatDodgeWithoutGun(), unsafeGunless()); }
 
-        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
         SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
@@ -140,7 +140,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(randomWanderPlan(), safeWithGun()); }
 
-        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
         SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
@@ -154,7 +154,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan11(), unsafeWithGun()); }
 
-        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
         SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
@@ -164,7 +164,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         if (SUPERadHocParallelPlanList[whichOne - 1] == null || SUPERadHocParallelPlanList[whichOne - 1].error())
         { SUPERadHocParallelPlanList[whichOne - 1] = new seriesEXE(combatBehaviorPlan12(), unsafeWithGun()); }
 
-        SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
+        //SUPERadHocParallelPlanList[whichOne - 1].grabberDebug = grabberDebug;
         SUPERadHocParallelPlanList[whichOne - 1].debugPrint = printThisNPC;
         SUPERadHocParallelPlanList[whichOne - 1].execute();
 
@@ -195,13 +195,13 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //ad-hoc hand-coded plan
 
-        return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position));
+        return FIXEDgoToTargetForSTATIONARYtargets(repository2.singleton.randomNearbyVector(this.transform.position));
     }
 
     public planEXE2 combatBehaviorPlan11()
     {
         //ad-hoc hand-written plan
-        GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
+        GameObject target2 = repository2.singleton.pickRandomObjectFromList(threatListWithoutSelf());
 
         if (target2 == null)
         {
@@ -248,7 +248,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
         //                      placeholderTarget1.transform.position = this.gameObject.transform.position + adHocThreatAvoidanceVector.normalized * 44.7f;
         //debugTargetDistance(this.gameObject, placeholderTarget1);
 
-        return FIXEDgoToTargetForSTATIONARYtargets(randomNearbyVector(this.transform.position), 1.9f);
+        return FIXEDgoToTargetForSTATIONARYtargets(repository2.singleton.randomNearbyVector(this.transform.position), 1.9f);
         //return FIXEDgoToTargetForSTATIONARYtargets(adHocThreatAvoidanceVector, 1.9f);
     }
 
@@ -337,7 +337,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
 
         //ad-hoc hand-written plan
-        GameObject target = pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
+        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
         if (target == null) { return null; }
         Debug.DrawLine(this.gameObject.transform.position, target.transform.position, Color.magenta, 7f);
@@ -787,90 +787,6 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
 
 
-    //utility
-
-    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
-    {
-        Vector3 vectorToReturn = positionToBeNear;
-        float initialDistance = 0f;
-        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
-        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
-        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
-
-        return vectorToReturn;
-    }
-
-    private GameObject pickRandomObjectFromList(List<GameObject> theList)
-    {
-
-        if (theList.Count == 0)
-        {
-            //Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
-            return null;
-        }
-
-
-        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
-        GameObject thisObject;
-        thisObject = null;
-
-
-        while (numberOfTries > 0)
-        {
-            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            thisObject = theList[randomIndex];
-
-            if (thisObject != null)
-            {
-                return thisObject;
-            }
-
-            numberOfTries--;
-        }
-
-
-
-
-        return thisObject;
-
-    }
-
-    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
-    {
-        if (theList.Count == 0)
-        {
-            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
-            return null;
-        }
-
-
-        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
-        GameObject thisObject;
-        thisObject = null;
-
-
-        while (numberOfTries > 0)
-        {
-            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
-            thisObject = theList[randomIndex];
-
-            if (thisObject != notTHISObject)
-            {
-                return thisObject;
-            }
-
-            numberOfTries--;
-        }
-
-
-
-
-        return thisObject;
-
-    }
-
-
 
 
 
@@ -980,7 +896,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
                     objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
 
                     int currentZone = tagging2.singleton.zoneOfObject[thisPair];
-                    GameObject target = pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    GameObject target = repository2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
                     //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
                 }
@@ -1034,7 +950,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        GameObject target = pickRandomObjectFromListEXCEPT(
+        GameObject target = repository2.singleton.pickRandomObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
@@ -1071,7 +987,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
 
         //ad-hoc hand-written plan
-        GameObject target2 = pickRandomObjectFromList(threatListWithoutSelf());
+        GameObject target2 = repository2.singleton.pickRandomObjectFromList(threatListWithoutSelf());
 
         return firePlan4(interType.shoot1, target2);
     }

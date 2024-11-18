@@ -31,6 +31,12 @@ public class interactionCreator : MonoBehaviour
     }
 
 
+    public enum stuffType
+    {
+        errorYouDidntSetEnumTypeForStuffType,
+        meat1,
+        fruit
+    }
 
 
     void Awake()
@@ -471,4 +477,84 @@ public class interactionLevel: interactionCondition
 
         return true;
     }
+}
+
+
+
+
+
+public class gravityToFall : MonoBehaviour
+{
+    bool isGrounded = false;
+    float gravity = -5f;
+    float currentFallRate = 0f;
+
+
+    void Update()
+    {
+        if (isThisGrounded() && currentFallRate < 0.7f) 
+        {
+            currentFallRate = 0f;
+            return;
+        }
+
+        Debug.Log("currentFallRate:  "+ currentFallRate);
+
+        fall();
+
+    }
+
+    public void fall()
+    {
+
+
+        currentFallRate += gravity * Time.deltaTime;
+        this.gameObject.transform.position += new Vector3(0, currentFallRate,0);
+
+        //controller.Move(velocity * Time.deltaTime);
+    }
+
+
+    public bool isThisGrounded()
+    {
+
+        //old version is this one line of code:
+        //return Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
+
+
+        RaycastHit hit;
+        Ray downRay = new Ray(transform.position, -Vector3.up);
+
+        // Cast a ray straight downwards.
+        if (Physics.Raycast(downRay, out hit))
+        {
+            //Debug.Log(hit.distance);
+            //when i start on ground, it returns:  1.080001
+
+            if (hit.distance < 1.2f)
+            {
+
+                return true;
+            }
+
+
+            // The "error" in height is the difference between the desired height
+            // and the height measured by the raycast distance.
+            //float hoverError = hoverHeight - hit.distance;
+
+            // Only apply a lifting force if the object is too low (ie, let
+            // gravity pull it downward if it is too high).
+            //if (hoverError > 0)
+            {
+                // Subtract the damping from the lifting force and apply it to
+                // the rigidbody.
+                //float upwardSpeed = rb.velocity.y;
+                //float lift = hoverError * hoverForce - upwardSpeed * hoverDamp;
+                //rb.AddForce(lift * Vector3.up);
+            }
+        }
+
+        return false;
+    }
+
 }

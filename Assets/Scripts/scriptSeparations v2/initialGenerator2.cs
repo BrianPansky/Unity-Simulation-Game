@@ -124,7 +124,7 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        int howManyZones = 81;
+        int howManyZones = 0;
         int howManySetsPerZone = 2;
         int theZSpacing = regularThinZoneSpacing;
         //int theZSpacing = oneBIGzoneSpacint;

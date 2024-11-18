@@ -60,6 +60,102 @@ public class repository2 : MonoBehaviour
 
 
 
+
+
+    //utility....put here???
+
+    public Vector3 randomNearbyVector(Vector3 positionToBeNear)
+    {
+        Vector3 vectorToReturn = positionToBeNear;
+        float initialDistance = 0f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance);
+
+        return vectorToReturn;
+    }
+
+    public GameObject pickRandomObjectFromList(List<GameObject> theList)
+    {
+
+        if (theList.Count == 0)
+        {
+            //Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != null)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
+    }
+
+    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    {
+        if (theList.Count == 0)
+        {
+            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            return null;
+        }
+
+
+        int numberOfTries = 10; //easy ad hoc way to terminate a potentially infinate loop for now lol
+        GameObject thisObject;
+        thisObject = null;
+
+
+        while (numberOfTries > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, theList.Count);
+            thisObject = theList[randomIndex];
+
+            if (thisObject != notTHISObject)
+            {
+                return thisObject;
+            }
+
+            numberOfTries--;
+        }
+
+
+
+
+        return thisObject;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     //everything else on this script [below] is WRONG and needs to be deleted, or at least moved
 
 

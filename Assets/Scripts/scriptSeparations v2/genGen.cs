@@ -74,7 +74,7 @@ public class genGen : MonoBehaviour
         return newProjectile;
     }
 
-    private void addCube(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    public void addCube(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
     {
         Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
         GameObject newObj = Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
@@ -84,7 +84,7 @@ public class genGen : MonoBehaviour
 
     }
 
-    private void addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    public void addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
     {
         Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
         GameObject newObj = Instantiate(repository2.singleton.arrowForward, where, Quaternion.identity);
@@ -94,7 +94,7 @@ public class genGen : MonoBehaviour
 
     }
 
-    private void addArrowUp(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    public void addArrowUp(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
     {
         Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
         GameObject newObj = Instantiate(repository2.singleton.arrowUp, where, Quaternion.identity);
@@ -187,7 +187,7 @@ public class genGen : MonoBehaviour
         inventory1 theirInventory = newObj.AddComponent<inventory1>();
     }
 
-    void makeEnactionsBody4(playable2 thePlayable)
+    public void makeEnactionsBody4(playable2 thePlayable)
     {
         hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
             new interactionInfo(interType.standardClick));
@@ -200,7 +200,7 @@ public class genGen : MonoBehaviour
         aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
     }
 
-    private void makeInteractionsBody4(interactable2 theInteractable)
+    public void makeInteractionsBody4(interactable2 theInteractable)
     {
         createWeaponLevels(theInteractable, interType.shoot1, 0, 4);
         //createWeaponLevels(theInteractable, interType.shootFlamethrower1, 0, 5);

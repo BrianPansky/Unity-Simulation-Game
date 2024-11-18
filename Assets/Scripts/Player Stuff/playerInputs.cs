@@ -22,5 +22,9 @@ public class playerInputs : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         theVirtualGamePad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
 
+
+
+        this.gameObject.GetComponent<NavMeshAgent>().enabled = false;
+        this.gameObject.AddComponent<gravityToFall>();
     }
 }

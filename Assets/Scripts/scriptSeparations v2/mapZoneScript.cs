@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static tagging2;
 
 public class mapZoneScript : MonoBehaviour
 {
@@ -31,8 +32,11 @@ public class mapZoneScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("Collider other):  " + other );
-        if(zoneTaggingConditionsMet(other) == false) { return; }
+        if(zoneTaggingConditionsMet(other) == false)
+        {
+            Debug.Log("(zoneTaggingConditionsMet(other) == false),  Collider other):  " + other);
+            return; 
+        }
 
         //add objects to this zone's list, and update their body to reference this zone
         tagging2.singleton.addToZone(other.transform.gameObject, thisZoneNumber);
@@ -41,6 +45,13 @@ public class mapZoneScript : MonoBehaviour
 
     private bool zoneTaggingConditionsMet(Collider other)
     {
+
+        if (tagging2.singleton.allTagsOnObject(other.gameObject).Contains(tag2.zoneable))
+        {
+            //Debug.Log("other.gameObject.tag == \"dontAddToZones\"");
+            return true;
+        }
+
         if (other.gameObject.GetComponent<interactable2>() == null)
         {
             return false;

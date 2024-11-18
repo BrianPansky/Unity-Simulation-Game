@@ -39,6 +39,7 @@ public class equippable2 : interactable2
             Debug.Log("tagging2.singleton is null, cannot use it to add tags.  this happens for objects that have been added to the scene using the editor, because they exist before any scripts are called.  solution:  do not add prefabs to scene using editor.  generate them after singletons have initialized.");
         }
 
+        //put these in interactable???
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.equippable2);
         tagging2.singleton.addTag(this.gameObject, tagging2.tag2.zoneable);

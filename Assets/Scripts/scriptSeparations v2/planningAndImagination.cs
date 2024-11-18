@@ -26,8 +26,8 @@ public abstract class planEXE2
     //public inputData theInputData;
 
     public bool debugPrint = false;
-    nestedLayerDebug debug;
-    public adHocDebuggerForGoGrabPlan grabberDebug;// = new adHocDebuggerForGoGrabPlan();
+    //nestedLayerDebug debug;
+    //public adHocDebuggerForGoGrabPlan grabberDebug;// = new adHocDebuggerForGoGrabPlan();
 
     //      !!!!!!!!!!!!!!!  was supposed to be private so that constructors inputs guarantee it's never null...but then i changed the constructors again...
     public List<planEXE2> exeList;
@@ -121,7 +121,7 @@ public abstract class planEXE2
 
         exeList[0].debugPrint = debugPrint;
 
-        exeList[0].grabberDebug = grabberDebug;
+        //exeList[0].grabberDebug = grabberDebug;
         //      conditionalPrint("5555555555555555555555555555grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
         //      grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
         //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
@@ -171,7 +171,7 @@ public abstract class planEXE2
         foreach (planEXE2 plan in exeList)
         {
 
-            plan.grabberDebug = grabberDebug;
+            //plan.grabberDebug = grabberDebug;
             plan.execute();
             if (plan.endConditionsMet()) { completedItems.Add(plan); }
         }
@@ -508,7 +508,7 @@ public class vect3EXE2 : singleEXE
 
 
         //conditionalPrint("8888888888888888888888888888grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
-        grabberDebug.recordCurrentEnaction(theEnaction);
+        //grabberDebug.recordCurrentEnaction(theEnaction);
         theEnaction.enact(new inputData(theTargetCalculator.targetPosition()));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
@@ -631,7 +631,7 @@ public class seriesEXE : planEXE2
 
     public override void execute()
     {
-        grabberDebug.debugPrintBool = debugPrint;
+        //grabberDebug.debugPrintBool = debugPrint;
         executeSequential();
     }
 
