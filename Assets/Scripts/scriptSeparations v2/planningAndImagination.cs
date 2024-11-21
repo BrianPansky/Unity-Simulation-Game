@@ -1268,6 +1268,15 @@ public class agnosticTargetCalc:targetCalculator
     {
         theTargetCalc = new movableObjectTargetCalculator(targeterIn, targetIn, offsetIn);
     }
+    public agnosticTargetCalc(Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    {
+        theTargetCalc = new staticSingleVectorTargetCalculator(targetPositionVectorIn, offsetIn);
+    }
+
+    public agnosticTargetCalc(GameObject targetIn, float offsetIn = 1.8f)
+    {
+        theTargetCalc = new singleMovableObjectTargetCalculator(targetIn, offsetIn);
+    }
 
     public override Vector3 realPositionOfTarget()
     {
@@ -1326,7 +1335,7 @@ public class movableObjectTargetCalculator : targetCalculator
         targeter = targeterIn;
         target = targetIn;
         offset = offsetIn;
-        asTextString= targeterIn.ToString();
+        asTextString = targeterIn.ToString();
     }
 
     public override bool error()
@@ -1351,7 +1360,7 @@ public class movableObjectTargetCalculator : targetCalculator
         //Debug.Log("***********************************  target.GetHashCode():  "+target.GetHashCode());
 
         //ad-hoc duct tape!
-        if(target == null)
+        if (target == null)
         {
             //return Vector3.zero;
             return targeter.transform.position;
@@ -1382,6 +1391,76 @@ public class staticVectorTargetCalculator : targetCalculator
     public override Vector3 targetPosition()
     {
         return calculateOffsetTargetPosition(targeter, targetPositionVector);
+    }
+
+    public override bool error()
+    {
+        return false;
+    }
+}
+
+public class singleMovableObjectTargetCalculator : targetCalculator
+{
+    GameObject target;
+
+    public singleMovableObjectTargetCalculator(GameObject targetIn, float offsetIn = 1.8f)
+    {
+        target = targetIn;
+        offset = offsetIn;
+    }
+
+    public override bool error()
+    {
+        return (target == null);
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        //ad-hoc duct tape!
+        if (target == null)
+        {
+            //return Vector3.zero;
+            return targeter.transform.position;
+        }
+
+        return target.transform.position;
+    }
+
+    public override Vector3 targetPosition()
+    {
+        //Debug.Log("***********************************  target.GetHashCode():  "+target.GetHashCode());
+
+        //ad-hoc duct tape!
+        if (target == null)
+        {
+            //return Vector3.zero;
+            return targeter.transform.position;
+        }
+        return realPositionOfTarget();
+    }
+
+
+}
+
+public class staticSingleVectorTargetCalculator : targetCalculator
+{
+    Vector3 targetPositionVector;
+
+    public staticSingleVectorTargetCalculator(Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    {
+        targetPositionVector = targetPositionVectorIn;
+        offset = offsetIn;
+        asTextString = "static vector:  " + targetPositionVectorIn;
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        return targetPositionVector;
+    }
+
+    public override Vector3 targetPosition()
+    {
+        return realPositionOfTarget();
     }
 
     public override bool error()

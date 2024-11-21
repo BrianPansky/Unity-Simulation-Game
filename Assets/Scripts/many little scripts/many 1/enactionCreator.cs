@@ -136,6 +136,7 @@ public abstract class IEnactaBool: enaction
 public abstract class IEnactaVector : enaction
 {
     //???????????????????  is IEnactaVector different from IEnactByTargetVector?????????
+    //      well, not all vectors are the result of one single known target, so....maybr different??? not sure....
 
     public void enact(Vector2 inputV2)
     {
@@ -485,9 +486,9 @@ public class hitscanEnactor: rangedEnaction
     {
 
         hitscanEnactor newHitscanEnactor = objectToAddItTo.GetComponent<hitscanEnactor>(); 
-        Debug.Log("OLD newHitscanEnactor:  "+ newHitscanEnactor);
+        //Debug.Log("OLD newHitscanEnactor:  "+ newHitscanEnactor);
         newHitscanEnactor = objectToAddItTo.AddComponent<hitscanEnactor>();
-        Debug.Log("NEW newHitscanEnactor:  " + newHitscanEnactor);
+        //Debug.Log("NEW newHitscanEnactor:  " + newHitscanEnactor);
         newHitscanEnactor.gamepadButtonType = gamepadButtonType;
         newHitscanEnactor.interInfo = interInfo;
 
@@ -518,7 +519,7 @@ public class hitscanEnactor: rangedEnaction
     override public void enact(inputData theInput)
     {
         //conditionalPrint("enacting:  " + this);
-        Debug.Log("FIRE.........");
+        //Debug.Log("FIRE.........");
         firingByRaycastHit(range);
     }
 

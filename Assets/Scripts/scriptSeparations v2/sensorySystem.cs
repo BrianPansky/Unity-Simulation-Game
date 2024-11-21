@@ -233,6 +233,22 @@ public class spatialDataPointFragment
         return theOutputVector;
     }
 
+    public Vector3 simpleRadialPattern()
+    {
+
+        //generalFragmentData1();
+
+
+
+        //Ray threatLookingRay = targetObject.GetComponent<sensorySystem>().lookingRay;
+        //Ray targetLookingRay = new Ray(targetObject.transform.position, targetObject.transform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
+        lineBetweenTargetAndThisPoint = originLocation - targetObject.transform.position;
+
+        //do i have these correct?
+        awayFromTarget = lineBetweenTargetAndThisPoint;
+
+        return awayFromTarget;
+    }
 
     //      initializing
 
@@ -435,6 +451,47 @@ public class spatialDataPoint
                 if (debugPrint == true) { Debug.Log("theOutputVector:  " + theOutputVector); }
             }
             
+        }
+
+        return theOutputVector;
+    }
+
+    public Vector3 weightedRadialPattern()
+    {
+        //straight away from threats
+        //their "center of mass"???
+        //weight nearer ones more heavily???
+
+
+
+        //well, how to do "weighting?"
+        //      set all relative to nearest one and furthest one?  normalize that?
+        //      hmm, nah, absolute value can matter more than relative?
+        //      and "furthest away" might be just a few CENTIMETERS further away, hardly worth setting to "zero" weight!
+        // just divide by distance
+        // and maybe multiply by an offset or whatever
+
+
+
+
+        Vector3 theOutputVector = new Vector3();
+
+
+        //generalPointData1();
+
+        //          if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
+
+        foreach (spatialDataPointFragment thisFragment in fragmentList)
+        {
+            if (thisFragment.lineOfSightBool == false) { continue; }
+
+
+            Vector3 fragmentVector = new Vector3();
+            fragmentVector = thisFragment.simpleRadialPattern();
+
+            float distance = thisFragment.distanceAsFloat;
+
+            theOutputVector += fragmentVector.normalized/distance;
         }
 
         return theOutputVector;

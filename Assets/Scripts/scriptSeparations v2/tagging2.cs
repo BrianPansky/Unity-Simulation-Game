@@ -33,7 +33,8 @@ public class tagging2 : MonoBehaviour
         playable2,
         mapZone,
         gamepad,
-        zoneable
+        zoneable,
+        threat1
     }
 
 

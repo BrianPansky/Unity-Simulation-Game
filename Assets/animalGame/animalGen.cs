@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
+using static UnityEngine.GraphicsBuffer;
 
 public class animalGen : MonoBehaviour
 {
@@ -73,6 +75,8 @@ public class animalGen : MonoBehaviour
     public GameObject returnBasicPredator1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
     {
         GameObject newObj = returnBasicAnimal1(where,stuffTypeX ,scale);
+
+        tagging2.singleton.addTag(newObj, tagging2.tag2.threat1);
 
         playable2 thePlayable = newObj.GetComponent<playable2>();
         //Debug.Log("?????????????????????????????????????????????????????");
@@ -276,7 +280,11 @@ public class animalGen : MonoBehaviour
     {
         condition switchCondition = new stickyCondition( new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX),90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX));
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), 
+            switchCondition, 
+            genGen.singleton.meleeDodge(theObjectDoingTheEnaction)
+            //grabTheStuff(theObjectDoingTheEnaction,stuffX)
+            );
 
         return theFSM;
     }
@@ -314,7 +322,15 @@ public class animalGen : MonoBehaviour
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
 
 
-        targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX);
+        //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX);
+
+
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
+            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
+
+
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()), aimTargetPlan2(theObjectDoingTheEnactions, theObjectDoingTheEnactions), fireHitscan(theObjectDoingTheEnactions, interTypeX));
@@ -342,7 +358,18 @@ public class animalGen : MonoBehaviour
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
         //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX));
+
+
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
+            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
+
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1,
+            getter//new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab)
+            );
+
+        //                  repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX));
 
 
         return repeatWithTargetPickerTest;
@@ -517,6 +544,700 @@ public class animalUpdate:MonoBehaviour
 
 
 
+
+
+
+//new combat dodge/fleeing behavior
+
+
+//start fleeing condition(s)
+//public class nonNullObjectWithAllCriteria : condition
+//{
+    //nonononono, make a function that either returns the FIRST such object, or ALL of them,
+    //then pain with OTHER condition thing that simply looks at whether the output is null or not
+    //[any easy way to cache this set/object in case i want to use it later?
+
+    //objectSetGrabber theObjectSetGrabber;
+    //List<objectCriteria> theCriteria;
+
+    //public override bool met()
+    //{
+        //foreach(GameObject thisObject in theObjectSetGrabber.grab())
+      //  {
+
+    //    }
+
+  //  }
+
+//}
+
+public class isThereAtLeastOneObjectInSet : condition
+{
+    objectSetGrabber theObjectSetGrabber;
+
+    public override bool met()
+    {
+        if(theObjectSetGrabber.grab().Count > 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+
+
+
+
+
+    public override string asText()
+    {
+        return this.ToString();
+    }
+
+    public override string asTextSHORT()
+    {
+        return this.ToString();
+    }
+}
+
+public class allObjectsInSetThatMeetCriteria : objectSetGrabber
+{
+
+    objectSetGrabber theObjectSetGrabber;
+    //List<objectCriteria> theCriteria;  //no no, use a multi-criteria
+    objectCriteria theCriteria;
+
+    public allObjectsInSetThatMeetCriteria(objectSetGrabber theObjectSetGrabberIn, objectCriteria theCriteriaIn)
+    {
+        theObjectSetGrabber = theObjectSetGrabberIn;
+        theCriteria = theCriteriaIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        List < GameObject > newList = new List < GameObject >();
+
+        foreach (GameObject thisObject in theObjectSetGrabber.grab())
+        {
+            if (theCriteria.evaluateObject(thisObject) == false)
+            {
+                continue;
+            }
+
+            newList.Add(thisObject);
+        }
+
+        return newList;
+    }
+}
+
+public class objectMeetsAllCriteria : objectCriteria
+{
+
+    List<objectCriteria> theCriteria = new List<objectCriteria>();
+
+    public objectMeetsAllCriteria(objectCriteria criteria1)
+    {
+        theCriteria.Add(criteria1);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7, objectCriteria criteria8)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+        theCriteria.Add(criteria8);
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        foreach (objectCriteria thisCriteria in theCriteria)
+        {
+            if (thisCriteria.evaluateObject(theObject) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+
+public class allObjectsInZone : objectSetGrabber
+{
+    GameObject theObjectWhoseZoneWeWantToLookIn;
+
+    public allObjectsInZone(GameObject theObjectWhoseZoneWeWantToLookInInput)
+    {
+        theObjectWhoseZoneWeWantToLookIn = theObjectWhoseZoneWeWantToLookInInput;
+    }
+
+    public override List<GameObject> grab()
+    {
+        //List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn); //lol
+
+        //return theListOfALL;
+        return allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn);
+    }
+
+
+    public List<GameObject> allObjectsInObjectsZone(GameObject theObject)
+    {
+        int zone = tagging2.singleton.whichZone(theObject);
+        List<objectIdPair> pairs = tagging2.singleton.objectsInZone[zone]; //= allInZone(zone);
+        return tagging2.singleton.listInObjectFormat(pairs);
+    }
+
+    /*
+    public List<objectIdPair> allInZone(int zone)
+    {
+        return tagging2.singleton.objectsInZone[zone];
+    }
+    */
+
+}
+
+public class objectVisibleInFOV : objectCriteria
+{
+    float horizontalAngleRange = 90f;
+    float verticalAngleRange = 60f;
+    Transform theSensoryTransform;
+
+
+
+
+    public objectVisibleInFOV(Transform theSensoryTransformIn, float horizontalAngleRangeIn = 90f, float verticalAngleRangeIn = 60f)
+    {
+        theSensoryTransform = theSensoryTransformIn;
+        horizontalAngleRange = horizontalAngleRangeIn;
+        verticalAngleRange = verticalAngleRangeIn;
+    }
+
+
+
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        //get angles [horizontal, vertical] then compare to limit?
+
+
+        //what about positive VS negative angle or whatever?
+        //try:
+        //      && horizontalAngleToObject < (360-horizontalAngleRange)
+
+        float horizontalAngleToObject = horizontalAngleFinder(theObject);
+        if(horizontalAngleToObject > horizontalAngleRange && horizontalAngleToObject < (360-horizontalAngleRange)) { return false; }
+
+        float verticalAngleToObject = verticalAngleFinder(theObject);
+        if (verticalAngleToObject > verticalAngleRange && verticalAngleToObject < (360 - verticalAngleRange)) { return false; }
+
+
+        return true;
+    }
+
+
+
+
+
+    private float verticalAngleFinder(GameObject theObject)
+    {
+        //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
+        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+
+
+        //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.up);
+
+
+        return theAngle;
+    }
+
+    private float horizontalAngleFinder(GameObject theObject)
+    {
+        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.up);
+
+
+        return theAngle;
+    }
+
+
+
+
+
+
+    /*
+    private float getHorizontalAngle(Vector3 lineToTarget)
+    {
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, 
+            theVectorRotationEnaction.thePartToAimHorizontal.forward, 
+            theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+        //float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, this.transform.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+        return oneAngle;
+    }
+
+    private float getVerticalAngle(Vector3 lineToTarget)
+    {
+
+        Vector3 start = theVectorRotationEnaction.thePartToAimVertical.position;
+        Vector3 offset = new Vector3(0.01f, 0.01f, 0.01f);
+        Debug.DrawLine(start + offset, start + lineToTarget.normalized + offset, Color.white, 4f);
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget, 
+            theVectorRotationEnaction.thePartToAimVertical.forward, 
+            theVectorRotationEnaction.thePartToAimVertical.right);
+        //fixed it!  my input vector was just target position!  i needed to be using line from aiming object to the target it is aiming at!  position relative to the person doing the aiming, basically
+
+        //this one has to be negative for some reason??
+        return -oneAngle;
+    }
+
+
+    */
+
+
+
+
+
+    public float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
+    {
+        //from here:
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        //but had to change conversion thing from "MathUtil.RAD_TO_DEG" to the following:
+        //Mathf.Rad2Deg
+
+
+        Vector3 right;
+        if (clockwise)
+        {
+            right = Vector3.Cross(forward, axis);
+            forward = Vector3.Cross(axis, right);
+        }
+        else
+        {
+            right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+        }
+
+
+        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
+    }
+
+
+
+
+
+
+
+}
+
+
+public class proximityCriteriaBool : objectCriteria
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    targetCalculator weWantSomethingNearToThis;
+
+    float desiredDistance = 4f;
+    float allowedMargin = 2f;
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+
+        //return false;
+        Vector3 position1 = weWantSomethingNearToThis.targetPosition();
+        Vector3 position2 = theObject.transform.position;
+
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+
+        if (distance > (desiredDistance + allowedMargin)) { return false; }
+
+        return true;
+    }
+
+
+
+
+
+    public proximityCriteriaBool(GameObject objectToBeNearIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        weWantSomethingNearToThis = new agnosticTargetCalc(objectToBeNearIn);// gahhhhhhh target calculator assumes access to TWO things!  indexer need one that only needs ONE!!!  [fixed]
+        
+
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+
+    public proximityCriteriaBool(Vector3 whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        weWantSomethingNearToThis = new agnosticTargetCalc(whereWeWantToBeCloseToIn);
+
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+}
+
+
+public class objectHasTag : objectCriteria
+{
+    tagging2.tag2 theTag;
+
+    public objectHasTag(tagging2.tag2 theTagIn)
+    {
+        this.theTag = theTagIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        return tagging2.singleton.allTagsOnObject(theObject).Contains(theTag);
+    }
+}
+
+
+public class objectListCacheSetter : objectSetGrabber
+{
+    //maybe:
+    //      don't re-calculate if the set is non-null
+    //      have some time or condition under which the list is set to null again???  [how?]
+    // no, do 2 diff classes.  a setter, and a receiver/bserver.
+
+
+
+    List<GameObject> theList = new List<GameObject>();
+
+    objectSetGrabber theSetToCache;  //??????  how to do this???
+
+
+
+
+    public override List<GameObject> grab()
+    {
+        //this function always generates a FRESH list
+
+        theList = theSetToCache.grab();
+
+        return theList;
+    }
+
+    public List<GameObject> observeCache()
+    {
+        if(theList == null)
+        {
+            return grab();
+        }
+
+        return theList;
+    }
+
+    internal void add(objectSetGrabber theObjectSetIn)
+    {
+        theSetToCache = theObjectSetIn;
+    }
+}
+
+
+public class objectListCacheReceiver : objectSetGrabber     //look at how cute and simple this is!
+{
+    objectListCacheSetter theCache;
+
+    public override List<GameObject> grab()
+    {
+        return theCache.observeCache();
+    }
+}
+
+
+//no!  split into evaluator for single object!  [and then just use allObjectsInSetThatMeetCriteria]
+
+/*
+public class allTargetsInSetThatAreThreats : objectSetGrabber
+{
+    //use tags for now?  later other rags for "teams"?  and [either before or after this step] exclude "self" from list?  
+    objectSetGrabber theObjectSetGrabber;
+
+    public override List<GameObject> grab()
+    {
+        return allInObjectListWithTagX(theObjectSetGrabber.grab(), tagging2.tag2.);
+    }
+
+    private List<GameObject> allInObjectListWithTagX(List<GameObject> theList, tagging2.tag2 theTag)
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach (GameObject thisObject in )
+        {
+            if (theCriteria.evaluateObject(thisObject) == false)
+            {
+                continue;
+            }
+
+            newList.Add(thisObject);
+        }
+
+        return newList;
+    }
+}
+
+*/
+
+//[and then also a "prox".......criteria.........
+
+
+
+
+
+
+
+
+//enaction
+
+
+
+
+
+/*
+public class meleeDodge : repeatWithTargetPicker
+{
+    //simple radial pattern?  well, can have multiple different threats....
+
+    objectSetGrabber theSetGrabber;
+
+
+    public meleeDodge(GameObject theObjectDoingTheEnaction)
+    {
+        theTargetPicker = null;
+
+
+
+        thePerma = new permaPlan2(
+            genGen.singleton.makeNavAgentPlanEXE(
+                theObjectDoingTheEnaction,
+                theTargetPicker.pickNext().realPositionOfTarget()
+                ));
+
+
+        theDepletablePlan = convertToDepletableWithNextTarget();
+    }
+
+
+
+
+    /*
+
+    public repeatWithTargetPicker returnTheGoToThing()
+    {
+
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+        targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+    */
+
+//}
+
+//*/
+
+
+
+public class radialFleeingTargeter : targetPicker
+{
+    //so...take a set of objects........AND the position of "flee-er"?
+    //then.......weighted average the vectors running away from each object?
+    //i think?
+    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+
+    objectSetGrabber theSet;
+    GameObject theFleeer;
+
+
+    public radialFleeingTargeter(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    {
+        theFleeer = theObjectDoingTheEnaction;
+        theSet = theSetInput;
+    }
+
+
+    public override agnosticTargetCalc pickNext()
+    {
+        return new agnosticTargetCalc(weightedRadialFleeingPoint());
+    }
+
+
+    Vector3 weightedRadialFleeingPoint()
+    {
+        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+
+        Vector3 newDirection = myData.weightedRadialPattern();
+        Debug.Log(newDirection - Vector3.zero);
+
+        return theFleeer.transform.position + (newDirection*20);
+    }
+}
+
+
+
+//end condition
+
+public class lineOfSight : objectCriteria
+{
+    GameObject theCentralObserver;
+    float theRange = 60f;
+
+
+    public lineOfSight(GameObject theCentralObserverIn, float theRangeIn = 60f)
+    {
+        theCentralObserver = theCentralObserverIn;
+        theRange = theRangeIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+
+        //spatialDataPoint myData = new spatialDataPoint(threatListWithoutSelf(), this.transform.position);
+
+
+
+        //return myData.threatLineOfSightBool();
+
+
+        bool theBool = false;
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = theObject.transform.position - theCentralObserver.transform.position;
+        Ray myRay = new Ray(theCentralObserver.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject == theObject)
+            {
+               return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
+
+
+
+//[i'll make this later]:
+
+//public class pigging : repeater
+//{
+    //creatures can eat non-food items, trash, guns, whatever lol [have to kill them to retreive?
+    //or......induce vomiting???  other methods?   yank from their jaws like a puppy]
+
+
+
+
+
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class ummAllThusStuffForGrab
 {
 
@@ -540,7 +1261,11 @@ public class ummAllThusStuffForGrab
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
 
 
-        targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
+        //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions, 
+            new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnactions), 
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()));
@@ -567,7 +1292,15 @@ public class ummAllThusStuffForGrab
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
         //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab));
+
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
+            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab),
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
+
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1,
+            getter//new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab)
+            );
         
 
         return repeatWithTargetPickerTest;
@@ -1084,6 +1817,7 @@ public abstract class repeater
 
 public class agnostRepeater: repeater
 {
+    //agnostic as to whether target may change or not
     repeater theRepeater;
 
     public agnostRepeater(permaPlan2 thePermaIn)
@@ -1105,7 +1839,7 @@ public class agnostRepeater: repeater
 
 public class repeatWithTargetPicker:repeater
 {
-    targetPicker theTargetPicker;
+    internal targetPicker theTargetPicker;
 
 
     public repeatWithTargetPicker(permaPlan2 thePermaIn, targetPicker theTargetPickerIn)
@@ -1644,7 +2378,10 @@ public class depletablePlan
 
 public abstract class targetPicker
 {
-    public abstract agnosticTargetCalc pickNext();
+
+    //internal GameObject objectToBeNear; ?????????????
+
+    public abstract agnosticTargetCalc pickNext();  //hmm, should just return object??
 }
 
 public class pickRandomNearbyLocation : targetPicker
@@ -1667,6 +2404,10 @@ public class pickRandomNearbyLocation : targetPicker
 
 }
 
+
+//nahh let's split this up:
+
+/*
 public class pickNextVisibleStuffStuff : targetPicker
 {
     GameObject objectToBeNear;
@@ -1674,7 +2415,7 @@ public class pickNextVisibleStuffStuff : targetPicker
 
     public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
     {
-        objectToBeNear = objectToBeNearIn;
+        //objectToBeNear = objectToBeNearIn;
         theType = theTypeIn;
     }
 
@@ -1688,15 +2429,25 @@ public class pickNextVisibleStuffStuff : targetPicker
         return targ;
     }
 }
+*/
+
+
+//"nearest visible" is two conditions.....
+//      all visible
+//      nearest
+
+//public class allVisibleInFOV : objectSetGrabber
+//no, just combine "allObjectsInSetThatMeetCriteria" with"objectVisibleInFOV", i love this
+
+//[i already have "allNearbyStuffStuff"]
 
 public class pickRandom : targetPicker
 {
-    GameObject objectToBeNear;
     objectSetGrabber theObjectSetGrabber;
 
     public pickRandom(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
     {
-        objectToBeNear = objectToBeNearIn;
+        //objectToBeNear = objectToBeNearIn;
         theObjectSetGrabber = objectSetGrabberIn;
     }
 
@@ -1705,7 +2456,7 @@ public class pickRandom : targetPicker
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
         GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
 
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        agnosticTargetCalc targ = new agnosticTargetCalc(target);
 
         return targ;
     }
@@ -1749,13 +2500,89 @@ public class pickNearestExceptSelf : targetPicker
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
         GameObject target = conditionCreator.singleton.whichObjectOnListIsNearestExceptSELF(objectToBeNear, theObjectSetGrabber.grab());
 
-        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! target:  " + target);
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! target:  " + target);
 
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
 
         return targ;
     }
 }
+
+
+
+
+
+
+
+public class pickFirstXFromListY : targetPicker
+{
+
+    objectCriteria theCriteria;
+    objectSetGrabber theListGenerator;
+
+    public override agnosticTargetCalc pickNext()
+    {
+        foreach (GameObject thisObject in theListGenerator.grab())
+        {
+            //Debug.Log("thisObject:  " + thisObject);
+
+            if (theCriteria.evaluateObject(thisObject))
+            {
+                agnosticTargetCalc targ = new agnosticTargetCalc(thisObject);
+
+                return targ;
+            }
+        }
+
+        return null;
+    }
+}
+
+public class pickMostXFromListY : targetPicker
+{
+
+    objectEvaluator theEvaluator;
+    objectSetGrabber theListGenerator;
+
+    public override agnosticTargetCalc pickNext()
+    {
+        agnosticTargetCalc targ = new agnosticTargetCalc(whichObjectOnListIsMostX(theListGenerator.grab()));
+
+        return targ;
+    }
+
+
+
+
+    public GameObject whichObjectOnListIsMostX(List<GameObject> listOfObjects)
+    {
+        GameObject bestSoFar = null;
+        float bestValueSoFar = 0;
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            if (bestSoFar == null) 
+            { 
+                bestSoFar = thisObject; 
+                bestValueSoFar = theEvaluator.evaluateObject(thisObject);
+                continue;
+            }
+
+
+            float currentValue = theEvaluator.evaluateObject(thisObject);
+            if (currentValue < bestValueSoFar)
+            {
+                bestSoFar = thisObject;
+                bestValueSoFar = currentValue;
+            }
+        }
+
+        return bestSoFar;
+    }
+
+}
+
+
 
 
 
@@ -1868,8 +2695,61 @@ public class allNearbyNumericalVariable : objectSetGrabber
 
 
 
+//"bool" criteria
+
+public abstract class objectCriteria
+{
+    // [BOOLEAN] function to evaluate a single object
+
+    public abstract bool evaluateObject(GameObject theObject);
+}
+
+public class stickyTrueCriteria : objectCriteria
+{
+    objectCriteria theNestedCriteria;
 
 
+    int countdown = 0;
+    int maxTimer = 90;
+
+
+    public stickyTrueCriteria(objectCriteria theNestedCriteriaIn, int maxTimerIn = 90)
+    {
+        theNestedCriteria = theNestedCriteriaIn;
+        maxTimer = maxTimerIn;
+    }
+
+
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        if (countdown > 0)
+        {
+            countdown--;
+            return true;
+        }
+
+        if (theNestedCriteria.evaluateObject(theObject))
+        {
+            countdown = maxTimer;
+            return true;
+        }
+
+        return false;
+    }
+}
+
+
+
+//"float"/scalar criteria
+
+public abstract class objectEvaluator
+{
+    // [FLOAT to RANK objects, and pick the "most"] function to evaluate a single object
+
+    public abstract float evaluateObject(GameObject theObject);
+}
 
 
 

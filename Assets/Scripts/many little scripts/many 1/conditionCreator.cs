@@ -130,10 +130,10 @@ public class conditionCreator : MonoBehaviour
     {
         GameObject theClosestSoFar = null;
 
-        Debug.Log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  objectWeWantItClosestTo:  " + objectWeWantItClosestTo);
+        //Debug.Log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  objectWeWantItClosestTo:  " + objectWeWantItClosestTo);
         foreach (GameObject thisObject in listOfObjects)
         {
-            Debug.Log("thisObject:  " + thisObject);
+            //Debug.Log("thisObject:  " + thisObject);
             if (thisObject == objectWeWantItClosestTo)
             {
                 continue;
@@ -530,6 +530,23 @@ public class stickyCondition : condition
 
     public override bool met()
     {
+        if (countdown >0)
+        {
+            countdown--;
+            return true;
+        }
+
+        if (nestedCondition.met())
+        {
+            countdown = maxTimer;
+            return true;
+        }
+
+
+
+        return false;
+
+        /*
         if (nestedCondition.met())
         {
             countdown = maxTimer;
@@ -537,14 +554,17 @@ public class stickyCondition : condition
         }
 
         countdown--;
-        
-        
+
+
         if (countdown < 1)
         {
             return false;
         }
 
         return true;
+        */
+
+
     }
 
 
@@ -739,12 +759,12 @@ public class proximityRef : condition
         float distance = vectorBetween.magnitude;
 
         //Debug.Log("condition:  " + this);
-        Debug.Log("distance:  " + distance);
-        Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
         //Debug.Log("theTargetHolder.theTargetCalculator.GetHashCode():  " + theTargetHolder.theTargetCalculator.GetHashCode());
-        Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.targetPosition());
+        //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.targetPosition());
         //Debug.Log("theTargetHolder.theTargetCalculator.targetPosition():  " + theTargetHolder.theTargetCalculator.tar);
-        Debug.DrawLine(position1, position2, Color.magenta, 0.1f);
+        //  Debug.DrawLine(position1, position2, Color.magenta, 0.1f);
 
 
         if (debugPrint)
@@ -762,7 +782,7 @@ public class proximityRef : condition
         if (distance > (desiredDistance+ allowedMargin)) { return false; }
 
 
-        Debug.Log("met");
+        //Debug.Log("met");
         return true;
     }
     public string metAsText()

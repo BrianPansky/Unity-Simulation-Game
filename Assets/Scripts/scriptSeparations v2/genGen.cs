@@ -167,6 +167,7 @@ public class genGen : MonoBehaviour
 
     public void addBody4ToObject(GameObject newObj)
     {
+        tagging2.singleton.addTag(newObj, tagging2.tag2.threat1);
         playable2 thePlayable = newObj.AddComponent<playable2>();
 
 
@@ -372,6 +373,75 @@ public class genGen : MonoBehaviour
         return theEXE;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+    public repeatWithTargetPicker meleeDodge(GameObject theObjectDoingTheEnaction)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 300),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 120))
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        objectSetGrabber theObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+        targetPicker theTargetPicker = new radialFleeingTargeter(theObjectDoingTheEnaction, theObjectSet);
+
+
+        //whew!!
+
+
+        permaPlan2 thePerma = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(
+                theObjectDoingTheEnaction,
+                theTargetPicker.pickNext().realPositionOfTarget()
+                ));
+
+        repeatWithTargetPicker theRep = new repeatWithTargetPicker(thePerma, theTargetPicker);
+
+        return theRep;
+    }
+    public repeatWithTargetPicker meleeDodge(GameObject theObjectDoingTheEnaction, objectListCacheSetter theCacher)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction,120)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        objectSetGrabber theObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        theCacher.add(theObjectSet);
+
+        targetPicker theTargetPicker = new radialFleeingTargeter(theObjectDoingTheEnaction, theCacher);
+
+
+        //whew!!
+
+
+        permaPlan2 thePerma = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(
+                theObjectDoingTheEnaction,
+                theTargetPicker.pickNext().realPositionOfTarget()
+                ));
+
+        repeatWithTargetPicker theRep = new repeatWithTargetPicker(thePerma, theTargetPicker);
+
+
+        //try to shorten?
+        //repeatWithTargetPicker theRep = meleeDodge(theObjectDoingTheEnaction);
+        //theRep.theTargetPicker
+
+        return theRep;
+    }
 
 
 
