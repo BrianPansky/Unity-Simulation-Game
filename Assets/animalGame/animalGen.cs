@@ -18,6 +18,7 @@ public class animalGen : MonoBehaviour
         location = new Vector3(20, 0, -15);
         makeEmptyZones(1,520);
 
+        
         genGen.singleton.returnShotgun1(new Vector3(-36, 5, 13));
         //returnArrowForward(location,3);
         returnBasicAnimal1(location, stuffType.fruit, 1);
@@ -28,9 +29,11 @@ public class animalGen : MonoBehaviour
         returnBasicAnimal1(new Vector3(-10, 0, -15), stuffType.fruit, 1);
         
         location = new Vector3(10, 0, 5);
-        returnBasicPredator1(location, stuffType.meat1, 2f);
-        //genGen.singleton.returnNPC5(location);
-
+        returnBasicPredator1(new Vector3(70, 0, -35), stuffType.meat1, 2f);
+        
+        genGen.singleton.returnNPC5(new Vector3(-30, 0, 35));
+        genGen.singleton.returnShotgun1(new Vector3(-36, 1, 36));
+        
         returnBasicGrabbable(stuffType.fruit, new Vector3(-5, 2, 8));
         //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
         returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 2, -4));
@@ -278,13 +281,117 @@ public class animalGen : MonoBehaviour
 
     animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
-        condition switchCondition = new stickyCondition( new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX),90);
+        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction), 
-            switchCondition, 
-            genGen.singleton.meleeDodge(theObjectDoingTheEnaction)
-            //grabTheStuff(theObjectDoingTheEnaction,stuffX)
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+        /*
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 30),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40)),
+            new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
             );
+        */
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchToFlee = new stickyCondition(
+            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+
+
+
+
+
+        /*
+
+        //condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        //animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            //new objectHasTag(tagging2.tag2.threat1),
+            //new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 60),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 8)
+            //new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40))
+            //new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
+            );
+
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        //condition switchToFlee = new stickyCondition(new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);
+        condition switchToFlee = new isThereAtLeastOneObjectInSet(theFleeFromObjectSet);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        //theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(switchToFlee, flee);
+        //theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        //getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+
+
+        
+        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 60),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40)),
+            new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
+            );
+
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchToFlee = new stickyCondition(
+            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+
+        */
+
+
 
         return theFSM;
     }
@@ -546,6 +653,40 @@ public class animalUpdate:MonoBehaviour
 
 
 
+public class excludeX : objectSetGrabber
+{
+    GameObject toExclude;
+    objectSetGrabber nestedSet;
+
+    public excludeX(objectSetGrabber nestedSetIn, GameObject toExcludeIn)
+    {
+        nestedSet = nestedSetIn;
+        toExclude = toExcludeIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach(GameObject obj in nestedSet.grab())
+        {
+            if(obj != toExclude)
+            {
+                newList.Add(obj);
+            }
+        }
+
+        return newList;
+    }
+}
+
+
+
+
+
+
+
+
 
 //new combat dodge/fleeing behavior
 
@@ -553,21 +694,21 @@ public class animalUpdate:MonoBehaviour
 //start fleeing condition(s)
 //public class nonNullObjectWithAllCriteria : condition
 //{
-    //nonononono, make a function that either returns the FIRST such object, or ALL of them,
-    //then pain with OTHER condition thing that simply looks at whether the output is null or not
-    //[any easy way to cache this set/object in case i want to use it later?
+//nonononono, make a function that either returns the FIRST such object, or ALL of them,
+//then pain with OTHER condition thing that simply looks at whether the output is null or not
+//[any easy way to cache this set/object in case i want to use it later?
 
-    //objectSetGrabber theObjectSetGrabber;
-    //List<objectCriteria> theCriteria;
+//objectSetGrabber theObjectSetGrabber;
+//List<objectCriteria> theCriteria;
 
-    //public override bool met()
-    //{
-        //foreach(GameObject thisObject in theObjectSetGrabber.grab())
-      //  {
+//public override bool met()
+//{
+//foreach(GameObject thisObject in theObjectSetGrabber.grab())
+//  {
 
-    //    }
+//    }
 
-  //  }
+//  }
 
 //}
 
@@ -575,13 +716,22 @@ public class isThereAtLeastOneObjectInSet : condition
 {
     objectSetGrabber theObjectSetGrabber;
 
+
+    public isThereAtLeastOneObjectInSet(objectSetGrabber theObjectSetGrabberIn)
+    {
+        theObjectSetGrabber = theObjectSetGrabberIn;
+    }
+
+
     public override bool met()
     {
         if(theObjectSetGrabber.grab().Count > 0)
         {
+            //Debug.Log("(theObjectSetGrabber.grab().Count > 0) is TRUE:  " + theObjectSetGrabber.grab().Count + "  " + theObjectSetGrabber.grab()[0]);
             return true;
         }
 
+        //Debug.Log("fffffffffffffffffalssssssssssssssssse");
         return false;
     }
 
@@ -1147,7 +1297,7 @@ public class radialFleeingTargeter : targetPicker
         spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
 
         Vector3 newDirection = myData.weightedRadialPattern();
-        Debug.Log(newDirection - Vector3.zero);
+        //Debug.Log(newDirection - Vector3.zero);
 
         return theFleeer.transform.position + (newDirection*20);
     }

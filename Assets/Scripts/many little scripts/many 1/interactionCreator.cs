@@ -310,6 +310,23 @@ public class numericalEffect : Ieffect
 }
 
 
+public class generateObject : Ieffect
+{
+    objectGen theGenerator;
+
+
+    public generateObject()
+    {
+
+    }
+
+    public void implementEffect()
+    {
+
+    }
+
+}
+
 
 //interactions
 

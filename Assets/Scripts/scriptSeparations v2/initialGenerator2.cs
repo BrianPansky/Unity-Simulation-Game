@@ -51,7 +51,7 @@ public class initialGenerator2 : MonoBehaviour
 
         Vector3 location = Vector3.zero;
 
-        location = new Vector3(0, 0, -20);
+        location = new Vector3(-20, 0, -55);
         //location = new Vector3(-55, 14, -67);
 
         makePLAYER(location);

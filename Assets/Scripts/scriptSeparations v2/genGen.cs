@@ -388,8 +388,8 @@ public class genGen : MonoBehaviour
     {
         objectCriteria theCriteria = new objectMeetsAllCriteria(
             new objectHasTag(tagging2.tag2.threat1),
-            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 300),
-            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 120))
+            //new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 40),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40))
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
 
@@ -493,6 +493,94 @@ public class genGen : MonoBehaviour
         if (theObject.GetComponent<safeDestroy>() == null)
         {
             theObject.AddComponent<safeDestroy>();
+        }
+    }
+}
+
+
+
+public interface objectGen
+{
+    GameObject generate();
+}
+
+public class genPrefabAndModify : objectGen
+{
+    GameObject thePrefab;
+    Vector3 thePoint = new Vector3();
+
+    List<objectModifier> theModifiers;
+
+
+    public GameObject generate()
+    {
+        GameObject theObject = genGen.singleton.createPrefabAtPointAndRETURN(thePrefab, thePoint);
+
+        foreach (objectModifier modifier in theModifiers)
+        {
+            modifier.modify(theObject);
+        }
+
+        return theObject;
+    }
+
+
+
+
+
+
+    /*
+    public void createPrefabAtPoint(GameObject thePrefab, Vector3 thePoint)
+    {
+        //just so i can keep the rotation of the object i input, for now:
+        Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
+    }
+
+    public GameObject createPrefabAtPointAndRETURN(GameObject thePrefab, Vector3 thePoint)
+    {
+        //just so i can keep the rotation of the object i input, for now:
+        return Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
+    }
+
+    public GameObject createAndReturnPrefabAtPointWITHNAME(GameObject thePrefab, Vector3 thePoint, string theName)
+    {
+
+        //just so i can keep the rotation of the object i input, for now:
+        GameObject newObject = Instantiate(thePrefab, thePoint, thePrefab.transform.rotation);
+
+        newObject.name = theName;
+
+        return newObject;
+    }
+    */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+public interface objectModifier
+{
+    void modify(GameObject theObject);
+}
+
+public class multiModify : objectModifier
+{
+
+    List<objectModifier> theModifiers;
+
+    public void modify(GameObject theObject)
+    {
+        foreach (objectModifier modifier in theModifiers)
+        {
+            modifier.modify(theObject);
         }
     }
 }
