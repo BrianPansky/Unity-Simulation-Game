@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
@@ -20,6 +21,15 @@ public class animalGen : MonoBehaviour
 
         
         genGen.singleton.returnShotgun1(new Vector3(-36, 5, 13));
+
+
+        adhocAnimal1Gen animalGen1 = new adhocAnimal1Gen(this.gameObject, stuffType.fruit);
+
+        animalGen1.spawn(new Vector3(0, 0.5f, 5));
+
+
+
+        /*
         //returnArrowForward(location,3);
         returnBasicAnimal1(location, stuffType.fruit, 1);
         
@@ -27,7 +37,7 @@ public class animalGen : MonoBehaviour
         returnBasicAnimal1(new Vector3(10, 0, 15), stuffType.fruit, 1);
         returnBasicAnimal1(new Vector3(15, 0, -5), stuffType.fruit, 1);
         returnBasicAnimal1(new Vector3(-10, 0, -15), stuffType.fruit, 1);
-        
+        */
         location = new Vector3(10, 0, 5);
         returnBasicPredator1(new Vector3(70, 0, -35), stuffType.meat1, 2f);
         
@@ -45,6 +55,88 @@ public class animalGen : MonoBehaviour
     {
         
     }
+
+
+
+    public GameObject fullAnimalGen1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
+    {
+        //GameObject newObj = returnArrowForward(where, scale);
+
+        GameObject newObj = Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
+        //      newObj.transform.localScale = new Vector3(128, 1, 8);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+
+
+
+
+
+
+
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+
+
+
+
+
+
+        //addAnimalBody1ToObject(newObj);
+
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+
+
+        //thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+        //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        //thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+        thePlayable.initializeEnactionPoint1();
+        //addArrowForward(thePlayable.enactionPoint1);
+        //genGen.singleton.addCube(thePlayable.enactionPoint1, 0.1f);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        //addArrowForward(newObj, 5f, 0f, 1.2f);
+        genGen.singleton.makeBasicEnactions(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+
+
+
+
+
+
+
+
+
+
+
+
+        genGen.singleton.addArrowForward(newObj, 1f, 0f, 1.2f);
+        //wander1.addWander1(newObj);
+        //grabGun1.addGrabGun1(newObj, interType.peircing);
+
+        //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
+
+        //Debug.Log("?????????????????????????????????????????????????????");
+        animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
+        //Debug.Log("?????????????????????    2   ??????????????????????????");
+        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+
+
+        newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
+
+        //Debug.Log("????????????????????      3   ???????????????????????");
+        //grabStuffStuff.addGrabStuffStuff(newObj, stuffTypeX);
+
+        return newObj;
+    }
+
+
+
+
 
 
 
@@ -97,6 +189,10 @@ public class animalGen : MonoBehaviour
 
         MeshRenderer theRenderer = newObj.GetComponent<MeshRenderer>();
         theRenderer.material.color = new Color(1f, 0f, 0f);
+
+
+        NavMeshAgent navMeshAgent = newObj.GetComponent<NavMeshAgent>();
+        navMeshAgent.speed += 1.7f;
 
         return newObj;
     }
@@ -679,9 +775,6 @@ public class excludeX : objectSetGrabber
         return newList;
     }
 }
-
-
-
 
 
 
@@ -1625,6 +1718,68 @@ public class animalFSM
         repeatingPlans.Add(doThisImmediately);
 
     }
+
+    public animalFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+                                                                            //theEXE.debugPrint = printThisNPC;
+                                                                            //singleEXE theEXEsingle = theEXE;
+
+        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// offsetRoom * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+    repeatWithTargetPicker grabTheStuffgdtjtxdetjt(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
+    }
+
+
+
+
+
+
     public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
@@ -1680,7 +1835,7 @@ public class animalFSM
         Debug.Log("(currentPlans.Count < 1), refill.......");
         
         */
-        foreach (repeatWithTargetPicker plan in repeatingPlans)
+        foreach (repeater plan in repeatingPlans)
         {
             plan.doThisThing();
         }
@@ -2792,12 +2947,10 @@ public class allNearbyNumericalVariable : objectSetGrabber
 
 
     GameObject theObjectThatIsLooking;
-    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
 
-    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn)
     {
         theObjectThatIsLooking = theObjectThatIsLookingIn;
-        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
         theVariableType = theVariableTypeIn;
     }
 

@@ -241,6 +241,14 @@ public class navAgent : IEnactByTargetVector
         */
 
         conditionalPrint("~~~~~~~~~~   nav agent enacting   ~~~~~~~~");
+        Debug.Assert(theAgent.isActiveAndEnabled);
+        
+
+        if(theAgent.isOnNavMesh == false)
+        {
+            theAgent.Warp(theAgent.transform.position);
+        }
+        Debug.Assert(theAgent.isOnNavMesh);
         theAgent.SetDestination(theInput.vect3);
     }
 }
@@ -572,6 +580,15 @@ public class enactEffect : IEnactaBool
         enactEffect newEnactEffect = objectToAddItTo.AddComponent<enactEffect>();
 
         newEnactEffect.theEffect = theEffectIn;
+    }
+    public static enactEffect addEnactEffectAndReturn(GameObject objectToAddItTo, Ieffect theEffectIn)
+    {
+
+        enactEffect newEnactEffect = objectToAddItTo.AddComponent<enactEffect>();
+
+        newEnactEffect.theEffect = theEffectIn;
+
+        return newEnactEffect;
     }
 
     public override void enact(inputData theInput)

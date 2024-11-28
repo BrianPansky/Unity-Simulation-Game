@@ -315,14 +315,14 @@ public class generateObject : Ieffect
     objectGen theGenerator;
 
 
-    public generateObject()
+    public generateObject(objectGen theGeneratorIn)
     {
-
+        theGenerator = theGeneratorIn;
     }
 
     public void implementEffect()
     {
-
+        theGenerator.generate();
     }
 
 }

@@ -452,6 +452,33 @@ public class genGen : MonoBehaviour
 
 
 
+    public enactEffect addAdhocReproduction1(GameObject theObjectToAddItTo, objectGen theObjectToGenerate)
+    {
+
+        Ieffect e1 = new generateObject(theObjectToGenerate);//new adhocAnimal1Gen();
+
+        enactEffect theEnaction = enactEffect.addEnactEffectAndReturn(theObjectToAddItTo,e1);//; theEnaction = theObjectToAddItTo.AddComponent<enactEffect>();
+
+        return theEnaction;
+    }
+
+
+    internal repeater reproRepeater(GameObject theObjectDoingTheEnaction, adhocAnimal1Gen adhocAnimal1Gen, stuffType stuffX)
+    {
+        enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));
+
+        //gahhhhhhhhh, need to be able to cut through this garbage?
+        //repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE( theEnaction);
+
+        throw new NotImplementedException();
+    }
+
+
+
+
+
+
+
 
     internal inventory1 ensureInventory1Script(GameObject onThisObject)
     {
@@ -495,6 +522,7 @@ public class genGen : MonoBehaviour
             theObject.AddComponent<safeDestroy>();
         }
     }
+
 }
 
 
@@ -509,7 +537,20 @@ public class genPrefabAndModify : objectGen
     GameObject thePrefab;
     Vector3 thePoint = new Vector3();
 
-    List<objectModifier> theModifiers;
+    List<objectModifier> theModifiers = new List<objectModifier>();
+
+
+    public genPrefabAndModify(GameObject thePrefabIn, objectModifier mod1)
+    {
+        thePrefab = thePrefabIn;
+        theModifiers.Add(mod1);
+    }
+    public genPrefabAndModify(GameObject thePrefabIn, objectModifier mod1, objectModifier mod2)
+    {
+        thePrefab = thePrefabIn;
+        theModifiers.Add(mod1);
+        theModifiers.Add(mod2);
+    }
 
 
     public GameObject generate()
@@ -522,6 +563,13 @@ public class genPrefabAndModify : objectGen
         }
 
         return theObject;
+    }
+
+    internal void spawn(Vector3 positionInput)
+    {
+        GameObject theObject = generate();
+
+        theObject.transform.position = positionInput;
     }
 
 
@@ -555,7 +603,326 @@ public class genPrefabAndModify : objectGen
     */
 }
 
+public class adhocAnimal1Gen : objectGen
+{
+    GameObject parent;
+    stuffType stuffTypeX;
+    float scale = 1f;
 
+    public adhocAnimal1Gen(GameObject parentIn, stuffType stuffTypeXIn, float scaleIn = 1f)
+    {
+        parent = parentIn;
+        stuffTypeX = stuffTypeXIn;
+        scale = scaleIn;
+    }
+
+    public GameObject generate()
+    {
+        return returnBasicAnimal1(parent.transform.position, stuffTypeX, scale);
+    }
+
+
+    internal void spawn(Vector3 positionInput)
+    {
+        GameObject theObject = generate();
+
+        theObject.transform.position = positionInput;
+    }
+
+
+
+
+
+    public GameObject returnBasicAnimal1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
+    {
+        GameObject newObj = returnArrowForward(where, scale);
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+        addAnimalBody1ToObject(newObj);
+        genGen.singleton.addArrowForward(newObj, 1f, 0f, 1.2f);
+        //wander1.addWander1(newObj);
+        //grabGun1.addGrabGun1(newObj, interType.peircing);
+
+        //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
+
+        //Debug.Log("?????????????????????????????????????????????????????");
+        animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
+        //Debug.Log("?????????????????????    2   ??????????????????????????");
+        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+
+
+        newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
+
+        //Debug.Log("????????????????????      3   ???????????????????????");
+        //grabStuffStuff.addGrabStuffStuff(newObj, stuffTypeX);
+
+        return newObj;
+    }
+
+
+
+
+    public GameObject returnArrowForward(Vector3 where, float scale = 1f)
+    {
+
+        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab, where);// Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
+        //      newObj.transform.localScale = new Vector3(128, 1, 8);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        return newObj;
+    }
+
+
+    public void addAnimalBody1ToObject(GameObject newObj)
+    {
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+
+
+        //thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+        //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        //thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+        thePlayable.initializeEnactionPoint1();
+        //addArrowForward(thePlayable.enactionPoint1);
+        //genGen.singleton.addCube(thePlayable.enactionPoint1, 0.1f);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        //addArrowForward(newObj, 5f, 0f, 1.2f);
+        genGen.singleton.makeBasicEnactions(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+    }
+
+
+    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+
+
+
+
+        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
+
+        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+
+
+
+        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+
+        animalFSM repro = repro1(theObjectDoingTheEnaction,stuffX);
+
+
+
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+        /*
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 30),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40)),
+            new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
+            );
+        */
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchToFlee = new stickyCondition(
+            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+
+        objectCriteria reproCriteria = new objectMeetsAllCriteria(
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 40)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theReproSet = new allObjectsInSetThatMeetCriteria(
+            new excludeX(new allNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction),
+            reproCriteria);
+
+        condition switchCondition3 = new reverseCondition(
+            new isThereAtLeastOneObjectInSet(theReproSet));
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        theFSM.addSwitchAndReverse(switchCondition3, repro);
+        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+        getFood.addSwitch(switchCondition3, repro);
+
+
+
+
+
+        /*
+
+        //condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        //animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            //new objectHasTag(tagging2.tag2.threat1),
+            //new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 60),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 8)
+            //new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40))
+            //new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
+            );
+
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        //condition switchToFlee = new stickyCondition(new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);
+        condition switchToFlee = new isThereAtLeastOneObjectInSet(theFleeFromObjectSet);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        //theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(switchToFlee, flee);
+        //theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        //getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+
+
+        
+        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 60),
+            new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40)),
+            new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
+            );
+
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchToFlee = new stickyCondition(
+            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+
+        */
+
+
+
+        return theFSM;
+    }
+
+    animalFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+
+
+        Ieffect e1 = new generateObject(new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));//new adhocAnimal1Gen();
+
+        enactEffect theEnaction = enactEffect.addEnactEffectAndReturn(theObjectDoingTheEnaction, e1);//; theEnaction = theObjectToAddItTo.AddComponent<enactEffect>();
+
+
+        singleEXE step1 = (singleEXE)theEnaction.standardEXEconversion();
+        step1.untilListFinished();
+
+        //singleEXE step1 = new boolEXE2(theEnaction);
+
+        animalFSM repro = new animalFSM(theObjectDoingTheEnaction, step1);
+
+        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+
+
+
+
+
+        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
+
+        //gahhhhhhhhh, need to be able to cut through this garbage?
+        //repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE(theEnaction);
+
+
+
+        /*
+        public animalFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+
+        animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+
+
+
+
+        enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
+
+        gahhhhhhhhh, need to be able to cut through this garbage?
+        repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE(theEnaction);
+
+        throw new NotImplementedException();
+
+        */
+
+        return repro;
+    }
+
+    private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
+    {
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
+        permaPlan2 perma1 = new permaPlan2(step1);
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+
+        return repeatWithTargetPickerTest;
+    }
+    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
+    }
+
+
+
+
+
+
+}
 
 
 
