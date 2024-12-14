@@ -606,6 +606,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //bit annoying, is there a better way?
 
+        /*
         foreach (compoundEnactaBool thisCompoundEnaction in theObject.GetComponents<compoundEnactaBool>())
         {
             foreach(IEnactaBool subEnaction in thisCompoundEnaction.theEnactions)
@@ -616,7 +617,10 @@ public class AIHub3 : planningAndImagination, IupdateCallable
                 }
             }
         }
+        */
 
+
+        throw new System.NotImplementedException();
 
         return possibleEnaction;
     }

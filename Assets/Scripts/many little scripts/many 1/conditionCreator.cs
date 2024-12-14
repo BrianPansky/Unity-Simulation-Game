@@ -234,6 +234,8 @@ public abstract class condition
 
     public abstract string asText();
     public abstract string asTextSHORT();
+    public abstract string asTextBaseOnly();
+    public abstract string asTextAllTheWayDown();
     //string whyDidItFail();
 
 
@@ -267,14 +269,8 @@ public abstract class condition
 }
 
 
-public class reverseCondition : condition
+public abstract class baseCondition : condition
 {
-    condition theConditionToReverse;
-
-    public reverseCondition(condition theConditionToReverseIn)
-    {
-        this.theConditionToReverse = theConditionToReverseIn;
-    }
 
     public override string asText()
     {
@@ -285,26 +281,74 @@ public class reverseCondition : condition
     {
         return standardAsTextSHORT();
     }
+    public override string asTextBaseOnly()
+    {
+        return asText();
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        Debug.Log("11111111111????????????????");
+        return asText();
+    }
+
+}
+
+public abstract class nesterCondition : condition
+{
+
+    public condition theNestedCondition;
+
+    public override string asText()
+    {
+        return theNestedCondition.asText();
+    }
+
+    public override string asTextSHORT()
+    {
+        return theNestedCondition.asTextSHORT();
+    }
+
+    public override string asTextBaseOnly()
+    {
+        return asText();
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        //Debug.Log("2222222222222????????????????");
+        //Debug.Log("this:  " + this);
+        //Debug.Log("asText():  " + asText());
+        string newString = theNestedCondition.asTextAllTheWayDown();
+        return newString;
+    }
+}
+
+public class reverseCondition : nesterCondition
+{
+    //condition theConditionToReverse;
+
+    public reverseCondition(condition theConditionToReverseIn)
+    {
+        //this.theConditionToReverse = theConditionToReverseIn;
+        this.theNestedCondition = theConditionToReverseIn;
+    }
 
     public override bool met()
     {
-        bool originalBool = theConditionToReverse.met();
+        bool originalBool = theNestedCondition.met();
 
         if(originalBool==true) {return false;}
         return true;
     }
 }
 
-public class multicondition : condition
+public class multicondition : nesterCondition
 {
     List<condition> conditionList;
 
 
-    public multicondition(condition c1)
-    {
-        conditionList = new List<condition>();
-        conditionList.Add(c1);
-    }
+    
     public multicondition(condition c1, condition c2)
     {
         conditionList = new List<condition>();
@@ -323,24 +367,58 @@ public class multicondition : condition
 
 
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-
     public override bool met()
     {
         foreach (condition condition in conditionList)
         {
+            //Debug.Log(".................condition:  " + condition);
+            //Debug.Log("condition.asTextSHORT():  " + condition.asTextSHORT());
+            //Debug.Log("condition.asText():  " + condition.asText());
             if (condition.met() == false) { return false; }
         }
 
         return true;
+    }
+
+
+    public override string asText()
+    {
+        string theText = "[";
+        foreach (condition thisCondition in conditionList)
+        {
+            theText += thisCondition.asText();
+            theText += ", ";
+        }
+
+        theText += "]";
+
+        return theText;
+    }
+
+    public override string asTextSHORT()
+    {
+        string theText = "[";
+        foreach (condition thisCondition in conditionList)
+        {
+            theText += thisCondition.asTextSHORT();
+            theText += ", ";
+        }
+
+        theText += "]";
+
+        return theText;
+    }
+
+    public override string asTextBaseOnly()
+    {
+        return asText();
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        string newString = this + ":  ";
+        newString+= asText();
+        return newString;
     }
 }
 
@@ -350,7 +428,7 @@ public class multicondition : condition
 
 
 //static/preset variables?????????
-public class autoCondition : condition
+public class autoCondition : baseCondition
 {
 
     public override bool met()
@@ -369,7 +447,7 @@ public class autoCondition : condition
     }
 }
 
-public class enacted : condition
+public class enacted : baseCondition
 {
     int howManyTimesToEnact = 1;
     planEXE2 theEnactionEXE;
@@ -387,18 +465,9 @@ public class enacted : condition
         return false;
     }
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 }
 
-public class cooldown : condition
+public class cooldown : baseCondition
 {
     public int cooldownMax = 130;
     public int cooldownTimer = 0;
@@ -425,19 +494,9 @@ public class cooldown : condition
         cooldownTimer = cooldownMax;
     }
 
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 }
 
-public class planListComplete : condition
+public class planListComplete : baseCondition
 {
     List<planEXE2> planList;
 
@@ -458,18 +517,9 @@ public class planListComplete : condition
     }
 
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 }
 
-public class adHocHasNoGunCondition : condition
+public class adHocHasNoGunCondition : baseCondition
 {
 
     GameObject theObject;
@@ -492,10 +542,6 @@ public class adHocHasNoGunCondition : condition
     }
 
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
 
     public override string asTextSHORT()
     {
@@ -513,9 +559,9 @@ public class adHocHasNoGunCondition : condition
     }
 }
 
-public class stickyCondition : condition
+public class stickyCondition : nesterCondition
 {
-    condition nestedCondition;
+    //ondition nestedCondition;
 
     int countdown = 0;
     int maxTimer = 2;
@@ -523,7 +569,7 @@ public class stickyCondition : condition
 
     public stickyCondition(condition nestedConditionIn, int maxTimerIn =2)
     {
-        nestedCondition = nestedConditionIn;
+        theNestedCondition = nestedConditionIn;
         maxTimer = maxTimerIn;
     }
 
@@ -536,7 +582,7 @@ public class stickyCondition : condition
             return true;
         }
 
-        if (nestedCondition.met())
+        if (theNestedCondition.met())
         {
             countdown = maxTimer;
             return true;
@@ -567,9 +613,168 @@ public class stickyCondition : condition
 
     }
 
+}
+
+
+public class equippableObjectWIthInterTypeX : objectCriteria
+{
+    interType interTypeX;
+
+    public equippableObjectWIthInterTypeX(interType interTypeXIn)
+    {
+        interTypeX = interTypeXIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+
+        equippable2 equip = theObject.GetComponent<equippable2>();
+        if (equip == null) { return false; }
+
+        if (equip.containsIntertype(interTypeX))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    GameObject firstObjectOnListWIthInterTypeX(interType interTypeX, List<GameObject> theList)
+    {
+        //looking at the INTERACTION TYPES of their enactions
+
+        GameObject theItemWeWant = null;
+
+        foreach (GameObject thisObject in theList)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(interTypeX))
+            {
+                theItemWeWant = thisObject;
+                break;
+            }
+        }
+
+        return theItemWeWant;
+    }
+
+}
 
 
 
+public class adHocHasNoIntertypeXCondition : condition
+{
+
+    GameObject theObject;
+    interType intertypeX;
+    bool returnTrueIfThereIsNoGun = true;
+
+
+    public adHocHasNoIntertypeXCondition(GameObject theObjectIn, interType intertypeXIn, bool returnTrueIfThereIsNoGunIn = true)
+    {
+        theObject = theObjectIn;
+        intertypeX = intertypeXIn;
+        returnTrueIfThereIsNoGun = returnTrueIfThereIsNoGunIn;
+    }
+
+    public override bool met()
+    {
+        //so.  look in:
+        //      1)  the playable
+        //      2)  the equipper slots [different from "the playable"?]
+        //      3)  the inventory
+        //so we can break it down!  into each of those....criteria?
+
+        enaction foundEnaction = new find().enactionOnObjectItselfWithIntertypeX(theObject, intertypeX);
+        if (foundEnaction != null) { return true; }
+
+        foundEnaction = new find().enactionEquippedByObjectWithIntertypeX(theObject, intertypeX);
+        if (foundEnaction != null) { return true; }
+
+        foundEnaction = new find().enactionInObjectsInventoryWithIntertypeX(theObject, intertypeX);
+        if (foundEnaction != null) { return true; }
+
+
+        return false;
+    }
+
+    /*
+    public bool hasNoGun()
+    {
+        enaction grabEnact1;
+        grabEnact1 = enactionWithInterTypeXOnObjectsPlayable(theObject, interType.peircing);
+
+
+
+        if (grabEnact1 == null)
+        {
+            //ummm sloppy for now
+            grabEnact1 = getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType.peircing);
+        }
+
+        if (grabEnact1 == null) { return true; }
+
+        return false;
+    }
+
+    public enaction enactionWithInterTypeXOnObjectsPlayable(GameObject theObject, interType intertypeX)
+    {
+        foreach (rangedEnaction thisEnaction in listOfIEnactaBoolsOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == intertypeX) { return thisEnactionOrAnyBundleItsIn(theObject, thisEnaction); }
+        }
+
+
+
+        return null;
+    }
+
+    private rangedEnaction getFireEnactionFromEquipperSlotsToSeeIfNPCHasAGUn(interType interTypeX)
+    {
+        GameObject theItemWeWant = firstObjectOnListWIthInterTypeX(interTypeX, equipperContents());
+
+        //oh no it can ALSO be null
+        if (theItemWeWant == null)
+        {
+            //      conditionalPrint("(theItemWeWant == null)");
+            //Debug.DrawLine(Vector3.zero, this.transform.position, Color.magenta, 6f);
+            return null;
+            //return goGrabPlan1(interType.peircing);
+        }
+
+
+        //Debug.Assert(theItemWeWant != null);
+
+        //grabEnact1 = theItemWeWant.GetComponent<rangedEnaction>();
+        return theItemWeWant.GetComponent<rangedEnaction>();
+    }
+
+    GameObject firstObjectOnListWIthInterTypeX(interType interTypeX, List<GameObject> theList)
+    {
+        //looking at the INTERACTION TYPES of their enactions
+
+        GameObject theItemWeWant = null;
+
+        foreach (GameObject thisObject in theList)
+        {
+
+            equippable2 equip = thisObject.GetComponent<equippable2>();
+            if (equip == null) { continue; }
+
+            if (equip.containsIntertype(interTypeX))
+            {
+                theItemWeWant = thisObject;
+                break;
+            }
+        }
+
+        return theItemWeWant;
+    }
+    */
 
     public override string asText()
     {
@@ -578,17 +783,36 @@ public class stickyCondition : condition
 
     public override string asTextSHORT()
     {
-        return standardAsTextSHORT();
+        string stringToReturn = "";
+        if (returnTrueIfThereIsNoGun)
+        {
+            stringToReturn += "do IF this object has NO gun";
+        }
+        else
+        {
+            stringToReturn += "do if this object HAS a gun";
+        }
+
+        return stringToReturn;
     }
 
+    public override string asTextBaseOnly()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        Debug.Log("3333333333333????????????????");
+        throw new NotImplementedException();
+    }
 }
 
 
 
 
-
 //dynamic/input variables??????????
-public class proximity : condition
+public class proximity : baseCondition
 {
     //for when we want the objects to be CLOSER than the desired distance
 
@@ -606,7 +830,7 @@ public class proximity : condition
     {
         this.object1 = object1;
         //this.object2 = object2;
-        targetCalc = new movableObjectTargetCalculator(object1, object2, desiredDistance);
+        targetCalc = new movableObjectTargetCalculator(object1, object2);//, desiredDistance);
         this.desiredDistance = desiredDistance;
         this.allowedMargin = allowedMargin;
     }
@@ -616,7 +840,7 @@ public class proximity : condition
         this.object1 = object1;
         //this.targetLocation2 = targetLocation2In;
 
-        targetCalc = new staticVectorTargetCalculator(object1, targetLocation2In, desiredDistance);
+        targetCalc = new staticVectorTargetCalculator(object1, targetLocation2In);//, desiredDistance);
         this.desiredDistance = desiredDistance;
     }
 
@@ -717,14 +941,10 @@ public class proximity : condition
 
     }
 
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 }
 
 
-public class proximityRef : condition
+public class proximityRef : baseCondition
 {
     //for when we want the objects to be CLOSER than the desired distance
 
@@ -847,14 +1067,10 @@ public class proximityRef : condition
 
     }
 
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 }
 
 
-public class adocThreatLineOfSightCondition : condition
+public class adocThreatLineOfSightCondition : baseCondition
 {
 
     GameObject theObject;
@@ -883,11 +1099,6 @@ public class adocThreatLineOfSightCondition : condition
         return false;
     }
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
     public override string asTextSHORT()
     {
         string stringToReturn = "";
@@ -904,7 +1115,7 @@ public class adocThreatLineOfSightCondition : condition
     }
 }
 
-public class targetMatchesHitscanOutput : condition
+public class targetMatchesHitscanOutput : baseCondition
 {
     GameObject intendedTarget;
     //GameObject whatRaycastHit = null;
@@ -923,15 +1134,6 @@ public class targetMatchesHitscanOutput : condition
     }
 
 
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
 
     public override bool met()
     {
@@ -1000,11 +1202,387 @@ public class targetMatchesHitscanOutput : condition
 
 }
 
+public class objectMeetsAllCriteria : objectCriteria
+{
+
+    List<objectCriteria> theCriteria = new List<objectCriteria>();
+
+    public objectMeetsAllCriteria(objectCriteria criteria1)
+    {
+        theCriteria.Add(criteria1);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+    }
+    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7, objectCriteria criteria8)
+    {
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+        theCriteria.Add(criteria8);
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        foreach (objectCriteria thisCriteria in theCriteria)
+        {
+            if (thisCriteria.evaluateObject(theObject) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+public class isThereAtLeastOneObjectInSet : baseCondition
+{
+    objectSetGrabber theObjectSetGrabber;
+
+
+    public isThereAtLeastOneObjectInSet(objectSetGrabber theObjectSetGrabberIn)
+    {
+        theObjectSetGrabber = theObjectSetGrabberIn;
+    }
+
+
+    public override bool met()
+    {
+        if (theObjectSetGrabber.grab().Count > 0)
+        {
+            //Debug.Log("(theObjectSetGrabber.grab().Count > 0) is TRUE:  " + theObjectSetGrabber.grab().Count + "  " + theObjectSetGrabber.grab()[0]);
+            return true;
+        }
+
+        //Debug.Log("fffffffffffffffffalssssssssssssssssse");
+        return false;
+    }
+
+
+    public override string asTextAllTheWayDown()
+    {
+        Debug.Log("444444444444444444444????????????????");
+        string theString = this + " (theObjectSetGrabber = " + theObjectSetGrabber + ")";
+        return theString;
+    }
+}
+
+
+//conditions
+
+public class canSeeStuffStuff : baseCondition
+{
+
+    stuffType theStuffType;
+
+
+    GameObject theObjectThatIsLooking;
+    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
+
+    public canSeeStuffStuff(GameObject theObjectThatIsLookingIn, stuffType theStuffTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
+        theStuffType = theStuffTypeIn;
+    }
+
+
+    public override bool met()
+    {
+        spatialDataPoint myData = new spatialDataPoint(new allNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
+
+
+        bool threatLineOfSightBool = myData.threatLineOfSightBool();
+
+        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            stringToReturn += "do IF this object can see stuffStuff";
+        }
+        else
+        {
+            stringToReturn += "do if this object CANNOT see stuffStuff";
+        }
+
+        return stringToReturn;
+    }
+
+}
+
+public class canSeeNumericalVariable : baseCondition
+{
+
+    numericalVariable theVariableType;
+
+
+    GameObject theObjectThatIsLooking;
+    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
+
+    public canSeeNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
+        theVariableType = theVariableTypeIn;
+    }
+
+
+    public override bool met()
+    {
+        spatialDataPoint myData = new spatialDataPoint(new allNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
+
+
+        bool threatLineOfSightBool = myData.threatLineOfSightBool();
+
+        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override string asTextSHORT()
+    {
+        string stringToReturn = "";
+        if (returnTrueIfThisObjectCanSeeStuffStuff)
+        {
+            stringToReturn += "do IF this object can see stuffStuff";
+        }
+        else
+        {
+            stringToReturn += "do if this object CANNOT see stuffStuff";
+        }
+
+        return stringToReturn;
+    }
+
+}
+
+public class depletableSingleEXEListComplete : baseCondition
+{
+    List<singleEXE> planList;
+
+    public depletableSingleEXEListComplete(List<singleEXE> planList)
+    {
+        this.planList = planList;
+    }
+
+    public override bool met()
+    {
+        //Debug.Log("planList.Count:  " + planList.Count);
+        foreach (singleEXE planEXE in planList)
+        {
+            if (planEXE == null) { continue; } //messy annoying for now
+            if (planEXE.endConditionsMet() == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+}
+
+public class individualObjectMeetsAllCriteria : condition //not really "base condition", has nested CRITERIA i may need to print
+{
+    individualObjectReturner theObjectReturner;
+    List<objectCriteria> theCriteria = new List<objectCriteria>();
+
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+    }
+    public individualObjectMeetsAllCriteria(individualObjectReturner theObjectReturnerIn, objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7, objectCriteria criteria8)
+    {
+        theObjectReturner = theObjectReturnerIn;
+        theCriteria.Add(criteria1);
+        theCriteria.Add(criteria2);
+        theCriteria.Add(criteria3);
+        theCriteria.Add(criteria4);
+        theCriteria.Add(criteria5);
+        theCriteria.Add(criteria6);
+        theCriteria.Add(criteria7);
+        theCriteria.Add(criteria8);
+    }
+
+
+
+
+    public override bool met()
+    {
+        foreach (objectCriteria thisCriteria in theCriteria)
+        {
+            if (thisCriteria.evaluateObject(theObjectReturner.returnObject()) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+
+
+
+
+    public override string asText()
+    {
+        return standardAsText();
+    }
+
+    public override string asTextSHORT()
+    {
+        return standardAsTextSHORT();
+    }
+
+    public override string asTextBaseOnly()
+    {
+        string theText = "[";
+        foreach (objectCriteria thisCondition in theCriteria)
+        {
+            theText += thisCondition;
+            theText += ", ";
+        }
+
+        theText += "]";
+
+        return theText;
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        Debug.Log("555555555555555????????????????");
+        string theText = this + " (object returner = " + theObjectReturner +")";
+
+        theText += "[";
+
+        theText += asTextBaseOnly();
+
+        theText += "]";
+
+        return theText;
+    }
+}
+
 
 
 
 //either?  unsure?
-public class numericalCondition : condition
+public class numericalCondition : baseCondition
 {
 
     numericalVariable theVariableType;
@@ -1032,6 +1610,55 @@ public class numericalCondition : condition
     }
 
 
+}
+
+
+
+
+
+
+
+
+public class canAcquireTarget : baseCondition
+{
+    targetPicker theTargetPicker;
+
+    public canAcquireTarget(targetPicker theTargetPickerIn)
+    {
+        theTargetPicker = theTargetPickerIn;
+    }
+
+    public override bool met()
+    {
+        return (theTargetPicker.pickNext() != null);
+    }
+
+}
+
+public class nonNullObject : condition //not really "base condition", has nested individualObjectReturner i may need to print
+{
+    individualObjectReturner theIndividualObjectReturner;
+
+    public nonNullObject(individualObjectReturner theIndividualObjectReturnerIn)
+    {
+        theIndividualObjectReturner = theIndividualObjectReturnerIn;
+    }
+
+    public override bool met()
+    {
+        return (theIndividualObjectReturner.returnObject() != null);
+    }
+
+
+
+
+
+
+
+
+
+
+
     public override string asText()
     {
         return standardAsText();
@@ -1041,8 +1668,441 @@ public class numericalCondition : condition
     {
         return standardAsTextSHORT();
     }
+
+
+    public override string asTextBaseOnly()
+    {
+        return asText();
+    }
+
+    public override string asTextAllTheWayDown()
+    {
+        Debug.Log("66666666666666666????????????????");
+        string newString = "["+this + ": " + theIndividualObjectReturner+"]";
+        return newString;
+    }
 }
 
 
+
+
+
+
+//"bool" criteria
+
+public abstract class objectCriteria
+{
+    // [BOOLEAN] function to evaluate a single object
+
+    public abstract bool evaluateObject(GameObject theObject);
+}
+
+public class stickyTrueCriteria : objectCriteria
+{
+    objectCriteria theNestedCriteria;
+
+
+    int countdown = 0;
+    int maxTimer = 90;
+
+
+    public stickyTrueCriteria(objectCriteria theNestedCriteriaIn, int maxTimerIn = 90)
+    {
+        theNestedCriteria = theNestedCriteriaIn;
+        maxTimer = maxTimerIn;
+    }
+
+
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        if (countdown > 0)
+        {
+            countdown--;
+            return true;
+        }
+
+        if (theNestedCriteria.evaluateObject(theObject))
+        {
+            countdown = maxTimer;
+            return true;
+        }
+
+        return false;
+    }
+}
+
+
+public class objectVisibleInFOV : objectCriteria
+{
+    float horizontalAngleRange = 90f;
+    float verticalAngleRange = 60f;
+    Transform theSensoryTransform;
+
+
+
+
+    public objectVisibleInFOV(Transform theSensoryTransformIn, float horizontalAngleRangeIn = 90f, float verticalAngleRangeIn = 60f)
+    {
+        theSensoryTransform = theSensoryTransformIn;
+        horizontalAngleRange = horizontalAngleRangeIn;
+        verticalAngleRange = verticalAngleRangeIn;
+    }
+
+
+
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        //get angles [horizontal, vertical] then compare to limit?
+
+
+        //what about positive VS negative angle or whatever?
+        //try:
+        //      && horizontalAngleToObject < (360-horizontalAngleRange)
+
+        float horizontalAngleToObject = horizontalAngleFinder(theObject);
+        if (horizontalAngleToObject > horizontalAngleRange && horizontalAngleToObject < (360 - horizontalAngleRange)) { return false; }
+
+        float verticalAngleToObject = verticalAngleFinder(theObject);
+        if (verticalAngleToObject > verticalAngleRange && verticalAngleToObject < (360 - verticalAngleRange)) { return false; }
+
+
+        return true;
+    }
+
+
+
+
+
+    private float verticalAngleFinder(GameObject theObject)
+    {
+        //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
+        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+
+
+        //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.up);
+
+
+        return theAngle;
+    }
+
+    private float horizontalAngleFinder(GameObject theObject)
+    {
+        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.up);
+
+
+        return theAngle;
+    }
+
+
+
+
+
+
+    /*
+    private float getHorizontalAngle(Vector3 lineToTarget)
+    {
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, 
+            theVectorRotationEnaction.thePartToAimHorizontal.forward, 
+            theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+        //float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, this.transform.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
+
+        return oneAngle;
+    }
+
+    private float getVerticalAngle(Vector3 lineToTarget)
+    {
+
+        Vector3 start = theVectorRotationEnaction.thePartToAimVertical.position;
+        Vector3 offset = new Vector3(0.01f, 0.01f, 0.01f);
+        Debug.DrawLine(start + offset, start + lineToTarget.normalized + offset, Color.white, 4f);
+
+        float oneAngle = AngleOffAroundAxis(lineToTarget, 
+            theVectorRotationEnaction.thePartToAimVertical.forward, 
+            theVectorRotationEnaction.thePartToAimVertical.right);
+        //fixed it!  my input vector was just target position!  i needed to be using line from aiming object to the target it is aiming at!  position relative to the person doing the aiming, basically
+
+        //this one has to be negative for some reason??
+        return -oneAngle;
+    }
+
+
+    */
+
+
+
+
+
+    public float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
+    {
+        //from here:
+        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
+
+        //but had to change conversion thing from "MathUtil.RAD_TO_DEG" to the following:
+        //Mathf.Rad2Deg
+
+
+        Vector3 right;
+        if (clockwise)
+        {
+            right = Vector3.Cross(forward, axis);
+            forward = Vector3.Cross(axis, right);
+        }
+        else
+        {
+            right = Vector3.Cross(axis, forward);
+            forward = Vector3.Cross(right, axis);
+        }
+
+
+        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
+    }
+
+
+
+
+
+
+
+}
+
+
+public class proximityCriteriaBool : objectCriteria
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    targetCalculator weWantSomethingNearToThis;
+
+    float desiredDistance = 4f;
+    float allowedMargin = 2f;
+
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+
+        //return false;
+        Vector3 position1 = weWantSomethingNearToThis.targetPosition();
+        Vector3 position2 = theObject.transform.position;
+
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+
+        if (distance > (desiredDistance + allowedMargin)) { return false; }
+
+        return true;
+    }
+
+
+
+
+
+    public proximityCriteriaBool(GameObject objectToBeNearIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        weWantSomethingNearToThis = new agnosticTargetCalc(objectToBeNearIn);// gahhhhhhh target calculator assumes access to TWO things!  indexer need one that only needs ONE!!!  [fixed]
+
+
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+
+    public proximityCriteriaBool(Vector3 whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        weWantSomethingNearToThis = new agnosticTargetCalc(whereWeWantToBeCloseToIn);
+
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+}
+
+
+public class objectHasTag : objectCriteria
+{
+    tagging2.tag2 theTag;
+
+    public objectHasTag(tagging2.tag2 theTagIn)
+    {
+        this.theTag = theTagIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        return tagging2.singleton.allTagsOnObject(theObject).Contains(theTag);
+    }
+}
+
+public class reverseCriteria : objectCriteria
+{
+    objectCriteria criteriaToReverse;
+
+    public reverseCriteria(objectCriteria criteriaToReverseIn)
+    {
+
+        criteriaToReverse = criteriaToReverseIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        if (criteriaToReverse.evaluateObject(theObject)) { return false; }
+        return true;
+    }
+}
+
+public class hasVirtualGamepad : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        virtualGamepad theGamepad = theObject.GetComponent<virtualGamepad>();
+        return (theGamepad != null);
+    }
+}
+
+public class lineOfSight : objectCriteria
+{
+    GameObject theCentralObserver;
+    float theRange = 60f;
+
+
+    public lineOfSight(GameObject theCentralObserverIn, float theRangeIn = 60f)
+    {
+        theCentralObserver = theCentralObserverIn;
+        theRange = theRangeIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+
+        //spatialDataPoint myData = new spatialDataPoint(threatListWithoutSelf(), this.transform.position);
+
+
+
+        //return myData.threatLineOfSightBool();
+
+
+        bool theBool = false;
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = theObject.transform.position - theCentralObserver.transform.position;
+        Ray myRay = new Ray(theCentralObserver.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject == theObject)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
+public class intertypeXisOnObject : objectCriteria
+{
+    interType interTypeX;
+
+    public intertypeXisOnObject(interType interTypeXIn)
+    {
+        interTypeX = interTypeXIn;
+    }
+
+    //that's where "playables" store their enactions too, as (enaction) components all over object
+    public override bool evaluateObject(GameObject theObject)
+    {
+        if(new find().enactionOnObjectItselfWithIntertypeX(theObject,interTypeX) != null) { return true; }
+
+        return false;
+    }
+}
+public class intertypeXisInEquipperSlots : objectCriteria
+{
+
+    interType interTypeX;
+
+    public intertypeXisInEquipperSlots(interType interTypeXIn)
+    {
+        interTypeX = interTypeXIn;
+    }
+
+    public override bool evaluateObject(GameObject theObject)
+    {
+        if (new find().enactionEquippedByObjectWithIntertypeX(theObject, interTypeX) != null) { return true; }
+
+        return false;
+    }
+
+    //that's where "playables" store their enactions too, as (enaction) components all over object
+
+
+
+    /*
+    public override bool evaluateObject(GameObject theObject)
+    {
+        playable2 thePlayable = theObject.GetComponent<playable2>();
+
+        foreach(var key in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            GameObject equippedObject = thePlayable.equipperSlotsAndContents[key];
+
+            if (new find().enactionOnObjectItselfWithIntertypeX(equippedObject, interTypeX) != null) { return true; }
+        }
+
+        return false;
+    }
+    */
+}
+public class intertypeXisInInventory : objectCriteria
+{
+
+    interType interTypeX;
+
+    public intertypeXisInInventory(interType interTypeXIn)
+    {
+        interTypeX = interTypeXIn;
+    }
+
+    //that's where "playables" store their enactions too, as (enaction) components all over object
+    public override bool evaluateObject(GameObject theObject)
+    {
+        inventory1 theInventory = theObject.GetComponent<inventory1>();
+
+        foreach (GameObject inventoryItem in theInventory.inventoryItems)
+        {
+            if (new find().enactionOnObjectItselfWithIntertypeX(inventoryItem, interTypeX) != null) { return true; }
+        }
+
+        return false;
+    }
+}
+
+
+
+
+//"float"/scalar criteria
+
+public abstract class objectEvaluator
+{
+    // [FLOAT to RANK objects, and pick the "most"] function to evaluate a single object
+
+    public abstract float evaluateObject(GameObject theObject);
+}
 
 

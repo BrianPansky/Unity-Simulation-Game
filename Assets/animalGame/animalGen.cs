@@ -726,7 +726,7 @@ public class animalGen : MonoBehaviour
 
 public class animalUpdate:MonoBehaviour
 {
-    public animalFSM theFSM;
+    public FSM theFSM;
 
     void Start()
     {
@@ -749,32 +749,238 @@ public class animalUpdate:MonoBehaviour
 
 
 
-public class excludeX : objectSetGrabber
-{
-    GameObject toExclude;
-    objectSetGrabber nestedSet;
 
-    public excludeX(objectSetGrabber nestedSetIn, GameObject toExcludeIn)
+
+
+public class animalFSM: FSM
+{
+    //Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
+
+
+    //planEXE2 repeatingPlan;
+    //planEXE2 currentPlan;;
+
+    //these are lists, AKA simultaneous plans
+    //List<permaPlan> repeatingPlans = new List<permaPlan>();
+    //List<repeater> repeatingPlans = new List<repeater>();
+    //List<depletablePlan> currentPlans = new List<depletablePlan>();
+
+
+    //repeatWithTargetPicker justDoThisForNow;
+
+
+    public animalFSM()
     {
-        nestedSet = nestedSetIn;
-        toExclude = toExcludeIn;
+        //      new permaPlan();
     }
 
-    public override List<GameObject> grab()
+    public animalFSM(repeater doThisImmediately)
     {
-        List<GameObject> newList = new List<GameObject>();
+        //justDoThisForNow = doThisImmediately;
 
-        foreach(GameObject obj in nestedSet.grab())
+        repeatingPlans.Add(doThisImmediately);
+
+    }
+
+    public animalFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
+                                                                            //theEXE.debugPrint = printThisNPC;
+                                                                            //singleEXE theEXEsingle = theEXE;
+
+        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// offsetRoom * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+    repeatWithTargetPicker grabTheStuffgdtjtxdetjt(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
+    }
+
+
+
+
+
+
+    public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public animalFSM(repeater doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+
+        switchBoard[switchCondition] = doThisAfterSwitchCondition;
+    }
+
+    
+
+
+
+    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+    public void addSwitch(condition switchCondition, animalFSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+    public void addSwitchAndReverse(condition switchCondition, animalFSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+
+
+    /*
+    private void executeCurrentPlans()
+    {
+
+        List<depletablePlan> newList = new List<depletablePlan>();
+
+        foreach (depletablePlan plan in currentPlans)
         {
-            if(obj != toExclude)
+            if (plan.endConditionsMet())
             {
-                newList.Add(obj);
+                continue;
             }
+
+            if (plan.startConditionsMet())
+            {
+                plan.doTheDepletablePlan();
+            }
+
+            if (plan.endConditionsMet())
+            {
+                continue;
+            }
+
+            newList.Add(plan);
+        }
+
+        currentPlans = newList;
+    }
+
+    private List<depletablePlan> refillPlans()
+    {
+        List<depletablePlan> newList = new List<depletablePlan>();
+        Debug.Log(repeatingPlans.Count.ToString());
+        Debug.Log(repeatingPlans.Count);
+        foreach (permaPlan plan in repeatingPlans)
+        {
+            newList.Add(plan.convertToDepletable());
         }
 
         return newList;
     }
+
+
+    */
+
+    /*
+    private List<permaPlan> duplicateTheRepeatingPlans()
+    {
+        List<permaPlan> newList = new List<permaPlan>();
+        foreach (permaPlan plan in repeatingPlans)
+        {
+            newList.Add(plan.duplicate());
+        }
+
+        return newList;
+    }
+    */
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -805,455 +1011,6 @@ public class excludeX : objectSetGrabber
 
 //}
 
-public class isThereAtLeastOneObjectInSet : condition
-{
-    objectSetGrabber theObjectSetGrabber;
-
-
-    public isThereAtLeastOneObjectInSet(objectSetGrabber theObjectSetGrabberIn)
-    {
-        theObjectSetGrabber = theObjectSetGrabberIn;
-    }
-
-
-    public override bool met()
-    {
-        if(theObjectSetGrabber.grab().Count > 0)
-        {
-            //Debug.Log("(theObjectSetGrabber.grab().Count > 0) is TRUE:  " + theObjectSetGrabber.grab().Count + "  " + theObjectSetGrabber.grab()[0]);
-            return true;
-        }
-
-        //Debug.Log("fffffffffffffffffalssssssssssssssssse");
-        return false;
-    }
-
-
-
-
-
-
-    public override string asText()
-    {
-        return this.ToString();
-    }
-
-    public override string asTextSHORT()
-    {
-        return this.ToString();
-    }
-}
-
-public class allObjectsInSetThatMeetCriteria : objectSetGrabber
-{
-
-    objectSetGrabber theObjectSetGrabber;
-    //List<objectCriteria> theCriteria;  //no no, use a multi-criteria
-    objectCriteria theCriteria;
-
-    public allObjectsInSetThatMeetCriteria(objectSetGrabber theObjectSetGrabberIn, objectCriteria theCriteriaIn)
-    {
-        theObjectSetGrabber = theObjectSetGrabberIn;
-        theCriteria = theCriteriaIn;
-    }
-
-    public override List<GameObject> grab()
-    {
-        List < GameObject > newList = new List < GameObject >();
-
-        foreach (GameObject thisObject in theObjectSetGrabber.grab())
-        {
-            if (theCriteria.evaluateObject(thisObject) == false)
-            {
-                continue;
-            }
-
-            newList.Add(thisObject);
-        }
-
-        return newList;
-    }
-}
-
-public class objectMeetsAllCriteria : objectCriteria
-{
-
-    List<objectCriteria> theCriteria = new List<objectCriteria>();
-
-    public objectMeetsAllCriteria(objectCriteria criteria1)
-    {
-        theCriteria.Add(criteria1);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-        theCriteria.Add(criteria4);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-        theCriteria.Add(criteria4);
-        theCriteria.Add(criteria5);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-        theCriteria.Add(criteria4);
-        theCriteria.Add(criteria5);
-        theCriteria.Add(criteria6);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-        theCriteria.Add(criteria4);
-        theCriteria.Add(criteria5);
-        theCriteria.Add(criteria6);
-        theCriteria.Add(criteria7);
-    }
-    public objectMeetsAllCriteria(objectCriteria criteria1, objectCriteria criteria2, objectCriteria criteria3, objectCriteria criteria4, objectCriteria criteria5, objectCriteria criteria6, objectCriteria criteria7, objectCriteria criteria8)
-    {
-        theCriteria.Add(criteria1);
-        theCriteria.Add(criteria2);
-        theCriteria.Add(criteria3);
-        theCriteria.Add(criteria4);
-        theCriteria.Add(criteria5);
-        theCriteria.Add(criteria6);
-        theCriteria.Add(criteria7);
-        theCriteria.Add(criteria8);
-    }
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-        foreach (objectCriteria thisCriteria in theCriteria)
-        {
-            if (thisCriteria.evaluateObject(theObject) == false)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-}
-
-
-public class allObjectsInZone : objectSetGrabber
-{
-    GameObject theObjectWhoseZoneWeWantToLookIn;
-
-    public allObjectsInZone(GameObject theObjectWhoseZoneWeWantToLookInInput)
-    {
-        theObjectWhoseZoneWeWantToLookIn = theObjectWhoseZoneWeWantToLookInInput;
-    }
-
-    public override List<GameObject> grab()
-    {
-        //List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn); //lol
-
-        //return theListOfALL;
-        return allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn);
-    }
-
-
-    public List<GameObject> allObjectsInObjectsZone(GameObject theObject)
-    {
-        int zone = tagging2.singleton.whichZone(theObject);
-        List<objectIdPair> pairs = tagging2.singleton.objectsInZone[zone]; //= allInZone(zone);
-        return tagging2.singleton.listInObjectFormat(pairs);
-    }
-
-    /*
-    public List<objectIdPair> allInZone(int zone)
-    {
-        return tagging2.singleton.objectsInZone[zone];
-    }
-    */
-
-}
-
-public class objectVisibleInFOV : objectCriteria
-{
-    float horizontalAngleRange = 90f;
-    float verticalAngleRange = 60f;
-    Transform theSensoryTransform;
-
-
-
-
-    public objectVisibleInFOV(Transform theSensoryTransformIn, float horizontalAngleRangeIn = 90f, float verticalAngleRangeIn = 60f)
-    {
-        theSensoryTransform = theSensoryTransformIn;
-        horizontalAngleRange = horizontalAngleRangeIn;
-        verticalAngleRange = verticalAngleRangeIn;
-    }
-
-
-
-
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-        //get angles [horizontal, vertical] then compare to limit?
-
-
-        //what about positive VS negative angle or whatever?
-        //try:
-        //      && horizontalAngleToObject < (360-horizontalAngleRange)
-
-        float horizontalAngleToObject = horizontalAngleFinder(theObject);
-        if(horizontalAngleToObject > horizontalAngleRange && horizontalAngleToObject < (360-horizontalAngleRange)) { return false; }
-
-        float verticalAngleToObject = verticalAngleFinder(theObject);
-        if (verticalAngleToObject > verticalAngleRange && verticalAngleToObject < (360 - verticalAngleRange)) { return false; }
-
-
-        return true;
-    }
-
-
-
-
-
-    private float verticalAngleFinder(GameObject theObject)
-    {
-        //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
-        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
-
-
-
-        //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
-        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
-            theSensoryTransform.forward,
-            theSensoryTransform.up);
-
-
-        return theAngle;
-    }
-
-    private float horizontalAngleFinder(GameObject theObject)
-    {
-        Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
-
-
-        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
-            theSensoryTransform.forward,
-            theSensoryTransform.up);
-
-
-        return theAngle;
-    }
-
-
-
-
-
-
-    /*
-    private float getHorizontalAngle(Vector3 lineToTarget)
-    {
-        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
-
-        float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, 
-            theVectorRotationEnaction.thePartToAimHorizontal.forward, 
-            theVectorRotationEnaction.thePartToAimHorizontal.up);
-
-        //float oneAngle = AngleOffAroundAxis(lineToTarget.normalized, this.transform.forward, theVectorRotationEnaction.thePartToAimHorizontal.up);
-
-        return oneAngle;
-    }
-
-    private float getVerticalAngle(Vector3 lineToTarget)
-    {
-
-        Vector3 start = theVectorRotationEnaction.thePartToAimVertical.position;
-        Vector3 offset = new Vector3(0.01f, 0.01f, 0.01f);
-        Debug.DrawLine(start + offset, start + lineToTarget.normalized + offset, Color.white, 4f);
-
-        float oneAngle = AngleOffAroundAxis(lineToTarget, 
-            theVectorRotationEnaction.thePartToAimVertical.forward, 
-            theVectorRotationEnaction.thePartToAimVertical.right);
-        //fixed it!  my input vector was just target position!  i needed to be using line from aiming object to the target it is aiming at!  position relative to the person doing the aiming, basically
-
-        //this one has to be negative for some reason??
-        return -oneAngle;
-    }
-
-
-    */
-
-
-
-
-
-    public float AngleOffAroundAxis(Vector3 v, Vector3 forward, Vector3 axis, bool clockwise = false)
-    {
-        //from here:
-        //https://forum.unity.com/threads/is-vector3-signedangle-working-as-intended.694105/
-
-        //but had to change conversion thing from "MathUtil.RAD_TO_DEG" to the following:
-        //Mathf.Rad2Deg
-
-
-        Vector3 right;
-        if (clockwise)
-        {
-            right = Vector3.Cross(forward, axis);
-            forward = Vector3.Cross(axis, right);
-        }
-        else
-        {
-            right = Vector3.Cross(axis, forward);
-            forward = Vector3.Cross(right, axis);
-        }
-
-
-        return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
-    }
-
-
-
-
-
-
-
-}
-
-
-public class proximityCriteriaBool : objectCriteria
-{
-    //for when we want the objects to be CLOSER than the desired distance
-
-    targetCalculator weWantSomethingNearToThis;
-
-    float desiredDistance = 4f;
-    float allowedMargin = 2f;
-
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-
-        //return false;
-        Vector3 position1 = weWantSomethingNearToThis.targetPosition();
-        Vector3 position2 = theObject.transform.position;
-
-        Vector3 vectorBetween = position1 - position2;
-        float distance = vectorBetween.magnitude;
-
-
-        if (distance > (desiredDistance + allowedMargin)) { return false; }
-
-        return true;
-    }
-
-
-
-
-
-    public proximityCriteriaBool(GameObject objectToBeNearIn, float desiredDistance = 4f, float allowedMargin = 2f)
-    {
-        weWantSomethingNearToThis = new agnosticTargetCalc(objectToBeNearIn);// gahhhhhhh target calculator assumes access to TWO things!  indexer need one that only needs ONE!!!  [fixed]
-        
-
-        this.desiredDistance = desiredDistance;
-        this.allowedMargin = allowedMargin;
-    }
-
-    public proximityCriteriaBool(Vector3 whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)
-    {
-        weWantSomethingNearToThis = new agnosticTargetCalc(whereWeWantToBeCloseToIn);
-
-        this.desiredDistance = desiredDistance;
-        this.allowedMargin = allowedMargin;
-    }
-}
-
-
-public class objectHasTag : objectCriteria
-{
-    tagging2.tag2 theTag;
-
-    public objectHasTag(tagging2.tag2 theTagIn)
-    {
-        this.theTag = theTagIn;
-    }
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-        return tagging2.singleton.allTagsOnObject(theObject).Contains(theTag);
-    }
-}
-
-
-public class objectListCacheSetter : objectSetGrabber
-{
-    //maybe:
-    //      don't re-calculate if the set is non-null
-    //      have some time or condition under which the list is set to null again???  [how?]
-    // no, do 2 diff classes.  a setter, and a receiver/bserver.
-
-
-
-    List<GameObject> theList = new List<GameObject>();
-
-    objectSetGrabber theSetToCache;  //??????  how to do this???
-
-
-
-
-    public override List<GameObject> grab()
-    {
-        //this function always generates a FRESH list
-
-        theList = theSetToCache.grab();
-
-        return theList;
-    }
-
-    public List<GameObject> observeCache()
-    {
-        if(theList == null)
-        {
-            return grab();
-        }
-
-        return theList;
-    }
-
-    internal void add(objectSetGrabber theObjectSetIn)
-    {
-        theSetToCache = theObjectSetIn;
-    }
-}
-
-
-public class objectListCacheReceiver : objectSetGrabber     //look at how cute and simple this is!
-{
-    objectListCacheSetter theCache;
-
-    public override List<GameObject> grab()
-    {
-        return theCache.observeCache();
-    }
-}
 
 
 //no!  split into evaluator for single object!  [and then just use allObjectsInSetThatMeetCriteria]
@@ -1400,47 +1157,6 @@ public class radialFleeingTargeter : targetPicker
 
 //end condition
 
-public class lineOfSight : objectCriteria
-{
-    GameObject theCentralObserver;
-    float theRange = 60f;
-
-
-    public lineOfSight(GameObject theCentralObserverIn, float theRangeIn = 60f)
-    {
-        theCentralObserver = theCentralObserverIn;
-        theRange = theRangeIn;
-    }
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-
-        //spatialDataPoint myData = new spatialDataPoint(threatListWithoutSelf(), this.transform.position);
-
-
-
-        //return myData.threatLineOfSightBool();
-
-
-        bool theBool = false;
-        RaycastHit myHit;
-
-        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
-        Vector3 theDirection = theObject.transform.position - theCentralObserver.transform.position;
-        Ray myRay = new Ray(theCentralObserver.transform.position, theDirection);
-
-
-        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-        {
-            if (myHit.collider.gameObject == theObject)
-            {
-               return true;
-            }
-        }
-
-        return false;
-    }
-}
 
 
 
@@ -1689,416 +1405,6 @@ public class ummAllThusStuffForGrab
 
 
 
-public class animalFSM
-{
-    Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
-
-    
-    //planEXE2 repeatingPlan;
-    //planEXE2 currentPlan;;
-
-    //these are lists, AKA simultaneous plans
-    //List<permaPlan> repeatingPlans = new List<permaPlan>();
-    List<repeater> repeatingPlans = new List<repeater>();
-    //List<depletablePlan> currentPlans = new List<depletablePlan>();
-
-
-    //repeatWithTargetPicker justDoThisForNow;
-
-
-    public animalFSM()
-    {
-        //      new permaPlan();
-    }
-
-    public animalFSM(repeater doThisImmediately)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-    }
-
-    public animalFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        repeatingPlans.Add(repeatWithTargetPickerTest);
-
-    }
-
-
-
-    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        return repeatWithTargetPickerTest;
-    }
-
-
-    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
-    {
-        permaPlan2 perma1 = new permaPlan2(exe1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
-        return repeatWithTargetPickerTest;
-    }
-
-    //single nav!  [should be standard conversion???????]
-    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);//placeholderTarget1);
-                                                                            //theEXE.debugPrint = printThisNPC;
-                                                                            //singleEXE theEXEsingle = theEXE;
-
-        //proximity condition = new proximity(this.gameObject, staticTargetPosition, 2f);// offsetRoom * 1.4f);
-        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// offsetRoom * 1.4f);
-        //condition.debugPrint = theNavAgent.debugPrint;
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-    repeatWithTargetPicker grabTheStuffgdtjtxdetjt(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        //perma1 = new permaPlan2(step1);
-
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
-
-
-        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
-    }
-
-
-
-
-
-
-    public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-
-
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
-
-        switchBoard[new multicondition(switchCondition)] = otherFSM;
-    }
-
-    public animalFSM(repeater doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-
-        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
-
-        switchBoard[new multicondition(switchCondition)] = doThisAfterSwitchCondition;
-    }
-
-    public animalFSM doAFrame()
-    {
-
-        animalFSM toSwitchTo = null;
-
-        toSwitchTo = firstMeSwitchtCondition();
-        if (toSwitchTo != null)
-        {
-            //Debug.Log("switch");
-            return toSwitchTo;
-        }
-
-
-
-
-
-        /*
-        
-        if (currentPlans.Count < 1)
-        {
-            Debug.Log("(currentPlans.Count < 1), refill.......");
-            currentPlans = refillPlans();
-        }
-
-        executeCurrentPlans();
-
-
-        Debug.Log("(currentPlans.Count < 1), refill.......");
-        
-        */
-        foreach (repeater plan in repeatingPlans)
-        {
-            plan.doThisThing();
-        }
-
-
-
-
-        return this;
-    }
-
-
-
-
-    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
-
-        switchBoard[new multicondition(switchCondition)] = otherFSM;
-    }
-    public void addSwitch(condition switchCondition, animalFSM otherFSM)
-    {
-        switchBoard[new multicondition(switchCondition)] = otherFSM;
-    }
-
-    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
-
-        switchBoard[new multicondition(switchCondition)] = otherFSM;
-        otherFSM.switchBoard[new multicondition(new reverseCondition(switchCondition))] = this;
-    }
-    public void addSwitchAndReverse(condition switchCondition, animalFSM otherFSM)
-    {
-        switchBoard[new multicondition(switchCondition)] = otherFSM;
-        otherFSM.switchBoard[new multicondition(new reverseCondition(switchCondition))] = this;
-    }
-
-
-    /*
-    private void executeCurrentPlans()
-    {
-
-        List<depletablePlan> newList = new List<depletablePlan>();
-
-        foreach (depletablePlan plan in currentPlans)
-        {
-            if (plan.endConditionsMet())
-            {
-                continue;
-            }
-
-            if (plan.startConditionsMet())
-            {
-                plan.doTheDepletablePlan();
-            }
-
-            if (plan.endConditionsMet())
-            {
-                continue;
-            }
-
-            newList.Add(plan);
-        }
-
-        currentPlans = newList;
-    }
-
-    private List<depletablePlan> refillPlans()
-    {
-        List<depletablePlan> newList = new List<depletablePlan>();
-        Debug.Log(repeatingPlans.Count.ToString());
-        Debug.Log(repeatingPlans.Count);
-        foreach (permaPlan plan in repeatingPlans)
-        {
-            newList.Add(plan.convertToDepletable());
-        }
-
-        return newList;
-    }
-
-
-    */
-
-    /*
-    private List<permaPlan> duplicateTheRepeatingPlans()
-    {
-        List<permaPlan> newList = new List<permaPlan>();
-        foreach (permaPlan plan in repeatingPlans)
-        {
-            newList.Add(plan.duplicate());
-        }
-
-        return newList;
-    }
-    */
-
-
-    private animalFSM firstMeSwitchtCondition()
-    {
-        foreach (multicondition theseConditions in switchBoard.Keys)
-        {
-            if (theseConditions.met())
-            {
-                return switchBoard[theseConditions];
-            }
-        }
-
-        return null;
-    }
-
-}
-
-
-
-
-
-//conditions
-
-public class canSeeStuffStuff : condition
-{
-
-    stuffType theStuffType;
-
-
-    GameObject theObjectThatIsLooking;
-    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
-
-    public canSeeStuffStuff(GameObject theObjectThatIsLookingIn, stuffType theStuffTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
-    {
-        theObjectThatIsLooking = theObjectThatIsLookingIn;
-        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
-        theStuffType = theStuffTypeIn;
-    }
-
-
-    public override bool met()
-    {
-        spatialDataPoint myData = new spatialDataPoint(new allNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
-
-
-        bool threatLineOfSightBool = myData.threatLineOfSightBool();
-
-        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        string stringToReturn = "";
-        if (returnTrueIfThisObjectCanSeeStuffStuff)
-        {
-            stringToReturn += "do IF this object can see stuffStuff";
-        }
-        else
-        {
-            stringToReturn += "do if this object CANNOT see stuffStuff";
-        }
-
-        return stringToReturn;
-    }
-
-}
-
-public class canSeeNumericalVariable : condition
-{
-
-    numericalVariable theVariableType;
-
-
-    GameObject theObjectThatIsLooking;
-    bool returnTrueIfThisObjectCanSeeStuffStuff = true;
-
-    public canSeeNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn, bool returnTrueIfThisObjectCanSeeStuffStuffIn = true)
-    {
-        theObjectThatIsLooking = theObjectThatIsLookingIn;
-        returnTrueIfThisObjectCanSeeStuffStuff = returnTrueIfThisObjectCanSeeStuffStuffIn;
-        theVariableType = theVariableTypeIn;
-    }
-
-
-    public override bool met()
-    {
-        spatialDataPoint myData = new spatialDataPoint(new allNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
-
-
-        bool threatLineOfSightBool = myData.threatLineOfSightBool();
-
-        if (threatLineOfSightBool == returnTrueIfThisObjectCanSeeStuffStuff)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        string stringToReturn = "";
-        if (returnTrueIfThisObjectCanSeeStuffStuff)
-        {
-            stringToReturn += "do IF this object can see stuffStuff";
-        }
-        else
-        {
-            stringToReturn += "do if this object CANNOT see stuffStuff";
-        }
-
-        return stringToReturn;
-    }
-
-}
-
-public class depletableSingleEXEListComplete : condition
-{
-    List<singleEXE> planList;
-
-    public depletableSingleEXEListComplete(List<singleEXE> planList)
-    {
-        this.planList = planList;
-    }
-
-    public override bool met()
-    {
-        //Debug.Log("planList.Count:  " + planList.Count);
-        foreach (singleEXE planEXE in planList)
-        {
-            if (planEXE == null) { continue; } //messy annoying for now
-            if (planEXE.endConditionsMet() == false)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    public override string asText()
-    {
-        return standardAsText();
-    }
-
-    public override string asTextSHORT()
-    {
-        return standardAsTextSHORT();
-    }
-}
 
 
 
@@ -2123,7 +1429,7 @@ public abstract class repeater
 public class agnostRepeater: repeater
 {
     //agnostic as to whether target may change or not
-    repeater theRepeater;
+    repeater theRepeater; //hmm, nesting makes problems for printing/debugging contents.....
 
     public agnostRepeater(permaPlan2 thePermaIn)
     {
@@ -2241,125 +1547,70 @@ public class simpleExactRepeatOfPerma : repeater
     }
 }
 
-
-
-
-public class permaPlan2
+public class repeatWithObjectReturner : repeater
 {
-    //boil things down so it's EASY to generate [other] abstract classes
-    //by simply inputting just [lists of?] enactions and conditions?
-
-    //and make a simple class [this one] that JUST holds one set of enactions and conditions?
-    //[then can easily copy from it]
+    internal individualObjectReturner theObjectReturner;
 
 
-    //what?  just START conditions for the set?  or ALSO end conditions?  [and is there anything else to consider?]
-
-    List<singleEXE> thePlan = new List<singleEXE>();
-
-    List<condition> startConditions;
-    List<condition> endConditions;
-
-
-    public permaPlan2(singleEXE step1)
+    public repeatWithObjectReturner(permaPlan2 thePermaIn, individualObjectReturner theObjectReturnerIn)
     {
-        thePlan.Add(step1);
-    }
-    public permaPlan2(singleEXE step1, singleEXE step2)
-    {
-        thePlan.Add(step1);
-        thePlan.Add(step2);
+        this.thePerma = thePermaIn;
+        theObjectReturner = theObjectReturnerIn;
+        theDepletablePlan = convertToDepletableWithNextTarget();
     }
 
-
-    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3)
+    public override void doThisThing()
     {
+        //Debug.Log("======================================================================");
+        refillIfNeeded();
 
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-        thePlan.Add(step3);
+        theDepletablePlan.doTheDepletablePlan();
+
+        refillIfNeeded();
     }
 
-    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, condition startCondition1)
+    private void refillIfNeeded()
     {
-        startConditions.Add(startCondition1);
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-        thePlan.Add(step3);
-    }
-    public permaPlan2(singleEXE step1, singleEXE step2, condition startCondition1)
-    {
-        startConditions.Add(startCondition1);
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-    }
-    public permaPlan2(singleEXE step1, condition startCondition1)
-    {
-        startConditions.Add(startCondition1);
-        thePlan.Add(step1);
-    }
-
-    public permaPlan2(singleEXE step1, singleEXE step2, condition startCondition1, condition startCondition2)
-    {
-        startConditions.Add(startCondition1);
-        startConditions.Add(startCondition2);
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-    }
-    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, condition startCondition1, condition startCondition2)
-    {
-        startConditions.Add(startCondition1);
-        startConditions.Add(startCondition2);
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-        thePlan.Add(step3);
-    }
-
-
-
-    List<singleEXE> outPutCopyOfThePlan()
-    {
-        List<singleEXE> newList = new List<singleEXE>();
-
-        foreach (singleEXE thisOne in thePlan)
+        //Debug.Log("refillIfNeeded()");
+        if (theDepletablePlan.endConditionsMet())
         {
-            newList.Add(thisOne);
+            //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
+            theDepletablePlan = convertToDepletableWithNextTarget();
+            return;
         }
 
-        return newList;
-    }
-    List<condition> outPutCopyOfStartConditions()
-    {
-        List<condition> newList = new List<condition>();
-
-        foreach (condition thisOne in startConditions)
-        {
-            newList.Add(thisOne);
-        }
-
-        return newList;
-    }
-    List<condition> outPutCopyOfEndConditions()
-    {
-        List<condition> newList = new List<condition>();
-
-        foreach (condition thisOne in endConditions)
-        {
-            newList.Add(thisOne);
-        }
-
-        return newList;
+        //Debug.Log("NOT met.........");
     }
 
-    internal depletablePlan convertToDepletable()
+
+
+
+
+
+    internal depletablePlan convertToDepletableWithNextTarget()
     {
         depletablePlan newThing = new depletablePlan();
+        //          agnosticTargetCalc newTarget = theTargetPicker.pickNext();
 
-        foreach (singleEXE thisOne in thePlan)
+        //Debug.Log("newTarget:  " + newTarget);
+        //Debug.Log("newTarget.targetPosition():  " + newTarget.targetPosition());
+        //Debug.Log("newTarget.GetHashCode():  " + newTarget.GetHashCode());
+
+        //Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
+
+        foreach (singleEXE thisOne in thePerma.convertToDepletable().thePlan)
         {
-            thisOne.resetEnactionCounter();
+            //thisOne.theEnaction.targ//ohhhhhhhhh, not all enactions HAVE a target, i see.....how to handle....
+            //Debug.Log("ooooooooooooooo????????????");
+           //            thisOne.setTarget(newTarget);
+
             newThing.add(thisOne);
         }
+
+
+        //Debug.Log("newThing.Count:  " + newThing.thePlan.Count);
+
+
 
         return newThing;
     }
@@ -2368,691 +1619,11 @@ public class permaPlan2
 
 }
 
-public class permaPlan
-{
-    //boil things down so it's EASY to generate [other] abstract classes
-    //by simply inputting just [lists of?] enactions and conditions?
 
-    //and make a simple class [this one] that JUST holds one set of enactions and conditions?
-    //[then can easily copy from it]
 
 
-    //what?  just START conditions for the set?  or ALSO end conditions?  [and is there anything else to consider?]
 
-    List<enaction> thePlan = new List<enaction>();
 
-    List<condition> startConditions;
-    List<condition> endConditions;
-
-
-    public permaPlan(enaction enaction1)
-    {
-        thePlan.Add(enaction1);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2)
-    {
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3)
-    {
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-        thePlan.Add(enaction3);
-    }
-
-    public permaPlan(enaction enaction1, condition startCondition1)
-    {
-        startConditions.Add(startCondition1);
-        thePlan.Add(enaction1);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2, condition startCondition1)
-    {
-        startConditions.Add(startCondition1);
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3, condition startCondition1)
-    {
-        startConditions.Add(startCondition1);
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-        thePlan.Add(enaction3);
-    }
-
-    public permaPlan(enaction enaction1, condition startCondition1, condition startCondition2)
-    {
-        startConditions.Add(startCondition1);
-        startConditions.Add(startCondition2);
-
-        thePlan.Add(enaction1);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2, condition startCondition1, condition startCondition2)
-    {
-        startConditions.Add(startCondition1);
-        startConditions.Add(startCondition2);
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-    }
-    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3, condition startCondition1, condition startCondition2)
-    {
-        startConditions.Add(startCondition1);
-        startConditions.Add(startCondition2);
-        thePlan.Add(enaction1);
-        thePlan.Add(enaction2);
-        thePlan.Add(enaction3);
-    }
-
-    List<enaction> outPutCopyOfThePlan()
-    {
-        List<enaction> newList = new List<enaction>();
-
-        foreach (enaction thisOne in thePlan)
-        {
-            newList.Add(thisOne);
-        }
-
-        return newList;
-    }
-    List<condition> outPutCopyOfStartConditions()
-    {
-        List<condition> newList = new List<condition>();
-
-        foreach (condition thisOne in startConditions)
-        {
-            newList.Add(thisOne);
-        }
-
-        return newList;
-    }
-    List<condition> outPutCopyOfEndConditions()
-    {
-        List<condition> newList = new List<condition>();
-
-        foreach (condition thisOne in endConditions)
-        {
-            newList.Add(thisOne);
-        }
-
-        return newList;
-    }
-
-    internal depletablePlan convertToDepletable()
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class depletablePlan
-{
-    //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalFSM] holds PARALLEL.
-    //so here:  just use singleEXE instead of enaction?  [for "inputData" for enacting]
-    //List<enaction> thePlan = new List<enaction>();
-    public List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
-                                                             //no further layers below the single enaction within it?  we'll see.  
-                                                             //List<enactable> thePlan = new List<enactable>();  //call it an enactable?
-
-    public List<condition> startConditions = new List<condition>();
-    public List<condition> endConditions = new List<condition>();
-
-    public depletablePlan()
-    {
-
-        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
-    }
-
-    public depletablePlan(singleEXE step1)
-    {
-        thePlan.Add(step1);
-
-        //always need "empty plan list" as an end condition, for animalFSM or something?
-
-        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
-    }
-    public depletablePlan(singleEXE step1, singleEXE step2)
-    {
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-
-        //always need "empty plan list" as an end condition, for animalFSM or something?
-
-        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
-    }
-    public depletablePlan(singleEXE step1, singleEXE step2, singleEXE step3)
-    {
-        thePlan.Add(step1);
-        thePlan.Add(step2);
-        thePlan.Add(step3);
-
-        //always need "empty plan list" as an end condition, for animalFSM or something?
-
-        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
-    }
-
-
-
-    public void add(singleEXE toAdd)
-    {
-        thePlan.Add(toAdd);
-    }
-
-    //public abstract void doTheDepletablePlan();
-    public void doTheDepletablePlan()
-    {
-        executeSequential();
-    }
-
-    public void executeSequential()
-    {
-
-        //conditionalPrint("executeSequential()");
-        //conditionalPrint("x1 nestedPlanCountToText():  " + nestedPlanCountToText());
-        //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
-
-        //sequential concerns:
-        //      only execute 1st one
-        //      remove item from list when its end conditions are met
-
-        if (thePlan == null)
-        {
-            Debug.Log("null.....that's an error!");
-            return;
-        }
-
-        if (thePlan.Count < 1)
-        {
-            Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end");
-            return;
-        }
-
-
-        if (thePlan[0] == null)
-        {
-            Debug.Log("null.....that's an error!");
-            return;
-        }
-
-        //exeList[0].grabberDebug = grabberDebug;
-        //      conditionalPrint("5555555555555555555555555555grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
-        //      grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
-        //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
-
-        if (startConditionsMet() && thePlan[0].startConditionsMet())
-        {
-            //Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
-            //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
-            //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
-            //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
-            //conditionalPrint("///////////////////////////////////////////////////////////////////////");
-            thePlan[0].execute();
-        }
-
-        //conditionalPrint("x3 nestedPlanCountToText():  " + nestedPlanCountToText());
-
-        if (thePlan[0].endConditionsMet())
-        {
-            //Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
-
-            //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
-            //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
-            thePlan.RemoveAt(0);
-
-            //conditionalPrint("x5 nestedPlanCountToText():  " + nestedPlanCountToText());
-
-            return;
-        }
-
-
-        //????????
-        if (endConditionsMet())
-        {
-            Debug.Log("exeList[0].endConditionsMet()  for:  " + this);
-
-            //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
-            //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
-            thePlan.Clear();
-
-            //conditionalPrint("x5 nestedPlanCountToText():  " + nestedPlanCountToText());
-
-            return;
-        }
-
-        //conditionalPrint("x6 nestedPlanCountToText():  " + nestedPlanCountToText());
-    }
-
-
-    public bool startConditionsMet()
-    {
-        //grabberDebug.debugPrintBool = debugPrint;
-        //Debug.Log("tartConditions.Count:  " + startConditions.Count);
-        foreach (condition thisCondition in startConditions)
-        {
-            //Debug.Log("thisCondition:  " + thisCondition);
-            //Debug.Log("thisCondition.met():  " + thisCondition.met());
-            if (thisCondition.met() == false)
-            {
-
-                //if (debugPrint == true) { Debug.Log("this start condition not met:  " + thisCondition); }
-                //      grabberDebug.rep
-                return false;
-            }
-        }
-
-        //Debug.Log("no start conditions remain unfulfilled!");
-        //Debug.Log("no conditions remain unfulfilled!");
-        return true;
-    }
-
-    public bool endConditionsMet()
-    {
-        //Debug.Log("looking at end conditions for:  " + this);
-
-        //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
-        foreach (condition thisCondition in endConditions)
-        {
-            //conditionalPrint("thisCondition:  " + thisCondition);
-            //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
-            if (thisCondition.met() == false)
-            {
-                //Debug.Log("this end condition not met:  " + thisCondition);
-                //conditionalPrint("this end condition not met:  "+ thisCondition);
-                return false;
-            }
-
-            //Debug.Log("thisCondition MET:  " + thisCondition);
-        }
-        //Debug.Log("no conditions remain unfulfilled!");
-
-        //conditionalPrint("no end conditions remain unfulfilled!");
-        //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
-
-        return true;
-    }
-
-}
-
-
-
-
-
-
-
-
-
-//targeting
-
-public abstract class targetPicker
-{
-
-    //internal GameObject objectToBeNear; ?????????????
-
-    public abstract agnosticTargetCalc pickNext();  //hmm, should just return object??
-}
-
-public class pickRandomNearbyLocation : targetPicker
-{
-    GameObject objectToBeNear;
-    float spreadFactor = 1.0f;
-
-    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
-    {
-        objectToBeNear = objectToBeNearIn;
-        spreadFactor = spreadFactorIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-        return targ;
-    }
-
-}
-
-
-//nahh let's split this up:
-
-/*
-public class pickNextVisibleStuffStuff : targetPicker
-{
-    GameObject objectToBeNear;
-    stuffType theType;
-
-    public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
-    {
-        //objectToBeNear = objectToBeNearIn;
-        theType = theTypeIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
-        //pickNearest???
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-
-        return targ;
-    }
-}
-*/
-
-
-//"nearest visible" is two conditions.....
-//      all visible
-//      nearest
-
-//public class allVisibleInFOV : objectSetGrabber
-//no, just combine "allObjectsInSetThatMeetCriteria" with"objectVisibleInFOV", i love this
-
-//[i already have "allNearbyStuffStuff"]
-
-public class pickRandom : targetPicker
-{
-    objectSetGrabber theObjectSetGrabber;
-
-    public pickRandom(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
-    {
-        //objectToBeNear = objectToBeNearIn;
-        theObjectSetGrabber = objectSetGrabberIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
-
-        agnosticTargetCalc targ = new agnosticTargetCalc(target);
-
-        return targ;
-    }
-}
-
-public class pickNearest : targetPicker
-{
-    GameObject objectToBeNear;
-    objectSetGrabber theObjectSetGrabber;
-
-    public pickNearest(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
-    {
-        objectToBeNear = objectToBeNearIn;
-        theObjectSetGrabber = objectSetGrabberIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearest(objectToBeNear ,theObjectSetGrabber.grab());
-
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-
-        return targ;
-    }
-}
-
-public class pickNearestExceptSelf : targetPicker
-{
-    GameObject objectToBeNear;
-    objectSetGrabber theObjectSetGrabber;
-
-    public pickNearestExceptSelf(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
-    {
-        objectToBeNear = objectToBeNearIn;
-        theObjectSetGrabber = objectSetGrabberIn;
-    }
-
-    public override agnosticTargetCalc pickNext()
-    {
-        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearestExceptSELF(objectToBeNear, theObjectSetGrabber.grab());
-
-        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! target:  " + target);
-
-        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
-
-        return targ;
-    }
-}
-
-
-
-
-
-
-
-public class pickFirstXFromListY : targetPicker
-{
-
-    objectCriteria theCriteria;
-    objectSetGrabber theListGenerator;
-
-    public override agnosticTargetCalc pickNext()
-    {
-        foreach (GameObject thisObject in theListGenerator.grab())
-        {
-            //Debug.Log("thisObject:  " + thisObject);
-
-            if (theCriteria.evaluateObject(thisObject))
-            {
-                agnosticTargetCalc targ = new agnosticTargetCalc(thisObject);
-
-                return targ;
-            }
-        }
-
-        return null;
-    }
-}
-
-public class pickMostXFromListY : targetPicker
-{
-
-    objectEvaluator theEvaluator;
-    objectSetGrabber theListGenerator;
-
-    public override agnosticTargetCalc pickNext()
-    {
-        agnosticTargetCalc targ = new agnosticTargetCalc(whichObjectOnListIsMostX(theListGenerator.grab()));
-
-        return targ;
-    }
-
-
-
-
-    public GameObject whichObjectOnListIsMostX(List<GameObject> listOfObjects)
-    {
-        GameObject bestSoFar = null;
-        float bestValueSoFar = 0;
-
-        foreach (GameObject thisObject in listOfObjects)
-        {
-            if (bestSoFar == null) 
-            { 
-                bestSoFar = thisObject; 
-                bestValueSoFar = theEvaluator.evaluateObject(thisObject);
-                continue;
-            }
-
-
-            float currentValue = theEvaluator.evaluateObject(thisObject);
-            if (currentValue < bestValueSoFar)
-            {
-                bestSoFar = thisObject;
-                bestValueSoFar = currentValue;
-            }
-        }
-
-        return bestSoFar;
-    }
-
-}
-
-
-
-
-
-
-public class allNearbyStuffStuff : objectSetGrabber
-{
-    GameObject theObjectWeWantStuffNear;
-    stuffType theStuffTypeX;
-
-    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
-    {
-        theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
-        theStuffTypeX = theStuffTypeXIn;
-    }
-
-
-    public override List<GameObject> grab()
-    {
-        return allNearbyObjectsWithStuffTypeX(theStuffTypeX);
-    }
-
-
-    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
-    {
-
-        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWeWantStuffNear);  //lol forgot, this is ONE way to grab functions
-        List<GameObject> theListOfObjects = new List<GameObject>();
-
-        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
-
-        foreach (GameObject thisObject in theListOfALL)
-        {
-
-            //Debug.Log("thisObject:  " + thisObject);
-            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
-
-            if (theComponent == null)
-            {
-
-                //Debug.Log("(theComponent == null)");
-                continue;
-            }
-
-            if (theComponent.theTypeOfStuff == theStuffTypeX)
-            {
-                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
-                theListOfObjects.Add(thisObject);
-            }
-        }
-
-        return theListOfObjects;
-    }
-}
-public class allNearbyNumericalVariable : objectSetGrabber
-{
-    numericalVariable theVariableType;
-
-
-    GameObject theObjectThatIsLooking;
-
-    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn)
-    {
-        theObjectThatIsLooking = theObjectThatIsLookingIn;
-        theVariableType = theVariableTypeIn;
-    }
-
-    public override List<GameObject> grab()
-    {
-        return allNearbyObjectsWithVariableX(theVariableType);
-    }
-
-
-    public List<GameObject> allNearbyObjectsWithVariableX(numericalVariable theVariableTypeIn)
-    {
-
-        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectThatIsLooking);  //lol forgot, this is ONE way to grab functions
-        List<GameObject> theListOfObjects = new List<GameObject>();
-
-        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
-
-        foreach (GameObject thisObject in theListOfALL)
-        {
-
-            //Debug.Log("thisObject:  " + thisObject);
-            interactable2 theComponent = thisObject.GetComponent<interactable2>();
-
-            if (theComponent == null)
-            {
-
-                //Debug.Log("(theComponent == null)");
-                continue;
-            }
-
-            if (theComponent.dictOfIvariables.ContainsKey(theVariableType))
-            {
-                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
-                theListOfObjects.Add(thisObject);
-            }
-        }
-
-        return theListOfObjects;
-    }
-}
-
-
-
-
-
-
-
-//"bool" criteria
-
-public abstract class objectCriteria
-{
-    // [BOOLEAN] function to evaluate a single object
-
-    public abstract bool evaluateObject(GameObject theObject);
-}
-
-public class stickyTrueCriteria : objectCriteria
-{
-    objectCriteria theNestedCriteria;
-
-
-    int countdown = 0;
-    int maxTimer = 90;
-
-
-    public stickyTrueCriteria(objectCriteria theNestedCriteriaIn, int maxTimerIn = 90)
-    {
-        theNestedCriteria = theNestedCriteriaIn;
-        maxTimer = maxTimerIn;
-    }
-
-
-
-
-    public override bool evaluateObject(GameObject theObject)
-    {
-        if (countdown > 0)
-        {
-            countdown--;
-            return true;
-        }
-
-        if (theNestedCriteria.evaluateObject(theObject))
-        {
-            countdown = maxTimer;
-            return true;
-        }
-
-        return false;
-    }
-}
-
-
-
-//"float"/scalar criteria
-
-public abstract class objectEvaluator
-{
-    // [FLOAT to RANK objects, and pick the "most"] function to evaluate a single object
-
-    public abstract float evaluateObject(GameObject theObject);
-}
 
 
 
@@ -3066,6 +1637,11 @@ public class reproduce : IEnactaBool
     {
         throw new System.NotImplementedException();
     }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class meleeAttack : IEnactaBool
@@ -3074,6 +1650,11 @@ public class meleeAttack : IEnactaBool
     {
         throw new System.NotImplementedException();
     }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class sleep : IEnactaBool
@@ -3081,6 +1662,11 @@ public class sleep : IEnactaBool
     public override void enact(inputData theInput)
     {
         throw new System.NotImplementedException();
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        throw new NotImplementedException();
     }
 }
 

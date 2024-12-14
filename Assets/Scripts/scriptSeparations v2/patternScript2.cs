@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
+using UnityEngine.UIElements;
 
 public class patternScript2 : MonoBehaviour
 {
@@ -117,6 +119,82 @@ public class patternScript2 : MonoBehaviour
         vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance* spreadFactor);
 
         return vectorToReturn;
+    }
+
+}
+
+
+
+public class gridOfPoints
+{
+    //axes conventions:
+    //      z = "forward"/"rows"/"length"
+    //      x = "right"/"columns"/"width"
+    //      y = [obviously "up"/"verticalColumns"/"height"]
+
+    List<Vector3> theList;
+
+    public gridOfPoints(Vector3 origin, int zQuantity, int xQuantity, float zLength, float xWidth, float yHeight = 10f, int yQuantity = 1)
+    {
+        theList = createGridOfPoints(origin, zQuantity, xQuantity, zLength, xWidth, yHeight, yQuantity);
+    }
+
+    public List<Vector3> returnIt()
+    {
+        return theList;
+    }
+
+    public List<Vector3> createGridOfPoints(Vector3 origin, int zQuantity, int xQuantity, float zLength, float xWidth, float yHeight = 10f, int yQuantity = 1)
+    {
+        //how to do?
+
+        List<Vector3> positionList = new List<Vector3>();
+
+        int xRow = 0;
+        int yLevel = 0;
+
+        while (yLevel < yQuantity)
+        {
+            while (xRow < xQuantity)
+            {
+                positionList = addPositionLists(positionList, 
+                    makeLinePattern2(origin, zQuantity, zLength, (xRow * xWidth), 
+                    (yLevel * yHeight)
+                    ));
+                xRow++;
+            }
+
+            yLevel++;
+        }
+
+
+        return positionList;
+    }
+
+
+    public List<Vector3> addPositionLists(List<Vector3> list1, List<Vector3> list2)
+    {
+        foreach (Vector3 thisPoint in list2)
+        {
+            list1.Add(thisPoint);
+        }
+
+        return list1;
+    }
+
+    public List<Vector3> makeLinePattern2(Vector3 origin, int howMany, float zSpacing, float xOffset, float yOffset = 0f)
+    {
+        List<Vector3> thisList = new List<Vector3>();
+
+        int whichPositionWeAreOn = 0;
+
+        while (whichPositionWeAreOn < howMany)
+        {
+            thisList.Add(new Vector3(xOffset, yOffset, whichPositionWeAreOn * zSpacing)+ origin);
+            whichPositionWeAreOn++;
+        }
+
+        return thisList;
     }
 
 }

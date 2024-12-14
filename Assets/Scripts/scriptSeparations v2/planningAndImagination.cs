@@ -435,7 +435,7 @@ public class boolEXE2 : singleEXE
     }
 
 
-    public boolEXE2(IEnactaBool theInputEnaction, GameObject theTarget)
+    public boolEXE2(IEnactaBool theInputEnaction, GameObject theTarget) //target is not used at all!!!!!!!!!
     {
         this.theEnaction = theInputEnaction;
     }
@@ -467,7 +467,17 @@ public class vect3EXE2 : singleEXE
         //this.possiblyMobileActualTarget = possiblyMobileActualTargetIn;
         //this.offsetRoom = offsetRoomIn;
 
-        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn, offsetRoomIn);
+        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn);//, offsetRoomIn);
+    }
+
+    public vect3EXE2(IEnactByTargetVector theInputEnaction, targetPicker targetPickerIn, float offsetRoomIn = 1.8f)
+    {
+        this.theEnaction = theInputEnaction;
+        //this.possiblyMobileActualTarget = possiblyMobileActualTargetIn;
+        //this.offsetRoom = offsetRoomIn;
+
+        //theTargetCalculator = new targetCalculatorFromPicker(this.theEnaction.transform.gameObject, targetPickerIn, offsetRoomIn);
+        theTargetCalculator = new targetCalculatorFromPicker(targetPickerIn, offsetRoomIn);
     }
 
 
@@ -480,7 +490,7 @@ public class vect3EXE2 : singleEXE
         Debug.Assert(this.theEnaction != null);
         Debug.Assert(this.theEnaction.transform != null);
         Debug.Assert(this.theEnaction.transform.gameObject != null);
-        theTargetCalculator = new staticVectorTargetCalculator(this.theEnaction.transform.gameObject, stationaryTargetAsVectorIn, offsetRoomIn);
+        theTargetCalculator = new staticVectorTargetCalculator(this.theEnaction.transform.gameObject, stationaryTargetAsVectorIn);//, offsetRoomIn);
 
     }
 
@@ -493,7 +503,7 @@ public class vect3EXE2 : singleEXE
 
         this.theEnaction = theInputEnaction;
         //this.possiblyMobileActualTarget = theTarget;
-        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn, offsetRoomIn);
+        theTargetCalculator = new movableObjectTargetCalculator(this.theEnaction.transform.gameObject, possiblyMobileActualTargetIn);//, offsetRoomIn);
 
     }
 
@@ -527,7 +537,9 @@ public class vect3EXE2 : singleEXE
 
         //conditionalPrint("8888888888888888888888888888grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
         //grabberDebug.recordCurrentEnaction(theEnaction);
-        theEnaction.enact(new inputData(theTargetCalculator.targetPosition()));
+        Vector3 targetPosition = theTargetCalculator.targetPosition();
+        new mastLine(targetPosition);
+        theEnaction.enact(new inputData(targetPosition));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;
         //conditionalPrint("aaaaaa.2222222222222bbbbbbb theRefillPlan.nestedPlanCountToText():  " + nestedPlanCountToText());
@@ -1259,23 +1271,23 @@ public class agnosticTargetCalc:targetCalculator
     targetCalculator theTargetCalc;
 
 
-    public agnosticTargetCalc(GameObject targeterIn, Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    public agnosticTargetCalc(GameObject targeterIn, Vector3 targetPositionVectorIn)//, float offsetIn = 1.8f)
     {
-        theTargetCalc = new staticVectorTargetCalculator(targeterIn, targetPositionVectorIn, offsetIn);
+        theTargetCalc = new staticVectorTargetCalculator(targeterIn, targetPositionVectorIn);//, offsetIn);
     }
 
-    public agnosticTargetCalc(GameObject targeterIn, GameObject targetIn, float offsetIn = 1.8f)
+    public agnosticTargetCalc(GameObject targeterIn, GameObject targetIn)//, float offsetIn = 1.8f)
     {
-        theTargetCalc = new movableObjectTargetCalculator(targeterIn, targetIn, offsetIn);
+        theTargetCalc = new movableObjectTargetCalculator(targeterIn, targetIn);//, offsetIn);
     }
-    public agnosticTargetCalc(Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    public agnosticTargetCalc(Vector3 targetPositionVectorIn)//, float offsetIn = 1.8f)
     {
-        theTargetCalc = new staticSingleVectorTargetCalculator(targetPositionVectorIn, offsetIn);
+        theTargetCalc = new staticSingleVectorTargetCalculator(targetPositionVectorIn);//, offsetIn);
     }
 
-    public agnosticTargetCalc(GameObject targetIn, float offsetIn = 1.8f)
+    public agnosticTargetCalc(GameObject targetIn)//, float offsetIn = 1.8f)
     {
-        theTargetCalc = new singleMovableObjectTargetCalculator(targetIn, offsetIn);
+        theTargetCalc = new singleMovableObjectTargetCalculator(targetIn);//, offsetIn);
     }
 
     public override Vector3 realPositionOfTarget()
@@ -1298,13 +1310,15 @@ public class agnosticTargetCalc:targetCalculator
 public abstract class targetCalculator
 {
     public GameObject targeter;
-    public float offset = 1.8f;
+
 
     public abstract Vector3 targetPosition();
     public abstract Vector3 realPositionOfTarget();
 
     public string asTextString = "";
 
+
+    /*
     public Vector3 calculateOffsetTargetPosition(GameObject targeter, Vector3 targetPositionVector)
     {
 
@@ -1315,7 +1329,7 @@ public abstract class targetCalculator
 
         return calculatedOffsetTarget;
     }
-
+    */
 
     internal string asText()
     {
@@ -1330,11 +1344,11 @@ public class movableObjectTargetCalculator : targetCalculator
 {
     GameObject target;
 
-    public movableObjectTargetCalculator(GameObject targeterIn, GameObject targetIn, float offsetIn = 1.8f)
+    public movableObjectTargetCalculator(GameObject targeterIn, GameObject targetIn)//, float offsetIn = 1.8f)
     {
         targeter = targeterIn;
         target = targetIn;
-        offset = offsetIn;
+        //offset = offsetIn;
         asTextString = targeterIn.ToString();
     }
 
@@ -1365,7 +1379,8 @@ public class movableObjectTargetCalculator : targetCalculator
             //return Vector3.zero;
             return targeter.transform.position;
         }
-        return calculateOffsetTargetPosition(targeter, target.transform.position);
+        //return calculateOffsetTargetPosition(targeter, target.transform.position);
+        return target.transform.position;
     }
 
 
@@ -1375,11 +1390,11 @@ public class staticVectorTargetCalculator : targetCalculator
 {
     Vector3 targetPositionVector;
 
-    public staticVectorTargetCalculator(GameObject targeterIn, Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    public staticVectorTargetCalculator(GameObject targeterIn, Vector3 targetPositionVectorIn)//, float offsetIn = 1.8f)
     {
         targeter = targeterIn;
         targetPositionVector = targetPositionVectorIn;
-        offset = offsetIn;
+        //offset = offsetIn;
         asTextString = "static vector:  " + targetPositionVectorIn;
     }
 
@@ -1390,7 +1405,8 @@ public class staticVectorTargetCalculator : targetCalculator
 
     public override Vector3 targetPosition()
     {
-        return calculateOffsetTargetPosition(targeter, targetPositionVector);
+        //return calculateOffsetTargetPosition(targeter, targetPositionVector);
+        return targetPositionVector;
     }
 
     public override bool error()
@@ -1403,10 +1419,10 @@ public class singleMovableObjectTargetCalculator : targetCalculator
 {
     GameObject target;
 
-    public singleMovableObjectTargetCalculator(GameObject targetIn, float offsetIn = 1.8f)
+    public singleMovableObjectTargetCalculator(GameObject targetIn)//, float offsetIn = 1.8f)
     {
         target = targetIn;
-        offset = offsetIn;
+        //offset = offsetIn;
     }
 
     public override bool error()
@@ -1446,10 +1462,10 @@ public class staticSingleVectorTargetCalculator : targetCalculator
 {
     Vector3 targetPositionVector;
 
-    public staticSingleVectorTargetCalculator(Vector3 targetPositionVectorIn, float offsetIn = 1.8f)
+    public staticSingleVectorTargetCalculator(Vector3 targetPositionVectorIn)//, float offsetIn = 1.8f)
     {
         targetPositionVector = targetPositionVectorIn;
-        offset = offsetIn;
+        //offset = offsetIn;
         asTextString = "static vector:  " + targetPositionVectorIn;
     }
 
@@ -1466,5 +1482,616 @@ public class staticSingleVectorTargetCalculator : targetCalculator
     public override bool error()
     {
         return false;
+    }
+}
+
+public class targetCalculatorFromPicker : targetCalculator
+{
+    targetPicker theTargetPicker;
+    targetCalculator theCalculatorForCurrentTarget;
+
+    private targetPicker targetPickerIn;
+    private float offsetRoomIn;
+
+    public targetCalculatorFromPicker(targetPicker targetPickerIn, float offsetRoomIn)
+    {
+        this.targetPickerIn = targetPickerIn;
+        this.offsetRoomIn = offsetRoomIn;
+    }
+
+    internal void updateTargetIfNecessary()
+    {
+
+        if (theCalculatorForCurrentTarget.error())
+        {
+            theCalculatorForCurrentTarget = theTargetPicker.pickNext();
+            //theCalculatorForCurrentTarget.offset = offsetRoomIn; //messyyyyy
+        }
+    }
+
+    public override bool error()
+    {
+        updateTargetIfNecessary();
+
+
+        if (theCalculatorForCurrentTarget.error())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override Vector3 realPositionOfTarget()
+    {
+        updateTargetIfNecessary();
+
+        return theCalculatorForCurrentTarget.realPositionOfTarget();
+    }
+
+    public override Vector3 targetPosition()
+    {
+        updateTargetIfNecessary();
+
+        return theCalculatorForCurrentTarget.targetPosition();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+public class permaPlan2
+{
+    //boil things down so it's EASY to generate [other] abstract classes
+    //by simply inputting just [lists of?] enactions and conditions?
+
+    //and make a simple class [this one] that JUST holds one set of enactions and conditions?
+    //[then can easily copy from it]
+
+
+    //what?  just START conditions for the set?  or ALSO end conditions?  [and is there anything else to consider?]
+
+    List<singleEXE> thePlan = new List<singleEXE>();
+
+    List<condition> startConditions;
+    List<condition> endConditions;
+
+
+    public permaPlan2(singleEXE step1)
+    {
+        thePlan.Add(step1);
+    }
+    public permaPlan2(singleEXE step1, singleEXE step2)
+    {
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+    }
+
+    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3)
+    {
+
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+        thePlan.Add(step3);
+    }
+    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
+    {
+
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+        thePlan.Add(step3);
+        thePlan.Add(step4);
+    }
+
+    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+        thePlan.Add(step3);
+    }
+    public permaPlan2(singleEXE step1, singleEXE step2, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+    }
+    public permaPlan2(singleEXE step1, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(step1);
+    }
+
+    public permaPlan2(singleEXE step1, singleEXE step2, condition startCondition1, condition startCondition2)
+    {
+        startConditions.Add(startCondition1);
+        startConditions.Add(startCondition2);
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+    }
+    public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, condition startCondition1, condition startCondition2)
+    {
+        startConditions.Add(startCondition1);
+        startConditions.Add(startCondition2);
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+        thePlan.Add(step3);
+    }
+
+
+
+    List<singleEXE> outPutCopyOfThePlan()
+    {
+        List<singleEXE> newList = new List<singleEXE>();
+
+        foreach (singleEXE thisOne in thePlan)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+    List<condition> outPutCopyOfStartConditions()
+    {
+        List<condition> newList = new List<condition>();
+
+        foreach (condition thisOne in startConditions)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+    List<condition> outPutCopyOfEndConditions()
+    {
+        List<condition> newList = new List<condition>();
+
+        foreach (condition thisOne in endConditions)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+
+    internal depletablePlan convertToDepletable()
+    {
+        depletablePlan newThing = new depletablePlan();
+
+        foreach (singleEXE thisOne in thePlan)
+        {
+            thisOne.resetEnactionCounter();
+            newThing.add(thisOne);
+        }
+
+        return newThing;
+    }
+
+
+
+    public void printBaseEnactions()
+    {
+        string newString = "";
+        //newString += "the base enactions of this perma plan:  ";
+        //newString += "[";
+        foreach (singleEXE thisEXE in thePlan)
+        {
+
+            newString += thisEXE.theEnaction;
+        }
+
+        //newString += "]";
+        Debug.Log(newString);
+    }
+
+    internal string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this perma plan:  ";
+        //newString += "[";
+        foreach (singleEXE thisEXE in thePlan)
+        {
+            newString += thisEXE.theEnaction;
+        }
+
+        return newString;
+    }
+}
+
+
+public class permaPlan
+{
+    //boil things down so it's EASY to generate [other] abstract classes
+    //by simply inputting just [lists of?] enactions and conditions?
+
+    //and make a simple class [this one] that JUST holds one set of enactions and conditions?
+    //[then can easily copy from it]
+
+
+    //what?  just START conditions for the set?  or ALSO end conditions?  [and is there anything else to consider?]
+
+    List<enaction> thePlan = new List<enaction>();
+
+    List<condition> startConditions;
+    List<condition> endConditions;
+
+
+    public permaPlan(enaction enaction1)
+    {
+        thePlan.Add(enaction1);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2)
+    {
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3)
+    {
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+        thePlan.Add(enaction3);
+    }
+
+    public permaPlan(enaction enaction1, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(enaction1);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3, condition startCondition1)
+    {
+        startConditions.Add(startCondition1);
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+        thePlan.Add(enaction3);
+    }
+
+    public permaPlan(enaction enaction1, condition startCondition1, condition startCondition2)
+    {
+        startConditions.Add(startCondition1);
+        startConditions.Add(startCondition2);
+
+        thePlan.Add(enaction1);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2, condition startCondition1, condition startCondition2)
+    {
+        startConditions.Add(startCondition1);
+        startConditions.Add(startCondition2);
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+    }
+    public permaPlan(enaction enaction1, enaction enaction2, enaction enaction3, condition startCondition1, condition startCondition2)
+    {
+        startConditions.Add(startCondition1);
+        startConditions.Add(startCondition2);
+        thePlan.Add(enaction1);
+        thePlan.Add(enaction2);
+        thePlan.Add(enaction3);
+    }
+
+    List<enaction> outPutCopyOfThePlan()
+    {
+        List<enaction> newList = new List<enaction>();
+
+        foreach (enaction thisOne in thePlan)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+    List<condition> outPutCopyOfStartConditions()
+    {
+        List<condition> newList = new List<condition>();
+
+        foreach (condition thisOne in startConditions)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+    List<condition> outPutCopyOfEndConditions()
+    {
+        List<condition> newList = new List<condition>();
+
+        foreach (condition thisOne in endConditions)
+        {
+            newList.Add(thisOne);
+        }
+
+        return newList;
+    }
+
+    internal depletablePlan convertToDepletable()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class depletablePlan
+{
+    //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalFSM] holds PARALLEL.
+    //so here:  just use singleEXE instead of enaction?  [for "inputData" for enacting]
+    //List<enaction> thePlan = new List<enaction>();
+    public List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
+                                                             //no further layers below the single enaction within it?  we'll see.  
+                                                             //List<enactable> thePlan = new List<enactable>();  //call it an enactable?
+
+    public List<condition> startConditions = new List<condition>();
+    public List<condition> endConditions = new List<condition>();
+
+    public depletablePlan()
+    {
+
+        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
+    }
+
+    public depletablePlan(singleEXE step1)
+    {
+        thePlan.Add(step1);
+
+        //always need "empty plan list" as an end condition, for animalFSM or something?
+
+        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
+    }
+    public depletablePlan(singleEXE step1, singleEXE step2)
+    {
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+
+        //always need "empty plan list" as an end condition, for animalFSM or something?
+
+        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
+    }
+    public depletablePlan(singleEXE step1, singleEXE step2, singleEXE step3)
+    {
+        thePlan.Add(step1);
+        thePlan.Add(step2);
+        thePlan.Add(step3);
+
+        //always need "empty plan list" as an end condition, for animalFSM or something?
+
+        endConditions.Add(new depletableSingleEXEListComplete(thePlan));
+    }
+
+
+
+    public void add(singleEXE toAdd)
+    {
+        thePlan.Add(toAdd);
+    }
+
+    //public abstract void doTheDepletablePlan();
+    public void doTheDepletablePlan()
+    {
+        executeSequential();
+    }
+
+    public void executeSequential()
+    {
+
+        //conditionalPrint("executeSequential()");
+        //conditionalPrint("x1 nestedPlanCountToText():  " + nestedPlanCountToText());
+        //this function is here because i want the lists to be private so that parallel and sequential EXEs initialize correctly
+
+        //sequential concerns:
+        //      only execute 1st one
+        //      remove item from list when its end conditions are met
+
+        if (thePlan == null)
+        {
+            Debug.Log("null.....that's an error!");
+            return;
+        }
+
+        if (thePlan.Count < 1)
+        {
+            Debug.Log("exeList.Count < 1       shouldn't happen?  or means this plan has reached the end");
+            return;
+        }
+
+
+        if (thePlan[0] == null)
+        {
+            Debug.Log("null.....that's an error!");
+            return;
+        }
+
+        //exeList[0].grabberDebug = grabberDebug;
+        //      conditionalPrint("5555555555555555555555555555grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
+        //      grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
+        //conditionalPrint("x2 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+        if (startConditionsMet() && thePlan[0].startConditionsMet())
+        {
+            //Debug.Log("start conitions met, should do this:  " + thePlan[0].staticEnactionNamesInPlanStructure());
+            //conditionalPrint(" grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);...........");
+            //conditionalPrint("??????????????????????????????? exeList[0].theEnaction:  " + exeList[0].theEnaction);
+            //grabberDebug.recordCurrentEnaction(exeList[0].theEnaction);
+            //conditionalPrint("///////////////////////////////////////////////////////////////////////");
+            thePlan[0].execute();
+        }
+
+        //conditionalPrint("x3 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+        if (thePlan[0].endConditionsMet())
+        {
+            //Debug.Log("exeList[0].endConditionsMet()  for:  " + thePlan[0].asText());
+
+            //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
+            //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
+            thePlan.RemoveAt(0);
+
+            //conditionalPrint("x5 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+            return;
+        }
+
+
+        //????????
+        if (endConditionsMet())
+        {
+            Debug.Log("exeList[0].endConditionsMet()  for:  " + this);
+
+            //conditionalPrint("x4 nestedPlanCountToText():  " + nestedPlanCountToText());
+            //conditionalPrint("endConditionsMet, so:  exeList.RemoveAt(0)");
+            thePlan.Clear();
+
+            //conditionalPrint("x5 nestedPlanCountToText():  " + nestedPlanCountToText());
+
+            return;
+        }
+
+        //conditionalPrint("x6 nestedPlanCountToText():  " + nestedPlanCountToText());
+    }
+
+
+    public bool startConditionsMet()
+    {
+        //grabberDebug.debugPrintBool = debugPrint;
+        //Debug.Log("tartConditions.Count:  " + startConditions.Count);
+        foreach (condition thisCondition in startConditions)
+        {
+            //Debug.Log("thisCondition:  " + thisCondition);
+            //Debug.Log("thisCondition.met():  " + thisCondition.met());
+            if (thisCondition.met() == false)
+            {
+
+                //if (debugPrint == true) { Debug.Log("this start condition not met:  " + thisCondition); }
+                //      grabberDebug.rep
+                return false;
+            }
+        }
+
+        //Debug.Log("no start conditions remain unfulfilled!");
+        //Debug.Log("no conditions remain unfulfilled!");
+        return true;
+    }
+
+    public bool endConditionsMet()
+    {
+        //Debug.Log("looking at end conditions for:  " + this);
+
+        //if (theEnaction != null) { Debug.Log("looking at end conditions for:  " + theEnaction); }
+        foreach (condition thisCondition in endConditions)
+        {
+            //conditionalPrint("thisCondition:  " + thisCondition);
+            //if (theEnaction != null) { Debug.Log("thisCondition:  " + thisCondition); }
+            if (thisCondition.met() == false)
+            {
+                //Debug.Log("this end condition not met:  " + thisCondition);
+                //conditionalPrint("this end condition not met:  "+ thisCondition);
+                return false;
+            }
+
+            //Debug.Log("thisCondition MET:  " + thisCondition);
+        }
+        //Debug.Log("no conditions remain unfulfilled!");
+
+        //conditionalPrint("no end conditions remain unfulfilled!");
+        //if (theEnaction != null) { Debug.Log("so this enaction is finished:  " + theEnaction); }
+
+        return true;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+public class aimTargetPlanGen
+{
+    vect3EXE2 theEXE;
+
+    public aimTargetPlanGen(GameObject theObjectDoingTheEnactions, GameObject target)
+    {
+        theEXE = aimTargetPlan2(theObjectDoingTheEnactions, target);
+    }
+
+    private vect3EXE2 aimTargetPlan2(GameObject theObjectDoingTheEnactions, GameObject target)
+    {
+        aimTarget testE1 = theObjectDoingTheEnactions.GetComponent<aimTarget>();
+
+        vect3EXE2 exe1 = (vect3EXE2)testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+
+    public aimTargetPlanGen(GameObject theObjectDoingTheEnactions, targetPicker targetPicker)
+    {
+        theEXE = aimTargetPlanFromTargetPicker(theObjectDoingTheEnactions, targetPicker);
+    }
+
+    private vect3EXE2 aimTargetPlanFromTargetPicker(GameObject theObjectDoingTheEnactions, targetPicker targetPicker)
+    {
+        aimTarget theEnaction = theObjectDoingTheEnactions.GetComponent<aimTarget>();
+
+        vect3EXE2 exe1 = new vect3EXE2(theEnaction,targetPicker);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+
+
+
+
+
+
+
+
+
+    public vect3EXE2 returnIt()
+    {
+        return theEXE;
+    }
+
+}
+
+public class equipInteractor : FSM
+{
+    condition theStartCondition;
+
+    public equipInteractor(GameObject agent, interType intertypeXIn)
+    {
+        //find interactor [on agent?]
+        //equip it
+
+        //start condition is "intertypeX is NOT currently equipped but COULD be"
+        //AKA all criteria:
+        //      intertypeX not in object's current gamepad
+        //      intertypeX found in object's inventory
+    }
+
+
+    public void whatToSwitchToWhenDone(FSM theThingToSwitchToWhenDone)
+    {
+        switchBoard[new reverseCondition(theStartCondition)] = theThingToSwitchToWhenDone;
     }
 }

@@ -14,7 +14,30 @@ public class debugTools : MonoBehaviour
 
 }
 
+public class mastLine
+{
+    public mastLine(GameObject theObject)
+    {
+        Vector3 thisPoint = theObject.transform.position;
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 105)), Color.green, 17f);
+    }
+    public mastLine(Vector3 thisPoint)
+    {
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 105)), Color.green, 17f);
+    }
+}
 
+
+//"do at point" plug-in component:
+
+public class makeMastLineAtPoint : doAtPoint
+{
+    internal override void doIt(Vector3 thisPoint)
+    {
+
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 105)), Color.white, 17f);
+    }
+}
 
 
 public class debugSwitchboard : MonoBehaviour

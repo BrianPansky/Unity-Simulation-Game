@@ -132,11 +132,6 @@ public class sensorySystem : MonoBehaviour
 
 
 
-public abstract class objectSetGrabber
-{
-    public abstract List<GameObject> grab();
-}
-
 
 
 

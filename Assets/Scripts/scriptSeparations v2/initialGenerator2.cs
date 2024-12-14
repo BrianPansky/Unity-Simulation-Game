@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SocialPlatforms;
@@ -30,6 +31,7 @@ public class initialGenerator2 : MonoBehaviour
         this.gameObject.AddComponent<tagging2>();
         this.gameObject.AddComponent<interactionCreator>();
         this.gameObject.AddComponent<comboGen>();
+        this.gameObject.AddComponent<outpostGame>();
     }
 
     void singletonify()
@@ -49,25 +51,83 @@ public class initialGenerator2 : MonoBehaviour
     {
         //Debug.Log("Start:  " + this);
 
+        GameObject theWorldObject = GameObject.Find("World");
+
+        //axes conventions:
+        //      z = "forward"/"rows"/"length"
+        //      x = "right"/"columns"/"width"
+        //      y = [obviously "up"/"verticalColumns"/"height"]
+
+        //createCubeGridTest();
+
+
+        Vector3 startPoint = new Vector3(0, 1, 0);
+        /*
+        int rows = 5;
+        int columns = 3;
+        int verticalColumns = 1;
+
+        float zScale = 5f;
+        float xScale = 3f;
+        float yScale = 1f;
+        */
+        int rows = 30;
+        int columns = 3;
+        int verticalColumns = 1;
+
+        float zScale = 30f;
+        float xScale = 100f;
+        float yScale = 20f;
+        //List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
+        createMapZones(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns);
+
+
+
         Vector3 location = Vector3.zero;
 
-        location = new Vector3(-20, 0, -55);
+        location = new Vector3(-20, 2.5f, -55);
         //location = new Vector3(-55, 14, -67);
 
-        makePLAYER(location);
-        GameObject theWorldObject = GameObject.Find("World");
+        makePLAYER(new Vector3(-5, 1, -1));
         //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
         //generateScene2();
         //generateScene3();
 
-        NEWgenerateScene3();
+        //          NEWgenerateScene3();
         //oneZoneNoNPCS();
         //generateFlex();
 
         //Time.timeScale = 0f;
     }
 
+    private static void createCubeGridTest()
+    {
+        Vector3 startPoint = new Vector3(0, 1, 0);
+
+        int rows = 5;
+        int columns = 3;
+        int verticalColumns = 1;
+
+        float zScale = 5f;
+        float xScale = 3f;
+        float yScale = 1f;
+
+        List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
+
+        new doAtEachPoint(new makeMastLineAtPoint(), points);
+        new doAtEachPoint(new makeObjectAtPoint(xScale, yScale, zScale), points);
+    }
+
+    private static void createMapZones(Vector3 origin, int zRows, int xColumns, float zLength, float xWidth, float yHeight = 10f, int verticalColumns = 1)
+    {
+
+        List<Vector3> points = new gridOfPoints(origin, zRows, xColumns, zLength, xWidth, yHeight, verticalColumns).returnIt();
+
+        new doAtEachPoint(new makeMastLineAtPoint(), points);
+        new doAtEachPoint(new makeMapZoneAtPoint(xWidth, yHeight, zLength), points);
+        //new doAtEachPoint(new makeObjectAtPoint2(xWidth, verticalColumns, zLength), points);
+    }
 
     void makePLAYER(Vector3 location)
     {
@@ -882,4 +942,256 @@ public class generatorJob
     
 }
 
+
+
+public class zoneSpacingCalc
+{
+
+    int regularThinZoneSpacing = 25;
+    int oneBIGzoneSpacint = 525;
+
+    int howManyZones = 1;
+    int howManySetsPerZone = 2;
+    int theZSpacing = 25;
+    int theXSpacing = 10;
+    float sideOffset = 0;
+
+    float xScale = 100;
+    float yScale = 1;
+    float zScale = 100;
+
+
+
+    //patternScript2.singleton.makeLinePattern2(howManyZones* howManySetsPerZone, theZSpacing, sideOffset), theXSpacing);
+
+
+
+}
+
+public class zoneGen1 //: objectGen
+{
+    int regularThinZoneSpacing = 25;
+    int oneBIGzoneSpacint = 525;
+
+    int howManyZones = 1;
+    int howManySetsPerZone = 2;
+    int theZSpacing = 25;
+    int theXSpacing = 10;
+    float sideOffset = 0;
+
+    public zoneGen1(Vector3 position, float xLength, float zWidth, float yHeight = 10f)
+    {
+        measuredZoneCube(position, xLength, zWidth, yHeight);
+    }
+
+    public void generate()
+    {
+
+    }
+
+    public GameObject unitZoneCube(Vector3 position)
+    {
+        GameObject unitZoneCube = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.invisibleCubePrefab, position);
+        Rigidbody rigidbody = unitZoneCube.AddComponent<Rigidbody>();
+        rigidbody.useGravity = false;
+        rigidbody.isKinematic = false;
+
+        unitZoneCube.AddComponent<mapZoneScript>();
+
+        return unitZoneCube;
+    }
+
+    public GameObject measuredZoneCube(Vector3 position, float xLength, float zWidth, float yHeight =10f)
+    {
+        GameObject newZone = unitZoneCube(position);
+        newZone.transform.localScale = new Vector3(xLength, yHeight, zWidth);
+
+        return newZone;
+    }
+
+
+
+
+    void NEWgenerateScene3()
+    {
+        howManyZones = 0;
+        howManySetsPerZone = 2;
+        theZSpacing = regularThinZoneSpacing;
+        //int theZSpacing = oneBIGzoneSpacint;
+        theXSpacing = 10;
+        sideOffset = 0;
+
+
+        //INVERSEmakeAndFillZones(
+        //  patternScript2.singleton.makeLinePattern2(howManyZones * howManySetsPerZone, theZSpacing, sideOffset),
+        //theXSpacing);
+
+
+        //do this last to make zone collisions easier
+        makeEmptyZones(howManyZones, 5 + (theZSpacing * (howManySetsPerZone)));
+
+
+    }
+
+    void makeEmptyZones(int howManyZones, int theZSpacing)
+    {
+
+        List<Vector3> zonePositions = patternScript2.singleton.makeLinePattern1(howManyZones, theZSpacing);
+
+
+        foreach (Vector3 thisPoint in zonePositions)
+        {
+            //Instantiate(prefab, thisPoint, default);
+            GameObject newObj = repository2.Instantiate(repository2.singleton.mapZone2, thisPoint, Quaternion.identity);
+            newObj.transform.localScale = new Vector3(400f, 10f, 1f * theZSpacing);
+
+        }
+    }
+}
+
+
+public class zoneGridGen
+{
+    public void createGridOfZones(Vector3 origin, int xQuantity, int zQuantity, float xLength, float zWidth, float yHeight = 10f, int yQuantity = 1)
+    {
+        //how to do?
+        //      create grid of origins
+        //      for each point, place a map zone [all with same length/width/height]
+
+        List<Vector3> positionList = new gridOfPoints(origin,xQuantity,zQuantity,xLength,zWidth,yHeight,yQuantity).returnIt();
+
+        foreach (Vector3 thisPoint in positionList)
+        {
+            new zoneGen1(thisPoint,xLength,zWidth,yHeight);
+        }
+    }
+
+    
+    public List<Vector3> addPositionLists(List<Vector3> list1, List<Vector3> list2)
+    {
+        foreach (Vector3 thisPoint in list2)
+        {
+            list1.Add(thisPoint);
+        }
+
+        return list1;
+    }
+
+    public List<Vector3> makeLinePattern2(int howMany, float zSpacing, float xOffset, float yOffset = 0f)
+    {
+        List<Vector3> thisList = new List<Vector3>();
+
+        int whichPositionWeAreOn = 0;
+
+        while (whichPositionWeAreOn < howMany)
+        {
+            thisList.Add(new Vector3(xOffset, yOffset, whichPositionWeAreOn * zSpacing));
+            whichPositionWeAreOn++;
+        }
+
+        return thisList;
+    }
+}
+
+public class doAtEachPoint
+{
+    public doAtEachPoint(doAtPoint toDo, List<Vector3> thePoints)
+    {
+        foreach(Vector3 thisPoint in thePoints)
+        {
+            toDo.doIt(thisPoint);
+        }
+    }
+}
+
+public abstract class doAtPoint
+{
+    internal abstract void doIt(Vector3 thisPoint);
+}
+
+public class makeObjectAtPoint : doAtPoint
+{
+    private float xScale;
+    private float yScale;
+    private float zScale;
+
+    public makeObjectAtPoint(float xScale, float yScale, float zScale)
+    {
+        this.xScale = xScale;
+        this.yScale = yScale;
+        this.zScale = zScale;
+    }
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thisPoint, Quaternion.identity);
+        newObj.transform.localScale = new Vector3(xScale, yScale, zScale);
+    }
+}
+public class makeMapZoneAtPoint : doAtPoint
+{
+    private float xScale;
+    private float yScale;
+    private float zScale;
+
+    public makeMapZoneAtPoint(float xScale, float yScale, float zScale)
+    {
+        this.xScale = xScale;
+        this.yScale = yScale;
+        this.zScale = zScale;
+    }
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject newObj = repository2.Instantiate(repository2.singleton.invisibleCubePrefab, thisPoint, Quaternion.identity);
+        newObj.transform.localScale = new Vector3(xScale, yScale, zScale);
+
+        Collider theCollider = newObj.GetComponent<Collider>();
+        theCollider.isTrigger = true;
+
+        Rigidbody rigidbody = newObj.AddComponent<Rigidbody>();
+        rigidbody.useGravity = false;
+        rigidbody.isKinematic = true;
+
+
+        newObj.AddComponent<mapZoneScript>();
+
+    }
+
+
+
+
+
+
+    /*
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject newObj = measuredZoneCube(thisPoint, xScale, zScale, yScale);//repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thisPoint, Quaternion.identity);
+        //newObj.transform.localScale = new Vector3(xScale, yScale, zScale);
+    }
+
+
+
+    public GameObject unitZoneCube(Vector3 position)
+    {
+        GameObject unitZoneCube = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.invisibleCubePrefab, position);
+        Rigidbody rigidbody = unitZoneCube.AddComponent<Rigidbody>();
+        rigidbody.useGravity = false;
+
+        unitZoneCube.AddComponent<mapZoneScript>();
+
+        return unitZoneCube;
+    }
+
+    public GameObject measuredZoneCube(Vector3 position, float xLength, float zWidth, float yHeight = 10f)
+    {
+        GameObject newZone = unitZoneCube(position);
+        newZone.transform.localScale = new Vector3(xLength, yHeight, zWidth);
+
+        return newZone;
+    }
+
+    */
+}
 

@@ -74,6 +74,36 @@ public abstract class enaction : MonoBehaviour
 {
     public buttonCategories gamepadButtonType { get; set; }
     public List<condition> prereqs = new List<condition>();
+    //public List<IEnactaBool> linkedEnactaboolAtoms = new List<IEnactaBool>();
+    //public List<enaction> linkedEnactionAtoms2 = new List<enaction>();
+    //public List<enaction> linkedEnactionAtoms4 = new List<enaction>();
+    //public List<int> linkedEnactionAtoms41 = new List<int>();
+    //public simpleEnactableList linkedEnactionAtoms;// = gimmie();// new simpleEnactableList(this);
+   //public simpleEnactableList linkedEnactionAtoms2 = gimmie2(linkedEnactionAtoms);
+
+    public List<enaction> linkedEnactionAtoms = new List<enaction>();
+    public void Awake()
+    {
+        //linkedEnactionAtoms = new simpleEnactableList();  //weeeeeeee
+        linkedEnactionAtoms = new List<enaction>();  //weeeeeeeeeeeee
+    }
+    public enaction()
+    {
+
+        //Debug.Log("this.GetInstanceID():  " + this.GetInstanceID());
+        //linkedEnactionAtoms = new simpleEnactableList();
+        Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", linkedEnactionAtoms:  " + linkedEnactionAtoms);
+    }
+    private static simpleEnactableList gimmie2(simpleEnactableList linkedEnactionAtoms)
+    {
+        throw new NotImplementedException();
+    }
+
+    private simpleEnactableList gimmie()
+    {
+        //Debug.Log("linkedEnactionAtoms:  " + this.);
+        return new simpleEnactableList();
+    }
 
     public bool debugPrint = false;
 
@@ -94,13 +124,54 @@ public abstract class enaction : MonoBehaviour
             exe1.startConditions.Add(thisCondition);
         }
 
+        foreach(enaction linkedEnaction in linkedEnactionAtoms)//messy, blehhhhhhhhh
+        {
+            foreach (condition thisCondition in linkedEnaction.prereqs)
+            {
+                exe1.startConditions.Add(thisCondition);
+            }
+        }
+
         return exe1;
     }
 
 
+    public abstract void enactJustThisIndividualEnaction(inputData theInput);
 
+    public void enactAllLinkedEnactionAtoms(inputData theInput)
+    {
+        //Debug.Log("linkedEnactionAtoms:  " + linkedEnactionAtoms);
 
+        Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", " + this.ToString()+", "+ this.toEXE(null).theEnaction + ", " + "linkedEnactionAtoms:  " + linkedEnactionAtoms);
+        //linkedEnactionAtoms.enactList(theInput);
+        foreach (enaction thisLinkedEnaction in linkedEnactionAtoms)
+        {
+            //Debug.Log("thisLinkedEnaction" + thisLinkedEnaction);
+            thisLinkedEnaction.enactJustThisIndividualEnaction(theInput);
+        }
+    }
 
+    /*
+    public void enactAllLinkedEnactionAtoms(inputData theInput)
+    {
+        //Debug.Log("linkedEnactionAtoms" + linkedEnactionAtoms);
+        //Debug.Log("linkedEnactionAtoms.Count" + linkedEnactionAtoms.Count);
+        Debug.Assert(linkedEnactionAtoms41 != null);
+        foreach (enaction thisLinkedEnaction in linkedEnactionAtoms4)
+        {
+            //Debug.Log("thisLinkedEnaction" + thisLinkedEnaction);
+            thisLinkedEnaction.enactJustThisIndividualEnaction(theInput);
+        }
+    }
+    public bool areConditionsForAllLinkedEnactionsMet()
+    {
+
+    }
+    public bool areConditionsForJustThisIndividualEnactionMet()
+    {
+
+    }
+    */
     internal void conditionalPrint(string thingToPrint)
     {
         if (debugPrint == false) { return; }
@@ -122,6 +193,7 @@ public abstract class IEnactaBool: enaction
     {
         enact(new inputData());
     }
+
 
 
     public override planEXE2 toEXE(GameObject target)
@@ -182,6 +254,40 @@ public abstract class IEnactByTargetVector:enaction
 
 
 
+public class simpleEnactableList
+{
+    //"simple" means we JUST enact them, we assume their onditions/prereqs are ALREADY MET
+
+
+    List<enaction> listOfEnactions;
+    private enaction enaction;
+
+    public simpleEnactableList()
+    {
+        listOfEnactions = new List<enaction>();
+        //Debug.Log("listOfEnactions:  "+ listOfEnactions);
+    }
+
+    public simpleEnactableList(enaction enaction)
+    {
+        this.enaction = enaction;
+    }
+
+    public void enactList(inputData theInput)
+    {
+        //Debug.Log("linkedEnactionAtoms" + linkedEnactionAtoms);
+        //Debug.Log("linkedEnactionAtoms.Count" + linkedEnactionAtoms.Count);
+        Debug.Assert(listOfEnactions != null);
+        foreach (enaction thisLinkedEnaction in listOfEnactions)
+        {
+            //Debug.Log("thisLinkedEnaction" + thisLinkedEnaction);
+            thisLinkedEnaction.enactJustThisIndividualEnaction(theInput);
+        }
+    }
+}
+
+
+
 public class navAgent : IEnactByTargetVector
 {
     //only for vector inputs!
@@ -218,6 +324,25 @@ public class navAgent : IEnactByTargetVector
     //only for vector inputs!
     public override void enact(inputData theInput)
     {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+
+
+    public override planEXE2 toEXE(GameObject target)
+    {
+        //OFFSET NEEDS TO BE ZERO FOR "aimtarget" to actually aim at the target [otherwise it aims at a sorta navpoint NEAR the target,,,,which can be BEHIND or BELOW the npc trying to target something in front of them!
+        //are there any situations where i'll want to use "toEXE" with a NON-zero offset???
+        vect3EXE2 theEXE = new vect3EXE2(this, target, 0f);
+        proximityRef condition = new proximityRef(this.gameObject, theEXE, 2f);
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
         if (theAgent.enabled == false)
         {
             Debug.Log("theAgent.enabled == false, theAgent.transform.gameObject:  " + theAgent.transform.gameObject);
@@ -242,9 +367,9 @@ public class navAgent : IEnactByTargetVector
 
         conditionalPrint("~~~~~~~~~~   nav agent enacting   ~~~~~~~~");
         Debug.Assert(theAgent.isActiveAndEnabled);
-        
 
-        if(theAgent.isOnNavMesh == false)
+
+        if (theAgent.isOnNavMesh == false)
         {
             theAgent.Warp(theAgent.transform.position);
         }
@@ -284,25 +409,8 @@ public class aimTarget : IEnactByTargetVector
     //only for vector inputs!
     override public void enact(inputData theInput)
     {
-        //instantaneous for now
-        //  Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
-        Vector3 lineFromVertAimerToTarget = theInput.vect3 - this.transform.position;
-        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
-        //conditionalPrint("theVectorRotationEnaction.thePartToAimVertical.position.vect3 = " + theVectorRotationEnaction.thePartToAimVertical.position);
-        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
-        theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
-        lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
-
-        //Debug.Log("aim..................");
-
-        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 7f);
-        theVectorRotationEnaction.updatePitch(getVerticalAngle(lineFromVertAimerToTarget), theVectorRotationEnaction.thePartToAimVertical);
-        //theVectorRotationEnaction.updatePitch(0, theVectorRotationEnaction.thePartToAimVertical);
-
-
-        //conditionalPrint("enacting:  " + this);
-        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.red, 0.02f);
-
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
     }
 
 
@@ -400,7 +508,28 @@ public class aimTarget : IEnactByTargetVector
         return perpendicular;
     }
 
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        //instantaneous for now
+        //  Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
+        Vector3 lineFromVertAimerToTarget = theInput.vect3 - this.transform.position;
+        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
+        //conditionalPrint("theVectorRotationEnaction.thePartToAimVertical.position.vect3 = " + theVectorRotationEnaction.thePartToAimVertical.position);
+        //conditionalPrint("theInput.vect3 = " + theInput.vect3);
+        theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
+        lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
 
+        //Debug.Log("aim..................");
+
+        Debug.DrawLine(theVectorRotationEnaction.thePartToAimVertical.position, theInput.vect3, Color.red, 7f);
+        theVectorRotationEnaction.updatePitch(getVerticalAngle(lineFromVertAimerToTarget), theVectorRotationEnaction.thePartToAimVertical);
+        //theVectorRotationEnaction.updatePitch(0, theVectorRotationEnaction.thePartToAimVertical);
+
+
+        //conditionalPrint("enacting:  " + this);
+        Debug.DrawLine(theInput.vect3, theVectorRotationEnaction.thePartToAimVertical.position, Color.red, 0.02f);
+
+    }
 }
 
 
@@ -478,9 +607,14 @@ public class projectileLauncher: rangedEnaction
     {
         //theCooldown.fire();
         //Debug.Log("firing projectile??????????????????????????????????????????????????????????????");
-        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position+ firePoint.forward, firePoint.forward);
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
     }
 
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, firePoint.forward);
+    }
 }
 
 public class hitscanEnactor: rangedEnaction
@@ -526,8 +660,11 @@ public class hitscanEnactor: rangedEnaction
 
     override public void enact(inputData theInput)
     {
-        //conditionalPrint("enacting:  " + this);
-        //Debug.Log("FIRE.........");
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
         firingByRaycastHit(range);
     }
 
@@ -593,10 +730,19 @@ public class enactEffect : IEnactaBool
 
     public override void enact(inputData theInput)
     {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
         theEffect.implementEffect();
     }
+
 }
 
+
+/*
 public class compoundEnactaBool : IEnactaBool
 {
 
@@ -698,41 +844,42 @@ public class compoundEnactaBool : IEnactaBool
         }
         */
 
-        return exe1;
-    }
+//return exe1;
+//}
 
 
-    /*
-    internal bool containsIntertype(interType intertypeX)
+/*
+internal bool containsIntertype(interType intertypeX)
+{
+
+    //uhhhhhhhhhhhh, messyyyyyyyyyyyyy
+
+    foreach (enaction thisEnaction in theEnactions)
     {
-
-        //uhhhhhhhhhhhh, messyyyyyyyyyyyyy
-
-        foreach (enaction thisEnaction in theEnactions)
-        {
-            if (thisEnaction.GetType() == collisionEnaction.GetType()) { return true; }
-        }
-
-
-
-
-
-        foreach (collisionEnaction thisEnaction in theEnactions)
-        {
-            if (thisEnaction.interInfo.interactionType == intertypeX) { return true; }
-        }
-
-        foreach (compoundEnactaBool thisEnaction in theEnactions)
-        {
-            if (thisEnaction.containsIntertype(intertypeX)) { return true; }
-        }
-
-
-        return false;
+        if (thisEnaction.GetType() == collisionEnaction.GetType()) { return true; }
     }
-    */
-}
 
+
+
+
+
+    foreach (collisionEnaction thisEnaction in theEnactions)
+    {
+        if (thisEnaction.interInfo.interactionType == intertypeX) { return true; }
+    }
+
+    foreach (compoundEnactaBool thisEnaction in theEnactions)
+    {
+        if (thisEnaction.containsIntertype(intertypeX)) { return true; }
+    }
+
+
+    return false;
+}
+*/
+//}
+
+//*/
 
 public abstract class vectorMovement : IEnactaVector
 {
@@ -781,10 +928,15 @@ public class vecTranslation : vectorMovement
 
     public override void enact(inputData theInput)
     {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
         Vector3 move = theTransform.right * theInput.vect2.x + theTransform.forward * theInput.vect2.y;
         controller.Move(move * speed * Time.deltaTime);
     }
-
 }
 
 public class vecRotation : vectorMovement
@@ -804,6 +956,8 @@ public class vecRotation : vectorMovement
     public static vecRotation addVecRotationAndReturnIt(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
         vecRotation theVectorRotationComponent = objectToAddItTo.AddComponent<vecRotation>();
+        Debug.Log("theVectorRotationComponent.GetInstanceID():  " + theVectorRotationComponent.GetInstanceID() + ", " + theVectorRotationComponent.ToString() + ", " + theVectorRotationComponent.toEXE(null).theEnaction + ", " + "theVectorRotationComponent.linkedEnactionAtoms:  " + theVectorRotationComponent.linkedEnactionAtoms);
+        //theVectorRotationComponent.base();//.enaction();
 
         theVectorRotationComponent.speed = inputSpeed;
         theVectorRotationComponent.yawSpeed = inputSpeed / 444;
@@ -838,8 +992,8 @@ public class vecRotation : vectorMovement
 
     public override void enact(inputData theInput)
     {
-        updatePitch(theInput.vect2.y, thePartToAimVertical);
-        updateYaw(theInput.vect2.x);
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
     }
 
     public void updatePitch(float pitchInput, Transform theTransformToRotate)
@@ -865,7 +1019,11 @@ public class vecRotation : vectorMovement
         thePartToAimHorizontal.Rotate(thePartToAimHorizontal.up * yawInput * yawSpeed);
     }
 
-
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        updatePitch(theInput.vect2.y, thePartToAimVertical);
+        updateYaw(theInput.vect2.x);
+    }
 }
 
 public class turningWithNoStrafe : vectorMovement
@@ -893,6 +1051,12 @@ public class turningWithNoStrafe : vectorMovement
 
 
     public override void enact(inputData theInput)
+    {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
     {
         Vector3 translate = theTransform.forward * theInput.vect2.y; //needs to be Y!!!!!!!!!!  //and FORWARD vector!!!!!!!!!!
 

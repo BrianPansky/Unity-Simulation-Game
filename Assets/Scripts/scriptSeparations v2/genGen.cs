@@ -6,6 +6,7 @@ using UnityEngine.AI;
 using UnityEngine.WSA;
 using static enactionCreator;
 using static interactionCreator;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 public class genGen : MonoBehaviour
@@ -248,8 +249,8 @@ public class genGen : MonoBehaviour
 
         condition cooldownCondition = new numericalCondition(numericalVariable.cooldown, theEquippable.dictOfIvariables);
 
-        compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
-
+        //compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
+        theShooter.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
 
 
 
@@ -267,12 +268,12 @@ public class genGen : MonoBehaviour
 
     }
 
-    private static void numericalEffect(equippable2 theEquippable, numericalVariable numVarX, int amountToSubtract = 1)
+    public static void numericalEffect(equippable2 theEquippable, numericalVariable numVarX, int amountToSubtract = 1)
     {
         enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown, amountToSubtract));
     }
 
-    void deathWhenHealthIsZero(interactable2 theInteractable)
+    public void deathWhenHealthIsZero(interactable2 theInteractable)
     {
 
         //i'll put conditional effects in this function for now
@@ -283,7 +284,7 @@ public class genGen : MonoBehaviour
         addConditionalEffect(theInteractable.transform.gameObject, theCondition, theEffect);
     }
 
-    private static void createWeaponLevels(interactable2 theInteractable, interType theInteractionType, int levelWhenDamageStarts, int instantKillLevel)
+    public static void createWeaponLevels(interactable2 theInteractable, interType theInteractionType, int levelWhenDamageStarts, int instantKillLevel)
     {
         theInteractable.dictOfInteractions = interactionCreator.singleton.addInteraction(theInteractable.dictOfInteractions,
                     theInteractionType,
@@ -410,7 +411,7 @@ public class genGen : MonoBehaviour
 
         return theRep;
     }
-    public repeatWithTargetPicker meleeDodge(GameObject theObjectDoingTheEnaction, objectListCacheSetter theCacher)
+    public repeatWithTargetPicker meleeDodge(GameObject theObjectDoingTheEnaction, objectListCacheSetter theCacher)//??? surely thic should be cache RECEIVER????
     {
         objectCriteria theCriteria = new objectMeetsAllCriteria(
             new objectHasTag(tagging2.tag2.threat1),
@@ -463,7 +464,7 @@ public class genGen : MonoBehaviour
     }
 
 
-    internal repeater reproRepeater(GameObject theObjectDoingTheEnaction, adhocAnimal1Gen adhocAnimal1Gen, stuffType stuffX)
+    public repeater reproRepeater(GameObject theObjectDoingTheEnaction, adhocAnimal1Gen adhocAnimal1Gen, stuffType stuffX)
     {
         enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));
 
@@ -480,7 +481,7 @@ public class genGen : MonoBehaviour
 
 
 
-    internal inventory1 ensureInventory1Script(GameObject onThisObject)
+    public inventory1 ensureInventory1Script(GameObject onThisObject)
     {
         inventory1 ensuredThing = onThisObject.GetComponent<inventory1>();
         if (ensuredThing == null)
@@ -491,7 +492,7 @@ public class genGen : MonoBehaviour
         return ensuredThing;
     }
 
-    internal virtualGamepad ensureVirtualGamePad(GameObject onThisObject)
+    public virtualGamepad ensureVirtualGamePad(GameObject onThisObject)
     {
         virtualGamepad ensuredThing = onThisObject.GetComponent<virtualGamepad>();
         if (ensuredThing == null)
@@ -502,7 +503,7 @@ public class genGen : MonoBehaviour
         return ensuredThing;
     }
 
-    internal NavMeshAgent ensureNavmeshAgent(GameObject onThisObject)
+    public NavMeshAgent ensureNavmeshAgent(GameObject onThisObject)
     {
         NavMeshAgent ensuredThing = onThisObject.GetComponent<NavMeshAgent>();
         if (ensuredThing == null)
@@ -906,6 +907,7 @@ public class adhocAnimal1Gen : objectGen
 
         return repeatWithTargetPickerTest;
     }
+    
     private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
@@ -924,10 +926,631 @@ public class adhocAnimal1Gen : objectGen
 
 }
 
+public class randomWanderRepeatable
+{
+    repeatWithTargetPicker madeIt;
+
+    public randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
+    {
+        madeIt = makeAndReturnRandomWanderRepeatable(theObjectDoingTheEnaction);
+    }
+
+    public repeatWithTargetPicker returnIt()
+    {
+        return madeIt;
+    }
+
+    private repeatWithTargetPicker makeAndReturnRandomWanderRepeatable(GameObject theObjectDoingTheEnaction)
+    {
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
+        permaPlan2 perma1 = new permaPlan2(step1);
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+
+        return repeatWithTargetPickerTest;
+    }
+
+}
+
+
+
+/*
+public class paintByNumbersAnimalFull1: objectGen
+{
+    GameObject theObjectDoingTheEnactions;
 
 
 
 
+    public paintByNumbersAnimalFull1(GameObject parent, stuffStuff foodType, float speed, int health, int minDamageLevel, int maxDamageLevel, float sightRange)
+    {
+
+    }
+
+    public GameObject generate()
+    {
+        throw new NotImplementedException();
+    }
+
+
+
+
+
+
+
+
+
+
+    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+
+
+
+
+        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
+
+        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
+
+        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+
+
+
+        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+
+        animalFSM repro = repro1(theObjectDoingTheEnaction, stuffX);
+
+
+
+        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tagging2.tag2.threat1),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+
+
+
+        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
+
+        condition switchToFlee = new stickyCondition(
+            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+
+        objectCriteria reproCriteria = new objectMeetsAllCriteria(
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 40)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theReproSet = new allObjectsInSetThatMeetCriteria(
+            new excludeX(new allNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction),
+            reproCriteria);
+
+        condition switchCondition3 = new reverseCondition(
+            new isThereAtLeastOneObjectInSet(theReproSet));
+
+
+        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        theFSM.addSwitchAndReverse(switchCondition3, repro);
+        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
+        getFood.addSwitch(switchCondition3, repro);
+
+
+
+
+        return theFSM;
+    }
+
+    animalFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+
+
+        Ieffect e1 = new generateObject(new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));//new adhocAnimal1Gen();
+
+        enactEffect theEnaction = enactEffect.addEnactEffectAndReturn(theObjectDoingTheEnaction, e1);//; theEnaction = theObjectToAddItTo.AddComponent<enactEffect>();
+
+
+        singleEXE step1 = (singleEXE)theEnaction.standardEXEconversion();
+        step1.untilListFinished();
+
+        //singleEXE step1 = new boolEXE2(theEnaction);
+
+        animalFSM repro = new animalFSM(theObjectDoingTheEnaction, step1);
+
+        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+
+
+
+
+
+        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
+
+        //gahhhhhhhhh, need to be able to cut through this garbage?
+        //repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE(theEnaction);
+
+
+
+
+        return repro;
+    }
+
+    private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
+    {
+        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
+        permaPlan2 perma1 = new permaPlan2(step1);
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+
+        return repeatWithTargetPickerTest;
+    }
+
+    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+
+
+        return returnTheRepeatTargetThing();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //repeaters
+
+    public repeatWithTargetPicker returnTheGoToThing()
+    {
+
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+        //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
+            new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnactions),
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()));
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+    public repeatWithTargetPicker returnTheRepeatTargetThing()
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+
+
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(
+            theObjectDoingTheEnactions, theObjectDoingTheEnactions.transform.position), 
+            aimTargetPlan2(theObjectDoingTheEnactions), fireHitscanClick());
+        //plan = new depletablePlan(step1, step2);
+        //plan = perma1.convertToDepletable();
+        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+
+        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
+            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab),
+            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
+            ));
+
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1,
+            getter//new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab)
+            );
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+
+
+
+
+
+    //planEXEs
+
+    private permaPlan2 goGrabPlan3(stuffType theStuffTypeX)
+    {
+        objectSetGrabber set = new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX);
+
+
+        singleEXE goTo = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, set.grab(), 1.8f);
+        singleEXE aim = aimTargetPlan2(theObjectDoingTheEnactions, set.grab());
+
+
+        hitscanEnactor theHitscanEnactor = new find().grabHitscanEnaction(theObjectDoingTheEnactions, interType.standardClick);
+        Debug.Assert(theHitscanEnactor != null);
+        singleEXE hitscanEXE = (singleEXE)theHitscanEnactor.standardEXEconversion();
+
+
+        permaPlan2 perma = new permaPlan2(goTo,aim,hitscanEXE);
+
+        return perma;
+    }
+
+
+
+
+
+
+
+
+    //singles
+
+    private singleEXE aimTargetPlan2(GameObject theEnactor, GameObject target)
+    {
+        aimTarget testE1 = theEnactor.GetComponent<aimTarget>();
+
+        singleEXE exe1 = (singleEXE)testE1.toEXE(target);
+        exe1.atLeastOnce();
+
+        return exe1;
+    }
+
+    public singleEXE fireHitscanClick(GameObject theEnactor)
+    {
+
+        hitscanEnactor theHitscanEnactor = new find().grabHitscanEnaction(theEnactor, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
+
+        singleEXE theSingle = (singleEXE)theHitscanEnactor.standardEXEconversion();
+        theSingle.untilListFinished();
+
+        return theSingle;
+    }
+
+}
+
+*/
+
+
+public class paintByNumbersAnimalBody1 : objectGen
+{
+    GameObject generatedObject;
+    GameObject parent;
+
+    public GameObject generate()
+    {
+        generatedObject.transform.position = parent.transform.position;
+        return generatedObject;
+    }
+
+
+    public paintByNumbersAnimalBody1(GameObject parentIn, stuffStuff foodTypeIn, float speedIn, int healthIn, int minDamageLevelIn, int maxDamageLevelIn, float sightRangeIn)
+    {
+        throw new NotImplementedException();
+    }
+
+
+
+    public GameObject returnBasicAnimal1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
+    {
+        GameObject newObj = returnBodyModel(where, scale);
+        genGen.singleton.addArrowForward(newObj, 1f, 0f, 1.2f);
+
+        addAnimalBody1PlayableToObject(newObj);
+        //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
+
+        //                          animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
+        //                          theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+
+
+        newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;  //do they need this?  bad sign that i can't tell just by looking here
+
+        return newObj;
+    }
+
+
+
+    public GameObject returnBodyModel(Vector3 where, float scale = 1f)
+    {
+
+        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab, where);// Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
+        //      newObj.transform.localScale = new Vector3(128, 1, 8);
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        return newObj;
+    }
+
+
+    public void addAnimalBody1PlayableToObject(GameObject newObj)
+    {
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        genGen.singleton.makeBasicEnactions(thePlayable);
+        makeInteractions(thePlayable);
+
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+    }
+
+
+    public void makeInteractions(interactable2 theInteractable)
+    {
+        genGen.createWeaponLevels(theInteractable, interType.peircing, 0, 4);
+        genGen.createWeaponLevels(theInteractable, interType.melee, 0, 4);
+        //createWeaponLevels(theInteractable, interType.shootFlamethrower1, 0, 5);
+        //createWeaponLevels(theInteractable, interType.tankShot, 0, 0);
+
+        genGen.singleton.deathWhenHealthIsZero(theInteractable);
+    }
+}
+
+
+
+public class FSM
+{
+
+    //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
+    internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
+
+    internal List<repeater> repeatingPlans = new List<repeater>();
+
+
+
+    public FSM doAFrame()
+    {
+        //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
+
+        FSM toSwitchTo = null;
+
+        toSwitchTo = firstMetSwitchtCondition();
+        if (toSwitchTo != null)
+        {
+            //Debug.Log("switch");
+            //Debug.Log("toSwitchTo:  " + toSwitchTo);
+            //Debug.Log("(toSwitchTo==this):  " + (toSwitchTo==this));
+            return toSwitchTo;
+        }
+
+
+
+
+
+        //Debug.Log("repeatingPlans.count:  " + repeatingPlans.Count);
+        foreach (repeater plan in repeatingPlans)
+        {
+            //Debug.Log("plan:  " + plan);
+            plan.doThisThing();
+        }
+
+
+
+
+        return this;
+    }
+
+
+
+
+    private FSM firstMetSwitchtCondition()
+    {
+        foreach (condition thisCondition in switchBoard.Keys)
+        {
+            //Debug.Log(".................thisCondition:  " + thisCondition + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asTextSHORT():  " + thisCondition.asTextSHORT() + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asText():  " + thisCondition.asText() + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asTextAllTheWayDown():  " + thisCondition.asTextAllTheWayDown() + " " + thisCondition.GetHashCode());
+            if (thisCondition.met())
+            {
+                Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
+                return switchBoard[thisCondition];
+            }
+        }
+
+        return null;
+    }
+
+
+
+
+
+
+
+    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+    public void addSwitch(condition switchCondition, FSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+    public void addSwitchAndReverse(condition switchCondition, FSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+
+
+    public string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this FSM:  ";
+        newString += "[";
+        foreach (repeater thisRep in repeatingPlans)
+        {
+
+            //newString += thisRep.thePerma.printBaseEnactions();
+            newString += thisRep.thePerma.baseEnactionsAsText();
+        }
+
+        newString += "]";
+        //Debug.Log(newString);
+        return newString;
+    }
+}
+
+public class generateFSM:FSM
+{
+
+    public generateFSM()
+    {
+        //      new permaPlan();
+    }
+
+    public generateFSM(repeater doThisImmediately)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+    }
+
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2, step3);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2, step3, step4);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+    public generateFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public generateFSM(repeater doThisImmediately, condition switchCondition, FSM doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+
+        switchBoard[switchCondition] = doThisAfterSwitchCondition;
+    }
+
+
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+
+
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+}
 
 
 

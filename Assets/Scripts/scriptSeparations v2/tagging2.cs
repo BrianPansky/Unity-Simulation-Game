@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
+using static enactionCreator;
+using static interactionCreator;
 using static tagging2;
 
 public class tagging2 : MonoBehaviour
@@ -34,7 +36,11 @@ public class tagging2 : MonoBehaviour
         mapZone,
         gamepad,
         zoneable,
-        threat1
+        threat1,
+        team1,
+        team2,
+        team3,
+        team4 //just use integers for teams????
     }
 
 
@@ -423,9 +429,184 @@ public class find
         return true;
     }
 
-    
+
+
+
+
+
+    public hitscanEnactor grabHitscanEnaction(GameObject theObject, interType interTypeX)
+    {
+
+        foreach (hitscanEnactor thisEnaction in listOfHitscansOnObject(theObject))
+        {
+
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+    public List<hitscanEnactor> listOfHitscansOnObject(GameObject theObject)
+    {
+        //hmm:
+        //List<IEnactaBool> theList = [.. theObject.GetComponents<collisionEnaction>()];
+
+
+        List<hitscanEnactor> theList = new List<hitscanEnactor>();
+
+        foreach (hitscanEnactor thisEnaction in theObject.GetComponents<hitscanEnactor>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+    internal enaction enactionWithInteractionX(GameObject theObject, interType interTypeX)
+    {
+        //have to see any available interactions:
+        //where?
+        //          in current "equipped" enactions in gamepad
+        //          in inventory [at which point, need to equip it!  ..............doesn't fit current "singleEXE" paradigm.....
+        //just add a step before this in the plan that equips/preps IF necessary???
+        //
+        //what kind of enaction?
+        //      ranged
+        //          hitscan
+        //          non-hitscan
+        //      [no others currently?]
+
+
+        //what about child objects/inventory objects?  does this copde find them? [no, you have to feed each inventory object into this function]
+        //Debug.Log(listOfCollisionEnactionsOnObject(theObject).Count);
+        foreach (collisionEnaction thisEnaction in listOfCollisionEnactionsOnObject(theObject))
+        {
+            //Debug.Log(thisEnaction.interInfo.interactionType);
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+
+        return null;
+        }
+
+    internal enaction enactionOnObjectItselfWithIntertypeX(GameObject theObject, interType interTypeX)
+    {
+        //what about child objects/inventory objects?  does this copde find them? [no, you have to feed each inventory object into this function]
+        //Debug.Log(listOfCollisionEnactionsOnObject(theObject).Count);
+        foreach (collisionEnaction thisEnaction in listOfCollisionEnactionsOnObject(theObject))
+        {
+            //Debug.Log(thisEnaction.interInfo.interactionType);
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+
+
+
+        return null;
+    }
+
+    internal enaction enactionEquippedByObjectWithIntertypeX(GameObject theObject, interType interTypeX)
+    {
+        //what about child objects/inventory objects?  does this copde find them? [no, you have to feed each inventory object into this function]
+        //Debug.Log(listOfCollisionEnactionsOnObject(theObject).Count);
+        foreach (collisionEnaction thisEnaction in listOfCollisionEnactionsOnObject(theObject))
+        {
+            //Debug.Log(thisEnaction.interInfo.interactionType);
+            if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+        }
+
+        playable2 thePlayable = theObject.GetComponent<playable2>();
+
+        foreach (var key in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            GameObject equippedObject = thePlayable.equipperSlotsAndContents[key];
+            enaction thisEnaction = enactionOnObjectItselfWithIntertypeX(equippedObject, interTypeX);
+
+            if (thisEnaction != null) { return thisEnaction; }
+        }
+
+
+
+
+        return null;
+    }
+    internal GameObject ObjectEquippedByObjectWithIntertypeX(GameObject theObject, interType interTypeX)
+    {
+
+        playable2 thePlayable = theObject.GetComponent<playable2>();
+
+        foreach (var key in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            GameObject equippedObject = thePlayable.equipperSlotsAndContents[key];
+
+            if (new find().enactionOnObjectItselfWithIntertypeX(equippedObject, interTypeX) != null) { return equippedObject; }
+        }
+
+
+
+
+        return null;
+    }
+
+    internal enaction enactionInObjectsInventoryWithIntertypeX(GameObject theObject, interType interTypeX)
+    {
+
+        inventory1 theInventory = theObject.GetComponent<inventory1>();
+
+        foreach (GameObject inventoryItem in theInventory.inventoryItems)
+        {
+
+            enaction thisEnaction = enactionOnObjectItselfWithIntertypeX(inventoryItem, interTypeX);
+            if (new find().enactionOnObjectItselfWithIntertypeX(inventoryItem, interTypeX) != null) { return thisEnaction; }
+        }
+
+
+
+        return null;
+    }
+
+    internal GameObject objectInObjectsInventoryWithIntertypeX(GameObject theObject, interType interTypeX)
+    {
+
+        inventory1 theInventory = theObject.GetComponent<inventory1>();
+
+        foreach (GameObject inventoryItem in theInventory.inventoryItems)
+        {
+
+            enaction thisEnaction = enactionOnObjectItselfWithIntertypeX(inventoryItem, interTypeX);
+            if (new find().enactionOnObjectItselfWithIntertypeX(inventoryItem, interTypeX) != null) { return inventoryItem; }
+        }
+
+
+
+        return null;
+    }
+
+
+    public List<collisionEnaction> listOfCollisionEnactionsOnObject(GameObject theObject)
+    {
+        //what about child objects/inventory objects?  does this code find them?
+
+        List<collisionEnaction> theList = new List<collisionEnaction>();
+
+        foreach (collisionEnaction thisEnaction in theObject.GetComponents<collisionEnaction>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
+
+
+
 
 }
+
 
 public class objectIdPair
 {
@@ -433,4 +614,737 @@ public class objectIdPair
     //buuuuuuuuuuut you can't get object if you have ID!!!!!  very annoying.  so use this instead
     public int theObjectIdNumber = 0;
     public GameObject theObject;
+}
+
+
+
+
+
+
+
+
+//targeting
+
+public abstract class targetPicker
+{
+
+    //internal GameObject objectToBeNear; ?????????????
+
+    public abstract agnosticTargetCalc pickNext();  //hmm, should just return object??
+}
+
+public class pickRandomNearbyLocation : targetPicker
+{
+    GameObject objectToBeNear;
+    float spreadFactor = 1.0f;
+
+    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
+    {
+        objectToBeNear = objectToBeNearIn;
+        spreadFactor = spreadFactorIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        return targ;
+    }
+
+}
+
+
+//nahh let's split this up:
+
+/*
+public class pickNextVisibleStuffStuff : targetPicker
+{
+    GameObject objectToBeNear;
+    stuffType theType;
+
+    public pickNextVisibleStuffStuff(GameObject objectToBeNearIn, stuffType theTypeIn)
+    {
+        //objectToBeNear = objectToBeNearIn;
+        theType = theTypeIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
+        //pickNearest???
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+*/
+
+
+//"nearest visible" is two conditions.....
+//      all visible
+//      nearest
+
+//public class allVisibleInFOV : objectSetGrabber
+//no, just combine "allObjectsInSetThatMeetCriteria" with"objectVisibleInFOV", i love this
+
+//[i already have "allNearbyStuffStuff"]
+
+public class pickRandom : targetPicker
+{
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickRandom(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        //objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(target);
+
+        return targ;
+    }
+}
+
+public class pickNearest : targetPicker
+{
+    GameObject objectToBeNear;
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickNearest(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearest(objectToBeNear, theObjectSetGrabber.grab());
+        //Debug.Log("target:  "+target);
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+public class pickNearestExceptSelf : targetPicker
+{
+    GameObject objectToBeNear;
+    objectSetGrabber theObjectSetGrabber;
+
+    public pickNearestExceptSelf(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theObjectSetGrabber = objectSetGrabberIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        GameObject target = conditionCreator.singleton.whichObjectOnListIsNearestExceptSELF(objectToBeNear, theObjectSetGrabber.grab());
+
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! target:  " + target);
+
+        agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+
+        return targ;
+    }
+}
+
+/*
+public class targetCacheSetter : targetPicker
+{
+    //maybe:
+    //      don't re-calculate if the target is non-null
+    //      have some time or condition under which the target is set to null again???  [how?]
+    // no, do 2 diff classes.  a setter, and a receiver/bserver.
+
+
+
+    targetPicker theTargetPicker; 
+
+    GameObject objectToBeNear;
+    GameObject theCachedObject;
+
+
+    public targetCacheSetter(GameObject objectToBeNearIn, targetPicker theTargetPickerIn)
+    {
+        objectToBeNear = objectToBeNearIn;
+        theTargetPicker = theTargetPickerIn;
+    }
+
+
+
+
+    public agnosticTargetCalc observeCache()
+    {
+        if (theCachedObject == null)
+        {
+            return pickNext();
+        }
+
+        return new agnosticTargetCalc(objectToBeNear, theCachedObject);
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        theCachedObject = theTargetPicker.pickNext().ta;
+        return new agnosticTargetCalc(objectToBeNear, theCachedObject);
+    }
+
+}
+
+
+public class targetCacheReceiver : targetPicker
+{
+    targetCacheSetter theCache;
+    GameObject objectToBeNear;
+
+    public targetCacheReceiver(GameObject objectToBeNear)
+    {
+
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        return theCache.observeCache();
+    }
+}
+
+*/
+
+
+public class pickFirstFromList : targetPicker
+{
+
+    objectSetGrabber theListGenerator;
+
+    public pickFirstFromList(objectSetGrabber theListGeneratorIn)
+    {
+        theListGenerator = theListGeneratorIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        foreach (GameObject thisObject in theListGenerator.grab())
+        {
+
+            agnosticTargetCalc targ = new agnosticTargetCalc(thisObject);
+
+            return targ;
+        }
+
+        return null;
+    }
+}
+
+public class pickFirstXFromListY : targetPicker
+{
+
+    objectCriteria theCriteria;
+    objectSetGrabber theListGenerator;
+
+    public pickFirstXFromListY(objectCriteria theCriteriaIn, objectSetGrabber theListGeneratorIn)
+    {
+        theCriteria = theCriteriaIn;
+        theListGenerator = theListGeneratorIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        foreach (GameObject thisObject in theListGenerator.grab())
+        {
+            //Debug.Log("thisObject:  " + thisObject);
+
+            if (theCriteria.evaluateObject(thisObject))
+            {
+                agnosticTargetCalc targ = new agnosticTargetCalc(thisObject);
+
+                return targ;
+            }
+        }
+
+        return null;
+    }
+}
+
+public class pickMostXFromListY : targetPicker
+{
+
+    objectEvaluator theEvaluator;
+    objectSetGrabber theListGenerator;
+
+    public override agnosticTargetCalc pickNext()
+    {
+        agnosticTargetCalc targ = new agnosticTargetCalc(whichObjectOnListIsMostX(theListGenerator.grab()));
+
+        return targ;
+    }
+
+
+
+
+    public GameObject whichObjectOnListIsMostX(List<GameObject> listOfObjects)
+    {
+        GameObject bestSoFar = null;
+        float bestValueSoFar = 0;
+
+        foreach (GameObject thisObject in listOfObjects)
+        {
+            if (bestSoFar == null)
+            {
+                bestSoFar = thisObject;
+                bestValueSoFar = theEvaluator.evaluateObject(thisObject);
+                continue;
+            }
+
+
+            float currentValue = theEvaluator.evaluateObject(thisObject);
+            if (currentValue < bestValueSoFar)
+            {
+                bestSoFar = thisObject;
+                bestValueSoFar = currentValue;
+            }
+        }
+
+        return bestSoFar;
+    }
+
+}
+
+
+
+
+//object set grabbers
+
+
+public abstract class objectSetGrabber
+{
+    public abstract List<GameObject> grab();
+}
+
+
+
+public class allObjectsInSetThatMeetCriteria : objectSetGrabber
+{
+
+    objectSetGrabber theObjectSetGrabber;
+    //List<objectCriteria> theCriteria;  //no no, use a multi-criteria
+    objectCriteria theCriteria;
+
+    public allObjectsInSetThatMeetCriteria(objectSetGrabber theObjectSetGrabberIn, objectCriteria theCriteriaIn)
+    {
+        theObjectSetGrabber = theObjectSetGrabberIn;
+        theCriteria = theCriteriaIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach (GameObject thisObject in theObjectSetGrabber.grab())
+        {
+            if (thisObject == null)
+            {
+                continue;
+            }
+
+            if (theCriteria.evaluateObject(thisObject) == false)
+            {
+                continue;
+            }
+
+            newList.Add(thisObject);
+        }
+
+        return newList;
+    }
+}
+
+
+
+public class allObjectsInZone : objectSetGrabber
+{
+    GameObject theObjectWhoseZoneWeWantToLookIn;
+
+    public allObjectsInZone(GameObject theObjectWhoseZoneWeWantToLookInInput)
+    {
+        theObjectWhoseZoneWeWantToLookIn = theObjectWhoseZoneWeWantToLookInInput;
+    }
+
+    public override List<GameObject> grab()
+    {
+        //List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn); //lol
+
+        //return theListOfALL;
+        return allObjectsInObjectsZone(theObjectWhoseZoneWeWantToLookIn);
+    }
+
+
+    public List<GameObject> allObjectsInObjectsZone(GameObject theObject)
+    {
+        int zone = tagging2.singleton.whichZone(theObject);
+        List<objectIdPair> pairs = tagging2.singleton.objectsInZone[zone]; //= allInZone(zone);
+        return tagging2.singleton.listInObjectFormat(pairs);
+    }
+
+    /*
+    public List<objectIdPair> allInZone(int zone)
+    {
+        return tagging2.singleton.objectsInZone[zone];
+    }
+    */
+
+}
+
+
+public class objectListCacheSetter : objectSetGrabber
+{
+    //maybe:
+    //      don't re-calculate if the set is non-null
+    //      have some time or condition under which the list is set to null again???  [how?]
+    // no, do 2 diff classes.  a setter, and a receiver/bserver.
+
+
+
+    List<GameObject> theList = new List<GameObject>();
+
+    objectSetGrabber theSetToCache;  //??????  how to do this???
+
+
+
+
+    public override List<GameObject> grab()
+    {
+        //this function always generates a FRESH list
+
+        theList = theSetToCache.grab();
+
+        return theList;
+    }
+
+    public List<GameObject> observeCache()
+    {
+        if (theList == null)
+        {
+            return grab();
+        }
+
+        return theList;
+    }
+
+    internal void add(objectSetGrabber theObjectSetIn)
+    {
+        theSetToCache = theObjectSetIn;
+    }
+}
+
+
+public class objectListCacheReceiver : objectSetGrabber     //look at how cute and simple this is!
+{
+    objectListCacheSetter theCache;
+
+    public override List<GameObject> grab()
+    {
+        return theCache.observeCache();
+    }
+}
+
+
+public class excludeX : objectSetGrabber
+{
+    GameObject toExclude;
+    objectSetGrabber nestedSet;
+
+    public excludeX(objectSetGrabber nestedSetIn, GameObject toExcludeIn)
+    {
+        nestedSet = nestedSetIn;
+        toExclude = toExcludeIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach (GameObject obj in nestedSet.grab())
+        {
+            if (obj != toExclude)
+            {
+                newList.Add(obj);
+            }
+        }
+
+        return newList;
+    }
+}
+
+
+
+
+//should switch stuff to just grabbing/picking objects with CRITERIA?  ya, that's better way to do it.
+
+public class allNearbyStuffStuff : objectSetGrabber
+{
+    GameObject theObjectWeWantStuffNear;
+    stuffType theStuffTypeX;
+
+    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
+    {
+        theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
+        theStuffTypeX = theStuffTypeXIn;
+    }
+
+
+    public override List<GameObject> grab()
+    {
+        return allNearbyObjectsWithStuffTypeX(theStuffTypeX);
+    }
+
+
+    public List<GameObject> allNearbyObjectsWithStuffTypeX(stuffType theStuffTypeX)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectWeWantStuffNear);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            stuffStuff theComponent = thisObject.GetComponent<stuffStuff>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.theTypeOfStuff == theStuffTypeX)
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+}
+public class allNearbyNumericalVariable : objectSetGrabber
+{
+    numericalVariable theVariableType;
+
+
+    GameObject theObjectThatIsLooking;
+
+    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn)
+    {
+        theObjectThatIsLooking = theObjectThatIsLookingIn;
+        theVariableType = theVariableTypeIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        return allNearbyObjectsWithVariableX(theVariableType);
+    }
+
+
+    public List<GameObject> allNearbyObjectsWithVariableX(numericalVariable theVariableTypeIn)
+    {
+
+        List<GameObject> theListOfALL = new find().allObjectsInObjectsZone(theObjectThatIsLooking);  //lol forgot, this is ONE way to grab functions
+        List<GameObject> theListOfObjects = new List<GameObject>();
+
+        //Debug.Log("theListOfALL.Count:  "+theListOfALL.Count);
+
+        foreach (GameObject thisObject in theListOfALL)
+        {
+
+            //Debug.Log("thisObject:  " + thisObject);
+            interactable2 theComponent = thisObject.GetComponent<interactable2>();
+
+            if (theComponent == null)
+            {
+
+                //Debug.Log("(theComponent == null)");
+                continue;
+            }
+
+            if (theComponent.dictOfIvariables.ContainsKey(theVariableType))
+            {
+                //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
+                theListOfObjects.Add(thisObject);
+            }
+        }
+
+        return theListOfObjects;
+    }
+}
+
+
+
+public class inventoryGrabber : objectSetGrabber
+{
+    //GameObject theObjectWithInventory;
+    inventory1 theInventory;
+
+
+    public inventoryGrabber(GameObject theObjectWithInventory)
+    {
+        theInventory = theObjectWithInventory.GetComponent<inventory1>();
+    }
+
+    public override List<GameObject> grab()
+    {
+        return theInventory.inventoryItems;
+    }
+}
+public class equippedObjectsGrabber : objectSetGrabber
+{
+    //GameObject theObjectWithInventory;
+    playable2 thePlayable;
+
+
+    public equippedObjectsGrabber(GameObject theObjectWithEquipperSlots)
+    {
+        thePlayable = theObjectWithEquipperSlots.GetComponent<playable2>();
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        foreach (var key in thePlayable.equipperSlotsAndContents.Keys)
+        {
+            GameObject thisObject = thePlayable.equipperSlotsAndContents[key];
+            if (thisObject != null)
+            {
+                newList.Add(thisObject);
+            }
+        }
+
+
+        return newList;
+    }
+}
+
+
+//grabbing INDIVIDUAL OBJECTS
+
+public abstract class individualObjectReturner
+{
+    public abstract GameObject returnObject();
+}
+
+public class objectCacheSetter : individualObjectReturner
+{
+    //maybe:
+    //      don't re-calculate if the target is non-null
+    //      have some time or condition under which the target is set to null again???  [how?]
+    // no, do 2 diff classes.  a setter, and a receiver/bserver.
+
+
+
+    individualObjectReturner theNestedReturner;
+
+    GameObject theCachedObject;
+
+
+    public objectCacheSetter(individualObjectReturner theNestedReturnerIn)
+    {
+        theNestedReturner = theNestedReturnerIn;
+    }
+
+
+
+
+    public GameObject observeCache()
+    {
+        if (theCachedObject == null)
+        {
+            return returnObject();
+        }
+
+        return theCachedObject;
+    }
+
+    public override GameObject returnObject()
+    {
+        theCachedObject = theNestedReturner.returnObject();
+        return theCachedObject;
+    }
+}
+
+
+public class objectCacheReceiver : individualObjectReturner
+{
+    objectCacheSetter theCache;
+
+    public objectCacheReceiver(objectCacheSetter theCacheIn)
+    {
+        //"theCacheIn" is the SETTER?  i think
+        theCache = theCacheIn;
+    }
+
+
+    public override GameObject returnObject()
+    {
+        return theCache.observeCache();
+    }
+}
+
+public class pickFirstObjectXFromListY : individualObjectReturner
+{
+
+    objectCriteria theCriteria;
+    objectSetGrabber theListGenerator;
+
+    public pickFirstObjectXFromListY(objectCriteria theCriteriaIn, objectSetGrabber theListGeneratorIn)
+    {
+        theCriteria = theCriteriaIn;
+        theListGenerator = theListGeneratorIn;
+    }
+
+    public override GameObject returnObject()
+    {
+
+        //Debug.Log("theListGenerator:  "+theListGenerator);
+        foreach (GameObject thisObject in theListGenerator.grab())
+        {
+            //Debug.Log("thisObject:  " + thisObject);
+            //Debug.Log("theCriteria:  " + theCriteria);
+            if (theCriteria.evaluateObject(thisObject))
+            {
+                return thisObject;
+            }
+        }
+
+        return null;
+    }
+}
+
+
+public class presetObject : individualObjectReturner
+{
+    GameObject theObject;
+
+    public presetObject(GameObject theObjectIn)
+    {
+        theObject = theObjectIn;
+    }
+
+
+
+    public override GameObject returnObject()
+    {
+        return theObject;
+    }
 }

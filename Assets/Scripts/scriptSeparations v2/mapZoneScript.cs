@@ -18,8 +18,12 @@ public class mapZoneScript : MonoBehaviour
     void Awake()
     {
         initializeZoneNumber();
-    }
 
+    }
+    void Start()
+    {
+        gameObject.tag = "aMapZone";
+    }
 
     private void initializeZoneNumber()
     {
