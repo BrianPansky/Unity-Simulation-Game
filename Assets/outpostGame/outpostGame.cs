@@ -12,7 +12,14 @@ public class outpostGame : MonoBehaviour
     void Start()
     {
         genGen.singleton.returnGun1(new Vector3(-2, 0.7f, 6));
-        new basicSoldierGenerator(tagging2.tag2.team2).doIt(new Vector3(7,0,6));
+
+        int number = 0;
+        while(number < 1)
+        {
+
+            new basicSoldierGenerator(tagging2.tag2.team2).doIt(new Vector3(7, 0, 10*number));
+            number++;
+        }
     }
 
     // Update is called once per frame
@@ -83,13 +90,13 @@ public class FSMcomponent:MonoBehaviour,IupdateCallable
     public void Update()
     {
 
-        Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
+        //Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
     }
 
     public void callableUpdate()
     {
-        Debug.Log("============================     callableUpdate()        =================");
-        //foreach (FSM theFSM in theFSMList)
+        //Debug.Log("============================     callableUpdate()        =================");
+        foreach (FSM theFSM in theFSMList)
         {
             //Debug.Log("theFSM:  "+ theFSM);
             //theFSM = theFSM.doAFrame();  //will this be an issue?  or only if i add/remove items from list?
@@ -145,8 +152,10 @@ public class basicSoldierFSM : FSM
 
 
 
-
-        return idle;
+        idle.name = "hands, idle";
+        combat1.name = "hands, combat1";
+        equipGun.theFSM.name = "hands, equipGun";
+        return idle;;
     }
 
     private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
@@ -178,6 +187,7 @@ public class basicSoldierFSM : FSM
 
 
         objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
             new reverseCriteria(new objectHasTag(team)),
             new lineOfSight(theObjectDoingTheEnaction),
             new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
@@ -195,7 +205,8 @@ public class basicSoldierFSM : FSM
 
         wander.addSwitchAndReverse(switchToAttack, combat1);
 
-
+        wander.name = "feet, wander";
+        combat1.name = "feet, combat1";
         return wander;
     }
 
@@ -358,6 +369,11 @@ public class equipObjectRepeater : repeater
         //condition thisCondition = new enacted(exe1);
         //exe1.endConditions.Add(thisCondition);
         return exe1;
+    }
+
+    public override string baseEnactionsAsText()
+    {
+        return theRepeater.baseEnactionsAsText();
     }
 }
 

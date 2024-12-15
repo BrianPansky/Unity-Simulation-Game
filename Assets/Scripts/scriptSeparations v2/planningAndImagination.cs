@@ -514,7 +514,6 @@ public class vect3EXE2 : singleEXE
         if (standardExecuteErrors()) { return; }
 
         //conditionalPrint("should enact this:  " + this.theEnaction);
-        //Debug.Log("theTarget:  " + target);
 
 
         //theEnaction.enact(new inputData(offsetDestination(target.transform.position)));
@@ -538,7 +537,9 @@ public class vect3EXE2 : singleEXE
         //conditionalPrint("8888888888888888888888888888grabberDebug.GetInstanceID():  " + grabberDebug.GetInstanceID());
         //grabberDebug.recordCurrentEnaction(theEnaction);
         Vector3 targetPosition = theTargetCalculator.targetPosition();
-        new mastLine(targetPosition);
+        //Debug.Log("(theTargetCalculator:  " + theTargetCalculator);
+        //Debug.Log("(targetPosition:  " + targetPosition);
+        //new mastLine(targetPosition);
         theEnaction.enact(new inputData(targetPosition));
         //executeInputData(new inputData());
         numberOfTimesExecuted++;

@@ -251,7 +251,7 @@ public class genGen : MonoBehaviour
 
         //compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
         theShooter.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
-
+        theShooter.gamepadButtonType = buttonCategories.primary;
 
 
 
@@ -1329,7 +1329,7 @@ public class paintByNumbersAnimalBody1 : objectGen
 
 public class FSM
 {
-
+    public string name;
     //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
     internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
 
@@ -1339,6 +1339,8 @@ public class FSM
 
     public FSM doAFrame()
     {
+        Debug.Log("the name of this FSM:  " + name);
+
         //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
         FSM toSwitchTo = null;
@@ -1432,7 +1434,9 @@ public class FSM
         {
 
             //newString += thisRep.thePerma.printBaseEnactions();
-            newString += thisRep.thePerma.baseEnactionsAsText();
+            //Debug.Assert(thisRep != null);
+            //Debug.Assert(thisRep.thePerma != null);
+            newString += thisRep.baseEnactionsAsText();
         }
 
         newString += "]";

@@ -92,7 +92,7 @@ public abstract class enaction : MonoBehaviour
 
         //Debug.Log("this.GetInstanceID():  " + this.GetInstanceID());
         //linkedEnactionAtoms = new simpleEnactableList();
-        Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", linkedEnactionAtoms:  " + linkedEnactionAtoms);
+        //Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", linkedEnactionAtoms:  " + linkedEnactionAtoms);
     }
     private static simpleEnactableList gimmie2(simpleEnactableList linkedEnactionAtoms)
     {
@@ -142,7 +142,7 @@ public abstract class enaction : MonoBehaviour
     {
         //Debug.Log("linkedEnactionAtoms:  " + linkedEnactionAtoms);
 
-        Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", " + this.ToString()+", "+ this.toEXE(null).theEnaction + ", " + "linkedEnactionAtoms:  " + linkedEnactionAtoms);
+        //Debug.Log("this.GetInstanceID():  " + this.GetInstanceID() + ", " + this.ToString()+", "+ this.toEXE(null).theEnaction + ", " + "linkedEnactionAtoms:  " + linkedEnactionAtoms);
         //linkedEnactionAtoms.enactList(theInput);
         foreach (enaction thisLinkedEnaction in linkedEnactionAtoms)
         {
@@ -293,6 +293,8 @@ public class navAgent : IEnactByTargetVector
     //only for vector inputs!
     NavMeshAgent theAgent;
     //public bool debugPrint = false;
+
+
     public static void addNavAgentEnaction(GameObject objectToAddNavmeshAgentTo)
     {
         navAgent nA = objectToAddNavmeshAgentTo.AddComponent<navAgent>();
@@ -374,6 +376,7 @@ public class navAgent : IEnactByTargetVector
             theAgent.Warp(theAgent.transform.position);
         }
         Debug.Assert(theAgent.isOnNavMesh);
+        //Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?");
         theAgent.SetDestination(theInput.vect3);
     }
 }
@@ -956,7 +959,7 @@ public class vecRotation : vectorMovement
     public static vecRotation addVecRotationAndReturnIt(GameObject objectToAddItTo, float inputSpeed, Transform theHorizontalTransform, Transform theVerticalTransform, buttonCategories gamepadButtonType, float pitchRange = 70f)
     {
         vecRotation theVectorRotationComponent = objectToAddItTo.AddComponent<vecRotation>();
-        Debug.Log("theVectorRotationComponent.GetInstanceID():  " + theVectorRotationComponent.GetInstanceID() + ", " + theVectorRotationComponent.ToString() + ", " + theVectorRotationComponent.toEXE(null).theEnaction + ", " + "theVectorRotationComponent.linkedEnactionAtoms:  " + theVectorRotationComponent.linkedEnactionAtoms);
+        //Debug.Log("theVectorRotationComponent.GetInstanceID():  " + theVectorRotationComponent.GetInstanceID() + ", " + theVectorRotationComponent.ToString() + ", " + theVectorRotationComponent.toEXE(null).theEnaction + ", " + "theVectorRotationComponent.linkedEnactionAtoms:  " + theVectorRotationComponent.linkedEnactionAtoms);
         //theVectorRotationComponent.base();//.enaction();
 
         theVectorRotationComponent.speed = inputSpeed;

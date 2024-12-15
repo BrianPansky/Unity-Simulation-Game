@@ -647,6 +647,7 @@ public class pickRandomNearbyLocation : targetPicker
     public override agnosticTargetCalc pickNext()
     {
         Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        Debug.Log(target);
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
         return targ;
     }

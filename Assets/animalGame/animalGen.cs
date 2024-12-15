@@ -1424,6 +1424,8 @@ public abstract class repeater
     public depletablePlan theDepletablePlan;
 
     public abstract void doThisThing();
+
+    public abstract string baseEnactionsAsText();
 }
 
 public class agnostRepeater: repeater
@@ -1441,6 +1443,10 @@ public class agnostRepeater: repeater
         theRepeater = new repeatWithTargetPicker(thePermaIn, theTargetPickerIn);
     }
 
+    public override string baseEnactionsAsText()
+    {
+        return theRepeater.baseEnactionsAsText();
+    }
 
     public override void doThisThing()
     {
@@ -1516,8 +1522,18 @@ public class repeatWithTargetPicker:repeater
         return newThing;
     }
 
+    public override string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this FSM:  ";
+        newString += "[";
 
+        newString += thePerma.baseEnactionsAsText();
 
+        newString += "]";
+        //Debug.Log(newString);
+        return newString;
+    }
 }
 
 public class simpleExactRepeatOfPerma : repeater
@@ -1544,6 +1560,18 @@ public class simpleExactRepeatOfPerma : repeater
         {
             theDepletablePlan = thePerma.convertToDepletable();
         }
+    }
+    public override string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this FSM:  ";
+        newString += "[";
+
+        newString += thePerma.baseEnactionsAsText();
+
+        newString += "]";
+        //Debug.Log(newString);
+        return newString;
     }
 }
 
@@ -1617,6 +1645,18 @@ public class repeatWithObjectReturner : repeater
 
 
 
+    public override string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this FSM:  ";
+        newString += "[";
+
+        newString += thePerma.baseEnactionsAsText();
+
+        newString += "]";
+        //Debug.Log(newString);
+        return newString;
+    }
 }
 
 
