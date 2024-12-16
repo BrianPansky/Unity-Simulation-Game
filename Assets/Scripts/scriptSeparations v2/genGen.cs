@@ -17,6 +17,7 @@ public class genGen : MonoBehaviour
     void Awake()
     {
         singletonify();
+
     }
 
     void singletonify()
@@ -1575,6 +1576,33 @@ public class multiModify : objectModifier
         foreach (objectModifier modifier in theModifiers)
         {
             modifier.modify(theObject);
+        }
+    }
+}
+
+
+
+
+public class objectSetInstantiator
+{
+    List<objectGen> theSet = new List<objectGen>();
+
+
+
+
+    public objectSetInstantiator(objectGen[] objectGenArray)
+    {
+        foreach(objectGen thisObjectGen in objectGenArray) { theSet.Add(thisObjectGen); }
+    }
+
+
+
+    internal void generate(Vector3 spawnPoint)
+    {
+        foreach(objectGen objGen in theSet)
+        {
+           GameObject newObj =  objGen.generate();
+           newObj.transform.position = patternScript2.singleton.randomNearbyVector(spawnPoint);
         }
     }
 }

@@ -44,11 +44,18 @@ public class tagging2 : MonoBehaviour
     }
 
 
+    public Dictionary<tagging2.tag2, Color> teamColors = new Dictionary<tagging2.tag2, Color>();
+
 
     void Awake()
     {
         //Debug.Log("Awake:  " + this);
         singletonify();
+
+
+        teamColors[tag2.team2] = Color.red;
+        teamColors[tag2.team3] = Color.green;
+        teamColors[tag2.team4] = Color.blue;
     }
 
     void singletonify()
@@ -325,6 +332,26 @@ public class tagging2 : MonoBehaviour
 
 
     }
+
+    public void initializeTagListsIfNecessary(tag2 thisTag)
+    {
+
+
+        /*
+        if (objectsInZone.ContainsKey(thisTag) == false)
+        {
+            zoneOfObject[thisTag] = 0;
+        }
+        */
+
+        if (objectsWithTag.ContainsKey(thisTag) == false)
+        {
+            objectsWithTag[thisTag] = new List<objectIdPair>();
+        }
+
+
+    }
+
     public List<GameObject> listInObjectFormat(List<objectIdPair> pairFormatList)
     {
         List<GameObject> newList = new List<GameObject>();
@@ -1002,6 +1029,23 @@ public class allObjectsInZone : objectSetGrabber
     }
     */
 
+}
+
+public class allObjectsWithTag : objectSetGrabber
+{
+    private tag2 tag;
+
+    public allObjectsWithTag(tag2 tag)
+    {
+        this.tag = tag;
+        tagging2.singleton.initializeTagListsIfNecessary(tag);
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<objectIdPair> pairs = tagging2.singleton.objectsWithTag[tag]; //= allInZone(zone);
+        return tagging2.singleton.listInObjectFormat(pairs);
+    }
 }
 
 

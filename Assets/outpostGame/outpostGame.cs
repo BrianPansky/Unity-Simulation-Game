@@ -5,29 +5,165 @@ using UnityEngine;
 using UnityEngine.Experimental.PlayerLoop;
 using static enactionCreator;
 using static interactionCreator;
+using static tagging2;
 
 public class outpostGame : MonoBehaviour
 {
+
+    List<hoardeWaveGen> hoardes = new List<hoardeWaveGen>();
+
+
+
     // Start is called before the first frame update
     void Start()
     {
         genGen.singleton.returnGun1(new Vector3(-2, 0.7f, 6));
 
+
+
+        List<Vector3> listOfSpawnPoints = new List<Vector3>();
+        listOfSpawnPoints.Add(new Vector3(10,0,20));
+        listOfSpawnPoints.Add(new Vector3(25,0,-20));
+        listOfSpawnPoints.Add(new Vector3(-15,0,25));
+        listOfSpawnPoints.Add(new Vector3(-20,0,-20));
+
+
+        hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
+        hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints));
+        hoardes.Add(new hoardeWaveGen(tag2.team4, listOfSpawnPoints));
+
+
+        /*
+
         int number = 0;
-        while(number < 1)
+        while(number < 3)
         {
 
-            new basicSoldierGenerator(tagging2.tag2.team2).doIt(new Vector3(7, 0, 10*number));
+            new basicSoldierGenerator(tag2.team2).doIt(new Vector3(7, 0, 10 * number));
+            new basicSoldierGenerator(tag2.team3).doIt(new Vector3(7, 0, -10 * number));
             number++;
         }
+        */
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        foreach(hoardeWaveGen hoard in hoardes)
+        {
+            hoard.doOnUpdate();
+        }
     }
 }
+
+
+
+
+
+
+
+public class hoardeWaveGen
+{
+    int currentWaveNumber = 0;
+
+    tag2 team;
+
+    condition newWaveCondition;
+
+    List<objectSetInstantiator> listOfWaves = new List<objectSetInstantiator>();
+
+    List<Vector3> listOfSpawnPoints = new List<Vector3>();
+
+
+
+    public hoardeWaveGen(tag2 teamIn, List<Vector3> listOfSpawnPointsIn)
+    {
+        team = teamIn;
+        listOfSpawnPoints = listOfSpawnPointsIn;
+
+        newWaveCondition = zeroRemainingTeamMembers();
+        listOfWaves = testWaves();
+    }
+
+    private List<objectSetInstantiator> testWaves()
+    {
+        List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
+
+
+        objectSetInstantiator o1 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o2 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+
+        newList.Add(o1);
+        newList.Add(o2);
+        newList.Add(o3);
+
+        return newList;
+    }
+
+    public void doOnUpdate()
+    {
+        if (newWaveCondition.met())
+        {
+            currentWaveNumber++;
+            generateNextWave();
+        }
+    }
+
+
+
+
+
+
+
+
+
+    public void generateNextWave()
+    {
+        //currentWaveNumber starts at 1
+        Debug.Log("current and count:  "+ currentWaveNumber+", "+ listOfWaves.Count);
+        if(currentWaveNumber-1 < listOfWaves.Count)
+        {
+
+            listOfWaves[currentWaveNumber -1].generate(pickRandomSpawnPoint(listOfSpawnPoints));
+            return;
+        }
+
+        listOfWaves[currentWaveNumber - listOfWaves.Count-1].generate(pickRandomSpawnPoint(listOfSpawnPoints));
+        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(pickRandomSpawnPoint(listOfSpawnPoints));
+    }
+
+    private Vector3 pickRandomSpawnPoint(List<Vector3> listOfSpawnPoints)
+    {
+        return listOfSpawnPoints[repository2.singleton.pickRandomInteger(listOfSpawnPoints.Count-1)];
+    }
+
+
+
+
+    condition zeroRemainingTeamMembers()
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad()
+            //new objectHasTag(team)
+            //new proximityCriteriaBool(thePlayer?, 25)
+            );
+
+
+        objectSetGrabber theTeamObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsWithTag(team), theCriteria);
+
+        condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 10));// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return theCondition;
+    }
+}
+
+
+
+
+
 
 
 
@@ -45,6 +181,8 @@ public class basicSoldierGenerator : doAtPoint
     internal override void doIt(Vector3 thisPoint)
     {
         GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCylinderPrefab, thisPoint, Quaternion.identity);
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
         GameObject.Destroy(newObj.GetComponent<Collider>());
         newObj.AddComponent<CapsuleCollider>();
 
@@ -80,6 +218,66 @@ public class basicSoldierGenerator : doAtPoint
 
 
 }
+
+
+public class basicSoldierGeneratorG : objectGen
+{
+    tagging2.tag2 team;
+    private Vector3 thePosition;
+
+    public basicSoldierGeneratorG(tagging2.tag2 theTeamIn)
+    {
+        this.team = theTeamIn;
+        thePosition = new Vector3();
+    }
+
+    public GameObject generate()
+    {
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCylinderPrefab, thePosition, Quaternion.identity);
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        newObj.AddComponent<CapsuleCollider>();
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+
+
+        tagging2.singleton.addTag(newObj, team);
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
+        thePlayable.initializeEnactionPoint1();
+        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+
+
+        genGen.singleton.makeBasicEnactions(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+        //theirInventory.startingItem = genGen.singleton.returnGun1(newObj.transform.position);
+        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, newObj);
+
+
+        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
+        theFSMcomponent.theFSMList = new basicSoldierFSM(newObj, team).returnIt();
+
+        return newObj;
+    }
+
+
+
+}
+
+
+
+
+
 
 public class FSMcomponent:MonoBehaviour,IupdateCallable
 {

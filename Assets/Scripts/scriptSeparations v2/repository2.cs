@@ -149,6 +149,10 @@ public class repository2 : MonoBehaviour
 
     }
 
+    public int pickRandomInteger(int maxInteger)
+    {
+        return UnityEngine.Random.Range(0, maxInteger);
+    }
 
 
 

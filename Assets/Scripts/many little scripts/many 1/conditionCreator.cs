@@ -1295,6 +1295,7 @@ public class isThereAtLeastOneObjectInSet : baseCondition
 
     public override bool met()
     {
+        if(theObjectSetGrabber.grab() == null){ return false; }
         if (theObjectSetGrabber.grab().Count > 0)
         {
             //Debug.Log("(theObjectSetGrabber.grab().Count > 0) is TRUE:  " + theObjectSetGrabber.grab().Count + "  " + theObjectSetGrabber.grab()[0]);
