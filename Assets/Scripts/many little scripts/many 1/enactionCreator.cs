@@ -291,7 +291,7 @@ public class simpleEnactableList
 public class navAgent : IEnactByTargetVector
 {
     //only for vector inputs!
-    NavMeshAgent theAgent;
+    public NavMeshAgent theAgent;
     //public bool debugPrint = false;
 
 
@@ -357,6 +357,7 @@ public class navAgent : IEnactByTargetVector
 
         //Debug.Log("theInput.vect3:  " + theInput.vect3);
 
+        Debug.DrawLine(theInput.vect3, theAgent.transform.position, Color.blue, 2f);
         /*
         if (debugPrint == true)
         {
@@ -376,7 +377,7 @@ public class navAgent : IEnactByTargetVector
             theAgent.Warp(theAgent.transform.position);
         }
         Debug.Assert(theAgent.isOnNavMesh);
-        //Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?");
+        Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?");
         theAgent.SetDestination(theInput.vect3);
     }
 }

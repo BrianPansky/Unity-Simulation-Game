@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.PlayerLoop;
+using UnityEngine.WSA;
 using static enactionCreator;
 using static interactionCreator;
 using static tagging2;
@@ -95,9 +96,9 @@ public class hoardeWaveGen
 
         objectSetInstantiator o1 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) });
         objectSetInstantiator o2 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o4 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o5 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99) });
+        objectSetInstantiator o4 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o5 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) });
 
         newList.Add(o1);
         newList.Add(o2);
@@ -164,6 +165,268 @@ public class hoardeWaveGen
         return theCondition;
     }
 }
+
+
+
+
+
+
+public class basicPaintByNumbersSoldierGeneratorG : objectGen
+{
+    tagging2.tag2 team;
+    private Vector3 thePosition;
+
+    float health;
+    float height;
+    float width;
+    objectGen weapon;
+    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    float speed;
+    float targetDetectionRange;
+
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+
+    // 
+    //basicBodyProperties
+    public basicPaintByNumbersSoldierGeneratorG(tag2 theTeamIn, float health, float height, float width, float speed, float targetDetectionRange)//, objectGen weapon)
+    {
+        this.team = theTeamIn;
+        this.health = health;
+        this.height = height;
+        this.width = width;
+        this.speed = speed;
+        //this.weapon = weapon;
+        //this.theBehavior = theBehavior;
+        thePosition = new Vector3();
+    }
+
+    public GameObject generate()
+    {
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+
+        //oldTorso(newObj,torso);
+
+        newTorso(newObj, torso);
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+
+        tagging2.singleton.addTag(newObj, team);
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.theNavMeshTransform = newObj.transform;
+        thePlayable.theHorizontalRotationTransform = torso.transform;
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
+        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform, true);
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = health;
+        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
+
+        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+
+
+        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+        //GameObject gun = weapon.generate();
+        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, newObj);
+
+
+
+
+        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
+        theFSMcomponent.theFSMList = new basicPaintByNumbersSoldierFSM(newObj,team,speed,targetDetectionRange).returnIt();//theBehavior;
+
+        return newObj;
+    }
+
+    private void newTorso(GameObject newObj, GameObject torso)
+    {
+        //torso.transform.localScale = new Vector3(width, height / 2, width);
+
+
+        //torso.transform.position += new Vector3(0, (height / 2) - 1, 0);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        //hitbox.size += new Vector3(width-1, height-1, width-1);
+        //hitbox.center += new Vector3(0, (height-1)/2, 0);
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+
+
+        torso.transform.SetParent(newObj.transform, false);
+        newObj.transform.localScale = new Vector3(width, (height-1)/2, width);
+        //newObj.transform.position += new Vector3(0, ((height - 1) / 2), 0);
+    }
+
+    private void oldTorso(GameObject newObj, GameObject torso)
+    {
+        torso.transform.SetParent(newObj.transform, false);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+    }
+}
+
+
+
+public class basicPaintByNumbersSoldierFSM : FSM
+{
+
+    //FSM theFSM;
+    public List<FSM> theFSMList = new List<FSM>();
+
+    //float combatRange = 40f;
+    private GameObject newObj;
+    private tag2 team;
+    private float speed;
+    private float targetDetectionRange;
+
+    public basicPaintByNumbersSoldierFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    {
+        this.newObj = theObjectDoingTheEnaction;
+        this.team = team;
+        this.speed = speed;
+        this.targetDetectionRange = targetDetectionRange;
+
+
+        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
+        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+
+    }
+
+    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        FSM idle = new generateFSM();
+
+        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
+        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+
+
+
+        idle.addSwitchAndReverse(switchToAttack, combat1);
+
+
+
+        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+
+
+
+        idle.name = "hands, idle";
+        combat1.name = "hands, combat1";
+        equipGun.theFSM.name = "hands, equipGun";
+        return idle; ;
+    }
+
+    private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 200),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        return theCriteria;
+    }
+
+    private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
+    {
+
+        targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        return theAttackTargetPicker;
+    }
+
+    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+        //targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        //targetPicker theTargetPicker = new applePatternTargeter(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        wander.addSwitchAndReverse(switchToAttack, combat1);
+
+        wander.name = "feet, wander";
+        combat1.name = "feet, combat1";
+
+        navAgent theNav = theObjectDoingTheEnaction.GetComponent<navAgent>();
+        theNav.theAgent.speed = this.speed;
+        theNav.theAgent.baseOffset = 0.5f;//theObjectDoingTheEnaction.transform.localScale.y;
+        //theNav.theAgent.
+
+        return wander;
+    }
+
+
+
+
+    public List<FSM> returnIt()
+    {
+        return theFSMList;
+    }
+
+
+
+}
+
+
+
+
+
 
 
 
@@ -480,6 +743,8 @@ public class combatDodgeVarietyPack1 : targetPicker
     {
         randomlyPickDifferentStrategySometimes();
         Debug.Log("currentPick:  " + currentPick);
+
+
 
         return listOfTargetPickers[currentPick].pickNext();
     }
