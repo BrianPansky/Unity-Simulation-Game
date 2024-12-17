@@ -61,7 +61,7 @@ public class initialGenerator2 : MonoBehaviour
         //createCubeGridTest();
 
 
-        Vector3 startPoint = new Vector3(-90, 1, -250);
+        Vector3 startPoint = new Vector3(-190, 1, -250);
         /*
         int rows = 5;
         int columns = 3;
@@ -71,12 +71,12 @@ public class initialGenerator2 : MonoBehaviour
         float xScale = 3f;
         float yScale = 1f;
         */
-        int rows = 30;
-        int columns = 3;
+        int rows = 1;
+        int columns = 1;
         int verticalColumns = 1;
 
-        float zScale = 60f;
-        float xScale = 100f;
+        float zScale = 2230f;
+        float xScale = 2200f;
         float yScale = 30f;
         //List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
         createMapZones(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns);

@@ -660,6 +660,23 @@ public abstract class targetPicker
     public abstract agnosticTargetCalc pickNext();  //hmm, should just return object??
 }
 
+public class aimOffsetter : targetPicker
+{
+    private targetPicker targetPicker;
+    private aimTarget theEnaction;
+
+    public aimOffsetter(targetPicker targetPicker, aimTarget theEnaction)
+    {
+        this.targetPicker = targetPicker;
+        this.theEnaction = theEnaction;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class pickRandomNearbyLocation : targetPicker
 {
     GameObject objectToBeNear;
@@ -674,7 +691,7 @@ public class pickRandomNearbyLocation : targetPicker
     public override agnosticTargetCalc pickNext()
     {
         Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        Debug.Log(target);
+        //Debug.Log(target);
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
         return targ;
     }

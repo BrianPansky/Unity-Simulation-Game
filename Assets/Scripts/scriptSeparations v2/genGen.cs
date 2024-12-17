@@ -202,6 +202,18 @@ public class genGen : MonoBehaviour
 
         aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
     }
+    public void makeEnactionsWithTorsoArticulation1(playable2 thePlayable)
+    {
+        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick));
+
+
+        vecTranslation.addVecTranslation(thePlayable.gameObject, thePlayable.speed, buttonCategories.vector1);
+
+        navAgent.addNavAgentEnaction(thePlayable.gameObject);
+
+        aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.theHorizontalRotationTransform, thePlayable.theVerticalRotationTransform, buttonCategories.vector2);
+    }
 
     public void makeInteractionsBody4(interactable2 theInteractable)
     {
@@ -233,7 +245,7 @@ public class genGen : MonoBehaviour
             new projectileToGenerate(speed, sdOnCollision, 99, 0),
             20);
 
-        numericalEffect(theEquippable, numericalVariable.cooldown, 90);
+        numericalEffect(theEquippable, numericalVariable.cooldown, 40);
 
         projectileLauncher theShooter = theEquippable.transform.gameObject.GetComponent<projectileLauncher>();
         enactEffect theFiringEffectOnCooldown = theEquippable.transform.gameObject.GetComponent<enactEffect>();
@@ -1340,7 +1352,7 @@ public class FSM
 
     public FSM doAFrame()
     {
-        Debug.Log("the name of this FSM:  " + name);
+        //Debug.Log("the name of this FSM:  " + name);
 
         //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
@@ -1385,7 +1397,7 @@ public class FSM
             //Debug.Log("thisCondition.asTextAllTheWayDown():  " + thisCondition.asTextAllTheWayDown() + " " + thisCondition.GetHashCode());
             if (thisCondition.met())
             {
-                Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
+                //Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
                 return switchBoard[thisCondition];
             }
         }

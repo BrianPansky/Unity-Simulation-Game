@@ -22,10 +22,10 @@ public class outpostGame : MonoBehaviour
 
 
         List<Vector3> listOfSpawnPoints = new List<Vector3>();
-        listOfSpawnPoints.Add(new Vector3(10,0,20));
-        listOfSpawnPoints.Add(new Vector3(25,0,-20));
-        listOfSpawnPoints.Add(new Vector3(-15,0,25));
-        listOfSpawnPoints.Add(new Vector3(-20,0,-20));
+        listOfSpawnPoints.Add(new Vector3(30,0,20));
+        listOfSpawnPoints.Add(new Vector3(45,0,-20));
+        listOfSpawnPoints.Add(new Vector3(-25,0,25));
+        listOfSpawnPoints.Add(new Vector3(-30,0,-30));
 
 
         hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
@@ -51,7 +51,8 @@ public class outpostGame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        foreach(hoardeWaveGen hoard in hoardes)
+        Debug.Log("---------------------------------------------------------");
+        foreach (hoardeWaveGen hoard in hoardes)
         {
             hoard.doOnUpdate();
         }
@@ -95,10 +96,14 @@ public class hoardeWaveGen
         objectSetInstantiator o1 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) });
         objectSetInstantiator o2 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
         objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o4 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
+        objectSetInstantiator o5 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
 
         newList.Add(o1);
         newList.Add(o2);
         newList.Add(o3);
+        newList.Add(o4);
+        newList.Add(o5);
 
         return newList;
     }
@@ -154,7 +159,7 @@ public class hoardeWaveGen
 
         objectSetGrabber theTeamObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsWithTag(team), theCriteria);
 
-        condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 10));// theObjectDoingTheEnaction, numericalVariable.health);
+        condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 120));// theObjectDoingTheEnaction, numericalVariable.health);
 
         return theCondition;
     }
@@ -233,11 +238,24 @@ public class basicSoldierGeneratorG : objectGen
 
     public GameObject generate()
     {
-        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCylinderPrefab, thePosition, Quaternion.identity);
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+
+        //newObj.transform.localScale = new Vector3(1, 0.5f, 1);
+        //torso.transform.localScale = new Vector3(1, 0.5f, 1); 
+        torso.transform.SetParent(newObj.transform, false);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
         Renderer theRenderer = newObj.GetComponent<Renderer>();
         theRenderer.material.color = tagging2.singleton.teamColors[team];
+
         GameObject.Destroy(newObj.GetComponent<Collider>());
-        newObj.AddComponent<CapsuleCollider>();
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+        //hitbox.transform.localScale += new Vector3(0, 1f, 0);
+        //newObj.transform.localScale += new Vector3(0, -1f, 0);
 
         genGen.singleton.ensureVirtualGamePad(newObj);
 
@@ -245,15 +263,21 @@ public class basicSoldierGeneratorG : objectGen
 
         tagging2.singleton.addTag(newObj, team);
         playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.theNavMeshTransform = newObj.transform;
+        thePlayable.theHorizontalRotationTransform = torso.transform;
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
+        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform,true);
+
         thePlayable.dictOfIvariables[numericalVariable.health] = 2;
         thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
-        thePlayable.initializeEnactionPoint1();
+
         genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
         thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
         genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
 
 
-        genGen.singleton.makeBasicEnactions(thePlayable);
+        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
         genGen.singleton.makeInteractionsBody4(thePlayable);
 
 
@@ -314,6 +338,8 @@ public class basicSoldierFSM : FSM
     //FSM theFSM;
     public List<FSM> theFSMList = new List<FSM>();
 
+    float combatRange = 40f;
+
     public basicSoldierFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
     {
 
@@ -334,7 +360,7 @@ public class basicSoldierFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction,theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, 10f).returnIt());
+        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, combatRange).returnIt());
 
         
 
@@ -361,7 +387,7 @@ public class basicSoldierFSM : FSM
         objectCriteria theCriteria = new objectMeetsAllCriteria(
             new hasVirtualGamepad(),
             new reverseCriteria(new objectHasTag(team)),
-            new lineOfSight(theObjectDoingTheEnaction),
+            new stickyTrueCriteria( new lineOfSight(theObjectDoingTheEnaction),200),
             new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
@@ -394,9 +420,12 @@ public class basicSoldierFSM : FSM
 
         objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
 
-        targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+        //targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theAttackTargetPicker, 10f).returnIt());
+        //targetPicker theTargetPicker = new applePatternTargeter(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
 
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -419,6 +448,70 @@ public class basicSoldierFSM : FSM
 
 
 }
+
+public class combatDodgeVarietyPack1 : targetPicker
+{
+    //randomly pick from:
+    //      apple pattern
+    //      idle
+    //      flee
+    //      go towards
+    //      random wander
+    //can maybe bias in favor of some?  but for now, simple random.
+
+    List<targetPicker> listOfTargetPickers = new List<targetPicker>();
+    int currentPick = 0;
+    int behaviorChangeCountdownTimeCurrent = 0;
+    int behaviorChangeCountdownTimeLIMIT = 40;
+
+    bool currentlyDoingMainBehavior = true;
+
+    public combatDodgeVarietyPack1(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    {
+
+        listOfTargetPickers.Add(new applePatternTargeter(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new radialFleeingTargeter(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new pickNearest(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think
+        listOfTargetPickers.Add(new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+        //how to do "idle"?
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        randomlyPickDifferentStrategySometimes();
+        Debug.Log("currentPick:  " + currentPick);
+
+        return listOfTargetPickers[currentPick].pickNext();
+    }
+
+    private void randomlyPickDifferentStrategySometimes()
+    {
+        behaviorChangeCountdownTimeCurrent++;
+        //Debug.Log("behaviorChangeCountdownTimeCurrent:  "+behaviorChangeCountdownTimeCurrent);
+
+        if (behaviorChangeCountdownTimeCurrent < behaviorChangeCountdownTimeLIMIT) { return; }
+
+
+        if (currentlyDoingMainBehavior)
+        {
+            currentlyDoingMainBehavior = false;
+            currentPick = repository2.singleton.pickRandomInteger(listOfTargetPickers.Count);
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.pickRandomInteger(270) + 110;
+
+        }
+        else
+        {
+            currentlyDoingMainBehavior = true;
+            currentPick = 0;
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.pickRandomInteger(300) + 210;
+        }
+
+        behaviorChangeCountdownTimeCurrent = 0;
+    }
+}
+
 
 public class equipItemFSM
 {
@@ -709,6 +802,8 @@ public class goToX
 
 }
 
+//public class applePattern  //no!  just swap out TARTGETpICKER and use it in "goToX"
+ 
 
 public class aimAtXAndInteractWithY
 {

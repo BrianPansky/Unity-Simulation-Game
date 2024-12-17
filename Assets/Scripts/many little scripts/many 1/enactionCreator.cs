@@ -417,6 +417,19 @@ public class aimTarget : IEnactByTargetVector
     }
 
 
+    public Vector3 aimerOffset()
+    {
+
+        return theVectorRotationEnaction.thePartToAimHorizontal.position - theVectorRotationEnaction.thePartToAimVertical.position;
+
+    }
+    public Vector3 targetOffset()
+    {
+
+        return theVectorRotationEnaction.thePartToAimHorizontal.position - theVectorRotationEnaction.thePartToAimVertical.position;
+
+    }
+
 
 
     private float translateAngleIntoYawSpeedEtc(float angle)
@@ -515,12 +528,16 @@ public class aimTarget : IEnactByTargetVector
     {
         //instantaneous for now
         //  Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
-        Vector3 lineFromVertAimerToTarget = theInput.vect3 - this.transform.position;
+        Vector3 theOffset = theVectorRotationEnaction.thePartToAimVertical.position - theVectorRotationEnaction.thePartToAimHorizontal.position;
+        Vector3 offsetTargetPosition = theInput.vect3 + theOffset;
+        Vector3 offsetVertAimerPosition = theVectorRotationEnaction.thePartToAimVertical.position + theOffset;
+        Vector3 offsetLineFromVertAimerToTarget = offsetTargetPosition - offsetVertAimerPosition;
         //conditionalPrint("theInput.vect3 = " + theInput.vect3);
         //conditionalPrint("theVectorRotationEnaction.thePartToAimVertical.position.vect3 = " + theVectorRotationEnaction.thePartToAimVertical.position);
         //conditionalPrint("theInput.vect3 = " + theInput.vect3);
-        theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(lineFromVertAimerToTarget)));
-        lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
+        theVectorRotationEnaction.updateYaw(translateAngleIntoYawSpeedEtc(getHorizontalAngle(offsetLineFromVertAimerToTarget)));
+
+        Vector3 lineFromVertAimerToTarget = theInput.vect3 - theVectorRotationEnaction.thePartToAimVertical.position;
 
         //Debug.Log("aim..................");
 

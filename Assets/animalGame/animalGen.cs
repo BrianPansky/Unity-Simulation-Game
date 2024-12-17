@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.XR;
@@ -1153,6 +1154,40 @@ public class radialFleeingTargeter : targetPicker
     }
 }
 
+public class applePatternTargeter : targetPicker
+{
+    //so...take a set of objects........AND the position of "flee-er"?
+    //then.......weighted average the vectors running away from each object?
+    //i think?
+    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+
+    objectSetGrabber theSet;
+    GameObject theFleeer;
+
+
+    public applePatternTargeter(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    {
+        theFleeer = theObjectDoingTheEnaction;
+        theSet = theSetInput;
+    }
+
+
+    public override agnosticTargetCalc pickNext()
+    {
+        return new agnosticTargetCalc(applePatternPoint());
+    }
+
+
+    Vector3 applePatternPoint()
+    {
+        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+
+        Vector3 newDirection = myData.applePattern();
+        //Debug.Log(newDirection - Vector3.zero);
+
+        return theFleeer.transform.position + (newDirection * 20);
+    }
+}
 
 
 //end condition
@@ -1166,8 +1201,8 @@ public class radialFleeingTargeter : targetPicker
 
 //public class pigging : repeater
 //{
-    //creatures can eat non-food items, trash, guns, whatever lol [have to kill them to retreive?
-    //or......induce vomiting???  other methods?   yank from their jaws like a puppy]
+//creatures can eat non-food items, trash, guns, whatever lol [have to kill them to retreive?
+//or......induce vomiting???  other methods?   yank from their jaws like a puppy]
 
 
 

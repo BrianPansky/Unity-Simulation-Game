@@ -12,6 +12,9 @@ public class playable2 : interactable2
     //attach to objects/entities you can "play as" [such as bodies and vehicles], NOT weapons and items [for them use "equippable2"]
     public bool occupied = false;
     public GameObject enactionPoint1;
+    public Transform theHorizontalRotationTransform;
+    public Transform theVerticalRotationTransform;
+    public Transform theNavMeshTransform;
     public Transform cameraMount;
     public Dictionary<interactionCreator.simpleSlot, GameObject> equipperSlotsAndContents = new Dictionary<interactionCreator.simpleSlot, GameObject>();
     

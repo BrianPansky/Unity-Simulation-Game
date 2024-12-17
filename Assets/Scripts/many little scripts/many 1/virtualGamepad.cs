@@ -238,9 +238,10 @@ public class virtualGamepad : MonoBehaviour
 
         void mouseClick()
         {
-            if (Input.GetMouseButtonDown(0))
+            //if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButton(0))
             {
-                if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) {return; }
+                if (theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]] == null) { return; }
                 theVirtualGamePad.allCurrentBoolEnactables[buttonMapping[realButton.click1]].enact();
             }
         }

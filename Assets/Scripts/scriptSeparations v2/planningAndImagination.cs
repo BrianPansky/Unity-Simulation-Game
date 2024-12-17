@@ -2052,7 +2052,7 @@ public class aimTargetPlanGen
     private vect3EXE2 aimTargetPlanFromTargetPicker(GameObject theObjectDoingTheEnactions, targetPicker targetPicker)
     {
         aimTarget theEnaction = theObjectDoingTheEnactions.GetComponent<aimTarget>();
-
+        targetPicker aimOffsetter = new aimOffsetter(targetPicker, theEnaction);
         vect3EXE2 exe1 = new vect3EXE2(theEnaction,targetPicker);
         exe1.atLeastOnce();
 
