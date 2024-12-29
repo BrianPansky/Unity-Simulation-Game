@@ -37,6 +37,8 @@ public class tagging2 : MonoBehaviour
         gamepad,
         zoneable,
         threat1,
+        herbivore,
+        predator,
         team1,
         team2,
         team3,
@@ -660,12 +662,12 @@ public abstract class targetPicker
     public abstract agnosticTargetCalc pickNext();  //hmm, should just return object??
 }
 
-public class aimOffsetter : targetPicker
+public class aimOffsetterTargetPicker : targetPicker
 {
     private targetPicker targetPicker;
     private aimTarget theEnaction;
 
-    public aimOffsetter(targetPicker targetPicker, aimTarget theEnaction)
+    public aimOffsetterTargetPicker(targetPicker targetPicker, aimTarget theEnaction)
     {
         this.targetPicker = targetPicker;
         this.theEnaction = theEnaction;
@@ -677,12 +679,12 @@ public class aimOffsetter : targetPicker
     }
 }
 
-public class pickRandomNearbyLocation : targetPicker
+public class randomNearbyLocationTargetPicker : targetPicker
 {
     GameObject objectToBeNear;
     float spreadFactor = 1.0f;
 
-    public pickRandomNearbyLocation(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
+    public randomNearbyLocationTargetPicker(GameObject objectToBeNearIn, float spreadFactorIn = 1f)
     {
         objectToBeNear = objectToBeNearIn;
         spreadFactor = spreadFactorIn;
@@ -716,8 +718,8 @@ public class pickNextVisibleStuffStuff : targetPicker
     public override agnosticTargetCalc pickNext()
     {
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(objectToBeNear, theType).grab());
-        //pickNearest???
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(new setOfAllNearbyStuffStuff(objectToBeNear, theType).grab());
+        //nearestTargetPicker???
         agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
 
         return targ;
@@ -731,15 +733,15 @@ public class pickNextVisibleStuffStuff : targetPicker
 //      nearest
 
 //public class allVisibleInFOV : objectSetGrabber
-//no, just combine "allObjectsInSetThatMeetCriteria" with"objectVisibleInFOV", i love this
+//no, just combine "setOfAllObjectThatMeetCriteria" with"objectVisibleInFOV", i love this
 
-//[i already have "allNearbyStuffStuff"]
+//[i already have "setOfAllNearbyStuffStuff"]
 
-public class pickRandom : targetPicker
+public class randomTargetPicker : targetPicker
 {
     objectSetGrabber theObjectSetGrabber;
 
-    public pickRandom(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    public randomTargetPicker(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
     {
         //objectToBeNear = objectToBeNearIn;
         theObjectSetGrabber = objectSetGrabberIn;
@@ -748,7 +750,7 @@ public class pickRandom : targetPicker
     public override agnosticTargetCalc pickNext()
     {
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
-        GameObject target = repository2.singleton.pickRandomObjectFromList(theObjectSetGrabber.grab());
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(theObjectSetGrabber.grab());
 
         agnosticTargetCalc targ = new agnosticTargetCalc(target);
 
@@ -756,12 +758,12 @@ public class pickRandom : targetPicker
     }
 }
 
-public class pickNearest : targetPicker
+public class nearestTargetPicker : targetPicker
 {
     GameObject objectToBeNear;
     objectSetGrabber theObjectSetGrabber;
 
-    public pickNearest(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    public nearestTargetPicker(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
     {
         objectToBeNear = objectToBeNearIn;
         theObjectSetGrabber = objectSetGrabberIn;
@@ -778,12 +780,12 @@ public class pickNearest : targetPicker
     }
 }
 
-public class pickNearestExceptSelf : targetPicker
+public class nearestTargetPickerExceptSelf : targetPicker
 {
     GameObject objectToBeNear;
     objectSetGrabber theObjectSetGrabber;
 
-    public pickNearestExceptSelf(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    public nearestTargetPickerExceptSelf(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
     {
         objectToBeNear = objectToBeNearIn;
         theObjectSetGrabber = objectSetGrabberIn;
@@ -865,12 +867,12 @@ public class targetCacheReceiver : targetPicker
 */
 
 
-public class pickFirstFromList : targetPicker
+public class firstFromListTargetPicker : targetPicker
 {
 
     objectSetGrabber theListGenerator;
 
-    public pickFirstFromList(objectSetGrabber theListGeneratorIn)
+    public firstFromListTargetPicker(objectSetGrabber theListGeneratorIn)
     {
         theListGenerator = theListGeneratorIn;
     }
@@ -889,13 +891,13 @@ public class pickFirstFromList : targetPicker
     }
 }
 
-public class pickFirstXFromListY : targetPicker
+public class firstXFromListYTargetPicker : targetPicker
 {
 
     objectCriteria theCriteria;
     objectSetGrabber theListGenerator;
 
-    public pickFirstXFromListY(objectCriteria theCriteriaIn, objectSetGrabber theListGeneratorIn)
+    public firstXFromListYTargetPicker(objectCriteria theCriteriaIn, objectSetGrabber theListGeneratorIn)
     {
         theCriteria = theCriteriaIn;
         theListGenerator = theListGeneratorIn;
@@ -919,7 +921,7 @@ public class pickFirstXFromListY : targetPicker
     }
 }
 
-public class pickMostXFromListY : targetPicker
+public class pickMostXFromListYTargetPicker : targetPicker
 {
 
     objectEvaluator theEvaluator;
@@ -976,14 +978,14 @@ public abstract class objectSetGrabber
 
 
 
-public class allObjectsInSetThatMeetCriteria : objectSetGrabber
+public class setOfAllObjectThatMeetCriteria : objectSetGrabber
 {
 
     objectSetGrabber theObjectSetGrabber;
     //List<objectCriteria> theCriteria;  //no no, use a multi-criteria
     objectCriteria theCriteria;
 
-    public allObjectsInSetThatMeetCriteria(objectSetGrabber theObjectSetGrabberIn, objectCriteria theCriteriaIn)
+    public setOfAllObjectThatMeetCriteria(objectSetGrabber theObjectSetGrabberIn, objectCriteria theCriteriaIn)
     {
         theObjectSetGrabber = theObjectSetGrabberIn;
         theCriteria = theCriteriaIn;
@@ -993,6 +995,8 @@ public class allObjectsInSetThatMeetCriteria : objectSetGrabber
     {
         List<GameObject> newList = new List<GameObject>();
 
+        //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+
         foreach (GameObject thisObject in theObjectSetGrabber.grab())
         {
             if (thisObject == null)
@@ -1000,11 +1004,17 @@ public class allObjectsInSetThatMeetCriteria : objectSetGrabber
                 continue;
             }
 
+            //Debug.Log(thisObject);
+
             if (theCriteria.evaluateObject(thisObject) == false)
             {
+
+                //Debug.Log("NOT MET");
                 continue;
             }
 
+
+            //Debug.Log("met");
             newList.Add(thisObject);
         }
 
@@ -1014,11 +1024,11 @@ public class allObjectsInSetThatMeetCriteria : objectSetGrabber
 
 
 
-public class allObjectsInZone : objectSetGrabber
+public class setOfAllObjectsInZone : objectSetGrabber
 {
     GameObject theObjectWhoseZoneWeWantToLookIn;
 
-    public allObjectsInZone(GameObject theObjectWhoseZoneWeWantToLookInInput)
+    public setOfAllObjectsInZone(GameObject theObjectWhoseZoneWeWantToLookInInput)
     {
         theObjectWhoseZoneWeWantToLookIn = theObjectWhoseZoneWeWantToLookInInput;
     }
@@ -1048,11 +1058,11 @@ public class allObjectsInZone : objectSetGrabber
 
 }
 
-public class allObjectsWithTag : objectSetGrabber
+public class setOfAllObjectsWithTag : objectSetGrabber
 {
     private tag2 tag;
 
-    public allObjectsWithTag(tag2 tag)
+    public setOfAllObjectsWithTag(tag2 tag)
     {
         this.tag = tag;
         tagging2.singleton.initializeTagListsIfNecessary(tag);
@@ -1066,7 +1076,7 @@ public class allObjectsWithTag : objectSetGrabber
 }
 
 
-public class objectListCacheSetter : objectSetGrabber
+public class objectSetGrabberAndCacheSetter : objectSetGrabber
 {
     //maybe:
     //      don't re-calculate if the set is non-null
@@ -1110,7 +1120,7 @@ public class objectListCacheSetter : objectSetGrabber
 
 public class objectListCacheReceiver : objectSetGrabber     //look at how cute and simple this is!
 {
-    objectListCacheSetter theCache;
+    objectSetGrabberAndCacheSetter theCache;
 
     public override List<GameObject> grab()
     {
@@ -1151,15 +1161,17 @@ public class excludeX : objectSetGrabber
 
 //should switch stuff to just grabbing/picking objects with CRITERIA?  ya, that's better way to do it.
 
-public class allNearbyStuffStuff : objectSetGrabber
+public class setOfAllNearbyStuffStuff : objectSetGrabber
 {
     GameObject theObjectWeWantStuffNear;
     stuffType theStuffTypeX;
 
-    public allNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
+    public setOfAllNearbyStuffStuff(GameObject theObjectWeWantStuffNearIn, stuffType theStuffTypeXIn)
     {
         theObjectWeWantStuffNear = theObjectWeWantStuffNearIn;
         theStuffTypeX = theStuffTypeXIn;
+
+        //Debug.Log("theStuffTypeX:  " + theStuffTypeX);
     }
 
 
@@ -1190,6 +1202,8 @@ public class allNearbyStuffStuff : objectSetGrabber
                 continue;
             }
 
+            //Debug.Log("theStuffTypeX:  " + theStuffTypeX);
+            //Debug.Log("theComponent.theTypeOfStuff:  " + theComponent.theTypeOfStuff);
             if (theComponent.theTypeOfStuff == theStuffTypeX)
             {
                 //Debug.Log("(theComponent.theTypeOfStuff == theStuffTypeX),   so:  theListOfObjects.Add(thisObject);");
@@ -1200,14 +1214,14 @@ public class allNearbyStuffStuff : objectSetGrabber
         return theListOfObjects;
     }
 }
-public class allNearbyNumericalVariable : objectSetGrabber
+public class setOfAllNearbyNumericalVariable : objectSetGrabber
 {
     numericalVariable theVariableType;
 
 
     GameObject theObjectThatIsLooking;
 
-    public allNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn)
+    public setOfAllNearbyNumericalVariable(GameObject theObjectThatIsLookingIn, numericalVariable theVariableTypeIn)
     {
         theObjectThatIsLooking = theObjectThatIsLookingIn;
         theVariableType = theVariableTypeIn;
@@ -1253,13 +1267,13 @@ public class allNearbyNumericalVariable : objectSetGrabber
 
 
 
-public class inventoryGrabber : objectSetGrabber
+public class setOfAllInventoryObjects : objectSetGrabber
 {
     //GameObject theObjectWithInventory;
     inventory1 theInventory;
 
 
-    public inventoryGrabber(GameObject theObjectWithInventory)
+    public setOfAllInventoryObjects(GameObject theObjectWithInventory)
     {
         theInventory = theObjectWithInventory.GetComponent<inventory1>();
     }
@@ -1269,13 +1283,13 @@ public class inventoryGrabber : objectSetGrabber
         return theInventory.inventoryItems;
     }
 }
-public class equippedObjectsGrabber : objectSetGrabber
+public class setOfAllEquippedObjects : objectSetGrabber
 {
     //GameObject theObjectWithInventory;
     playable2 thePlayable;
 
 
-    public equippedObjectsGrabber(GameObject theObjectWithEquipperSlots)
+    public setOfAllEquippedObjects(GameObject theObjectWithEquipperSlots)
     {
         thePlayable = theObjectWithEquipperSlots.GetComponent<playable2>();
     }

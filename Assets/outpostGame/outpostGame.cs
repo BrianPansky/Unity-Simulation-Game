@@ -29,9 +29,9 @@ public class outpostGame : MonoBehaviour
         listOfSpawnPoints.Add(new Vector3(-30,0,-30));
 
 
-        hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
-        hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints));
-        hoardes.Add(new hoardeWaveGen(tag2.team4, listOfSpawnPoints));
+        //hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
+        //hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints));
+        //hoardes.Add(new hoardeWaveGen(tag2.team4, listOfSpawnPoints));
 
 
         /*
@@ -47,17 +47,59 @@ public class outpostGame : MonoBehaviour
         */
 
 
+
+
+        GameObject anim1 = new animalGen2(tag2.team2, 2, 1, 1, 1, 9, 24).generate();
+        anim1.transform.position = new Vector3(-23, 0, 35);
+        GameObject anim2 = new animalGen2(tag2.team2, 2, 1, 1, 1, 9, 24).generate();
+        anim2.transform.position = new Vector3(-13, 0, 25);
+
+        GameObject pred1 = new predatorGen2(tag2.team3, 2, 1.5f, 1.5f, 1.5f, 13, 74).generate();
+        pred1.transform.position = new Vector3(23, 0, -15);
+
+
+        returnBasicGrabbable(stuffType.fruit, new Vector3(-5, 2, 8));
+        //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(15, 2, -4));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 1, 8));
+        //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(25, 1, -14));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(-25, 1, 18));
+        //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 1, -24));
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("---------------------------------------------------------");
+        //Debug.Log("---------------------------------------------------------");
         foreach (hoardeWaveGen hoard in hoardes)
         {
             hoard.doOnUpdate();
         }
     }
+
+
+    public GameObject returnBasicGrabbable(stuffType stuffX, Vector3 where, float scale = 1f)
+    {
+
+        GameObject newObj = genGen.singleton.returnPineTree1(where);
+
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        tagging2.singleton.addTag(newObj, tagging2.tag2.interactable);
+        tagging2.singleton.addTag(newObj, tagging2.tag2.equippable2);
+        tagging2.singleton.addTag(newObj, tagging2.tag2.zoneable);
+
+        stuffStuff.addStuffStuff(newObj, stuffX);
+
+        interactionCreator.singleton.addInteraction(newObj, interType.standardClick, new interactionEffect(new deathEffect(newObj)));
+
+
+        return newObj;
+    }
+
 }
 
 
@@ -129,21 +171,21 @@ public class hoardeWaveGen
     public void generateNextWave()
     {
         //currentWaveNumber starts at 1
-        Debug.Log("current and count:  "+ currentWaveNumber+", "+ listOfWaves.Count);
+        //Debug.Log("current and count:  "+ currentWaveNumber+", "+ listOfWaves.Count);
         if(currentWaveNumber-1 < listOfWaves.Count)
         {
 
-            listOfWaves[currentWaveNumber -1].generate(pickRandomSpawnPoint(listOfSpawnPoints));
+            listOfWaves[currentWaveNumber -1].generate(randomTargetPickerSpawnPoint(listOfSpawnPoints));
             return;
         }
 
-        listOfWaves[currentWaveNumber - listOfWaves.Count-1].generate(pickRandomSpawnPoint(listOfSpawnPoints));
-        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(pickRandomSpawnPoint(listOfSpawnPoints));
+        listOfWaves[currentWaveNumber - listOfWaves.Count-1].generate(randomTargetPickerSpawnPoint(listOfSpawnPoints));
+        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(randomTargetPickerSpawnPoint(listOfSpawnPoints));
     }
 
-    private Vector3 pickRandomSpawnPoint(List<Vector3> listOfSpawnPoints)
+    private Vector3 randomTargetPickerSpawnPoint(List<Vector3> listOfSpawnPoints)
     {
-        return listOfSpawnPoints[repository2.singleton.pickRandomInteger(listOfSpawnPoints.Count-1)];
+        return listOfSpawnPoints[repository2.singleton.randomTargetPickerInteger(listOfSpawnPoints.Count-1)];
     }
 
 
@@ -158,7 +200,7 @@ public class hoardeWaveGen
             );
 
 
-        objectSetGrabber theTeamObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsWithTag(team), theCriteria);
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
 
         condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 120));// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -322,7 +364,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
         FSM idle = new generateFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
-        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
 
 
@@ -366,7 +408,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
     private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
     {
 
-        targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
         return theAttackTargetPicker;
     }
@@ -386,12 +428,12 @@ public class basicPaintByNumbersSoldierFSM : FSM
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
 
-        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
 
-        //targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        //targetPicker theTargetPicker = new applePatternTargeter(theObjectDoingTheEnaction, theAttackObjectSet);
-        targetPicker theTargetPicker = new combatDodgeVarietyPack1(theObjectDoingTheEnaction, theAttackObjectSet);
+        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
         FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
 
@@ -569,7 +611,7 @@ public class basicSoldierGeneratorG : objectGen
 public class FSMcomponent:MonoBehaviour,IupdateCallable
 {
     //public FSM theFSM;
-    public List<FSM> theFSMList;  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+    public List<FSM> theFSMList;// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
 
     public List<IupdateCallable> currentUpdateList {  get; set; }
     public void Update()
@@ -581,6 +623,7 @@ public class FSMcomponent:MonoBehaviour,IupdateCallable
     public void callableUpdate()
     {
         //Debug.Log("============================     callableUpdate()        =================");
+        //Debug.Log("this.gameObject:  " + this.gameObject);
         foreach (FSM theFSM in theFSMList)
         {
             //Debug.Log("theFSM:  "+ theFSM);
@@ -617,7 +660,7 @@ public class basicSoldierFSM : FSM
         FSM idle = new generateFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction,team);
-        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
 
@@ -661,7 +704,7 @@ public class basicSoldierFSM : FSM
     private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
     {
         
-        targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
         return theAttackTargetPicker;
     }
@@ -681,12 +724,12 @@ public class basicSoldierFSM : FSM
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
 
-        objectSetGrabber theAttackObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
 
-        //targetPicker theAttackTargetPicker = new pickNearest(theObjectDoingTheEnaction, theAttackObjectSet);
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        //targetPicker theTargetPicker = new applePatternTargeter(theObjectDoingTheEnaction, theAttackObjectSet);
-        targetPicker theTargetPicker = new combatDodgeVarietyPack1(theObjectDoingTheEnaction, theAttackObjectSet);
+        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
         FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
 
@@ -712,7 +755,7 @@ public class basicSoldierFSM : FSM
 
 }
 
-public class combatDodgeVarietyPack1 : targetPicker
+public class combatDodgeVarietyPack1TargetPicker : targetPicker
 {
     //randomly pick from:
     //      apple pattern
@@ -729,20 +772,20 @@ public class combatDodgeVarietyPack1 : targetPicker
 
     bool currentlyDoingMainBehavior = true;
 
-    public combatDodgeVarietyPack1(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    public combatDodgeVarietyPack1TargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
     {
 
-        listOfTargetPickers.Add(new applePatternTargeter(theObjectDoingTheEnaction, theSetInput));
-        listOfTargetPickers.Add(new radialFleeingTargeter(theObjectDoingTheEnaction, theSetInput));
-        listOfTargetPickers.Add(new pickNearest(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think
-        listOfTargetPickers.Add(new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+        listOfTargetPickers.Add(new applePatternTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new radialFleeingTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think
+        listOfTargetPickers.Add(new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction));
         //how to do "idle"?
     }
 
     public override agnosticTargetCalc pickNext()
     {
         randomlyPickDifferentStrategySometimes();
-        Debug.Log("currentPick:  " + currentPick);
+        //Debug.Log("currentPick:  " + currentPick);
 
 
 
@@ -760,9 +803,9 @@ public class combatDodgeVarietyPack1 : targetPicker
         if (currentlyDoingMainBehavior)
         {
             currentlyDoingMainBehavior = false;
-            currentPick = repository2.singleton.pickRandomInteger(listOfTargetPickers.Count);
+            currentPick = repository2.singleton.randomTargetPickerInteger(listOfTargetPickers.Count);
 
-            behaviorChangeCountdownTimeLIMIT = repository2.singleton.pickRandomInteger(270) + 110;
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(270) + 110;
 
         }
         else
@@ -770,7 +813,7 @@ public class combatDodgeVarietyPack1 : targetPicker
             currentlyDoingMainBehavior = true;
             currentPick = 0;
 
-            behaviorChangeCountdownTimeLIMIT = repository2.singleton.pickRandomInteger(300) + 210;
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(300) + 210;
         }
 
         behaviorChangeCountdownTimeCurrent = 0;
@@ -811,9 +854,9 @@ public class equipItemFSM
 
 
 
-        objectSetGrabber theEquippedObjectsGrabber = new equippedObjectsGrabber(theObjectDoingTheEnaction);
+        objectSetGrabber thesetOfAllEquippedObjects = new setOfAllEquippedObjects(theObjectDoingTheEnaction);
         //objectCriteria hasInterTypeX = new intertypeXisOnObject(interTypeX);
-        pickFirstObjectXFromListY theEquippedObjectPicker = new pickFirstObjectXFromListY(hasInterTypeX, theEquippedObjectsGrabber);
+        pickFirstObjectXFromListY theEquippedObjectPicker = new pickFirstObjectXFromListY(hasInterTypeX, thesetOfAllEquippedObjects);
 
 
         condition hasEquipped = new nonNullObject(theEquippedObjectPicker);
@@ -834,7 +877,7 @@ public class equipItemFSM
         //  plug cache setter into condition checker [so, wrap the above returner]
         //  have cache observer as a variable we can plug into "equipping" enaction
 
-        inventoryGrabber theInvGrabber = new inventoryGrabber(theObjectDoingTheEnaction);
+        setOfAllInventoryObjects theInvGrabber = new setOfAllInventoryObjects(theObjectDoingTheEnaction);
         //objectCriteria hasInterTypeX = new intertypeXisOnObject(interTypeX);
         pickFirstObjectXFromListY theInvObjectPicker = new pickFirstObjectXFromListY(hasInterTypeX, theInvGrabber);
 
@@ -905,6 +948,11 @@ public class equipObjectRepeater : repeater
     */
 
 
+    public override void refill()
+    {
+        theRepeater.refill();
+    }
+
     public override void doThisThing()
     {
         theRepeater.doThisThing();
@@ -954,8 +1002,8 @@ public class goToXAndInteractWithY
     private repeatWithTargetPicker thinggggg(GameObject theObjectDoingTheEnactions, targetPicker thingXToGoTo, interType theIntertypeY, float proximity)
     {
 
-        //targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-        //    new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+        //targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+        //    new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(
@@ -1045,8 +1093,8 @@ public class goToX
     private repeatWithTargetPicker thinggggg(GameObject theObjectDoingTheEnactions, targetPicker thingXToGoTo, float proximity)
     {
 
-        //targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-        //    new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+        //targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+        //    new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(
@@ -1087,8 +1135,8 @@ public class aimAtXAndInteractWithY
     private repeatWithTargetPicker thinggggg(GameObject theObjectDoingTheEnactions, targetPicker thingXToAimAt, interType theIntertypeY, float proximity)
     {
 
-        //targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-        //    new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+        //targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+        //    new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(

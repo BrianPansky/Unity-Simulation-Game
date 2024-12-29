@@ -368,7 +368,7 @@ public class navAgent : IEnactByTargetVector
         }
         */
 
-        conditionalPrint("~~~~~~~~~~   nav agent enacting   ~~~~~~~~");
+        //conditionalPrint("~~~~~~~~~~   nav agent enacting   ~~~~~~~~");
         Debug.Assert(theAgent.isActiveAndEnabled);
 
 
@@ -377,7 +377,7 @@ public class navAgent : IEnactByTargetVector
             theAgent.Warp(theAgent.transform.position);
         }
         Debug.Assert(theAgent.isOnNavMesh);
-        Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?");
+        //Debug.Log("theAgent.SetDestination(theInput.vect3);, should go?");
         theAgent.SetDestination(theInput.vect3);
     }
 }

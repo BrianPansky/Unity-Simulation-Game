@@ -75,7 +75,7 @@ public class initialGenerator2 : MonoBehaviour
         int columns = 1;
         int verticalColumns = 1;
 
-        float zScale = 2230f;
+        float zScale = 2130f;
         float xScale = 2200f;
         float yScale = 30f;
         //List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();

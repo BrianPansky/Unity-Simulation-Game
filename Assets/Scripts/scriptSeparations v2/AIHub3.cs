@@ -201,7 +201,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     public planEXE2 combatBehaviorPlan11()
     {
         //ad-hoc hand-written plan
-        GameObject target2 = repository2.singleton.pickRandomObjectFromList(threatListWithoutSelf());
+        GameObject target2 = repository2.singleton.randomTargetPickerObjectFromList(threatListWithoutSelf());
 
         if (target2 == null)
         {
@@ -337,7 +337,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
 
         //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
         if (target == null) { return null; }
         Debug.DrawLine(this.gameObject.transform.position, target.transform.position, Color.magenta, 7f);
@@ -900,7 +900,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
                     objectIdPair thisPair = tagging2.singleton.idPairGrabify(this.gameObject);
 
                     int currentZone = tagging2.singleton.zoneOfObject[thisPair];
-                    GameObject target = repository2.singleton.pickRandomObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
+                    GameObject target = repository2.singleton.randomTargetPickerObjectFromListEXCEPT(tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), this.gameObject);
                     //          Debug.DrawLine(this.transform.position, target.transform.position, Color.blue, 2f);
                     item.enact(target.transform.position);
                 }
@@ -954,7 +954,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         objectIdPair thisId = tagging2.singleton.idPairGrabify(this.gameObject);
         int currentZone = tagging2.singleton.zoneOfObject[thisId];
-        GameObject target = repository2.singleton.pickRandomObjectFromListEXCEPT(
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromListEXCEPT(
             tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsInZone[currentZone]), 
             this.gameObject);
 
@@ -991,7 +991,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
 
         //ad-hoc hand-written plan
-        GameObject target2 = repository2.singleton.pickRandomObjectFromList(threatListWithoutSelf());
+        GameObject target2 = repository2.singleton.randomTargetPickerObjectFromList(threatListWithoutSelf());
 
         return firePlan4(interType.peircing, target2);
     }

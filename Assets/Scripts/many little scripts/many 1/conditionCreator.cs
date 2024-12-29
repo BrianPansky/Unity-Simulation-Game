@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.Sprites;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
 using static UnityEngine.GraphicsBuffer;
@@ -158,11 +161,11 @@ public class conditionCreator : MonoBehaviour
     }
 
 
-    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    public GameObject randomTargetPickerObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
     {
         if (theList.Count == 0)
         {
-            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            Debug.Log("there are zero objects on the list of objects entered into ''randomTargetPickerObjectFromListEXCEPT''");
             return null;
         }
 
@@ -563,28 +566,35 @@ public class stickyCondition : nesterCondition
 {
     //ondition nestedCondition;
 
-    int countdown = 0;
+    //int countdown = 0;
     int maxTimer = 2;
 
+    float startTime = 0;
 
-    public stickyCondition(condition nestedConditionIn, int maxTimerIn =2)
+
+    public stickyCondition(condition nestedConditionIn, int maxTimerInSeconds =2)
     {
         theNestedCondition = nestedConditionIn;
-        maxTimer = maxTimerIn;
+        maxTimer = maxTimerInSeconds;
     }
 
 
     public override bool met()
     {
-        if (countdown >0)
+        //Debug.Log("Time.fixedTime:  " + Time.fixedTime);
+        //Debug.Log("startTime:  " + startTime);
+        //Debug.Log("Time.fixedTime - startTime:  " + (Time.fixedTime - startTime));
+        //Debug.Log("maxTimer:  " + maxTimer);
+        if (Time.fixedTime - startTime < maxTimer)
         {
-            countdown--;
+            //countdown--;
             return true;
         }
 
         if (theNestedCondition.met())
         {
-            countdown = maxTimer;
+            //countdown = maxTimer;
+            startTime = Time.fixedTime;
             return true;
         }
 
@@ -943,6 +953,134 @@ public class proximity : baseCondition
 
 }
 
+public class proximityFromTargetPicker : baseCondition
+{
+    //for when we want the objects to be CLOSER than the desired distance
+
+    GameObject object1;
+    //GameObject object2;
+    //Vector3 targetLocation2;
+    //targetCalculator targetCalc;
+    targetPicker theTargetPicker;
+    float desiredDistance = 4f;
+    float allowedMargin = 2f;
+    public bool debugPrint = false;
+
+    conditionalEffects2 adHocConditionalEffects;
+
+    public proximityFromTargetPicker(GameObject object1, targetPicker theTargetPickerIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        this.object1 = object1;
+        //this.object2 = object2;
+        //targetCalc = new movableObjectTargetCalculator(object1, object2);//, desiredDistance);
+        theTargetPicker = theTargetPickerIn;
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+
+    public override bool met()
+    {
+
+
+        //return false;
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = theTargetPicker.pickNext().targetPosition();// object2.transform.position;
+        Debug.Log("theTargetPicker.pickNext():  " + theTargetPicker.pickNext());
+        Debug.Log("theTargetPicker.pickNext().targetPosition():  " + theTargetPicker.pickNext().targetPosition());
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("(desiredDistance + allowedMargin):  " + (desiredDistance + allowedMargin));
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.Log("(desiredDistance + allowedMargin):  " + (desiredDistance + allowedMargin));
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
+
+        if (distance > (desiredDistance + allowedMargin)) { return false; }
+
+
+
+        //Debug.Log("YESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+        return true;
+    }
+    public string metAsText()
+    {
+        string stringToReturn = "";
+        bool theBool = false;
+        Vector3 position1 = object1.transform.position;
+        Vector3 position2 = theTargetPicker.pickNext().targetPosition();// object2.transform.position;
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        //Debug.Log("condition:  " + this);
+        //Debug.Log("distance:  " + distance);
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.DrawLine(position1, position2, Color.blue, 0.1f);
+
+
+        if (debugPrint)
+        {
+            Debug.Log("distance:  " + distance);
+            Debug.Log("desiredDistance:  " + desiredDistance);
+            Debug.DrawLine((position1 + Vector3.up), (position2 + Vector3.up), Color.blue, 7f);
+
+            Debug.DrawLine(position1, position1 + (Vector3.up * 105), Color.white, 7f);
+
+            Debug.DrawLine(position2, position2 + (Vector3.up * 105), Color.black, 7f);
+        }
+
+
+        if (distance > desiredDistance)
+        { theBool = false; }
+        else
+        {
+            theBool = true;
+        }
+
+
+
+
+
+
+
+
+
+
+        stringToReturn += "met?  " + theBool;
+        stringToReturn += ", distance:  " + distance;
+        stringToReturn += ", desiredDistance:  " + desiredDistance;
+
+        return stringToReturn;
+    }
+
+    public override string asText()
+    {
+        string stringToReturn = "";
+        stringToReturn += "proximity between 1)  " + object1 + ", and 2)  " + theTargetPicker.ToString();// object2;
+        stringToReturn += ", [desiredDistance = " + desiredDistance + "]";
+        stringToReturn += ", [metAsText() = " + metAsText() + "]";
+
+
+        return stringToReturn;
+
+    }
+
+}
+
 
 public class proximityRef : baseCondition
 {
@@ -1270,12 +1408,18 @@ public class objectMeetsAllCriteria : objectCriteria
 
     public override bool evaluateObject(GameObject theObject)
     {
+
+        //Debug.Log("###################################################");
         foreach (objectCriteria thisCriteria in theCriteria)
         {
+
+            //Debug.Log("thisCriteria:  "+ thisCriteria);
             if (thisCriteria.evaluateObject(theObject) == false)
             {
+                //Debug.Log("NOT MET");
                 return false;
             }
+            //Debug.Log("met");
         }
 
         return true;
@@ -1337,7 +1481,7 @@ public class canSeeStuffStuff : baseCondition
 
     public override bool met()
     {
-        spatialDataPoint myData = new spatialDataPoint(new allNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
+        spatialDataPoint myData = new spatialDataPoint(new setOfAllNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
 
 
         bool threatLineOfSightBool = myData.threatLineOfSightBool();
@@ -1387,7 +1531,7 @@ public class canSeeNumericalVariable : baseCondition
 
     public override bool met()
     {
-        spatialDataPoint myData = new spatialDataPoint(new allNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
+        spatialDataPoint myData = new spatialDataPoint(new setOfAllNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
 
 
         bool threatLineOfSightBool = myData.threatLineOfSightBool();
@@ -1903,7 +2047,14 @@ public class proximityCriteriaBool : objectCriteria
         Vector3 vectorBetween = position1 - position2;
         float distance = vectorBetween.magnitude;
 
+        //Debug.Log("position1:  " + position1);
+        //Debug.Log("position2:  " + position2);
+        //Debug.Log("distance:  " + distance);
 
+        //Debug.Log("this.GetHashCode():  " + this.GetHashCode());
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("allowedMargin:  " + allowedMargin);
+        //Debug.Log("(desiredDistance + allowedMargin):  " + (desiredDistance + allowedMargin));
         if (distance > (desiredDistance + allowedMargin)) { return false; }
 
         return true;
@@ -1920,6 +2071,13 @@ public class proximityCriteriaBool : objectCriteria
 
         this.desiredDistance = desiredDistance;
         this.allowedMargin = allowedMargin;
+
+
+        //Debug.Log("this.GetHashCode():  " + this.GetHashCode());
+        //Debug.Log("desiredDistance:  " + desiredDistance);
+        //Debug.Log("allowedMargin:  " + allowedMargin);
+
+
     }
 
     public proximityCriteriaBool(Vector3 whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)

@@ -76,13 +76,13 @@ public class repository2 : MonoBehaviour
         return vectorToReturn;
     }
 
-    public GameObject pickRandomObjectFromList(List<GameObject> theList)
+    public GameObject randomTargetPickerObjectFromList(List<GameObject> theList)
     {
         //Debug.Log("theList.Count:  "+theList.Count);
 
         if (theList.Count == 0)
         {
-            //Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            //Debug.Log("there are zero objects on the list of objects entered into ''randomTargetPickerObjectFromListEXCEPT''");
             return null;
         }
 
@@ -115,11 +115,11 @@ public class repository2 : MonoBehaviour
 
     }
 
-    public GameObject pickRandomObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
+    public GameObject randomTargetPickerObjectFromListEXCEPT(List<GameObject> theList, GameObject notTHISObject)
     {
         if (theList.Count == 0)
         {
-            Debug.Log("there are zero objects on the list of objects entered into ''pickRandomObjectFromListEXCEPT''");
+            Debug.Log("there are zero objects on the list of objects entered into ''randomTargetPickerObjectFromListEXCEPT''");
             return null;
         }
 
@@ -149,7 +149,7 @@ public class repository2 : MonoBehaviour
 
     }
 
-    public int pickRandomInteger(int maxInteger)
+    public int randomTargetPickerInteger(int maxInteger)
     {
         return UnityEngine.Random.Range(0, maxInteger);
     }

@@ -313,7 +313,7 @@ public class animalGen : MonoBehaviour
 
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
 
-        repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+        repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
 
     }
 
@@ -335,7 +335,7 @@ public class animalGen : MonoBehaviour
 
 
         animalFSM wander = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new allNearbyStuffStuff(stuffX)));
+        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
         animalFSM killPrey = new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(theObjectDoingTheEnaction, numericalVariable.health, interType.melee));
 
 
@@ -356,8 +356,8 @@ public class animalGen : MonoBehaviour
     private repeater returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(GameObject theObjectDoingTheEnactions, numericalVariable numVarX, interType interTypeX)
     {
 
-        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions, 
-            new allNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions, 
+            new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
 
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(
@@ -368,7 +368,7 @@ public class animalGen : MonoBehaviour
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
         repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
 
 
@@ -400,8 +400,8 @@ public class animalGen : MonoBehaviour
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
 
-        //objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new excludeX(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
 
 
 
@@ -438,7 +438,7 @@ public class animalGen : MonoBehaviour
             //new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
             );
 
-        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new excludeX(new allObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new excludeX(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
 
 
 
@@ -471,7 +471,7 @@ public class animalGen : MonoBehaviour
             new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
             );
 
-        objectSetGrabber theFleeFromObjectSet = new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
 
 
 
@@ -500,7 +500,7 @@ public class animalGen : MonoBehaviour
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnaction));
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction));
 
         return repeatWithTargetPickerTest;
     }
@@ -509,7 +509,7 @@ public class animalGen : MonoBehaviour
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
         //perma1 = new permaPlan2(step1);
 
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
 
 
         return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
@@ -529,8 +529,8 @@ public class animalGen : MonoBehaviour
         //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, stuffX);
 
 
-        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
+        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+            new setOfAllObjectThatMeetCriteria(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
             new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
             ));
 
@@ -541,7 +541,7 @@ public class animalGen : MonoBehaviour
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
         repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
 
 
@@ -561,11 +561,11 @@ public class animalGen : MonoBehaviour
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
 
 
-        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
+        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+            new setOfAllObjectThatMeetCriteria(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, stuffX),
             new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
             ));
 
@@ -588,7 +588,7 @@ public class animalGen : MonoBehaviour
     private planEXE2 goGrabPlan2(GameObject theObjectDoingTheEnactions, stuffType theStuffTypeX)
     {
         //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
 
 
         Debug.Assert(target != null);
@@ -833,7 +833,7 @@ public class animalFSM: FSM
         //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
         //perma1 = new permaPlan2(step1);
 
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(this.gameObject));
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
 
 
         return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
@@ -1014,7 +1014,7 @@ public class animalFSM: FSM
 
 
 
-//no!  split into evaluator for single object!  [and then just use allObjectsInSetThatMeetCriteria]
+//no!  split into evaluator for single object!  [and then just use setOfAllObjectThatMeetCriteria]
 
 /*
 public class allTargetsInSetThatAreThreats : objectSetGrabber
@@ -1104,7 +1104,7 @@ public class meleeDodge : repeatWithTargetPicker
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
         repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
 
 
@@ -1119,7 +1119,7 @@ public class meleeDodge : repeatWithTargetPicker
 
 
 
-public class radialFleeingTargeter : targetPicker
+public class radialFleeingTargetPicker : targetPicker
 {
     //so...take a set of objects........AND the position of "flee-er"?
     //then.......weighted average the vectors running away from each object?
@@ -1130,7 +1130,7 @@ public class radialFleeingTargeter : targetPicker
     GameObject theFleeer;
 
 
-    public radialFleeingTargeter(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    public radialFleeingTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
     {
         theFleeer = theObjectDoingTheEnaction;
         theSet = theSetInput;
@@ -1150,11 +1150,11 @@ public class radialFleeingTargeter : targetPicker
         Vector3 newDirection = myData.weightedRadialPattern();
         //Debug.Log(newDirection - Vector3.zero);
 
-        return theFleeer.transform.position + (newDirection*20);
+        return theFleeer.transform.position + (newDirection.normalized*20);
     }
 }
 
-public class applePatternTargeter : targetPicker
+public class applePatternTargetPicker : targetPicker
 {
     //so...take a set of objects........AND the position of "flee-er"?
     //then.......weighted average the vectors running away from each object?
@@ -1165,7 +1165,7 @@ public class applePatternTargeter : targetPicker
     GameObject theFleeer;
 
 
-    public applePatternTargeter(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
+    public applePatternTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput)
     {
         theFleeer = theObjectDoingTheEnaction;
         theSet = theSetInput;
@@ -1256,8 +1256,8 @@ public class ummAllThusStuffForGrab
 
 
         //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
-        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions, 
-            new allObjectsInSetThatMeetCriteria(new allObjectsInZone(theObjectDoingTheEnactions), 
+        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions, 
+            new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnactions), 
             new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
             ));
 
@@ -1266,7 +1266,7 @@ public class ummAllThusStuffForGrab
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
         repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
 
 
@@ -1285,10 +1285,10 @@ public class ummAllThusStuffForGrab
         //plan = new depletablePlan(step1, step2);
         //plan = perma1.convertToDepletable();
         //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new pickRandomNearbyLocation(theObjectDoingTheEnactions));
+        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
 
-        targetPicker getter = new pickNearestExceptSelf(theObjectDoingTheEnactions,
-            new allObjectsInSetThatMeetCriteria(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab),
+        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+            new setOfAllObjectThatMeetCriteria(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab),
             new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
             ));
 
@@ -1313,7 +1313,7 @@ public class ummAllThusStuffForGrab
     private planEXE2 goGrabPlan2(stuffType theStuffTypeX)
     {
         //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(new allNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX).grab());
 
 
         Debug.Assert(target != null);
@@ -1461,6 +1461,8 @@ public abstract class repeater
     public abstract void doThisThing();
 
     public abstract string baseEnactionsAsText();
+
+    public abstract void refill();
 }
 
 public class agnostRepeater: repeater
@@ -1486,6 +1488,11 @@ public class agnostRepeater: repeater
     public override void doThisThing()
     {
         theRepeater.doThisThing();
+    }
+
+    public override void refill()
+    {
+        theRepeater.refill();
     }
 }
 
@@ -1517,14 +1524,17 @@ public class repeatWithTargetPicker:repeater
         if (theDepletablePlan.endConditionsMet())
         {
             //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
-            theDepletablePlan = convertToDepletableWithNextTarget();
+            refill();
             return;
         }
 
         //Debug.Log("NOT met.........");
     }
 
-
+    public override void refill()
+    {
+        theDepletablePlan = convertToDepletableWithNextTarget();
+    }
 
 
 
@@ -1593,7 +1603,7 @@ public class simpleExactRepeatOfPerma : repeater
     {
         if (theDepletablePlan.endConditionsMet())
         {
-            theDepletablePlan = thePerma.convertToDepletable();
+            refill();
         }
     }
     public override string baseEnactionsAsText()
@@ -1608,6 +1618,14 @@ public class simpleExactRepeatOfPerma : repeater
         //Debug.Log(newString);
         return newString;
     }
+
+
+    public override void refill()
+    {
+        theDepletablePlan = thePerma.convertToDepletable();
+    }
+
+
 }
 
 public class repeatWithObjectReturner : repeater
@@ -1638,7 +1656,7 @@ public class repeatWithObjectReturner : repeater
         if (theDepletablePlan.endConditionsMet())
         {
             //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
-            theDepletablePlan = convertToDepletableWithNextTarget();
+            refill();
             return;
         }
 
@@ -1646,6 +1664,10 @@ public class repeatWithObjectReturner : repeater
     }
 
 
+    public override void refill()
+    {
+        theDepletablePlan = convertToDepletableWithNextTarget();
+    }
 
 
 
@@ -1692,6 +1714,7 @@ public class repeatWithObjectReturner : repeater
         //Debug.Log(newString);
         return newString;
     }
+
 }
 
 
@@ -1828,7 +1851,7 @@ public class grabGun1 : behavior
     private planEXE2 goGrabPlan2(interType interTypeX)
     {
         //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(allNearbyEquippablesWithInterTypeX(interTypeX));
 
         if (target == null) { return null; }
 
@@ -1949,7 +1972,7 @@ public class grabStuffStuff : behavior
     private planEXE2 goGrabPlan2(stuffType theStuffTypeX)
     {
         //ad-hoc hand-written plan
-        GameObject target = repository2.singleton.pickRandomObjectFromList(allNearbyObjectsWithStuffTypeX(theStuffTypeX));
+        GameObject target = repository2.singleton.randomTargetPickerObjectFromList(allNearbyObjectsWithStuffTypeX(theStuffTypeX));
 
 
         Debug.Assert(target!=null);
