@@ -8,6 +8,8 @@ using UnityEngine.AI;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
+using static tagging2;
+using static UnityEngine.UI.Image;
 
 public class initialGenerator2 : MonoBehaviour
 {
@@ -58,10 +60,16 @@ public class initialGenerator2 : MonoBehaviour
         //      x = "right"/"columns"/"width"
         //      y = [obviously "up"/"verticalColumns"/"height"]
 
+
+
+
+
+
         //createCubeGridTest();
 
 
-        Vector3 startPoint = new Vector3(-190, 1, -250);
+        //Vector3 startPoint = new Vector3(-190, 1, -250);
+        Vector3 startPoint = new Vector3(0, 1, -250);
         /*
         int rows = 5;
         int columns = 3;
@@ -71,23 +79,44 @@ public class initialGenerator2 : MonoBehaviour
         float xScale = 3f;
         float yScale = 1f;
         */
-        int rows = 1;
+
+        int rows = 33;
         int columns = 1;
         int verticalColumns = 1;
 
-        float zScale = 2130f;
-        float xScale = 2200f;
+        float zScale = 170f;
+        float xScale = 110f;
         float yScale = 30f;
+
         //List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
-        createMapZones(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns);
+        //createMapZones(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns);
+        //fillMapZones(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns);
+
+
+        //creating, filling and marking zones, based on geometry above:
+        List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
+
+        new doAtEachPoint(new makeMastLineAtPoint(), points);
+        /*
+        foreach (Vector3 thisPoint in points)
+        {
+            GameObject positionMarkerObject = new GameObject();
+            positionMarkerObject.transform.position = thisPoint;
+            positionMarkerObject.AddComponent<testingThisRepositionError>();
+        }
+        */
+        new doAtEachPoint(new makeMapZoneAtPoint(xScale, yScale, zScale), points);
+
+        new doAtEachPoint(new makeHoardeGenAtPoint(xScale, yScale, zScale), points);
+
+
+
+
 
 
 
         Vector3 location = Vector3.zero;
-
         location = new Vector3(-20, 2.5f, -55);
-        //location = new Vector3(-55, 14, -67);
-
         makePLAYER(new Vector3(-5, 1, -1));
         //theWorldScript = theWorldObject.GetComponent("worldScript") as worldScript;
 
@@ -100,6 +129,152 @@ public class initialGenerator2 : MonoBehaviour
 
         //Time.timeScale = 0f;
     }
+
+    private static void fillMapZones(Vector3 origin, int zRows, int xColumns, float zLength, float xWidth, float yHeight = 10f, int verticalColumns = 1)
+    {
+
+        List<Vector3> points = new gridOfPoints(origin, zRows, xColumns, zLength, xWidth, yHeight, verticalColumns).returnIt();
+
+        //new doAtEachPoint(new makeMastLineAtPoint(), points);
+        new doAtEachPoint(new makeHoardeGenAtPoint(xWidth, yHeight, zLength), points);
+        //new doAtEachPoint(new makeObjectAtPoint2(xWidth, verticalColumns, zLength), points);
+    }
+
+
+
+
+
+
+
+    public class makeHoardeGenAtPoint : doAtPoint
+    {
+        private float xScale;
+        private float yScale;
+        private float zScale;
+        Vector3 zoneOffset;
+
+        public makeHoardeGenAtPoint(float xScale, float yScale, float zScale, Vector3 zoneOffsetIn = new Vector3())
+        {
+            zoneOffset = zoneOffsetIn;
+            this.xScale = xScale;
+            this.yScale = yScale;
+            this.zScale = zScale;
+        }
+
+        internal override void doIt(Vector3 thisPoint)
+        {
+            /*
+            GameObject newObj = repository2.Instantiate(repository2.singleton.invisibleCubePrefab, thisPoint, Quaternion.identity);
+            newObj.transform.localScale = new Vector3(xScale, yScale, zScale);
+
+            Collider theCollider = newObj.GetComponent<Collider>();
+            theCollider.isTrigger = true;
+
+            Rigidbody rigidbody = newObj.AddComponent<Rigidbody>();
+            rigidbody.useGravity = false;
+            rigidbody.isKinematic = true;
+
+
+            newObj.AddComponent<mapZoneScript>();
+            */
+
+            //empty object
+            //set map zone position plus offset
+            //add hoard updater
+            //add hoard gen to BE updated
+            //connect zone number to the "no more soldiers" condition, for testing
+
+            GameObject emptyObject = new GameObject();
+            emptyObject.transform.position = thisPoint + zoneOffset;
+
+            hoardUpdater theUpdater = emptyObject.AddComponent<hoardUpdater>();
+
+
+            List<Vector3> listOfSpawnPoints = new List<Vector3>();
+            /*
+            listOfSpawnPoints.Add(new Vector3(30, 0, 20) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(45, 0, -20) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-25, 0, 25) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-30, 0, -30) + emptyObject.transform.position);
+            *
+            
+            listOfSpawnPoints.Add(new Vector3(5, 0, 5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(5, 0, -5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-5, 0, 5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-5, 0, -5) + emptyObject.transform.position);
+            */
+
+            //listOfSpawnPoints.Add(new Vector3(0, 0, 0) + emptyObject.transform.position);
+
+            listOfSpawnPoints.Add(new Vector3(5, 0, 5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(5, 0, -5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-5, 0, 5) + emptyObject.transform.position);
+            listOfSpawnPoints.Add(new Vector3(-5, 0, -5) + emptyObject.transform.position);
+
+            theUpdater.hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints, emptyObject));
+            theUpdater.hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints, emptyObject));
+            theUpdater.hoardes.Add(new hoardeWaveGen(tag2.team4, listOfSpawnPoints, emptyObject));
+
+
+            emptyObject.AddComponent<BoxCollider>();
+            tagging2.singleton.addTag(emptyObject, tagging2.tag2.zoneable);
+            //tagging2.singleton.setObjectAsMemberOfZone(emptyObject, );
+
+        }
+    }
+
+
+    public class hoardUpdater : MonoBehaviour, IupdateCallable
+    {
+        public List<IupdateCallable> currentUpdateList { get; set; }
+        public List<hoardeWaveGen> hoardes = new List<hoardeWaveGen>();
+
+
+        void Start()
+        {
+            Debug.Log("hoardUpdater | zone:  " + tagging2.singleton.whichZone(this.gameObject) + ", and id number:  " + this.gameObject.GetHashCode());
+
+            //messy [using collider to add this generator to a zone]
+            Destroy(this.gameObject.GetComponent<BoxCollider>());//.enabled = false;
+        }
+
+        public void callableUpdate()
+        {
+            foreach (hoardeWaveGen hoard in hoardes)
+            {
+                hoard.doOnUpdate();
+            }
+        }
+
+        /*
+        public void Update()
+        {
+            int zone = tagging2.singleton.whichZone(this.gameObject);
+            Debug.Log("hoarde zone:  " + zone);
+            //Debug.Log("hoardes.Count" + hoardes.Count);
+            foreach (hoardeWaveGen hoard in hoardes)
+            {
+                hoard.doOnUpdate();
+            }
+        }
+        */
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static void createCubeGridTest()
     {
@@ -934,7 +1109,47 @@ public class initialGenerator2 : MonoBehaviour
     
 }
 
-public class generatorJob
+
+
+
+public class testingThisRepositionError:MonoBehaviour
+{
+    void Update()
+    {
+        generateAndReposition();
+    }
+
+    public void generateAndReposition()
+    {
+        //has reposition error in far spawn points:
+        //GameObject thing1 = Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+        //would have NO reposition error in spawn points:
+        GameObject thing1 = Instantiate(repository2.singleton.placeHolderCubePrefab, this.gameObject.transform.position, Quaternion.identity);
+
+        thing1.AddComponent<NavMeshAgent>();
+
+        thing1.transform.position = this.gameObject.transform.position + new Vector3(7,0,0);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public class generatorJob
 {
     Vector3 originPoint;
 

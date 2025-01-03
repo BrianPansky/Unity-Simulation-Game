@@ -300,6 +300,8 @@ public class tagging2 : MonoBehaviour
     {
         objectIdPair newIdPair = new objectIdPair();
         newIdPair.theObject = theObject;
+        Debug.Assert(newIdPair != null);
+        Debug.Assert(theObject != null);
         newIdPair.theObjectIdNumber = theObject.GetHashCode();
         if (pairsById.ContainsKey(newIdPair.theObjectIdNumber))
         {
@@ -1045,6 +1047,7 @@ public class setOfAllObjectsInZone : objectSetGrabber
     public List<GameObject> allObjectsInObjectsZone(GameObject theObject)
     {
         int zone = tagging2.singleton.whichZone(theObject);
+
         List<objectIdPair> pairs = tagging2.singleton.objectsInZone[zone]; //= allInZone(zone);
         return tagging2.singleton.listInObjectFormat(pairs);
     }

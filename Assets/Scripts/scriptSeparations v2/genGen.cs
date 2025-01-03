@@ -547,6 +547,263 @@ public class genGen : MonoBehaviour
 
 
 
+public class reactivationOfNavMeshAgent : MonoBehaviour
+{
+
+    void Awake()
+    {
+        this.gameObject.GetComponent<NavMeshAgent>().enabled = false;
+    }
+
+    void Start()
+    {
+        this.gameObject.GetComponent<NavMeshAgent>().enabled = true;
+        Destroy(this);
+    }
+    void Update()
+    {
+
+    }
+}
+
+
+
+
+
+
+
+public class TESTsoldierGenerator : objectGen
+{
+    tagging2.tag2 team;
+    private Vector3 thePosition;
+
+    public TESTsoldierGenerator(tagging2.tag2 theTeamIn, Vector3 thePositionIn = new Vector3())
+    {
+        this.team = theTeamIn;
+        thePosition = thePositionIn;// (1,0,100);
+    }
+
+    public GameObject generate()
+    {
+        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCylinderPrefab, thePosition); //repository2.Instantiate(repository2.singleton.placeHolderCylinderPrefab, thePosition, Quaternion.identity);
+        //GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+
+        newObj.AddComponent<NavMeshAgent>();
+
+        return newObj;
+        /*
+
+
+        //newObj.transform.localScale = new Vector3(1, 0.5f, 1);
+        //torso.transform.localScale = new Vector3(1, 0.5f, 1); 
+        torso.transform.SetParent(newObj.transform, false);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+        //hitbox.transform.localScale += new Vector3(0, 1f, 0);
+        //newObj.transform.localScale += new Vector3(0, -1f, 0);
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+
+
+        tagging2.singleton.addTag(newObj, team);
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.theNavMeshTransform = newObj.transform;
+        thePlayable.theHorizontalRotationTransform = torso.transform;
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
+        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform, true);
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
+
+        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+
+
+        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+        //theirInventory.startingItem = genGen.singleton.returnGun1(newObj.transform.position);
+        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, newObj);
+
+
+        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
+        theFSMcomponent.theFSMList = new TESTbasicSoldierFSM(newObj, team).returnIt();
+        */
+
+
+
+
+
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+public class TESTbasicSoldierFSM : FSM
+{
+
+    //FSM theFSM;
+    public List<FSM> theFSMList = new List<FSM>();
+
+    float combatRange = 40f;
+
+    public TESTbasicSoldierFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    {
+
+
+        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
+        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+
+    }
+
+    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    {
+        FSM idle = new generateFSM();
+
+        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, combatRange).returnIt());
+
+
+
+        idle.addSwitchAndReverse(switchToAttack, combat1);
+
+
+
+        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+
+
+
+        idle.name = "hands, idle";
+        combat1.name = "hands, combat1";
+        equipGun.theFSM.name = "hands, equipGun";
+        return idle; ;
+    }
+
+    private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 200),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        return theCriteria;
+    }
+
+    private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
+    {
+
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        return theAttackTargetPicker;
+    }
+
+    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    {
+        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
+
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        wander.addSwitchAndReverse(switchToAttack, combat1);
+
+        wander.name = "feet, wander";
+        combat1.name = "feet, combat1";
+        return wander;
+    }
+
+
+
+
+    public List<FSM> returnIt()
+    {
+        return theFSMList;
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3038,7 +3295,7 @@ public class FSM
 
     public FSM doAFrame()
     {
-        Debug.Log("the name of this FSM:  " + name);
+        //Debug.Log("the name of this FSM:  " + name);
 
         //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
@@ -3088,7 +3345,7 @@ public class FSM
             //Debug.Log(".................thisCondition:  " + thisCondition + " " + thisCondition.GetHashCode());
             //Debug.Log("thisCondition.asTextSHORT():  " + thisCondition.asTextSHORT() + " " + thisCondition.GetHashCode());
             //Debug.Log("thisCondition.asText():  " + thisCondition.asText() + " " + thisCondition.GetHashCode());
-            //Debug.Log("thisCondition.asTextAllTheWayDown():  " + thisCondition.asTextAllTheWayDown() + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asTextBaseOnly():  " + thisCondition.asTextBaseOnly() + " " + thisCondition.GetHashCode());
             if (thisCondition.met())
             {
                 //Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
@@ -3308,7 +3565,9 @@ public class objectSetInstantiator
         foreach(objectGen objGen in theSet)
         {
            GameObject newObj =  objGen.generate();
-           newObj.transform.position = patternScript2.singleton.randomNearbyVector(spawnPoint);
+            //Debug.Log("spawnPoint:  "+spawnPoint);
+            //newObj.transform.position = spawnPoint;
+            newObj.transform.position = patternScript2.singleton.randomNearbyVector(spawnPoint);
         }
     }
 }

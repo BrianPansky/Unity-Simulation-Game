@@ -11,7 +11,7 @@ public class safeDestroy : MonoBehaviour
 
         //Debug.Log("//////////////   safe destroy:  " + this.gameObject.GetInstanceID());
 
-        tagging2.singleton.removeAllTagsAndZone(this.gameObject);
+        tagging2.singleton.removeAllTagsAndZone(this.gameObject); //ummm, i just got a null error for THIS LINE...........
 
         if (this.gameObject.GetComponent<IupdateCallable>() == null) { return; }
         worldScript.singleton.removeIupdateCallableFromItsList(this.gameObject.GetComponent<IupdateCallable>());

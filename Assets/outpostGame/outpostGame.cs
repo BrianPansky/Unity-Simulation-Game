@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine.WSA;
 using static enactionCreator;
@@ -29,7 +30,7 @@ public class outpostGame : MonoBehaviour
         listOfSpawnPoints.Add(new Vector3(-30,0,-30));
 
 
-        //hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
+        ///hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
         //hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints));
         //hoardes.Add(new hoardeWaveGen(tag2.team4, listOfSpawnPoints));
 
@@ -48,7 +49,7 @@ public class outpostGame : MonoBehaviour
 
 
 
-
+        /*
         GameObject anim1 = new animalGen2(tag2.team2, 2, 1, 1, 1, 9, 24).generate();
         anim1.transform.position = new Vector3(-23, 0, 35);
         GameObject anim2 = new animalGen2(tag2.team2, 2, 1, 1, 1, 9, 24).generate();
@@ -68,6 +69,8 @@ public class outpostGame : MonoBehaviour
         //returnBasicGrabbable(stuffType.meat1, new Vector3(-17, 2, 2));
         returnBasicGrabbable(stuffType.fruit, new Vector3(-15, 1, -24));
         
+        */
+
     }
 
     // Update is called once per frame
@@ -108,6 +111,23 @@ public class outpostGame : MonoBehaviour
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class hoardeWaveGen
 {
     int currentWaveNumber = 0;
@@ -115,6 +135,7 @@ public class hoardeWaveGen
     tag2 team;
 
     condition newWaveCondition;
+    GameObject thePlaceholderObjectInZone;
 
     List<objectSetInstantiator> listOfWaves = new List<objectSetInstantiator>();
 
@@ -122,8 +143,9 @@ public class hoardeWaveGen
 
 
 
-    public hoardeWaveGen(tag2 teamIn, List<Vector3> listOfSpawnPointsIn)
+    public hoardeWaveGen(tag2 teamIn, List<Vector3> listOfSpawnPointsIn, GameObject thePlaceholderObjectInZoneIn)
     {
+        this.thePlaceholderObjectInZone = thePlaceholderObjectInZoneIn;
         team = teamIn;
         listOfSpawnPoints = listOfSpawnPointsIn;
 
@@ -136,27 +158,67 @@ public class hoardeWaveGen
         List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
 
 
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
+
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
+
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
+
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
+
+        /*
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        /*
         objectSetInstantiator o1 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) });
         objectSetInstantiator o2 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
         objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99) });
         objectSetInstantiator o4 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
         objectSetInstantiator o5 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) });
+        
+
 
         newList.Add(o1);
         newList.Add(o2);
         newList.Add(o3);
         newList.Add(o4);
         newList.Add(o5);
+        */
 
         return newList;
     }
 
     public void doOnUpdate()
     {
+        //Debug.Log("???????????????????????????????????????????");
+
+        //Debug.Log("newWaveCondition" + newWaveCondition);
+        //Debug.Log("newWaveCondition.asTextAllTheWayDown()" + newWaveCondition.asTextAllTheWayDown());
         if (newWaveCondition.met())
         {
+            //Debug.Log("SAYS IT'S MET???????????????????????????????????????????");
             currentWaveNumber++;
             generateNextWave();
+        }
+        else
+        {
+
+            //Debug.Log("NOT MET1111111");
         }
     }
 
@@ -170,8 +232,58 @@ public class hoardeWaveGen
 
     public void generateNextWave()
     {
+        /*
+        //has reposition error in far zones:
+        GameObject thing1 = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab, new Vector3());
+        //would have NO reposition error in far zones:
+        //GameObject thing1 = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab,thePlaceholderObjectInZone.transform.position);
+        thing1.AddComponent<NavMeshAgent>();
+
+        thing1.transform.position = thePlaceholderObjectInZone.transform.position;
+        */
+
+
+
+
+
+
+        //GameObject thing1 = new TESTsoldierGenerator(team, thePlaceholderObjectInZone.transform.position).generate();
+        //GameObject thing1 = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab,
+        //thePlaceholderObjectInZone.transform.position);
+        //thing1.AddComponent<NavMeshAgent>();
+
+        //thing1.transform.position = thePlaceholderObjectInZone.transform.position;
+        //Debug.Log("spawnPoint:  "+spawnPoint);
+        //newObj.transform.position = spawnPoint;
+        //newObj.transform.position = patternScript2.singleton.randomNearbyVector(thePlaceholderObjectInZone.transform.position);
+
+
+
+        //new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }).generate(thePlaceholderObjectInZone.transform.position);
+
+        /*
+        GameObject thing1= genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCylinderPrefab, thePlaceholderObjectInZone.transform.position);
+        thing1.AddComponent<NavMeshAgent>();
+        thing1.AddComponent<navAgent>();
+
+        Debug.Log("thePlaceholderObjectInZone.transform.position:  " + thePlaceholderObjectInZone.transform.position);
+        Debug.Log("current and count:  " + currentWaveNumber + ", " + listOfWaves.Count);
+        */
+        //if (currentWaveNumber > -1) { return; }
+
+        if (currentWaveNumber - 1 < listOfWaves.Count)
+        {
+
+            listOfWaves[currentWaveNumber - 1].generate(thePlaceholderObjectInZone.transform.position);
+            return;
+        }
+
+        listOfWaves[currentWaveNumber - listOfWaves.Count - 1].generate(thePlaceholderObjectInZone.transform.position);
+        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(thePlaceholderObjectInZone.transform.position);
+
+        /*
         //currentWaveNumber starts at 1
-        //Debug.Log("current and count:  "+ currentWaveNumber+", "+ listOfWaves.Count);
+        Debug.Log("current and count:  "+ currentWaveNumber+", "+ listOfWaves.Count);
         if(currentWaveNumber-1 < listOfWaves.Count)
         {
 
@@ -181,6 +293,8 @@ public class hoardeWaveGen
 
         listOfWaves[currentWaveNumber - listOfWaves.Count-1].generate(randomTargetPickerSpawnPoint(listOfSpawnPoints));
         listOfWaves[currentWaveNumber - listOfWaves.Count].generate(randomTargetPickerSpawnPoint(listOfSpawnPoints));
+
+        */
     }
 
     private Vector3 randomTargetPickerSpawnPoint(List<Vector3> listOfSpawnPoints)
@@ -194,15 +308,19 @@ public class hoardeWaveGen
     condition zeroRemainingTeamMembers()
     {
         objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new hasVirtualGamepad()
+            new hasVirtualGamepad(),
+            new objectHasTag(team)
             //new objectHasTag(team)
             //new proximityCriteriaBool(thePlayer?, 25)
             );
 
 
-        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
 
-        condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 120));// theObjectDoingTheEnaction, numericalVariable.health);
+        Debug.Log("CONDITION MAKER | zone:  "+tagging2.singleton.whichZone(thePlaceholderObjectInZone)+", and id number:  " + thePlaceholderObjectInZone.GetHashCode());
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(thePlaceholderObjectInZone), theCriteria);
+
+        condition theCondition =new reverseCondition( new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 0));// theObjectDoingTheEnaction, numericalVariable.health);
 
         return theCondition;
     }
@@ -226,17 +344,20 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
     float speed;
     float targetDetectionRange;
 
+    GameObject positionMarker;  //this somehow should prevent relocation hijinx...
+
     //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
 
     // 
     //basicBodyProperties
-    public basicPaintByNumbersSoldierGeneratorG(tag2 theTeamIn, float health, float height, float width, float speed, float targetDetectionRange)//, objectGen weapon)
+    public basicPaintByNumbersSoldierGeneratorG(tag2 theTeamIn, float health, float height, float width, float speed, float targetDetectionRange, GameObject positionMarkerIn)//, objectGen weapon)
     {
         this.team = theTeamIn;
         this.health = health;
         this.height = height;
         this.width = width;
         this.speed = speed;
+        positionMarker = positionMarkerIn;
         //this.weapon = weapon;
         //this.theBehavior = theBehavior;
         thePosition = new Vector3();
@@ -244,8 +365,8 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
 
     public GameObject generate()
     {
-        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
-        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
 
         //oldTorso(newObj,torso);
 
@@ -277,7 +398,7 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
 
         inventory1 theirInventory = newObj.AddComponent<inventory1>();
         //GameObject gun = weapon.generate();
-        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
+        GameObject gun = genGen.singleton.returnGun1(positionMarker.transform.position);
         theirInventory.inventoryItems.Add(gun);
         interactionCreator.singleton.dockXToY(gun, newObj);
 
@@ -286,6 +407,10 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
 
         FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
         theFSMcomponent.theFSMList = new basicPaintByNumbersSoldierFSM(newObj,team,speed,targetDetectionRange).returnIt();//theBehavior;
+
+
+        //newObj.GetComponent<NavMeshAgent>().enabled = false;
+        newObj.AddComponent<reactivationOfNavMeshAgent>();
 
         return newObj;
     }
@@ -538,7 +663,7 @@ public class basicSoldierGeneratorG : objectGen
     public basicSoldierGeneratorG(tagging2.tag2 theTeamIn)
     {
         this.team = theTeamIn;
-        thePosition = new Vector3();
+        thePosition = new Vector3();// (1,0,100);
     }
 
     public GameObject generate()

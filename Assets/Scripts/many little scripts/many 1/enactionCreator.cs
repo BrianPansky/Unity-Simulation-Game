@@ -374,6 +374,7 @@ public class navAgent : IEnactByTargetVector
 
         if (theAgent.isOnNavMesh == false)
         {
+            //Debug.Log("(theAgent.isOnNavMesh == false), Warp!!!!!!!!");
             theAgent.Warp(theAgent.transform.position);
         }
         Debug.Assert(theAgent.isOnNavMesh);

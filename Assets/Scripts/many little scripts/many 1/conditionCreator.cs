@@ -237,8 +237,8 @@ public abstract class condition
 
     public abstract string asText();
     public abstract string asTextSHORT();
-    public abstract string asTextBaseOnly();
     public abstract string asTextAllTheWayDown();
+    public abstract string asTextBaseOnly();
     //string whyDidItFail();
 
 
@@ -284,12 +284,12 @@ public abstract class baseCondition : condition
     {
         return standardAsTextSHORT();
     }
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
         return asText();
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         Debug.Log("11111111111????????????????");
         return asText();
@@ -312,17 +312,18 @@ public abstract class nesterCondition : condition
         return theNestedCondition.asTextSHORT();
     }
 
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
-        return asText();
+        string newString = this.ToString() + "|>"+ theNestedCondition.asTextAllTheWayDown();
+        return newString;
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         //Debug.Log("2222222222222????????????????");
         //Debug.Log("this:  " + this);
         //Debug.Log("asText():  " + asText());
-        string newString = theNestedCondition.asTextAllTheWayDown();
+        string newString = theNestedCondition.asTextBaseOnly();
         return newString;
     }
 }
@@ -339,6 +340,7 @@ public class reverseCondition : nesterCondition
 
     public override bool met()
     {
+        //Debug.Log("reverseCondition met ????????????????  "+ theNestedCondition.ToString());
         bool originalBool = theNestedCondition.met();
 
         if(originalBool==true) {return false;}
@@ -412,12 +414,14 @@ public class multicondition : nesterCondition
         return theText;
     }
 
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
-        return asText();
+        string newString = this + ":  ";
+        newString += asText();
+        return newString;
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         string newString = this + ":  ";
         newString+= asText();
@@ -806,12 +810,12 @@ public class adHocHasNoIntertypeXCondition : condition
         return stringToReturn;
     }
 
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
         throw new NotImplementedException();
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         Debug.Log("3333333333333????????????????");
         throw new NotImplementedException();
@@ -1439,7 +1443,8 @@ public class isThereAtLeastOneObjectInSet : baseCondition
 
     public override bool met()
     {
-        if(theObjectSetGrabber.grab() == null){ return false; }
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        if (theObjectSetGrabber.grab() == null){ return false; }
         if (theObjectSetGrabber.grab().Count > 0)
         {
             //Debug.Log("(theObjectSetGrabber.grab().Count > 0) is TRUE:  " + theObjectSetGrabber.grab().Count + "  " + theObjectSetGrabber.grab()[0]);
@@ -1451,7 +1456,7 @@ public class isThereAtLeastOneObjectInSet : baseCondition
     }
 
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         Debug.Log("444444444444444444444????????????????");
         string theString = this + " (theObjectSetGrabber = " + theObjectSetGrabber + ")";
@@ -1694,7 +1699,7 @@ public class individualObjectMeetsAllCriteria : condition //not really "base con
         return standardAsTextSHORT();
     }
 
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
         string theText = "[";
         foreach (objectCriteria thisCondition in theCriteria)
@@ -1708,14 +1713,14 @@ public class individualObjectMeetsAllCriteria : condition //not really "base con
         return theText;
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         Debug.Log("555555555555555????????????????");
         string theText = this + " (object returner = " + theObjectReturner +")";
 
         theText += "[";
 
-        theText += asTextBaseOnly();
+        theText += asTextAllTheWayDown();
 
         theText += "]";
 
@@ -1815,12 +1820,12 @@ public class nonNullObject : condition //not really "base condition", has nested
     }
 
 
-    public override string asTextBaseOnly()
+    public override string asTextAllTheWayDown()
     {
         return asText();
     }
 
-    public override string asTextAllTheWayDown()
+    public override string asTextBaseOnly()
     {
         Debug.Log("66666666666666666????????????????");
         string newString = "["+this + ": " + theIndividualObjectReturner+"]";
