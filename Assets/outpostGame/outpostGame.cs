@@ -158,47 +158,13 @@ public class hoardeWaveGen
         List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
 
 
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
-
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
-
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
-
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33, thePlaceholderObjectInZone) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99, thePlaceholderObjectInZone), new basicSoldierGeneratorG(team) }));
-
-        /*
         newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
-        /*
-        objectSetInstantiator o1 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o2 = new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o3 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99) });
-        objectSetInstantiator o4 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) });
-        objectSetInstantiator o5 = new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) });
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 11, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 5, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) }));
         
 
-
-        newList.Add(o1);
-        newList.Add(o2);
-        newList.Add(o3);
-        newList.Add(o4);
-        newList.Add(o5);
-        */
 
         return newList;
     }
@@ -344,23 +310,18 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
     float speed;
     float targetDetectionRange;
 
-    GameObject positionMarker;  //this somehow should prevent relocation hijinx...
 
     //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
 
     // 
     //basicBodyProperties
-    public basicPaintByNumbersSoldierGeneratorG(tag2 theTeamIn, float health, float height, float width, float speed, float targetDetectionRange, GameObject positionMarkerIn)//, objectGen weapon)
+    public basicPaintByNumbersSoldierGeneratorG(tag2 theTeamIn, float health, float height, float width, float speed, float targetDetectionRange)//, objectGen weapon)
     {
         this.team = theTeamIn;
         this.health = health;
         this.height = height;
         this.width = width;
         this.speed = speed;
-        positionMarker = positionMarkerIn;
-        //this.weapon = weapon;
-        //this.theBehavior = theBehavior;
-        thePosition = new Vector3();
     }
 
     public GameObject generate()
@@ -398,7 +359,7 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
 
         inventory1 theirInventory = newObj.AddComponent<inventory1>();
         //GameObject gun = weapon.generate();
-        GameObject gun = genGen.singleton.returnGun1(positionMarker.transform.position);
+        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
         theirInventory.inventoryItems.Add(gun);
         interactionCreator.singleton.dockXToY(gun, newObj);
 
@@ -720,6 +681,11 @@ public class basicSoldierGeneratorG : objectGen
 
         FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
         theFSMcomponent.theFSMList = new basicSoldierFSM(newObj, team).returnIt();
+
+
+
+
+        newObj.AddComponent<reactivationOfNavMeshAgent>();
 
         return newObj;
     }

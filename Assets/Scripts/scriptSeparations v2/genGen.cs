@@ -560,10 +560,6 @@ public class reactivationOfNavMeshAgent : MonoBehaviour
         this.gameObject.GetComponent<NavMeshAgent>().enabled = true;
         Destroy(this);
     }
-    void Update()
-    {
-
-    }
 }
 
 
