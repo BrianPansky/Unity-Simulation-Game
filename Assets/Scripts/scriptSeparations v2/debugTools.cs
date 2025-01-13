@@ -257,3 +257,16 @@ public class adHocBooleanDeliveryClass
 
     public bool theBoolSignal = false;
 }
+
+
+
+/*
+public interface context
+{
+    //place this interface on classes that nest other classes
+    //plug it into those nested classes
+    //nested classes etc call this so i can see what the context is when debugging?
+
+    string contextAsString();
+}
+*/

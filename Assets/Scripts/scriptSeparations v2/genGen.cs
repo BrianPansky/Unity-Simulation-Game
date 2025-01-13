@@ -1157,7 +1157,7 @@ public class generateFSM : FSM
 public class FSMcomponent : MonoBehaviour, IupdateCallable
 {
     //public FSM theFSM;
-    public List<FSM> theFSMList;// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+    public List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
 
     public List<IupdateCallable> currentUpdateList { get; set; }
     public void Update()

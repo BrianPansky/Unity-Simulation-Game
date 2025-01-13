@@ -23,14 +23,25 @@ public class outpostGame : MonoBehaviour
     {
         genGen.singleton.returnGun1(new Vector3(-2, 0.7f, 6));
 
-        
+        new makeTestLeader(tag2.team2).doIt(new Vector3(430, 1, 30));
+        new makeTestLeader(tag2.team3).doIt(new Vector3(-430, 1, -30));
+        new makeTestLeader(tag2.team4).doIt(new Vector3(420, 1, 30));
+        new makeTestLeader(tag2.team5).doIt(new Vector3(-430, 1, -20));
+        /*
         new makeSimpleTestsToFixMyRTSStuff(tag2.team2).doIt(new Vector3(20,1,20));
         new makeSimpleTestsToFixMyRTSStuff(tag2.team3).doIt(new Vector3(-20, 1, -20));
         new makeTestBase(tag2.team2).doIt(new Vector3(25, 1, 25));
         new makeTestBase(tag2.team3).doIt(new Vector3(-25, 1, -25));
         new makeTestLeader(tag2.team2).doIt(new Vector3(30, 1, 30));
         new makeTestLeader(tag2.team3).doIt(new Vector3(-30, 1, -30));
+        */
+        //new makeTestBase(tag2.team2).doIt(new Vector3(25, 1, 25));
+        /*
+        new makeTestBase(tag2.team3).doIt(new Vector3(-25, 1, -25));
 
+        new makeTestLeader(tag2.team2).doIt(new Vector3(30, 1, 30));
+        new basicSoldierGeneratorG(tag2.team2).generate(); 
+        new basicPaintByNumbersSoldierGeneratorG(tag2.team2, 1, 2.4f, 1, 4, 33).generate();
 
         List<Vector3> listOfSpawnPoints = new List<Vector3>();
         listOfSpawnPoints.Add(new Vector3(30,0,20));
@@ -38,6 +49,8 @@ public class outpostGame : MonoBehaviour
         listOfSpawnPoints.Add(new Vector3(-25,0,25));
         listOfSpawnPoints.Add(new Vector3(-30,0,-30));
 
+        new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team2, listOfSpawnPoints));
+        */
 
         ///hoardes.Add(new hoardeWaveGen(tag2.team2, listOfSpawnPoints));
         //hoardes.Add(new hoardeWaveGen(tag2.team3, listOfSpawnPoints));
@@ -279,7 +292,7 @@ public class testRTSFSM
         //then get the condition to gate that behavior
         //then find a way for it to work while initially empty, and then being filled [currently, LOTS of null object errprs!]
 
-        return feetFSM(theObjectDoingTheEnaction, team);
+        return rtsFSM1(theObjectDoingTheEnaction, team);
     }
 
     internal List<FSM> returnIt()
@@ -289,7 +302,7 @@ public class testRTSFSM
 
 
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
     {
         //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
@@ -430,6 +443,7 @@ public class teamRankingOfficerGenerator : objectGen
 
         genGen.singleton.ensureVirtualGamePad(newObj);
 
+        tagging2.singleton.addTag(newObj, tag2.teamLeader);
 
         tagging2.singleton.addTag(newObj, team);
         playable2 thePlayable = newObj.AddComponent<playable2>();
@@ -1277,7 +1291,6 @@ public class hoardeWaveGen1_1
     {
         List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
 
-
         newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
         newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
         newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99) }));
@@ -1368,8 +1381,8 @@ public class hoardeWaveGen1_1
     condition zeroRemainingTeamMembersAnywhere()
     {
         objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new hasVirtualGamepad()
-            //new objectHasTag(team)
+            new hasVirtualGamepad(),
+            new reverseCriteria( new objectHasTag(tag2.teamLeader))
             //new objectHasTag(team)
             //new proximityCriteriaBool(thePlayer?, 25)
             );
@@ -2154,6 +2167,8 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
         GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
         GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
 
+
+        newObj.AddComponent<rtsModule>();
         //oldTorso(newObj,torso);
 
         newTorso(newObj, torso);
@@ -2477,6 +2492,34 @@ public class basicPaintByNumbersSoldierFSM : FSM
         wander.name = "feet, wander";
         combat1.name = "feet, combat1";
 
+
+
+
+
+
+
+
+
+
+        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+
+        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction, team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+
+        condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
+
+        wander.addSwitchAndReverse(switchFromWanderToRTS, goToRTSTarget);
+        goToRTSTarget.addSwitchAndReverse(switchToAttack, combat1);
+
+        goToRTSTarget.name = "feet, goToRTSTarget";
+
+
+
+
+
+
+
+
+
         navAgent theNav = theObjectDoingTheEnaction.GetComponent<navAgent>();
         theNav.theAgent.speed = this.speed;
         theNav.theAgent.baseOffset = 0.5f;//theObjectDoingTheEnaction.transform.localScale.y;
@@ -2484,6 +2527,75 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
         return wander;
     }
+
+
+
+
+
+
+
+    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    {
+        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+
+        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+
+        //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
+
+        //wander.addSwitchAndReverse(switchFromWanderToRTS, goToRTSTarget);
+
+
+        //wander.name = "feet, wander";
+        goToRTSTarget.name = "feet, goToRTSTarget";
+        return goToRTSTarget;
+    }
+
+    private targetPicker makeTheRTSCommandTargetPicker(GameObject theObjectDoingTheEnaction)
+    {
+        //bit messy ad-hoc sorta way to do this for now
+        //need target picker that just copies from their RTS module lol
+
+        //individualObjectReturner theObject = new presetObject(theObjectDoingTheEnaction);
+        targetPicker theRTSCommandTargetPicker = new targetPickerFromRTSModule(theObjectDoingTheEnaction);
+        return theRTSCommandTargetPicker;
+    }
+
+    private condition makeSwitchFromWanderToRTS(GameObject theObjectDoingTheEnaction)
+    {
+        //if there's more than zero orders
+        //opposite of leader's condition
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasRtsModule(),
+            new reverseCriteria( new hasNoOrders())
+            );
+
+        //how to apply it to themselves?
+        individualObjectReturner theObject = new presetObject(theObjectDoingTheEnaction);
+
+
+        condition switchFromWanderToRTS = new individualObjectMeetsAllCriteria(theObject, theCriteria);
+
+        return switchFromWanderToRTS;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2745,15 +2857,16 @@ public class basicSoldierFSM : FSM
 
         FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
 
+        //condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 1);
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
 
         wander.addSwitchAndReverse(switchToAttack, combat1);
 
 
-        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+        //targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction,team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -2765,6 +2878,28 @@ public class basicSoldierFSM : FSM
         combat1.name = "feet, combat1";
         goToRTSTarget.name = "feet, goToRTSTarget";
         return wander;
+    }
+
+
+
+
+
+    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    {
+        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+
+        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+
+        //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
+
+        //wander.addSwitchAndReverse(switchFromWanderToRTS, goToRTSTarget);
+
+
+        //wander.name = "feet, wander";
+        goToRTSTarget.name = "feet, goToRTSTarget";
+        return goToRTSTarget;
     }
 
     private targetPicker makeTheRTSCommandTargetPicker(GameObject theObjectDoingTheEnaction)
@@ -2783,8 +2918,8 @@ public class basicSoldierFSM : FSM
         //opposite of leader's condition
 
         objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new hasRtsModule()
-            //new reverseCriteria( new hasNoOrders())
+            new hasRtsModule(),
+            new reverseCriteria( new hasNoOrders())
             );
 
         //how to apply it to themselves?
@@ -2795,6 +2930,15 @@ public class basicSoldierFSM : FSM
 
         return switchFromWanderToRTS;
     }
+
+
+
+
+
+
+
+
+
 
     public List<FSM> returnIt()
     {
@@ -3214,10 +3358,10 @@ public class giveXRTSTargetsToYUnits: repeatWithTargetPicker
 
     public override void doThisThing() //a bit of a kludge, but maybe good???
     {
-        Debug.Log("?????????????????????????????????????");
+        //Debug.Log("?????????????????????????????????????");
         agnosticTargetCalc theTarget = rtsTargetPicker.pickNext();
 
-        Debug.Log("unitsToGiveOrdersTo.grab().Count:  " + unitsToGiveOrdersTo.grab().Count);
+        //Debug.Log("unitsToGiveOrdersTo.grab().Count:  " + unitsToGiveOrdersTo.grab().Count);
         foreach (GameObject unit in unitsToGiveOrdersTo.grab())
         {
             rtsModule theComponent = unit.GetComponent<rtsModule>();

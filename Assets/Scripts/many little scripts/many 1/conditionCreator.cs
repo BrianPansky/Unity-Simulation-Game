@@ -1105,6 +1105,8 @@ public class proximityRef : baseCondition
     {
         this.object1 = object1;
         theTargetHolder = theTargetHolderIn;
+        Debug.Assert(theTargetHolder != null);
+        Debug.Assert(theTargetHolder.theTargetCalculator != null);
         //this.object2 = object2;
         //targetCalc = new movableObjectTargetCalculator(object1, object2, desiredDistance);
         this.desiredDistance = desiredDistance;
@@ -1116,6 +1118,8 @@ public class proximityRef : baseCondition
     {
         //return false;
         Vector3 position1 = object1.transform.position;
+        Debug.Assert(theTargetHolder != null);
+        Debug.Assert(theTargetHolder.theTargetCalculator != null);
         Vector3 position2 = theTargetHolder.theTargetCalculator.targetPosition();// object2.transform.position;
         Vector3 vectorBetween = position1 - position2;
         float distance = vectorBetween.magnitude;
@@ -2141,7 +2145,7 @@ public class hasRtsModule : objectCriteria
     {
         rtsModule theComponent = theObject.GetComponent<rtsModule>();
         //Debug.Log("???????????????????????????????????????????????????????");
-        Debug.Log("theComponent:  " + theComponent);
+        //Debug.Log("theComponent:  " + theComponent);
         //Debug.Assert(theComponent != null);
         return (theComponent != null);
     }

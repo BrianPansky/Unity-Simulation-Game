@@ -95,13 +95,12 @@ public class initialGenerator2 : MonoBehaviour
         //new doAtEachPoint(new makeMastLineAtPoint(), points);
         new doAtEachPoint(new makeMapZoneAtPoint(xScale, yScale, zScale), points);
 
-        //new doAtEachPoint(new makeHoardeGenAtPoint(xScale, yScale, zScale), points);
 
-        /*
+        //new doAtEachPoint(new makeHoardeGenAtPoint(xScale, yScale, zScale), points);
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.4f);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.2f);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
@@ -123,8 +122,12 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team3, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team4, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team5, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team6, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team7, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team8, listOfOffsetSpawnLocations)));
 
-        */
+
+
 
         /*
         listOfTeamBaseGenerators.Add(team1Base());
@@ -138,8 +141,8 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(team9Base());
         */
 
-        //          new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
-        //          new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
+        new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
+        new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
 
 
         Vector3 location = Vector3.zero;
