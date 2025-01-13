@@ -1458,7 +1458,7 @@ public class isThereAtLeastOneObjectInSet : baseCondition
 
     public override string asTextBaseOnly()
     {
-        Debug.Log("444444444444444444444????????????????");
+        //Debug.Log("444444444444444444444????????????????");
         string theString = this + " (theObjectSetGrabber = " + theObjectSetGrabber + ")";
         return theString;
     }
@@ -2135,6 +2135,30 @@ public class hasVirtualGamepad : objectCriteria
         return (theGamepad != null);
     }
 }
+public class hasRtsModule : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        rtsModule theComponent = theObject.GetComponent<rtsModule>();
+        //Debug.Log("???????????????????????????????????????????????????????");
+        Debug.Log("theComponent:  " + theComponent);
+        //Debug.Assert(theComponent != null);
+        return (theComponent != null);
+    }
+}
+
+
+public class hasNoOrders : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        rtsModule theComponent = theObject.GetComponent<rtsModule>();
+        //if(theComponent.currentReceivedOrdersAndWhoGaveThem == null || theComponent.currentReceivedOrdersAndWhoGaveThem.Count == 0) { return true; }
+        if (theComponent.currentReceivedOrders == null) { return true; }
+
+        return false;
+    }
+}
 
 public class lineOfSight : objectCriteria
 {
@@ -2196,6 +2220,7 @@ public class intertypeXisOnObject : objectCriteria
         return false;
     }
 }
+
 public class intertypeXisInEquipperSlots : objectCriteria
 {
 
@@ -2233,6 +2258,7 @@ public class intertypeXisInEquipperSlots : objectCriteria
     }
     */
 }
+
 public class intertypeXisInInventory : objectCriteria
 {
 

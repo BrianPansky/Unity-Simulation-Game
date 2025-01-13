@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.WSA;
+using UnityEngine.UIElements;
 using static enactionCreator;
 using static interactionCreator;
 using static tagging2;
@@ -315,7 +314,7 @@ public class genGen : MonoBehaviour
 
     }
 
-
+    
 
 
 
@@ -387,7 +386,24 @@ public class genGen : MonoBehaviour
 
         return theEXE;
     }
+    public singleEXE makeNavAgentPlanEXE(GameObject theObjectDoingTheEnaction, targetPicker theTargetPicker, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
 
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, theTargetPicker);//placeholderTarget1);
+                                                                                  //theEXE.debugPrint = printThisNPC;
+
+
+        //proximity condition = new proximity(theObjectDoingTheEnactions, possiblyMobileActualTarget, offsetRoom * 1.4f);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);// * 1.4f);
+        //condition.debugPrint = theNavAgent.debugPrint;
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
 
 
 
@@ -547,9 +563,630 @@ public class genGen : MonoBehaviour
 
 
 
-public class reactivationOfNavMeshAgent : MonoBehaviour
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class gunComponent1: equippable2
+{
+    public void Awake()
+    {
+        this.GetComponent<equippable2>().Awake();
+
+        initializeStandardEnactionPoint1(this, 0.2f, 0.3f);
+    }
+
+    void Update()
+    {
+        doCooldown();
+    }
+}
+
+
+
+public class paintByNumbersGun1 :  objectGen //equippable2
+{
+    //annoying, messy variable initialization silliness.  just input into a function that uses it?  but want to STORE it to generate LATER, sighhhh
+    float magnitudeOfInteraction;
+    int firingRate;
+    float projectileSpeed;
+    float projectileSize;
+    bool sdOnCollision = true;
+    int level = 0;
+    float gunHeight = 1;
+    float gunWidth = 1;
+    float gunLength = 1;
+    
+    public paintByNumbersGun1(float magnitudeOfInteractionIn, int firingRateIn, float projectileSpeedIn, float projectileSizeIn, bool sdOnCollisionIn = true, int levelIn=0, float gunHeightIn=1, float gunWidthIn = 1, float gunLengthIn = 1)
+    {
+        magnitudeOfInteraction = magnitudeOfInteractionIn;
+        firingRate = firingRateIn;
+        projectileSpeed = projectileSpeedIn;
+        projectileSize = projectileSizeIn;
+        sdOnCollision = sdOnCollisionIn;
+        level = levelIn;
+        gunHeight = gunHeightIn;
+        gunWidth = gunWidthIn;
+        gunLength = gunLengthIn;
+    }
+
+    public GameObject generate()
+    {
+        return gunGen2(magnitudeOfInteraction,firingRate,projectileSpeed,projectileSize,sdOnCollision,level,gunHeight,gunWidth,gunLength);
+    }
+
+
+    public GameObject gunGen2(float magnitudeOfInteraction, int firingRate, float projectileSpeed, float projectileSize, bool sdOnCollision = true, int level = 0, float gunHeight = 1, float gunWidth = 1, float gunLength = 1)
+    {
+        GameObject theObject = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+        theObject.transform.localScale = new Vector3(gunWidth, gunHeight, gunLength);
+        equippable2 theEquippable = theObject.AddComponent<gunComponent1>();
+        theEquippable.dictOfIvariables[numericalVariable.cooldown] = 0f;
+        addNumericalEffect(theEquippable, numericalVariable.cooldown, firingRate);
+
+        /*
+        projectileLauncher theShooter = new projectileLauncher(theEquippable.enactionPoint1.transform, 
+            buttonCategories.errorYouDidntSetEnumTypeForBUTTONCATEGORIES, 
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0));
+        */
+
+
+        //bit messy?  made "thisButtonCategoryIntentionallyLeftBlank" so that i can add component to object [thus easy search object for component of that type] WITHOUT having it plug into a gamepad button when equipped......
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.thisButtonCategoryIntentionallyLeftBlank,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(projectileSpeed, sdOnCollision, 99, 0),
+            20);
+
+
+        projectileLauncher theShooter = theEquippable.transform.gameObject.GetComponent<projectileLauncher>();
+        enactEffect theFiringEffectOnCooldown = theEquippable.transform.gameObject.GetComponent<enactEffect>();
+
+        //IEnactaBool theFiringEffectOnCooldown = enactEffect.returnEnactEffect(new numericalEffect(theEquippable, numericalVariable.cooldown));
+
+
+
+
+
+        //Debug.Assert(enactEffect.returnEnactEffect(new deathEffect(theEquippable.transform.gameObject)) != null);
+        //Debug.Assert(theFiringEffectOnCooldown != null);
+        Debug.Assert(theFiringEffectOnCooldown != null);
+
+        condition cooldownCondition = new numericalCondition(numericalVariable.cooldown, theEquippable.dictOfIvariables);
+
+        //compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
+        theShooter.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
+        theShooter.gamepadButtonType = buttonCategories.primary;
+
+
+
+
+        /*
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.primary,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0),
+            20);
+
+        */
+
+        return theObject;
+    }
+    public static void addNumericalEffect(equippable2 theEquippable, numericalVariable numVarX, int amountToSubtract = 1)
+    {
+        enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown, amountToSubtract));
+    }
+
+}
+
+
+public class newGunGen : objectGen //equippable2
+{
+    //annoying, messy variable initialization silliness.  just input into a function that uses it?  but want to STORE it to generate LATER, sighhhh
+    //AHA!  use CLASSES!  my "object modifiers"
+
+    /*
+    float magnitudeOfInteraction;
+    int firingRate;
+    float projectileSpeed;
+    float projectileSize;
+    bool sdOnCollision = true;
+    int level = 0;
+    float gunHeight = 1;
+    float gunWidth = 1;
+    float gunLength = 1;
+    */
+
+    genObjectAndModify mainGunGenerator;
+    genObjectAndModify projectileType;
+    int firingRate = 40;
+
+    public newGunGen(genObjectAndModify projectileTypeIn, int firingRateIn = 40)
+    {
+        //theBullets = new genObjectAndModify(, projectileModifiers);
+        //theGun = new genObjectAndModify(new thingShell(projectileType), gunModifiers);
+        projectileType = projectileTypeIn;
+        firingRate = firingRateIn;
+        mainGunGenerator = new genObjectAndModify(new cubeGen());
+    }
+    public newGunGen(genObjectAndModify projectileTypeIn, objectModifier[] gunModifiers, int firingRateIn = 40)
+    {
+        //theBullets = new genObjectAndModify(, projectileModifiers);
+        //theGun = new genObjectAndModify(new thingShell(projectileType), gunModifiers);
+        projectileType = projectileTypeIn;
+        firingRate = firingRateIn;
+        mainGunGenerator = new genObjectAndModify(new cubeGen(), gunModifiers);
+    }
+
+
+    public GameObject generate()
+    {
+        //generateObjectAtLocation
+
+        return gunGen3();
+    }
+
+
+    public GameObject gunGen3()
+    {
+        GameObject theObject = mainGunGenerator.generate();//repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+
+        /*
+        theObject.transform.localScale = new Vector3(gunWidth, gunHeight, gunLength);
+        equippable2 theEquippable = theObject.AddComponent<gunComponent1>();
+        theEquippable.dictOfIvariables[numericalVariable.cooldown] = 0f;
+        addNumericalEffect(theEquippable, numericalVariable.cooldown, firingRate);
+        */
+
+        /*
+        projectileLauncher theShooter = new projectileLauncher(theEquippable.enactionPoint1.transform, 
+            buttonCategories.errorYouDidntSetEnumTypeForBUTTONCATEGORIES, 
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0));
+        */
+
+        /*
+        //bit messy?  made "thisButtonCategoryIntentionallyLeftBlank" so that i can add component to object [thus easy search object for component of that type] WITHOUT having it plug into a gamepad button when equipped......
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.thisButtonCategoryIntentionallyLeftBlank,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(projectileSpeed, sdOnCollision, 99, 0),
+            20);
+
+        */
+
+
+        //hard to turn gun component and cooldown and enaction point generator into "object modifiers" because they have to be LINKED, not totally separate/atomized/independent components???  or can i plug one into another?  one modifier into another?  hmmm, ehh....
+        gunComponent1 theEquippable = theObject.AddComponent<gunComponent1>();
+        theEquippable.initializeStandardEnactionPoint1(theObject, theEquippable.transform.localScale.x, 0.1f);
+
+        theEquippable.dictOfIvariables[numericalVariable.cooldown] = 0f;
+        addNumericalEffect(theEquippable, numericalVariable.cooldown, firingRate);
+
+        //enactEffect theEnaction = theObject.AddComponent<enactEffect>();
+        //theEnaction.theEffect = new generateObjectAtLocation(projectileType, theEquippable.enactionPoint1);
+
+        createAuthoredObject theEnaction = createAuthoredObject.addThisEnactionAndReturn(theObject,projectileType, theEquippable.enactionPoint1);
+
+
+
+
+        //projectileLauncher theShooter = theEquippable.transform.gameObject.GetComponent<projectileLauncher>();
+        enactEffect theFiringEffectOnCooldown = theEquippable.transform.gameObject.GetComponent<enactEffect>();
+
+        //IEnactaBool theFiringEffectOnCooldown = enactEffect.returnEnactEffect(new numericalEffect(theEquippable, numericalVariable.cooldown));
+
+
+
+
+
+        //Debug.Assert(enactEffect.returnEnactEffect(new deathEffect(theEquippable.transform.gameObject)) != null);
+        //Debug.Assert(theFiringEffectOnCooldown != null);
+        Debug.Assert(theFiringEffectOnCooldown != null);
+
+        condition cooldownCondition = new numericalCondition(numericalVariable.cooldown, theEquippable.dictOfIvariables);
+
+        //compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
+        theEnaction.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
+        theEnaction.gamepadButtonType = buttonCategories.primary;
+
+
+
+
+        /*
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.primary,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0),
+            20);
+
+        */
+
+        return theObject;
+    }
+    
+    public static void addNumericalEffect(equippable2 theEquippable, numericalVariable numVarX, int amountToSubtract = 1)
+    {
+        enactEffect.addEnactEffect(theEquippable.transform.gameObject, new numericalEffect(theEquippable, numericalVariable.cooldown, amountToSubtract));
+    }
+
+}
+
+
+public class sphereGen : objectGen
+{
+    /*
+    public GameObject makeEmptyIntSphere(Vector3 position)
+    {
+        GameObject prefabToUse = repository2.singleton.interactionSphere;
+        GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, position);
+
+        return newProjectile;
+    }
+    public void projectileGenerator(projectileToGenerate theprojectileToGenerate, collisionEnaction theEnactable, Vector3 startPoint, Vector3 direction)//(rangedEnaction enInfo, interactionInfo interINFO, IEnactaBool theEnactable)
+    {
+
+        GameObject newObjectForProjectile = makeEmptyIntSphere(startPoint);
+        projectile1.genProjectile1(newObjectForProjectile, theprojectileToGenerate, direction);//enInfo, interINFO, theEnactable);
+        growScript1.genGrowScript1(newObjectForProjectile, theprojectileToGenerate.growthSpeed);
+
+        colliderInteractor.genColliderInteractor(newObjectForProjectile, theEnactable);
+        selfDestructScript1 sds = newObjectForProjectile.GetComponent<selfDestructScript1>();
+        sds.timeUntilSelfDestruct = theprojectileToGenerate.timeUntilSelfDestruct;
+    }
+
+    */
+
+    public GameObject generate()
+    {
+        GameObject prefabToUse = repository2.singleton.interactionSphere;
+        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, new Vector3());
+
+        return newObj;
+    }
+}
+public class cubeGen : objectGen
+{
+    public GameObject generate()
+    {
+        GameObject prefabToUse = repository2.singleton.placeHolderCubePrefab;
+        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, new Vector3());
+
+        return newObj;
+    }
+}
+
+public class paintByNumbersProjectile : objectGen
+{
+    Vector3 direction = new Vector3();
+
+    public GameObject generate()
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+
+
+
+
+public class FSM
+{
+    public string name;
+    //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
+    internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
+
+    internal List<repeater> repeatingPlans = new List<repeater>();
+
+
+
+    public FSM doAFrame()
+    {
+        //Debug.Log("the name of this FSM:  " + name);
+
+        //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
+
+        FSM toSwitchTo = null;
+
+        toSwitchTo = firstMetSwitchtCondition();
+        if (toSwitchTo != null)
+        {
+            //Debug.Log("switch");
+            //Debug.Log("toSwitchTo:  " + toSwitchTo);
+            //Debug.Log("(toSwitchTo==this):  " + (toSwitchTo==this));
+            toSwitchTo.refillAllRepeaters();
+            return toSwitchTo;
+        }
+
+
+
+
+
+        //Debug.Log("repeatingPlans.count:  " + repeatingPlans.Count);
+        foreach (repeater plan in repeatingPlans)
+        {
+            //Debug.Log("plan:  " + plan);
+            plan.doThisThing();
+        }
+
+
+
+
+        return this;
+    }
+
+
+    public void refillAllRepeaters()
+    {
+        foreach (repeater plan in repeatingPlans)
+        {
+            plan.refill();
+        }
+    }
+
+
+    private FSM firstMetSwitchtCondition()
+    {
+        foreach (condition thisCondition in switchBoard.Keys)
+        {
+            //Debug.Log(".................thisCondition:  " + thisCondition + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asTextSHORT():  " + thisCondition.asTextSHORT() + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asText():  " + thisCondition.asText() + " " + thisCondition.GetHashCode());
+            //Debug.Log("thisCondition.asTextBaseOnly():  " + thisCondition.asTextBaseOnly() + " " + thisCondition.GetHashCode());
+            if (thisCondition.met())
+            {
+                //Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
+                return switchBoard[thisCondition];
+            }
+        }
+
+        return null;
+    }
+
+
+
+
+
+
+
+    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+    public void addSwitch(condition switchCondition, FSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+    public void addSwitchAndReverse(condition switchCondition, FSM otherFSM)
+    {
+        switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+    }
+
+
+    public string baseEnactionsAsText()
+    {
+        string newString = "";
+        //newString += "the base enactions of this FSM:  ";
+        newString += "[";
+        foreach (repeater thisRep in repeatingPlans)
+        {
+
+            //newString += thisRep.thePerma.printBaseEnactions();
+            //Debug.Assert(thisRep != null);
+            //Debug.Assert(thisRep.thePerma != null);
+            newString += thisRep.baseEnactionsAsText();
+        }
+
+        newString += "]";
+        //Debug.Log(newString);
+        return newString;
+    }
+}
+
+public class generateFSM : FSM
 {
 
+    public generateFSM()
+    {
+        //      new permaPlan();
+    }
+
+    public generateFSM(repeater doThisImmediately)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+    }
+
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2, step3);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1, step2, step3, step4);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        repeatingPlans.Add(repeatWithTargetPickerTest);
+
+    }
+
+    public generateFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+
+        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+
+        switchBoard[switchCondition] = otherFSM;
+    }
+
+    public generateFSM(repeater doThisImmediately, condition switchCondition, FSM doThisAfterSwitchCondition)
+    {
+        //justDoThisForNow = doThisImmediately;
+
+        repeatingPlans.Add(doThisImmediately);
+
+
+        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+
+        switchBoard[switchCondition] = doThisAfterSwitchCondition;
+    }
+
+
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+
+
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+
+}
+
+
+
+public class FSMcomponent : MonoBehaviour, IupdateCallable
+{
+    //public FSM theFSM;
+    public List<FSM> theFSMList;// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+
+    public List<IupdateCallable> currentUpdateList { get; set; }
+    public void Update()
+    {
+
+        //Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
+    }
+
+    public void callableUpdate()
+    {
+        //Debug.Log("============================     callableUpdate()        =================");
+        //Debug.Log("this.gameObject:  " + this.gameObject);
+        foreach (FSM theFSM in theFSMList)
+        {
+            //Debug.Log("theFSM:  "+ theFSM);
+            //theFSM = theFSM.doAFrame();  //will this be an issue?  or only if i add/remove items from list?
+        }
+
+        for (int index = 0; index < theFSMList.Count; index++)
+        {
+            theFSMList[index] = theFSMList[index].doAFrame();
+        }
+
+    }
+}
+
+public class reactivationOfNavMeshAgent : MonoBehaviour
+{
+    //a quick fix for "reposition errors", where things don't spawn in correct location due to nav mesh agent, somehow
     void Awake()
     {
         this.gameObject.GetComponent<NavMeshAgent>().enabled = false;
@@ -561,224 +1198,6 @@ public class reactivationOfNavMeshAgent : MonoBehaviour
         Destroy(this);
     }
 }
-
-
-
-
-
-
-
-public class TESTsoldierGenerator : objectGen
-{
-    tagging2.tag2 team;
-    private Vector3 thePosition;
-
-    public TESTsoldierGenerator(tagging2.tag2 theTeamIn, Vector3 thePositionIn = new Vector3())
-    {
-        this.team = theTeamIn;
-        thePosition = thePositionIn;// (1,0,100);
-    }
-
-    public GameObject generate()
-    {
-        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCylinderPrefab, thePosition); //repository2.Instantiate(repository2.singleton.placeHolderCylinderPrefab, thePosition, Quaternion.identity);
-        //GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
-
-        newObj.AddComponent<NavMeshAgent>();
-
-        return newObj;
-        /*
-
-
-        //newObj.transform.localScale = new Vector3(1, 0.5f, 1);
-        //torso.transform.localScale = new Vector3(1, 0.5f, 1); 
-        torso.transform.SetParent(newObj.transform, false);
-        torso.transform.position += new Vector3(0, 1f, 0);
-
-
-        Renderer theRenderer = newObj.GetComponent<Renderer>();
-        theRenderer.material.color = tagging2.singleton.teamColors[team];
-
-        GameObject.Destroy(newObj.GetComponent<Collider>());
-        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
-        hitbox.size += new Vector3(0, 1f, 0);
-        hitbox.center += new Vector3(0, 0.5f, 0);
-        //hitbox.transform.localScale += new Vector3(0, 1f, 0);
-        //newObj.transform.localScale += new Vector3(0, -1f, 0);
-
-        genGen.singleton.ensureVirtualGamePad(newObj);
-
-
-
-        tagging2.singleton.addTag(newObj, team);
-        playable2 thePlayable = newObj.AddComponent<playable2>();
-        thePlayable.theNavMeshTransform = newObj.transform;
-        thePlayable.theHorizontalRotationTransform = torso.transform;
-        thePlayable.initializeEnactionPoint1();
-        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
-        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform, true);
-
-        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
-        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
-
-        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
-        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
-        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
-
-
-        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
-        genGen.singleton.makeInteractionsBody4(thePlayable);
-
-
-        inventory1 theirInventory = newObj.AddComponent<inventory1>();
-        //theirInventory.startingItem = genGen.singleton.returnGun1(newObj.transform.position);
-        GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
-        theirInventory.inventoryItems.Add(gun);
-        interactionCreator.singleton.dockXToY(gun, newObj);
-
-
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new TESTbasicSoldierFSM(newObj, team).returnIt();
-        */
-
-
-
-
-
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-public class TESTbasicSoldierFSM : FSM
-{
-
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
-
-    float combatRange = 40f;
-
-    public TESTbasicSoldierFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
-    {
-
-
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
-
-    }
-
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
-    {
-        FSM idle = new generateFSM();
-
-        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
-        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
-
-
-        targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
-
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, combatRange).returnIt());
-
-
-
-        idle.addSwitchAndReverse(switchToAttack, combat1);
-
-
-
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
-
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
-
-
-
-        idle.name = "hands, idle";
-        combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
-        return idle; ;
-    }
-
-    private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
-    {
-        objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new hasVirtualGamepad(),
-            new reverseCriteria(new objectHasTag(team)),
-            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 200),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        return theCriteria;
-    }
-
-    private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
-    {
-
-        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
-
-        return theAttackTargetPicker;
-    }
-
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
-    {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
-
-
-
-
-        objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new hasVirtualGamepad(),
-            new reverseCriteria(new objectHasTag(team)),
-            new lineOfSight(theObjectDoingTheEnaction),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-
-        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
-
-        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
-        targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
-
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
-
-        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
-
-
-        wander.addSwitchAndReverse(switchToAttack, combat1);
-
-        wander.name = "feet, wander";
-        combat1.name = "feet, combat1";
-        return wander;
-    }
-
-
-
-
-    public List<FSM> returnIt()
-    {
-        return theFSMList;
-    }
-
-
-
-}
-
-
-
-
-
 
 
 
@@ -1049,7 +1468,7 @@ public class predatorFSMGen2 : FSM
         killPrey.name = "hands, killPrey";
         //combat1.name = "hands, combat1";
         //equipGun.theFSM.name = "hands, equipGun";
-        return idle; ;
+        return idle;
     }
 
     private FSM killPreyFSM()
@@ -1909,6 +2328,41 @@ public class genPrefabAndModify : objectGen
     */
 }
 
+public class genObjectAndModify : objectGen
+{
+    objectGen theObjectGen;
+
+    List<objectModifier> theModifiers = new List<objectModifier>();
+
+
+    public genObjectAndModify(objectGen theObjectGenIn, objectModifier[] modifiers)
+    {
+        theObjectGen = theObjectGenIn;
+
+        foreach (objectModifier mod in modifiers)
+        {
+            theModifiers.Add(mod);
+        }
+    }
+    public genObjectAndModify(objectGen theObjectGenIn)
+    {
+        theObjectGen = theObjectGenIn;
+    }
+
+
+    public GameObject generate()
+    {
+        GameObject theObject = theObjectGen.generate();
+
+        foreach (objectModifier modifier in theModifiers)
+        {
+            modifier.modify(theObject);
+        }
+
+        return theObject;
+    }
+}
+
 
 /*
 public class paintByNumbersNPCGenerator1 : objectGen
@@ -2133,502 +2587,6 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
 
 
 
-
-
-
-public abstract class bodyGen1
-{
-
-
-    public abstract GameObject makeObject(Vector3 thePosition);
-
-}
-
-
-public abstract class behaviorSet
-{
-    List<FSM> theFSMs = new List<FSM>();
-
-    public void addBehaviorSet(GameObject theObject)
-    {
-        genGen.singleton.ensureVirtualGamePad(theObject);
-
-        FSMcomponent theFSMcomponent = theObject.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = theFSMs;
-    }
-
-}
-
-
-
-
-
-/*
-
-public class bodyWithTorso1 : bodyGen1
-{
-
-    public override GameObject makeObject(Vector3 thePosition)
-    {
-        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
-        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
-
-        return newObj;
-    }
-
-
-    private void newTorso(GameObject newObj, GameObject torso)
-    {
-        //torso.transform.localScale = new Vector3(width, height / 2, width);
-
-
-        //torso.transform.position += new Vector3(0, (height / 2) - 1, 0);
-        torso.transform.position += new Vector3(0, 1f, 0);
-
-        Renderer theRenderer = newObj.GetComponent<Renderer>();
-        theRenderer.material.color = tagging2.singleton.teamColors[team];
-        Renderer theRenderer2 = torso.GetComponent<Renderer>();
-        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
-
-        GameObject.Destroy(newObj.GetComponent<Collider>());
-        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
-        //hitbox.size += new Vector3(width-1, height-1, width-1);
-        //hitbox.center += new Vector3(0, (height-1)/2, 0);
-        hitbox.size += new Vector3(0, 1f, 0);
-        hitbox.center += new Vector3(0, 0.5f, 0);
-
-
-        torso.transform.SetParent(newObj.transform, false);
-        newObj.transform.localScale = new Vector3(width, (height - 1) / 2, width);
-        //newObj.transform.position += new Vector3(0, ((height - 1) / 2), 0);
-    }
-
-    private void oldTorso(GameObject newObj, GameObject torso)
-    {
-        torso.transform.SetParent(newObj.transform, false);
-        torso.transform.position += new Vector3(0, 1f, 0);
-
-
-        Renderer theRenderer = newObj.GetComponent<Renderer>();
-        theRenderer.material.color = tagging2.singleton.teamColors[team];
-
-        GameObject.Destroy(newObj.GetComponent<Collider>());
-        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
-        hitbox.size += new Vector3(0, 1f, 0);
-        hitbox.center += new Vector3(0, 0.5f, 0);
-    }
-
-
-    public void soldier1(GameObject newObj, GameObject torso)
-    {
-
-        tagging2.singleton.addTag(newObj, team);
-        playable2 thePlayable = newObj.AddComponent<playable2>();
-        thePlayable.theNavMeshTransform = newObj.transform;
-        thePlayable.theHorizontalRotationTransform = torso.transform;
-        thePlayable.initializeEnactionPoint1();
-        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
-        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform, true);
-
-        thePlayable.dictOfIvariables[numericalVariable.health] = health;
-        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
-
-        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
-        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
-        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
-
-
-        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
-        genGen.singleton.makeInteractionsBody4(thePlayable);
-
-
-
-        inventory1 theirInventory = newObj.AddComponent<inventory1>();
-        //GameObject gun = weapon.generate();
-        //          GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);
-        //          theirInventory.inventoryItems.Add(gun);
-        //          interactionCreator.singleton.dockXToY(gun, newObj);
-
-    }
-}
-
-
-public class behaviorSetForSoldier1 : behaviorSet
-{
-
-    public void soldier1()
-    {
-        new basicPaintByNumbersSoldierFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
-
-    }
-}
-
-
-
-
-public class animalBody1 : bodyGen1
-{
-
-    public override GameObject makeObject(Vector3 thePosition)
-    {
-        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, thePosition, Quaternion.identity);
-
-        return newObj;
-    }
-
-
-
-
-    GameObject parent;
-    stuffType stuffTypeX;
-    float scale = 1f;
-
-    public adhocAnimal1Gen(GameObject parentIn, stuffType stuffTypeXIn, float scaleIn = 1f)
-    {
-        parent = parentIn;
-        stuffTypeX = stuffTypeXIn;
-        scale = scaleIn;
-    }
-
-    public GameObject generate()
-    {
-        return returnBasicAnimal1(parent.transform.position, stuffTypeX, scale);
-    }
-
-
-    internal void spawn(Vector3 positionInput)
-    {
-        GameObject theObject = generate();
-
-        theObject.transform.position = positionInput;
-    }
-
-
-
-
-
-    public GameObject returnBasicAnimal1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
-    {
-        GameObject newObj = returnArrowForward(where, scale);
-
-        genGen.singleton.ensureVirtualGamePad(newObj);
-
-        addAnimalBody1ToObject(newObj);
-        genGen.singleton.addArrowForward(newObj, 1f, 0f, 1.2f);
-        //wander1.addWander1(newObj);
-        //grabGun1.addGrabGun1(newObj, interType.peircing);
-
-        //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
-
-        //Debug.Log("?????????????????????????????????????????????????????");
-        animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
-        //Debug.Log("?????????????????????    2   ??????????????????????????");
-        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
-
-
-        newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
-
-        //Debug.Log("????????????????????      3   ???????????????????????");
-        //grabStuffStuff.addGrabStuffStuff(newObj, stuffTypeX);
-
-        return newObj;
-    }
-
-
-
-
-    public GameObject returnArrowForward(Vector3 where, float scale = 1f)
-    {
-
-        GameObject newObj = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.placeHolderCubePrefab, where);// Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
-        //      newObj.transform.localScale = new Vector3(128, 1, 8);
-        newObj.transform.localScale = scale * newObj.transform.localScale;
-
-        return newObj;
-    }
-
-
-    public void addAnimalBody1ToObject(GameObject newObj)
-    {
-        playable2 thePlayable = newObj.AddComponent<playable2>();
-
-
-        //thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
-        //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
-
-        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
-        //thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
-        thePlayable.initializeEnactionPoint1();
-        //addArrowForward(thePlayable.enactionPoint1);
-        //genGen.singleton.addCube(thePlayable.enactionPoint1, 0.1f);
-        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
-        //addArrowForward(newObj, 5f, 0f, 1.2f);
-        genGen.singleton.makeBasicEnactions(thePlayable);
-        genGen.singleton.makeInteractionsBody4(thePlayable);
-
-
-        inventory1 theirInventory = newObj.AddComponent<inventory1>();
-    }
-
-
-    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-
-
-
-
-        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
-
-        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
-
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
-
-
-
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
-
-        animalFSM repro = repro1(theObjectDoingTheEnaction, stuffX);
-
-
-
-        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
-
-
-        //objectCriteria theCriteria = new objectMeetsAllCriteria(
-            //new objectHasTag(tagging2.tag2.threat1),
-            //new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 30),
-            //new stickyTrueCriteria(new proximityCriteriaBool(theObjectDoingTheEnaction, 40)),
-            //new stickyTrueCriteria(new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform), 90)
-            //);
-        
-        objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new objectHasTag(tagging2.tag2.threat1),
-            new lineOfSight(theObjectDoingTheEnaction),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new excludeX(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
-
-
-
-        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
-
-        condition switchToFlee = new stickyCondition(
-            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
-
-
-
-        objectCriteria reproCriteria = new objectMeetsAllCriteria(
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 40)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theReproSet = new setOfAllObjectThatMeetCriteria(
-            new excludeX(new setOfAllNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction),
-            reproCriteria);
-
-        condition switchCondition3 = new reverseCondition(
-            new isThereAtLeastOneObjectInSet(theReproSet));
-
-
-        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
-        theFSM.addSwitchAndReverse(switchCondition3, repro);
-        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
-        getFood.addSwitch(switchCondition3, repro);
-
-
-
-
-
-
-
-        return theFSM;
-    }
-
-    animalFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-
-
-        Ieffect e1 = new generateObject(new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));//new adhocAnimal1Gen();
-
-        enactEffect theEnaction = enactEffect.addEnactEffectAndReturn(theObjectDoingTheEnaction, e1);//; theEnaction = theObjectToAddItTo.AddComponent<enactEffect>();
-
-
-        singleEXE step1 = (singleEXE)theEnaction.standardEXEconversion();
-        step1.untilListFinished();
-
-        //singleEXE step1 = new boolEXE2(theEnaction);
-
-        animalFSM repro = new animalFSM(theObjectDoingTheEnaction, step1);
-
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
-
-
-
-
-
-        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
-
-        //gahhhhhhhhh, need to be able to cut through this garbage?
-        //repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE(theEnaction);
-
-
-
-
-        return repro;
-    }
-
-    private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
-    {
-        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
-        permaPlan2 perma1 = new permaPlan2(step1);
-        //plan = new depletablePlan(step1, step2);
-        //plan = perma1.convertToDepletable();
-        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction));
-
-        return repeatWithTargetPickerTest;
-    }
-
-    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        //perma1 = new permaPlan2(step1);
-
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
-
-
-        return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
-    }
-
-
-
-
-
-
-}
-
-
-public class behaviorSetForHerbivore1 : behaviorSet
-{
-
-    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
-
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
-        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
-
-        objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new objectHasTag(tagging2.tag2.threat1),
-            new lineOfSight(theObjectDoingTheEnaction),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new excludeX(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
-
-
-
-        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
-
-        condition switchToFlee = new stickyCondition(
-            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
-
-
-        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
-        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
-
-
-
-
-
-
-
-
-        return theFSM;
-    }
-
-}
-
-public class behaviorSetForPredater1 : behaviorSet
-{
-
-    public GameObject returnBasicPredator1(Vector3 where, stuffType stuffTypeX, float scale = 1f)
-    {
-        GameObject newObj = returnBasicAnimal1(where, stuffTypeX, scale);
-
-        tagging2.singleton.addTag(newObj, tagging2.tag2.threat1);
-
-        playable2 thePlayable = newObj.GetComponent<playable2>();
-        //Debug.Log("?????????????????????????????????????????????????????");
-        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
-            new interactionInfo(interType.melee));
-
-
-
-        //genGen.singleton.ensureVirtualGamePad(newObj);
-        animalUpdate theUpdate = newObj.GetComponent<animalUpdate>();
-        theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
-
-        //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
-
-
-        MeshRenderer theRenderer = newObj.GetComponent<MeshRenderer>();
-        theRenderer.material.color = new Color(1f, 0f, 0f);
-
-
-        NavMeshAgent navMeshAgent = newObj.GetComponent<NavMeshAgent>();
-        navMeshAgent.speed += 1.7f;
-
-        return newObj;
-    }
-
-
-    private animalFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-
-
-        animalFSM wander = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
-        animalFSM killPrey = new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(theObjectDoingTheEnaction, numericalVariable.health, interType.melee));
-
-
-        condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
-
-        condition switchCondition2 = new canSeeNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health);
-
-
-        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        wander.addSwitchAndReverse(new stickyCondition(switchCondition2, 90), killPrey);
-
-        //killPrey.addSwitch(new stickyCondition(switchCondition1, 90), grabMeat);
-
-
-        return wander;
-    }
-
-}
-
-
-
-
-
-
-
-*/
 
 
 
@@ -2905,299 +2863,6 @@ public class randomWanderRepeatable
 }
 
 
-
-
-
-/*
-public class paintByNumbersAnimalFull1: objectGen
-{
-    GameObject theObjectDoingTheEnactions;
-
-
-
-
-    public paintByNumbersAnimalFull1(GameObject parent, stuffStuff foodType, float speed, int health, int minDamageLevel, int maxDamageLevel, float sightRange)
-    {
-
-    }
-
-    public GameObject generate()
-    {
-        throw new NotImplementedException();
-    }
-
-
-
-
-
-
-
-
-
-
-    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-
-
-
-
-        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
-
-        condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
-
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
-
-
-
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
-
-        animalFSM repro = repro1(theObjectDoingTheEnaction, stuffX);
-
-
-
-        //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
-
-        objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new objectHasTag(tagging2.tag2.threat1),
-            new lineOfSight(theObjectDoingTheEnaction),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new excludeX(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theObjectDoingTheEnaction), theCriteria);
-
-
-
-        //condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
-
-        condition switchToFlee = new stickyCondition(
-            new isThereAtLeastOneObjectInSet(theFleeFromObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
-
-
-
-        objectCriteria reproCriteria = new objectMeetsAllCriteria(
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 40)
-            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
-            );
-
-        //objectSetGrabber theFleeFromObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        objectSetGrabber theReproSet = new setOfAllObjectThatMeetCriteria(
-            new excludeX(new setOfAllNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction),
-            reproCriteria);
-
-        condition switchCondition3 = new reverseCondition(
-            new isThereAtLeastOneObjectInSet(theReproSet));
-
-
-        //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
-        theFSM.addSwitchAndReverse(switchCondition3, repro);
-        getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
-        getFood.addSwitch(switchCondition3, repro);
-
-
-
-
-        return theFSM;
-    }
-
-    animalFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-
-
-        Ieffect e1 = new generateObject(new adhocAnimal1Gen(theObjectDoingTheEnaction, stuffX));//new adhocAnimal1Gen();
-
-        enactEffect theEnaction = enactEffect.addEnactEffectAndReturn(theObjectDoingTheEnaction, e1);//; theEnaction = theObjectToAddItTo.AddComponent<enactEffect>();
-
-
-        singleEXE step1 = (singleEXE)theEnaction.standardEXEconversion();
-        step1.untilListFinished();
-
-        //singleEXE step1 = new boolEXE2(theEnaction);
-
-        animalFSM repro = new animalFSM(theObjectDoingTheEnaction, step1);
-
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
-
-
-
-
-
-        //enactEffect theEnaction = genGen.singleton.addAdhocReproduction1(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX));
-
-        //gahhhhhhhhh, need to be able to cut through this garbage?
-        //repeater newRep = new agnostRepeater(new permaPlan2(new singleEXE(theEnaction);
-
-
-
-
-        return repro;
-    }
-
-    private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
-    {
-        singleEXE step1 = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnaction, patternScript2.singleton.randomNearbyVector(theObjectDoingTheEnaction.transform.position));
-        permaPlan2 perma1 = new permaPlan2(step1);
-        //plan = new depletablePlan(step1, step2);
-        //plan = perma1.convertToDepletable();
-        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction));
-
-        return repeatWithTargetPickerTest;
-    }
-
-    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX)
-    {
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-        //perma1 = new permaPlan2(step1);
-
-        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
-
-
-        return returnTheRepeatTargetThing();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //repeaters
-
-    public repeatWithTargetPicker returnTheGoToThing()
-    {
-
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-
-
-        //targetPicker getter = new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab);
-        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
-            new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnactions),
-            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
-            ));
-
-        //USING FAKE INPUTS FOR TARGETS
-        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, getter.pickNext().realPositionOfTarget()));
-        //plan = new depletablePlan(step1, step2);
-        //plan = perma1.convertToDepletable();
-        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, getter);
-
-
-        return repeatWithTargetPickerTest;
-    }
-
-    public repeatWithTargetPicker returnTheRepeatTargetThing()
-    {
-        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
-
-
-
-        //USING FAKE INPUTS FOR TARGETS
-        permaPlan2 perma1 = new permaPlan2(genGen.singleton.makeNavAgentPlanEXE(
-            theObjectDoingTheEnactions, theObjectDoingTheEnactions.transform.position), 
-            aimTargetPlan2(theObjectDoingTheEnactions), fireHitscanClick());
-        //plan = new depletablePlan(step1, step2);
-        //plan = perma1.convertToDepletable();
-        //simpleRepeat1 = new simpleExactRepeatOfPerma(perma1);
-        //repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(theObjectDoingTheEnactions));
-
-        targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
-            new setOfAllObjectThatMeetCriteria(new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab),
-            new objectVisibleInFOV(theObjectDoingTheEnactions.transform)
-            ));
-
-        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1,
-            getter//new pickNextVisibleStuffStuff(theObjectDoingTheEnactions, theStuffTypeToGrab)
-            );
-
-
-        return repeatWithTargetPickerTest;
-    }
-
-
-
-
-
-
-
-
-    //planEXEs
-
-    private permaPlan2 goGrabPlan3(stuffType theStuffTypeX)
-    {
-        objectSetGrabber set = new setOfAllNearbyStuffStuff(theObjectDoingTheEnactions, theStuffTypeX);
-
-
-        singleEXE goTo = genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions, set.grab(), 1.8f);
-        singleEXE aim = aimTargetPlan2(theObjectDoingTheEnactions, set.grab());
-
-
-        hitscanEnactor theHitscanEnactor = new find().grabHitscanEnaction(theObjectDoingTheEnactions, interType.standardClick);
-        Debug.Assert(theHitscanEnactor != null);
-        singleEXE hitscanEXE = (singleEXE)theHitscanEnactor.standardEXEconversion();
-
-
-        permaPlan2 perma = new permaPlan2(goTo,aim,hitscanEXE);
-
-        return perma;
-    }
-
-
-
-
-
-
-
-
-    //singles
-
-    private singleEXE aimTargetPlan2(GameObject theEnactor, GameObject target)
-    {
-        aimTarget testE1 = theEnactor.GetComponent<aimTarget>();
-
-        singleEXE exe1 = (singleEXE)testE1.toEXE(target);
-        exe1.atLeastOnce();
-
-        return exe1;
-    }
-
-    public singleEXE fireHitscanClick(GameObject theEnactor)
-    {
-
-        hitscanEnactor theHitscanEnactor = new find().grabHitscanEnaction(theEnactor, interType.standardClick); //hitscanClickPlan(interType.standardClick, target);
-
-        singleEXE theSingle = (singleEXE)theHitscanEnactor.standardEXEconversion();
-        theSingle.untilListFinished();
-
-        return theSingle;
-    }
-
-}
-
-*/
-
-
 public class paintByNumbersAnimalBody1 : objectGen
 {
     GameObject generatedObject;
@@ -3212,7 +2877,7 @@ public class paintByNumbersAnimalBody1 : objectGen
 
     public paintByNumbersAnimalBody1(GameObject parentIn, stuffStuff foodTypeIn, float speedIn, int healthIn, int minDamageLevelIn, int maxDamageLevelIn, float sightRangeIn)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
 
@@ -3279,244 +2944,6 @@ public class paintByNumbersAnimalBody1 : objectGen
 
 
 
-public class FSM
-{
-    public string name;
-    //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
-    internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
-
-    internal List<repeater> repeatingPlans = new List<repeater>();
-
-
-
-    public FSM doAFrame()
-    {
-        //Debug.Log("the name of this FSM:  " + name);
-
-        //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
-
-        FSM toSwitchTo = null;
-
-        toSwitchTo = firstMetSwitchtCondition();
-        if (toSwitchTo != null)
-        {
-            //Debug.Log("switch");
-            //Debug.Log("toSwitchTo:  " + toSwitchTo);
-            //Debug.Log("(toSwitchTo==this):  " + (toSwitchTo==this));
-            toSwitchTo.refillAllRepeaters();
-            return toSwitchTo;
-        }
-
-
-
-
-
-        //Debug.Log("repeatingPlans.count:  " + repeatingPlans.Count);
-        foreach (repeater plan in repeatingPlans)
-        {
-            //Debug.Log("plan:  " + plan);
-            plan.doThisThing();
-        }
-
-
-
-
-        return this;
-    }
-
-
-    public void refillAllRepeaters()
-    {
-        foreach (repeater plan in repeatingPlans)
-        {
-            plan.refill();
-        }
-    }
-
-
-    private FSM firstMetSwitchtCondition()
-    {
-        foreach (condition thisCondition in switchBoard.Keys)
-        {
-            //Debug.Log(".................thisCondition:  " + thisCondition + " " + thisCondition.GetHashCode());
-            //Debug.Log("thisCondition.asTextSHORT():  " + thisCondition.asTextSHORT() + " " + thisCondition.GetHashCode());
-            //Debug.Log("thisCondition.asText():  " + thisCondition.asText() + " " + thisCondition.GetHashCode());
-            //Debug.Log("thisCondition.asTextBaseOnly():  " + thisCondition.asTextBaseOnly() + " " + thisCondition.GetHashCode());
-            if (thisCondition.met())
-            {
-                //Debug.Log("thisCondition is met:  " + thisCondition+" "+thisCondition.GetHashCode());
-                return switchBoard[thisCondition];
-            }
-        }
-
-        return null;
-    }
-
-
-
-
-
-
-
-    public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
-
-        switchBoard[switchCondition] = otherFSM;
-    }
-    public void addSwitch(condition switchCondition, FSM otherFSM)
-    {
-        switchBoard[switchCondition] = otherFSM;
-    }
-
-    public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
-
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
-    }
-    public void addSwitchAndReverse(condition switchCondition, FSM otherFSM)
-    {
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
-    }
-
-
-    public string baseEnactionsAsText()
-    {
-        string newString = "";
-        //newString += "the base enactions of this FSM:  ";
-        newString += "[";
-        foreach (repeater thisRep in repeatingPlans)
-        {
-
-            //newString += thisRep.thePerma.printBaseEnactions();
-            //Debug.Assert(thisRep != null);
-            //Debug.Assert(thisRep.thePerma != null);
-            newString += thisRep.baseEnactionsAsText();
-        }
-
-        newString += "]";
-        //Debug.Log(newString);
-        return newString;
-    }
-}
-
-public class generateFSM:FSM
-{
-
-    public generateFSM()
-    {
-        //      new permaPlan();
-    }
-
-    public generateFSM(repeater doThisImmediately)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-    }
-
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        repeatingPlans.Add(repeatWithTargetPickerTest);
-
-    }
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1, step2);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        repeatingPlans.Add(repeatWithTargetPickerTest);
-
-    }
-
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1, step2, step3);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        repeatingPlans.Add(repeatWithTargetPickerTest);
-
-    }
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1, step2, step3, step4);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        repeatingPlans.Add(repeatWithTargetPickerTest);
-
-    }
-
-    public generateFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-
-
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
-
-        switchBoard[switchCondition] = otherFSM;
-    }
-
-    public generateFSM(repeater doThisImmediately, condition switchCondition, FSM doThisAfterSwitchCondition)
-    {
-        //justDoThisForNow = doThisImmediately;
-
-        repeatingPlans.Add(doThisImmediately);
-
-
-        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
-
-        switchBoard[switchCondition] = doThisAfterSwitchCondition;
-    }
-
-
-
-
-
-    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
-    {
-        permaPlan2 perma1 = new permaPlan2(step1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
-        return repeatWithTargetPickerTest;
-    }
-
-    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
-    {
-        permaPlan2 perma1 = new permaPlan2(exe1);
-        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
-        return repeatWithTargetPickerTest;
-    }
-
-
-
-
-
-
-    //single nav!  [should be standard conversion???????]
-    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
-    {
-        //give it some room so they don't step on object they want to arrive at!
-        //just do their navmesh agent enaction.
-        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
-
-
-        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);
-        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
-        theEXE.endConditions.Add(condition);
-
-        return theEXE;
-    }
-
-}
-
-
 
 
 
@@ -3538,6 +2965,137 @@ public class multiModify : objectModifier
         }
     }
 }
+
+
+public class modifyScale : objectModifier
+{
+    float xScale;
+    float yScale;
+    float zScale;
+
+    public modifyScale(float xScaleIn, float yScaleIn, float zScaleIn)
+    {
+        xScale = xScaleIn;
+        yScale = yScaleIn;
+        zScale = zScaleIn;
+    }
+
+    public void modify(GameObject theObject)
+    {
+        theObject.transform.localScale = new Vector3(xScale, yScale, zScale);
+    }
+}
+
+
+public class collisionInteractionMod : objectModifier
+{
+    private interType theIntertype;
+    float magnitudeOfInteraction;
+    int level;
+
+    public collisionInteractionMod(interType theIntertypeIn, float magnitudeOfInteractionIn, int levelIn)
+    {
+        this.theIntertype = theIntertypeIn;
+        magnitudeOfInteraction = magnitudeOfInteractionIn;
+        this.level = levelIn;
+    }
+
+    public void modify(GameObject theObject)
+    {
+        colliderInteractor2.addColliderInteractor2(theObject, theIntertype, magnitudeOfInteraction,level);
+
+    }
+}
+
+public class simpleMovingMod : objectModifier
+{
+    float speed;
+    bool sdOnCollision = true;
+    int timeUntilSelfDestruct;
+
+    //hmmm, what about direction?  just go FORWARD, then match rotation to that of the gun when firing it?
+    public simpleMovingMod(float speedIn, bool sdOnCollisionIn = true, int timeUntilSelfDestructIn = 99)
+    {
+        //Debug.Log("speedIn:  " + speedIn);
+        speed = speedIn;
+        sdOnCollision = sdOnCollisionIn;
+        timeUntilSelfDestruct = timeUntilSelfDestructIn;
+    }
+
+    public void modify(GameObject theObject)
+    {
+        //Debug.Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>speed:  " + speed);
+        projectile2.addProjectile2(theObject,speed,timeUntilSelfDestruct,sdOnCollision);
+    }
+}
+
+
+
+
+public class projectile2 : MonoBehaviour
+{
+    float speed = 0f;
+    bool selfDestructOnCollision = true;
+    
+
+    public static void addProjectile2(GameObject theObject, float speedIn, int timeUntilSelfDestructIn, bool sdOnCollisionIn = true)//IEnactaBool enactingThis)//(GameObject theObject, int timeUntilSelfDestruct, Vector3 direction = new Vector3(), bool sdOnCollision = true, bool explodeOnDestroy = false)//, IEnactaBool enactingThis)
+    {
+        //use like THIS:
+        //projectile2.addProjectile1(x, y, z);
+
+        projectile2 projectileScript = theObject.AddComponent<projectile2>();
+
+        //Debug.Log("speedIn:  " + speedIn);
+        projectileScript.speed = speedIn;
+
+        projectileScript.selfDestructOnCollision = sdOnCollisionIn;
+        selfDestructScript1 killScript = theObject.GetComponent<selfDestructScript1>();
+        killScript.timeUntilSelfDestruct = timeUntilSelfDestructIn;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        //Debug.Log("speed:  " + speed);
+        this.gameObject.transform.position = this.gameObject.transform.position + this.gameObject.transform.forward * speed;
+        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //Debug.Log("projectile collision self destruct????????" + Time.fixedTime + this.GetInstanceID());
+        //technically, this is an interaction.  but whatever?  just put it here.
+        //Debug.Log("other.gameObject.tag:  "+ other.gameObject.tag);
+
+
+        if (selfDestructOnCollision == false) { return; }
+        if (other.CompareTag("aMapZone")) { return; }//other.CompareTag(String tagName)  //https://stackoverflow.com/questions/46248022/not-destroying-objects-fast-enough-and-causing-another-collision
+
+
+
+        Destroy(this.gameObject);
+
+        /*
+        if (selfDestructOnCollision && other.gameObject.tag != "aMapZone")
+        {
+            //selfDestructOnCollision = false;
+            //enabled = false;
+            //Debug.Log("YES projectile collision self destruct!!!" + Time.fixedTime + this.GetInstanceID());
+            Destroy(this.gameObject);
+        }
+        else
+        {
+
+            //Debug.Log("no  " + Time.fixedTime + this.GetInstanceID());
+        }
+        */
+    }
+
+}
+
+
+
+
 
 
 

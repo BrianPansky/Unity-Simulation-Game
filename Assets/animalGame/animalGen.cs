@@ -1505,7 +1505,7 @@ public class repeatWithTargetPicker:repeater
     {
         this.thePerma = thePermaIn;
         theTargetPicker = theTargetPickerIn;
-        theDepletablePlan = convertToDepletableWithNextTarget();
+        //theDepletablePlan = convertToDepletableWithNextTarget();
     }
 
     public override void doThisThing()
@@ -1521,7 +1521,7 @@ public class repeatWithTargetPicker:repeater
     private void refillIfNeeded()
     {
         //Debug.Log("refillIfNeeded()");
-        if (theDepletablePlan.endConditionsMet())
+        if (theDepletablePlan == null || theDepletablePlan.endConditionsMet())
         {
             //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!endConditionsMet() == true");
             refill();
@@ -1548,8 +1548,11 @@ public class repeatWithTargetPicker:repeater
         //Debug.Log("newTarget.targetPosition():  " + newTarget.targetPosition());
         //Debug.Log("newTarget.GetHashCode():  " + newTarget.GetHashCode());
 
-        //Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
 
+        Debug.Assert(thePerma != null);
+        Debug.Assert(thePerma.convertToDepletable() != null);
+        Debug.Assert(thePerma.convertToDepletable().thePlan != null);
+        //Debug.Log("thePerma.convertToDepletable().thePlan.Count:  " + thePerma.convertToDepletable().thePlan.Count);
         foreach (singleEXE thisOne in thePerma.convertToDepletable().thePlan)
         {
             //thisOne.theEnaction.targ//ohhhhhhhhh, not all enactions HAVE a target, i see.....how to handle....

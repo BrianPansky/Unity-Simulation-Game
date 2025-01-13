@@ -194,6 +194,11 @@ public abstract class IEnactaBool: enaction
         enact(new inputData());
     }
 
+    public override void enact(inputData theInput)
+    {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
 
 
     public override planEXE2 toEXE(GameObject target)
@@ -729,7 +734,7 @@ public class hitscanEnactor: rangedEnaction
 
 public class enactEffect : IEnactaBool
 {
-    Ieffect theEffect;
+    public Ieffect theEffect;
 
 
 
@@ -750,11 +755,6 @@ public class enactEffect : IEnactaBool
         return newEnactEffect;
     }
 
-    public override void enact(inputData theInput)
-    {
-        enactJustThisIndividualEnaction(theInput);
-        enactAllLinkedEnactionAtoms(theInput);
-    }
 
     public override void enactJustThisIndividualEnaction(inputData theInput)
     {
@@ -762,6 +762,58 @@ public class enactEffect : IEnactaBool
     }
 
 }
+
+public class createAuthoredObject : IEnactaBool
+{
+    objectGen theGenerator;
+    agnosticTargetCalc theLocation;
+    
+    public static createAuthoredObject addThisEnactionAndReturn(GameObject theObjectToAddItTo, objectGen theObjectGeneratorIn, GameObject enactionPointIn)
+    {
+        createAuthoredObject theEnaction = theObjectToAddItTo.AddComponent<createAuthoredObject>();
+        theEnaction.theGenerator = theObjectGeneratorIn;
+        theEnaction.theLocation = new agnosticTargetCalc(enactionPointIn);
+
+        return theEnaction;
+    }
+    public static createAuthoredObject addThisEnactionAndReturn(GameObject theObjectToAddItTo, objectGen theObjectGeneratorIn, Vector3 spawnPointIn)
+    {
+        createAuthoredObject theEnaction = theObjectToAddItTo.AddComponent<createAuthoredObject>();
+        theEnaction.theGenerator = theObjectGeneratorIn;
+        theEnaction.theLocation = new agnosticTargetCalc(spawnPointIn);
+
+        return theEnaction;
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        GameObject theObject = theGenerator.generate();
+        theObject.transform.position = theLocation.realPositionOfTarget();
+        authorComponent theAuthorComponent = theObject.AddComponent<authorComponent>();
+        theAuthorComponent.author = this.enactionAuthor;
+    }
+}
+
+public class issueRTSCommand : IEnactaBool
+{
+    rtsModule theRTSModuleOfthisCommandGiver;
+
+    public static issueRTSCommand addThisEnactionAndReturn(GameObject theObjectToAddItTo)
+    {
+        issueRTSCommand theEnaction = theObjectToAddItTo.AddComponent<issueRTSCommand>();
+        theEnaction.theRTSModuleOfthisCommandGiver = theObjectToAddItTo.GetComponent<rtsModule>();
+
+        return theEnaction;
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        theRTSModuleOfthisCommandGiver.giveCurrentOrdersToCurrentlySelectedUnits();
+    }
+}
+
+
+
 
 
 /*

@@ -39,10 +39,16 @@ public class tagging2 : MonoBehaviour
         threat1,
         herbivore,
         predator,
+        militaryBase,
+        teamLeader,
         team1,
         team2,
         team3,
-        team4 //just use integers for teams????
+        team4,
+        team5,
+        team6,
+        team7,
+        team8 //just use integers for teams????
     }
 
 
@@ -58,6 +64,10 @@ public class tagging2 : MonoBehaviour
         teamColors[tag2.team2] = Color.red;
         teamColors[tag2.team3] = Color.green;
         teamColors[tag2.team4] = Color.blue;
+        teamColors[tag2.team5] = Color.black;
+        teamColors[tag2.team6] = Color.cyan;
+        teamColors[tag2.team7] = Color.yellow;
+        teamColors[tag2.team8] = Color.magenta;
     }
 
     void singletonify()
@@ -374,6 +384,24 @@ public class tagging2 : MonoBehaviour
 
         return newList;
     }
+
+    
+        public List<objectIdPair> listInIDPairFormat(List<GameObject> objectFormatList)
+    {
+        List<objectIdPair> newList = new List<objectIdPair>();
+
+        foreach (GameObject theObject in objectFormatList)
+        {
+            if (theObject != null)
+            {
+                newList.Add(idPairGrabify(theObject));
+            }
+        }
+
+        return newList;
+    }
+
+
     public void setObjectAsMemberOfZone(GameObject theObject, int zoneNumber)
     {
         //tagging2.singleton.objectsInZone[zoneNumber].Add(theObject);
@@ -493,6 +521,22 @@ public class find
 
 
         return theList;
+    }
+
+
+
+    internal enaction enactionWithButtonX(GameObject theObject, buttonCategories buttonX)
+    {
+        foreach (enaction thisEnaction in listOfAllnEnactionsOnObject(theObject))
+        {
+            //Debug.Log(thisEnaction.interInfo.interactionType);
+            if (thisEnaction.gamepadButtonType == buttonX) { return thisEnaction; }
+        }
+
+
+
+
+        return null;
     }
 
     internal enaction enactionWithInteractionX(GameObject theObject, interType interTypeX)
@@ -618,6 +662,20 @@ public class find
     }
 
 
+    public List<enaction> listOfAllnEnactionsOnObject(GameObject theObject)
+    {
+        //what about child objects/inventory objects?  does this code find them?
+
+        List<enaction> theList = new List<enaction>();
+
+        foreach (enaction thisEnaction in theObject.GetComponents<enaction>())
+        {
+            theList.Add(thisEnaction);
+        }
+
+
+        return theList;
+    }
     public List<collisionEnaction> listOfCollisionEnactionsOnObject(GameObject theObject)
     {
         //what about child objects/inventory objects?  does this code find them?
@@ -632,9 +690,6 @@ public class find
 
         return theList;
     }
-
-
-
 
 }
 
@@ -743,7 +798,7 @@ public class randomTargetPicker : targetPicker
 {
     objectSetGrabber theObjectSetGrabber;
 
-    public randomTargetPicker(GameObject objectToBeNearIn, objectSetGrabber objectSetGrabberIn)
+    public randomTargetPicker(objectSetGrabber objectSetGrabberIn)
     {
         //objectToBeNear = objectToBeNearIn;
         theObjectSetGrabber = objectSetGrabberIn;

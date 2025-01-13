@@ -327,6 +327,32 @@ public class generateObject : Ieffect
 
 }
 
+public class generateObjectAtLocation : Ieffect
+{
+    objectGen theGenerator;
+    agnosticTargetCalc theLocation;
+
+
+    public generateObjectAtLocation(objectGen theGeneratorIn, GameObject enactionPointIn)
+    {
+        theGenerator = theGeneratorIn;
+        theLocation = new agnosticTargetCalc(enactionPointIn);
+    }
+    public generateObjectAtLocation(objectGen theGeneratorIn, Vector3 spawnPointIn)
+    {
+        theGenerator = theGeneratorIn;
+        theLocation = new agnosticTargetCalc(spawnPointIn);
+    }
+
+    public void implementEffect()
+    {
+        GameObject theObject = theGenerator.generate();
+        theObject.transform.position = theLocation.realPositionOfTarget();
+
+    }
+
+}
+
 
 //interactions
 

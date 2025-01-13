@@ -75,6 +75,13 @@ public class equippable2 : interactable2
         enactionPoint1.transform.position = theObject.transform.position + theObject.transform.forward * forwardOffset + theObject.transform.up * upwardOffset;
         enactionPoint1.transform.rotation = theObject.transform.rotation;
     }
+    public void initializeStandardEnactionPoint1(GameObject theObject, float forwardOffset, float upwardOffset)
+    {
+        enactionPoint1 = new GameObject("enactionPoint1");
+        enactionPoint1.transform.parent = theObject.transform;
+        enactionPoint1.transform.position = theObject.transform.position + theObject.transform.forward * forwardOffset + theObject.transform.up * upwardOffset;
+        enactionPoint1.transform.rotation = theObject.transform.rotation;
+    }
 
 
     public void plugIntoGamepadIfThereIsOne()
