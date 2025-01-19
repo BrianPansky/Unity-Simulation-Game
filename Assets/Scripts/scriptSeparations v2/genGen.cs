@@ -266,8 +266,19 @@ public class genGen : MonoBehaviour
         theShooter.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
         theShooter.gamepadButtonType = buttonCategories.primary;
 
+        /*
+        objectGen theFlash =  new genObjectAndModify(new gunFlash(), new objectModifier[] { new simpleMovingMod(0.2f, false, 4) });
+
+        enactEffect theGunFlash = enactEffect.addEnactEffectAndReturn(theEquippable.gameObject, new generateObjectAtLocation(theFlash, theEquippable.enactionPoint1));
+        theShooter.linkedEnactionAtoms.Add(theGunFlash);//messy [but better than the above "compound" nonsense]
+        
 
 
+        objectGen theBulletGlow = new genObjectAndModify(new bulletGlow(), new objectModifier[] { new simpleMovingMod(speed, false, 99) });
+
+        enactEffect theGlowEnactEffect = enactEffect.addEnactEffectAndReturn(theEquippable.gameObject, new generateObjectAtLocation(theBulletGlow, theEquippable.enactionPoint1));
+        theShooter.linkedEnactionAtoms.Add(theGlowEnactEffect);//messy [but better than the above "compound" nonsense]
+        */
 
         /*
         projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
@@ -557,18 +568,6 @@ public class genGen : MonoBehaviour
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -927,7 +926,7 @@ public class FSM
 
     public FSM doAFrame()
     {
-        //Debug.Log("the name of this FSM:  " + name);
+        Debug.Log("the name of this FSM:  " + name);
 
         //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
@@ -1162,7 +1161,6 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
     public List<IupdateCallable> currentUpdateList { get; set; }
     public void Update()
     {
-
         //Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
     }
 
@@ -1170,6 +1168,7 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
     {
         //Debug.Log("============================     callableUpdate()        =================");
         //Debug.Log("this.gameObject:  " + this.gameObject);
+        //tagging2.singleton.printAllTags(this.gameObject);
         foreach (FSM theFSM in theFSMList)
         {
             //Debug.Log("theFSM:  "+ theFSM);
@@ -2585,6 +2584,85 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
 
 
 
+
+
+
+
+
+
+
+public class gunFlash : objectGen
+{
+    public GameObject generate()
+    {
+        GameObject newProjectile = expandingSphere(new Vector3(), 0.2f, 4);
+        GameObject.Destroy(newProjectile.GetComponent<Collider>());
+
+        //MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
+        //theRenderer.material.color = new Color(1f, 1f, 0f);
+        newProjectile.GetComponent<Renderer>().material = repository2.singleton.explosion1;
+
+        return newProjectile;
+    }
+
+
+    public GameObject expandingSphere(Vector3 theLocation, float growthSpeed, int timeUntilSelfDestruct)
+    {
+        GameObject prefabToUse = repository2.singleton.interactionSphere;
+        GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, theLocation);
+
+
+        projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
+        projectileScript.speed = 0.17f;
+        projectileScript.selfDestructOnCollision = false;
+        selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
+        killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
+        newProjectile.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+        growScript1 growScript = newProjectile.AddComponent<growScript1>();
+        growScript.growthSpeed = growthSpeed;
+
+        return newProjectile;
+    }
+}
+
+
+
+public class bulletGlow : objectGen
+{
+    public GameObject generate()
+    {
+
+        GameObject newProjectile = sphere(new Vector3(), 99);
+        GameObject.Destroy(newProjectile.GetComponent<Collider>());
+
+        //MeshRenderer theRenderer = newProjectile.GetComponent<MeshRenderer>();
+        //theRenderer.material.color = new Color(1f, 1f, 0f);
+        newProjectile.GetComponent<Renderer>().material = repository2.singleton.bulletGlow1;
+
+        return newProjectile;
+    }
+
+
+    public GameObject sphere(Vector3 theLocation, int timeUntilSelfDestruct)
+    {
+        GameObject prefabToUse = repository2.singleton.interactionSphere;
+        GameObject newProjectile = genGen.singleton.createPrefabAtPointAndRETURN(prefabToUse, theLocation);
+
+
+        projectile1 projectileScript = newProjectile.AddComponent<projectile1>();
+        projectileScript.speed = 0.17f;
+        projectileScript.selfDestructOnCollision = false;
+        selfDestructScript1 killScript = newProjectile.GetComponent<selfDestructScript1>();
+        killScript.timeUntilSelfDestruct = timeUntilSelfDestruct;
+        newProjectile.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+
+        return newProjectile;
+    }
+
+
+}
 
 
 

@@ -348,6 +348,7 @@ public class generateObjectAtLocation : Ieffect
     {
         GameObject theObject = theGenerator.generate();
         theObject.transform.position = theLocation.realPositionOfTarget();
+        theObject.transform.rotation = theLocation.realRotationOfTarget();
 
     }
 

@@ -51,6 +51,29 @@ public class initialGenerator2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+
+        /*
+        float weaponFiringRange = 40;
+        Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        Debug.Log("2:  " + 2);
+        Debug.Log("3:  " + 3);
+        Debug.Log("2f/3f:  " + 2f / 3f);
+        Debug.Log("2/3:  " + (2 / 3));
+        Debug.Log("1 * (2 / 3):  " + 1 * (2 / 3));
+        Debug.Log("2 * (2 / 3):  " + 2 * (2 / 3));
+        Debug.Log("3 * (2 / 3):  " + 3 * (2 / 3));
+        Debug.Log("30 * (2 / 3):  " + 30 * (2 / 3));
+        Debug.Log("weaponFiringRange*2:  " + weaponFiringRange * 2);
+        Debug.Log("weaponFiringRange*3:  " + weaponFiringRange * 3);
+        float goldilocksRange = weaponFiringRange * (2f / 3f);
+        Debug.Log("goldilocksRange:  " + goldilocksRange);
+        */
+
+
+
+
+
         //Debug.Log("Start:  " + this);
 
         GameObject theWorldObject = GameObject.Find("World");
@@ -82,12 +105,12 @@ public class initialGenerator2 : MonoBehaviour
         int columns = 5;
         int verticalColumns = 1;
 
-        float zScale = 350f;
-        float xScale = 350f;
+        float zScale = 550f;
+        float xScale = 550f;
         float yScale = 30f;
 
         //approximate center point calculation:
-        Vector3 startPoint = new Vector3(-xScale * columns / 2, 1,  - zScale * rows / 2);
+        Vector3 startPoint = new Vector3(-xScale * columns / 2, 1, -zScale * rows / 2);
 
         //creating, filling and marking zones, based on geometry above:
         List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
@@ -96,18 +119,23 @@ public class initialGenerator2 : MonoBehaviour
         new doAtEachPoint(new makeMapZoneAtPoint(xScale, yScale, zScale), points);
 
 
+
+
+        //OFFSET FOR PLACING THINGS IN THE ZONES
+        Vector3 offset = new Vector3(-230, 1, 120);
+
         //new doAtEachPoint(new makeHoardeGenAtPoint(xScale, yScale, zScale), points);
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.2f);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.55f, offset);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
         //new doAtEachPoint(new randomlyAssignToEachPoint(listOfTeamBaseGenerators), listOfTeamStartLocations);
         List<doAtPoint> listOfTeamBaseGenerators = new List<doAtPoint>();
 
-
+        /*
         List<Vector3> listOfOffsetSpawnLocations = new List<Vector3>();
         listOfOffsetSpawnLocations.Add(new Vector3(5, 0, 5));
         listOfOffsetSpawnLocations.Add(new Vector3(-5, 0, 3));
@@ -118,14 +146,29 @@ public class initialGenerator2 : MonoBehaviour
 
         //, new factionEDYEOUF(tag2.team2).returnWaves()
 
-        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team2, listOfOffsetSpawnLocations)));
-        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team3, listOfOffsetSpawnLocations)));
+
+        //listOfTeamBaseGenerators.Add(new twoUnitGeneratorsPerTeam(tag2.team2, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
+        */
+
+
+        /*
+        //listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new playerTeamBase1_1(tag2.team1, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team2, new hoardeWaveGen1_1(tag2.team2, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team3, new hoardeWaveGen1_1(tag2.team3, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team4, new hoardeWaveGen1_1(tag2.team4, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team5, new hoardeWaveGen1_1(tag2.team5, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team6, new hoardeWaveGen1_1(tag2.team6, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team7, new hoardeWaveGen1_1(tag2.team7, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team8, new hoardeWaveGen1_1(tag2.team8, listOfOffsetSpawnLocations)));
+        */
+
+        /*
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team4, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team5, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team6, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team7, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new hoardeWaveGen1_1(tag2.team8, listOfOffsetSpawnLocations)));
-
+        */
 
 
 
@@ -140,6 +183,14 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(team8Base());
         listOfTeamBaseGenerators.Add(team9Base());
         */
+
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));//, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team3));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team4));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team5));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team6));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
 
         new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
         new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
@@ -162,27 +213,28 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamStartLocations.Add(new Vector3(-300, 0, -400));
         listOfTeamStartLocations.Add(new Vector3(300, 0, -500));
         listOfTeamStartLocations.Add(new Vector3(-500, 0, -70));
-        listOfTeamStartLocations.Add(new Vector3(400, 0, 0));
+        listOfTeamStartLocations.Add(new Vector3(400, 0, 200));
         listOfTeamStartLocations.Add(new Vector3(50, 0, 400));
         listOfTeamStartLocations.Add(new Vector3(-20, 0, -600));
 
         return listOfTeamStartLocations;
     }
 
-    private List<Vector3> scalableMapStartLocations1(float scaleFactor)
+    private List<Vector3> scalableMapStartLocations1(float scaleFactor, Vector3 offset)
     {
         
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
 
-        listOfTeamStartLocations.Add(new Vector3(500* scaleFactor, 0, 500 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(-200 * scaleFactor, 0, 300 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(-300 * scaleFactor, 0, -400 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(300 * scaleFactor, 0, -500 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(-500 * scaleFactor, 0, -70 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(400 * scaleFactor, 0, 0 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(50 * scaleFactor, 0, 400 * scaleFactor));
-        listOfTeamStartLocations.Add(new Vector3(-20 * scaleFactor, 0, -600 * scaleFactor));
+        listOfTeamStartLocations.Add(new Vector3(500* scaleFactor, 0, 500 * scaleFactor)+ offset);
+        listOfTeamStartLocations.Add(new Vector3(-200 * scaleFactor, 0, 300 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(-300 * scaleFactor, 0, -400 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(300 * scaleFactor, 0, -500 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(-500 * scaleFactor, 0, -70 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(400 * scaleFactor, 0, 0 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(50 * scaleFactor, 0, 400 * scaleFactor) + offset);
+        listOfTeamStartLocations.Add(new Vector3(-20 * scaleFactor, 0, -600 * scaleFactor) + offset);
+
 
         return listOfTeamStartLocations;
     }

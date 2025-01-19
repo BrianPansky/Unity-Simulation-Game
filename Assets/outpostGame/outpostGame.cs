@@ -2,13 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Analytics;
 using UnityEngine.Experimental.PlayerLoop;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.WSA;
+using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
 using static tagging2;
+using static UnityEditor.PlayerSettings;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.GridLayoutGroup;
 
 public class outpostGame : MonoBehaviour
@@ -21,12 +27,28 @@ public class outpostGame : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        genGen.singleton.returnGun1(new Vector3(-2, 0.7f, 6));
 
+        //new makeTestBase(tag2.team3).doIt(new Vector3(-705, 1, -325));
+
+        genGen.singleton.returnShotgun1(new Vector3(-7, 1, -6));
+
+        /*
         new makeTestLeader(tag2.team2).doIt(new Vector3(430, 1, 30));
-        new makeTestLeader(tag2.team3).doIt(new Vector3(-430, 1, -30));
         new makeTestLeader(tag2.team4).doIt(new Vector3(420, 1, 30));
         new makeTestLeader(tag2.team5).doIt(new Vector3(-430, 1, -20));
+        new makeTestLeader(tag2.team6).doIt(new Vector3(430, 1, -20));
+        new makeTestLeader(tag2.team7).doIt(new Vector3(430, 1, -20));
+        new makeTestLeader(tag2.team8).doIt(new Vector3(430, 1, -20));
+        */
+
+        //new makeTestLeader(tag2.team3).doIt(new Vector3(-430, 1, -30));
+        /*
+        new makeTestLeader(tag2.team4).doIt(new Vector3(420, 1, 30));
+        new makeTestLeader(tag2.team5).doIt(new Vector3(-430, 1, -20));
+        new makeTestLeader(tag2.team6).doIt(new Vector3(430, 1, -20));
+        new makeTestLeader(tag2.team7).doIt(new Vector3(430, 1, -20));
+        new makeTestLeader(tag2.team8).doIt(new Vector3(430, 1, -20));
+        */
         /*
         new makeSimpleTestsToFixMyRTSStuff(tag2.team2).doIt(new Vector3(20,1,20));
         new makeSimpleTestsToFixMyRTSStuff(tag2.team3).doIt(new Vector3(-20, 1, -20));
@@ -129,6 +151,1895 @@ public class outpostGame : MonoBehaviour
 
 
 
+
+
+
+
+
+public class teamGen:doAtPoint
+{
+    //So, for each team I need the following
+    //      a base LOCATION
+    //      a base object that is properly tagged
+    //      a leader
+    //      a hoarde wave callable update component  monobehavior I think? that can generate the waves at the correct times
+    //      I need two of those.or I need two different ways and two different conditions.so two of those probably.
+    //  one for attackers one for defenders.
+    //      Attackers need to be tagged as attackers, Defenders need to be tagged as Defenders
+    //      each of them needs to be able to receive orders
+    //      the leader needs to give attackers and Defenders different orders based on their tagged classification. 
+    //      And let's have one type of soldier generator, because I hate having to update two of them
+    //  and check two of them and everything. just have one. [that i can somehow plug in the "attacker" or "defender" tags]
+
+    tag2 team;
+
+    public teamGen(tag2 teamIn)
+    {
+        team = teamIn;
+    }
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject baseMarker=  new makeBaseMarker(team).doIt(thisPoint);
+        new makeLeader(team).doIt(thisPoint * 8);
+        List<objectSetInstantiator> attackerWaveSet = new makeWaveList(team, tag2.attackSquad).returnWaves();
+        List<objectSetInstantiator> defenderWaveSet = new makeWaveList(team, tag2.defenseSquad).returnWaves();
+        Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDict = new Dictionary<condition, List<objectSetInstantiator>>();
+        condition attackerRespawnCondition = noUnitsWithThisTag(tag2.attackSquad);
+        condition defenderRespawnCondition = noUnitsWithThisTag(tag2.defenseSquad);
+        wavesAndConditionDict[attackerRespawnCondition] = attackerWaveSet;
+        wavesAndConditionDict[defenderRespawnCondition] = defenderWaveSet;
+        callableThatGeneratesWavesWhenTheirConditionIsMet.addThisComponent(baseMarker, relativeSpawnPoints(), wavesAndConditionDict); //can assume condition just checks their tags?  but then.....need to input those tags, or else hard wire them....
+    }
+
+    private List<Vector3> relativeSpawnPoints()
+    {
+        List<Vector3> listOfOffsetSpawnLocations = new List<Vector3>();
+        listOfOffsetSpawnLocations.Add(new Vector3(5, 0, 5));
+        listOfOffsetSpawnLocations.Add(new Vector3(-5, 0, 3));
+        listOfOffsetSpawnLocations.Add(new Vector3(-7, 0, -4));
+        listOfOffsetSpawnLocations.Add(new Vector3(6, 0, -5));
+
+        return listOfOffsetSpawnLocations;
+    }
+
+    private condition noUnitsWithThisTag(tag2 unitGroupIn)
+    {
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            );
+
+
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet));
+
+        return theCondition;
+    }
+}
+
+
+
+public class makeWaveList
+{
+
+    tag2 team;//this is annoying, messy
+    public tag2 unitGroup;
+    List<objectSetInstantiator> theWaves = new List<objectSetInstantiator>();
+
+    public makeWaveList(tag2 teamIn, tag2 unitGroupIn)
+    {
+        team = teamIn;
+        unitGroup = unitGroupIn;
+    }
+
+
+    public List<objectSetInstantiator> returnWaves()
+    {
+        addWave(
+            new objectGen[]
+                {
+                    unit1()//,unit2(),unit2(),unit4()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit3()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit2(),unit2(),unit3()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit3(),unit3(),unit3()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit1(),unit1(),unit1(),
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2(),unit2(),unit4()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit2(),unit2(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit3(),unit3(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit2(),unit3(),unit4()
+                }
+            );
+
+        return theWaves;
+    }
+
+    public objectGen unit1()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 1f;
+        int firingRateIn = 10;
+        float projectileSizeIn = 0.2f;
+        float projectileSpeedIn = 1f;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.3f;
+        float gunWidthIn = 0.2f;
+        float gunLengthIn = 1.4f;
+
+        return unitMaker2(1, 2.9f, 0.9f, 5, 20,
+            weaponMaker(1, 10, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 50;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.4f;
+        float gunWidthIn = 0.4f;
+        float gunLengthIn = 1.7f;
+
+        return unitMaker2(1, 3f, 1f, 3.7f, 33,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+
+    }
+    public objectGen unit3()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 20;
+        float projectileSpeedIn = 4;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 1;
+        float gunHeightIn = 0.5f;
+        float gunWidthIn = 0.3f;
+        float gunLengthIn = 0.8f;
+        return unitMaker2(3, 3.3f, 1f, 3.7f, 28,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+
+    }
+    public objectGen unit4()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 5;
+        int firingRateIn = 70;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 2;
+        float gunHeightIn = 0.6f;
+        float gunWidthIn = 0.7f;
+        float gunLengthIn = 1.3f;
+        return unitMaker2(3, 3.9f, 1f, 7f, 25,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+    }
+
+
+    /*
+    
+    public objectGen unit1()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn =1f;
+        int firingRateIn = 10;
+        float projectileSizeIn = 0.2f;
+        float projectileSpeedIn = 1f;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.3f;
+        float gunWidthIn = 0.2f;
+        float gunLengthIn = 1.4f;
+
+        return unitMaker2(1, 2.9f, 0.9f, 5, 20, 
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));//weaponMaker(1, 10, 4, 1, true, 0, 0.3f, 0.2f, 1.4f//(1,10,4,1,true,0,0.3f,0.2f,1.4f));
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 50;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.4f;
+        float gunWidthIn = 0.4f;
+        float gunLengthIn = 1.7f;
+    
+            return unitMaker2(1, 3f, 1f, 3.7f, 33,
+
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+        
+    }
+    public objectGen unit3()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+            int firingRateIn = 20;
+            float projectileSpeedIn = 4;
+            float projectileSizeIn = 1;
+            bool sdOnCollisionIn = true;
+            int levelIn = 1;
+            float gunHeightIn = 0.5f;
+            float gunWidthIn = 0.3f;
+            float gunLengthIn = 0.8f;
+            return unitMaker2(3, 3.3f, 1f, 3.7f, 28,
+
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+
+    }
+    public objectGen unit4()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 5;
+        int firingRateIn = 70;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 2;
+        float gunHeightIn = 0.6f;
+        float gunWidthIn = 0.7f;
+        float gunLengthIn = 1.3f;
+        return unitMaker2(3, 3.9f, 1f, 7f, 25,
+
+        weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    public objectGen unit1()
+    {
+        return unit(1, 2.9f, 0.9f, 5, 20);
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        return unit(1, 3f, 1f, 3.7f, 33);
+    }
+    public objectGen unit3()
+    {
+        return unit(3, 3.3f, 1f, 3.7f, 28);
+    }
+    public objectGen unit4()
+    {
+        return unit(3, 3.9f, 1f, 7f, 25);
+    }
+
+
+
+
+    */
+
+
+
+
+
+    public void addWave(objectGen[] theWave)
+    {
+        theWaves.Add(new objectSetInstantiator(theWave));
+    }
+
+    /*
+    objectGen unit(float health, float height, float width, float speed, float targetDetectionRange)
+    {
+        return new basicPaintByNumbersSoldierGeneratorG(team, health, height, width, speed, targetDetectionRange);
+    }
+    */
+
+    objectGen unitMaker2(float health, float height, float width, float speed, float targetDetectionRange, objectGen weapon)
+    {
+        return new soldierGenWithCustomGunAndUnitGroup(team, unitGroup, health, height, width, speed, targetDetectionRange, weapon);
+    }
+
+    objectGen weaponMaker(float magnitudeOfInteractionIn, int firingRateIn, float projectileSpeedIn, float projectileSizeIn, bool sdOnCollisionIn = true, int levelIn = 0, float gunHeightIn = 1, float gunWidthIn = 1, float gunLengthIn = 1)
+    {
+        return new paintByNumbersGun1(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType)
+    {
+
+        return new newGunGen(projectileType, new objectModifier[]{
+        },
+        firingRateIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType, objectModifier[] gunItselfMods)
+    {
+
+        return new newGunGen(projectileType, gunItselfMods,
+        firingRateIn);
+    }
+
+    genObjectAndModify projectileMaker(objectModifier[] projectileModifiers) //should be a class?  like newGunGen?
+    {
+        //float magnitudeOfInteractionIn, int firingRateIn,
+        //float projectileSpeedIn, float projectileSizeIn,
+        //bool sdOnCollisionIn = true, int levelIn = 0)
+
+        return new genObjectAndModify(new sphereGen(), projectileModifiers);
+
+
+    }
+
+
+}
+
+
+public class soldierGenWithCustomGunAndUnitGroup : objectGen
+{
+    tagging2.tag2 team;
+    public tag2 unitGroup;
+    private Vector3 thePosition;
+
+    float health;
+    float height;
+    float width;
+    objectGen weapon;
+    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    float speed;
+    float targetDetectionRange;
+
+
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+
+    // 
+    //basicBodyProperties
+    public soldierGenWithCustomGunAndUnitGroup(tag2 theTeamIn, tag2 unitGroupIn, float health, float height, float width, float speed, float targetDetectionRange, objectGen weaponGenIn)
+    {
+        this.team = theTeamIn;
+        this.unitGroup = unitGroupIn;
+        this.health = health;
+        this.height = height;
+        this.width = width;
+        this.speed = speed;
+        weapon = weaponGenIn;
+    }
+
+    public GameObject generate()
+    {
+        GameObject newObj = new makeBasicHuman(3, 1, 6).generate();
+        addTeamColors(newObj);
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, unitGroup);
+
+
+        newObj.AddComponent<rtsModule>();
+
+        addWeapon(newObj, weapon);
+        addSoldierFSM(newObj);
+
+
+        return newObj;
+    }
+
+    private void addWeapon(GameObject theObject, objectGen theWeaponIn)
+    {
+        inventory1 theirInventory = theObject.GetComponent<inventory1>();
+        //GameObject gun = weapon.generate();
+        GameObject gun = theWeaponIn.generate();//genGen.singleton.returnGun1(newObj.transform.position);
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, theObject);
+
+    }
+
+    private void addSoldierFSM(GameObject theObject)
+    {
+        FSMcomponent theFSMcomponent = theObject.AddComponent<FSMcomponent>();
+        theFSMcomponent.theFSMList = new soldierWithUnitGroupFSM(theObject, team, unitGroup,speed).returnIt();
+    }
+
+    public void addTeamColors(GameObject theObject)
+    {
+        Renderer theRenderer = theObject.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        //Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+    }
+
+    private void newTorso(GameObject newObj, GameObject torso)
+    {
+        //torso.transform.localScale = new Vector3(width, height / 2, width);
+
+
+        //torso.transform.position += new Vector3(0, (height / 2) - 1, 0);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        //hitbox.size += new Vector3(width-1, height-1, width-1);
+        //hitbox.center += new Vector3(0, (height-1)/2, 0);
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+
+
+        torso.transform.SetParent(newObj.transform, false);
+        newObj.transform.localScale = new Vector3(width, (height - 1) / 2, width);
+        //newObj.transform.position += new Vector3(0, ((height - 1) / 2), 0);
+    }
+
+    private void oldTorso(GameObject newObj, GameObject torso)
+    {
+        torso.transform.SetParent(newObj.transform, false);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+    }
+}
+
+
+public class soldierWithUnitGroupFSM : FSM
+{
+
+    //FSM theFSM;
+    public List<FSM> theFSMList = new List<FSM>();
+
+    //float combatRange = 40f;
+    private GameObject newObj;
+    private tag2 team;
+    public tag2 unitGroup;
+    private float speed;
+    float weaponFiringRange;
+    private float targetDetectionRange;
+
+    public soldierWithUnitGroupFSM(GameObject theObjectDoingTheEnaction, tag2 team, tag2 unitGroupIn, float speed, float weaponFiringRangeIn = 50f, float targetDetectionRangeIn = 110f)
+    {
+        this.newObj = theObjectDoingTheEnaction;
+        this.team = team;
+        this.unitGroup = unitGroupIn;  //i don't think soldiers need this info though?  leave it up to the leaders?
+        this.speed = speed;
+        weaponFiringRange = weaponFiringRangeIn;
+        this.targetDetectionRange = targetDetectionRangeIn;
+
+        Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
+        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+
+    }
+
+    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        FSM idle = new generateFSM();
+
+        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team, weaponFiringRange);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction,weaponFiringRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+
+
+
+        idle.addSwitchAndReverse(switchToAttack, combat1);
+
+
+
+        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+
+
+
+        idle.name = "hands, idle";
+        combat1.name = "hands, combat1";
+        equipGun.theFSM.name = "hands, equipGun";
+        return idle; ;
+    }
+
+    private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tag2 team, float weaponFiringRangeIn)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 200),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, weaponFiringRangeIn)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        return theCriteria;
+    }
+
+    private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
+    {
+
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        return theAttackTargetPicker;
+    }
+
+    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        Debug.Log("targetDetectionRange:  " + targetDetectionRange);
+        Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+
+        objectCriteria theCriteria = attackObjectCriteria(theObjectDoingTheEnaction);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        //Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        //float goldilocksRange = weaponFiringRange * (2 / 3);
+        float goldilocksRange = weaponFiringRange * (2f / 3f);
+        //Debug.Log("goldilocksRange:  "+ goldilocksRange);
+        targetPicker theTargetPicker = new combatPositionPack3TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet, 27f);
+
+        float desiredProximity = weaponFiringRange * (2f / 3f);
+        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, 0).returnIt());
+
+        condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction, targetDetectionRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        wander.addSwitchAndReverse(switchToAttack, combat1);
+
+
+
+
+
+
+
+
+
+        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+
+        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction, team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+
+        condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
+
+        wander.addSwitchAndReverse(switchFromWanderToRTS, goToRTSTarget);
+        goToRTSTarget.addSwitchAndReverse(switchToAttack, combat1);
+
+        //*/
+
+
+        wander.name = "feet, wander";
+        combat1.name = "feet, combat1";
+        goToRTSTarget.name = "feet, goToRTSTarget";
+
+
+
+
+
+
+
+
+
+
+        navAgent theNav = theObjectDoingTheEnaction.GetComponent<navAgent>();
+        theNav.theAgent.speed = this.speed;
+        theNav.theAgent.baseOffset = 0.5f;//theObjectDoingTheEnaction.transform.localScale.y;
+        //theNav.theAgent.
+
+        return wander;
+    }
+
+    private objectCriteria attackObjectCriteria(GameObject theObjectDoingTheEnaction)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team))
+            //new lineOfSight(theObjectDoingTheEnaction),
+            //new proximityCriteriaBool(theObjectDoingTheEnaction, targetDetectionRange)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        return theCriteria;
+    }
+
+    internal condition threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(GameObject theObjectDoingTheEnaction, float range)
+    {
+        objectCriteria theRealObjectCriteria = theRealThreatObjectCriteria();
+
+        objectSetGrabber theRealObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theRealObjectCriteria);
+
+        objectCriteria theAdditionalSituationalCriteria = theAdditionalSituationalThreatCriteria(theObjectDoingTheEnaction, range);
+
+        objectSetGrabber theVisibleNearObjectSet = new setOfAllObjectThatMeetCriteria(theRealObjectSet, theAdditionalSituationalCriteria);
+
+        int stickyTimerInSeconds = 9;
+        condition objectPermanenceKludgeUsingStickiness = new stickyCondition(new isThereAtLeastOneObjectInSet(theVisibleNearObjectSet), stickyTimerInSeconds);// theObjectDoingTheEnaction, numericalVariable.health);
+        condition realObjectConditionWithNoStickiness = new isThereAtLeastOneObjectInSet(theRealObjectSet);
+
+        condition theCondition = new multicondition(realObjectConditionWithNoStickiness, objectPermanenceKludgeUsingStickiness);
+
+        //return realObjectConditionWithNoStickiness;
+        return theCondition;
+    }
+
+    private objectCriteria theAdditionalSituationalThreatCriteria(GameObject theObjectDoingTheEnaction, float range)
+    {
+        objectCriteria theAdditionalSituationalCriteria = new objectMeetsAllCriteria(
+            new lineOfSight(theObjectDoingTheEnaction, range),
+            //new proximityCriteriaBool(theObjectDoingTheEnaction, range)  //REDUNDANT!  line of sight does range better for this purpose!
+            new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+        return theAdditionalSituationalCriteria;
+    }
+
+    private objectCriteria theRealThreatObjectCriteria()
+    {
+        objectCriteria theRealObjectCriteria =  new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team))
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+        return theRealObjectCriteria;
+    }
+
+    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    {
+        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+        targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
+
+        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+
+        //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
+
+        //wander.addSwitchAndReverse(switchFromWanderToRTS, goToRTSTarget);
+
+
+        //wander.name = "feet, wander";
+        goToRTSTarget.name = "feet, goToRTSTarget";
+        return goToRTSTarget;
+    }
+
+    private targetPicker makeTheRTSCommandTargetPicker(GameObject theObjectDoingTheEnaction)
+    {
+        //bit messy ad-hoc sorta way to do this for now
+        //need target picker that just copies from their RTS module lol
+
+        //individualObjectReturner theObject = new presetObject(theObjectDoingTheEnaction);
+        targetPicker theRTSCommandTargetPicker = new targetPickerFromRTSModule(theObjectDoingTheEnaction);
+        return theRTSCommandTargetPicker;
+    }
+
+    private condition makeSwitchFromWanderToRTS(GameObject theObjectDoingTheEnaction)
+    {
+        //if there's more than zero orders
+        //opposite of leader's condition
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasRtsModule(),
+            new reverseCriteria(new hasNoOrders())
+            );
+
+        //how to apply it to themselves?
+        individualObjectReturner theObject = new presetObject(theObjectDoingTheEnaction);
+
+
+        condition switchFromWanderToRTS = new individualObjectMeetsAllCriteria(theObject, theCriteria);
+
+        return switchFromWanderToRTS;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public List<FSM> returnIt()
+    {
+        return theFSMList;
+    }
+
+
+
+}
+
+public class combatPositionPack2TargetPicker : targetPicker
+{
+    //randomly pick from:
+    //      apple pattern
+    //      idle
+    //      flee
+    //      go towards
+    //      random wander
+    //can maybe bias in favor of some?  but for now, simple random.
+
+    List<targetPicker> listOfTargetPickers = new List<targetPicker>();
+    int currentPick = 0;
+    int behaviorChangeCountdownTimeCurrent = 0;
+    int behaviorChangeCountdownTimeLIMIT = 40;
+
+    bool currentlyDoingMainBehavior = true;
+
+
+
+
+
+    GameObject theObjectDoingTheEnaction;
+    objectSetGrabber theSet;
+    public combatPositionPack2TargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput, float goldilocksRangeIn)
+    {
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+        theSet = theSetInput;
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+        targetPicker goldilocksCircle = new nearestGoldilocksTargetPicker(theObjectDoingTheEnaction, theSetInput, goldilocksRangeIn);
+        targetPicker applePattern = new applePatternTargetPicker(theObjectDoingTheEnaction, theSetInput);
+        targetPicker randomNearby = new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction);
+
+        /*
+        listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(new radialFleeingTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think
+        listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { randomNearby, applePattern }));
+        */
+
+        /*
+        //listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        //listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby })); 
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        */
+        listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(new radialFleeingTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think  //yup, this one is like normal combat in a game, nice
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { applePattern, randomNearby }));//this one is like kiting while dodging.  a very cautious fighting style.  nice
+        
+        //how to do "idle"? can do single object target picker, and insert self.
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        if (theSet.grab().Count ==0)//SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK BEFORE WE DO THIS!  WHY IS IT HAPPENING???
+        {
+            Debug.Log("(theSet.grab().Count ==0) SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK THIS SET BEFORE WE USE IT!");
+            return new agnosticTargetCalc(theObjectDoingTheEnaction);
+        }
+        randomlyPickDifferentStrategySometimes();
+        //Debug.Log("currentPick:  " + currentPick);
+
+
+
+        return listOfTargetPickers[currentPick].pickNext();
+    }
+
+    private void randomlyPickDifferentStrategySometimes()
+    {
+        behaviorChangeCountdownTimeCurrent++;
+        //Debug.Log("behaviorChangeCountdownTimeCurrent:  "+behaviorChangeCountdownTimeCurrent);
+
+        if (behaviorChangeCountdownTimeCurrent < behaviorChangeCountdownTimeLIMIT) { return; }
+
+
+        if (currentlyDoingMainBehavior)
+        {
+            currentlyDoingMainBehavior = false;
+            currentPick = repository2.singleton.randomTargetPickerInteger(listOfTargetPickers.Count);
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(270) + 110;
+
+        }
+        else
+        {
+            currentlyDoingMainBehavior = true;
+            currentPick = 0;
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(300) + 210;
+        }
+
+        behaviorChangeCountdownTimeCurrent = 0;
+    }
+}
+
+public class combatPositionPack3TargetPicker : targetPicker
+{
+    //randomly pick from:
+    //      apple pattern
+    //      idle
+    //      flee
+    //      go towards
+    //      random wander
+    //can maybe bias in favor of some?  but for now, simple random.
+
+    List<targetPicker> listOfTargetPickers = new List<targetPicker>();
+    int currentPick = 0;
+    int behaviorChangeCountdownTimeCurrent = 0;
+    int behaviorChangeCountdownTimeLIMIT = 40;
+
+    bool currentlyDoingMainBehavior = true;
+
+
+
+
+
+    GameObject theObjectDoingTheEnaction;
+    objectSetGrabber theSet;
+    public combatPositionPack3TargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput, float goldilocksRangeIn)
+    {
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+        theSet = theSetInput;
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+        targetPicker goldilocksCircle = new nearestGoldilocksTargetPicker(theObjectDoingTheEnaction, theSetInput, goldilocksRangeIn);
+        targetPicker applePattern = new applePatternTargetPicker(theObjectDoingTheEnaction, theSetInput);
+        targetPicker randomNearby = new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction);
+
+        
+        
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think
+        listOfTargetPickers.Add(randomNearby);
+        //listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { randomNearby, applePattern }));
+        //listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby }));
+        
+
+        /*
+        //listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        //listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby })); 
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        */
+        /*
+        listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(new radialFleeingTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think  //yup, this one is like normal combat in a game, nice
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { applePattern, randomNearby }));//this one is like kiting while dodging.  a very cautious fighting style.  nice
+        */
+        //how to do "idle"? can do single object target picker, and insert self.
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        if (theSet.grab().Count == 0)//SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK BEFORE WE DO THIS!  WHY IS IT HAPPENING???
+        {
+            Debug.Log("(theSet.grab().Count ==0) SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK THIS SET BEFORE WE USE IT!");
+            return new agnosticTargetCalc(theObjectDoingTheEnaction);
+        }
+        randomlyPickDifferentStrategySometimes();
+        //Debug.Log("currentPick:  " + currentPick);
+
+
+
+        return listOfTargetPickers[currentPick].pickNext();
+    }
+
+    private void randomlyPickDifferentStrategySometimes()
+    {
+        behaviorChangeCountdownTimeCurrent++;
+        //Debug.Log("behaviorChangeCountdownTimeCurrent:  "+behaviorChangeCountdownTimeCurrent);
+
+        if (behaviorChangeCountdownTimeCurrent < behaviorChangeCountdownTimeLIMIT) { return; }
+
+
+        if (currentlyDoingMainBehavior)
+        {
+            currentlyDoingMainBehavior = false;
+            currentPick = repository2.singleton.randomTargetPickerInteger(listOfTargetPickers.Count);
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(270) + 110;
+
+        }
+        else
+        {
+            currentlyDoingMainBehavior = true;
+            currentPick = 0;
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(300) + 210;
+        }
+
+        behaviorChangeCountdownTimeCurrent = 0;
+    }
+}
+
+
+/*
+public class something
+{
+    int currentWaveNumber = 0;
+
+    public tag2 team;
+    public tag2 unitGroup;
+    public condition newWaveCondition;
+
+    public List<objectSetInstantiator> listOfWaves = new List<objectSetInstantiator>();
+
+    List<Vector3> listOfSpawnPoints = new List<Vector3>();
+
+    public GameObject theBaseGeneratorObject;
+
+
+    public something(tag2 teamIn, tag2 unitGroupIn, List<Vector3> listOfSpawnPointsIn)
+    {
+        unitGroup = unitGroupIn;
+        listOfSpawnPoints = listOfSpawnPointsIn;
+
+        //newWaveCondition = zeroRemainingUnitGroupMembersAnywhere(unitGroupIn);
+
+        //Debug.Log("listOfSpawnPoints.Count:  " + listOfSpawnPoints.Count);
+    }
+    public something(tag2 unitGroupIn, List<Vector3> listOfSpawnPointsIn, List<objectSetInstantiator> wavesIn)
+    {
+        unitGroup = unitGroupIn;
+        listOfSpawnPoints = listOfSpawnPointsIn;
+
+        //newWaveCondition = zeroRemainingUnitGroupMembersAnywhere(unitGroupIn);
+        listOfWaves = wavesIn;
+
+        //Debug.Log("listOfSpawnPoints.Count:  " + listOfSpawnPoints.Count);
+    }
+
+    public List<objectSetInstantiator> testWaves()
+    {
+        List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
+
+        newList.Add(new objectSetInstantiator(new objectGen[] { new solderGen3(team, unitGroup) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 3, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) }));
+
+
+
+        return newList;
+    }
+
+
+
+
+    public void doOnUpdate()
+    {
+        if (newWaveCondition.met())
+        {
+            currentWaveNumber++;
+            generateNextWave();
+        }
+    }
+
+
+    public void generateNextWave()
+    {
+        if (listOfWaves.Count == 0)
+        {
+            Debug.Log("(listOfWaves.Count == 0)  for this team:  " + team);
+            return;
+        }
+
+        if (currentWaveNumber - 1 < listOfWaves.Count)
+        {
+
+            listOfWaves[currentWaveNumber - 1].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+            return;
+        }
+
+        listOfWaves[currentWaveNumber - listOfWaves.Count - 1].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+
+    }
+
+    private Vector3 randomTargetPickerSpawnPoint(List<Vector3> listOfSpawnPoints)
+    {
+        //Debug.Log("listOfSpawnPoints.Count:  "+listOfSpawnPoints.Count);
+        return listOfSpawnPoints[repository2.singleton.randomTargetPickerInteger(listOfSpawnPoints.Count - 1)];
+    }
+
+
+
+
+    public condition zeroRemainingUnitGroupMembersAnywhere(tag2 unitGroupIn)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            //new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            //new objectHasTag(team)
+            //new proximityCriteriaBool(thePlayer?, 25)
+            );
+
+
+
+        //Debug.Log("CONDITION MAKER | zone:  "+tagging2.singleton.whichZone(thePlaceholderObjectInZone)+", and id number:  " + thePlaceholderObjectInZone.GetHashCode());
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 0));// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return theCondition;
+    }
+
+}
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+public class callableThatGeneratesWavesWhenTheirConditionIsMet : MonoBehaviour, IupdateCallable
+{
+    private List<Vector3> relativeSpawnPoints;
+    private Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDict;
+    int currentWaveNumber = 0;
+    public List<IupdateCallable> currentUpdateList { get; set; }
+
+    public static callableThatGeneratesWavesWhenTheirConditionIsMet addThisComponent(GameObject baseMarkerIn, List<Vector3> relativeSpawnPointsIn, Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDictIn)
+    {
+        callableThatGeneratesWavesWhenTheirConditionIsMet theCallable = baseMarkerIn.AddComponent<callableThatGeneratesWavesWhenTheirConditionIsMet>();
+
+        theCallable.relativeSpawnPoints = relativeSpawnPointsIn;
+        theCallable.wavesAndConditionDict = wavesAndConditionDictIn;
+
+        return theCallable;
+    }
+
+    public void callableUpdate()
+    {
+        foreach (condition thisCondition in wavesAndConditionDict.Keys)
+        {
+            if (thisCondition.met() == false) { continue; }
+            wavesAndConditionDict[thisCondition][currentWaveNumber].generate(this.transform.position);
+            currentWaveNumber++;
+        }
+    }
+}
+
+
+
+
+public class makeBasicHuman: objectGen
+{
+    float height;
+    float width;
+    objectGen weapon;
+    float speed;
+
+
+    public makeBasicHuman(float height, float width, float speed)//, objectGen weapon)
+    {
+        this.height = height;
+        this.width = width;
+        this.speed = speed;
+    }
+
+    private playable2 playableWithNewTorso(GameObject newObj, GameObject torso)
+    {
+
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+        thePlayable.theNavMeshTransform = newObj.transform;
+        thePlayable.theHorizontalRotationTransform = torso.transform;
+        thePlayable.initializeEnactionPoint1();
+        thePlayable.theVerticalRotationTransform = thePlayable.enactionPoint1.transform;
+        thePlayable.enactionPoint1.transform.SetParent(thePlayable.theHorizontalRotationTransform, true);
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
+
+        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform);
+
+        return thePlayable;
+    }
+
+    private void newTorso(GameObject newObj, GameObject torso)
+    {
+        //torso.transform.localScale = new Vector3(width, height / 2, width);
+
+
+        //torso.transform.position += new Vector3(0, (height / 2) - 1, 0);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        //hitbox.size += new Vector3(width-1, height-1, width-1);
+        //hitbox.center += new Vector3(0, (height-1)/2, 0);
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+
+
+        torso.transform.SetParent(newObj.transform, false);
+        newObj.transform.localScale = new Vector3(width, (height - 1) / 2, width);
+        //newObj.transform.position += new Vector3(0, ((height - 1) / 2), 0);
+    }
+
+    public GameObject generate()
+    {
+        //GameObject newObj = new teamRankingOfficerGenerator(team, 2, 4, 2, 5, 99).generate();
+
+        GameObject newObj = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+        GameObject torso = repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+
+        newTorso(newObj, torso);
+        playable2 thePlayable = playableWithNewTorso(newObj, torso);
+
+        //newObj.transform.position = thePosition;
+
+
+        genGen.singleton.ensureVirtualGamePad(newObj);
+
+        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+
+
+        genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
+        genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+        //GameObject gun = weapon.generate();
+        //GameObject gun = genGen.singleton.returnGun1(newObj.transform.position);//new paintByNumbersGun1(1,40, 10,0.5f, true, 0, 0.3f, 0.2f,0.5f).generate();//
+        //theirInventory.inventoryItems.Add(gun);
+        //interactionCreator.singleton.dockXToY(gun, newObj);
+
+
+
+
+
+        //newObj.GetComponent<NavMeshAgent>().enabled = false;
+        newObj.AddComponent<reactivationOfNavMeshAgent>();
+
+        return newObj;
+    }
+}
+
+public class makeLeader
+{
+    private tag2 team;
+
+    public makeLeader(tag2 teamIn)
+    {
+        team = teamIn;
+    }
+
+    internal void doIt(Vector3 vector3)
+    {
+        GameObject newObj = new makeBasicHuman(4,2,5).generate();//new teamRankingOfficerGenerator(team, 2, 4, 2, 5, 99).generate();
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, tag2.teamLeader);
+        addTeamColors(newObj);
+        addLeaderFSM(newObj);
+        newObj.transform.position = vector3;
+    }
+
+    private void addLeaderFSM(GameObject theObject)
+    {
+        FSMcomponent theFSMcomponent = theObject.AddComponent<FSMcomponent>();
+        theFSMcomponent.theFSMList = new teamLeaderWithUnitGroupsFSM(theObject, team, 5, 44).returnIt();
+    }
+
+    public void addTeamColors(GameObject theObject)
+    {
+        Renderer theRenderer = theObject.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        //Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+    }
+}
+
+
+
+public class teamLeaderWithUnitGroupsFSM : FSM
+{
+
+    //FSM theFSM;
+    public List<FSM> theFSMList = new List<FSM>();
+
+    //float combatRange = 40f;
+    private GameObject newObj;
+    private tag2 team;
+    private float speed;
+    private float targetDetectionRange;
+
+    public teamLeaderWithUnitGroupsFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    {
+        this.newObj = theObjectDoingTheEnaction;
+        this.team = team;
+        this.speed = speed;
+        this.targetDetectionRange = targetDetectionRange;
+
+
+        //theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
+        //theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theFSMList.Add(giveTeamCommandsFSM(theObjectDoingTheEnaction, team));
+
+    }
+
+    private FSM giveTeamCommandsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        objectSetGrabber theEnemyBaseObjectSet = new setOfAllObjectThatMeetCriteria(
+            new setOfAllObjectsWithTag(tag2.militaryBase), enemyBaseCriteria(theObjectDoingTheEnaction, team));
+
+        //condition is any time there are units with no orders? [and units who complete orders should thus blank out their orders?]
+        objectCriteria attackerHasNoOrders = unitWithNoOrdersCriteriaByUnitGroup(tag2.attackSquad);
+
+        condition conditionToGiveOrdersToAttackers = new isThereAtLeastOneObjectInSet(
+            new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), attackerHasNoOrders));
+
+
+
+
+
+        objectCriteria defenderHasNoOrders = unitWithNoOrdersCriteriaByUnitGroup(tag2.defenseSquad);
+        
+        condition conditionToGiveOrdersToDefenders = new isThereAtLeastOneObjectInSet(
+            new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), defenderHasNoOrders));
+
+
+        //So:
+        //      1)  pick a random enemy base
+        //      2)  make the finite state for feet that goes to that base
+        //      3)  give that state to all of the soldiers with no orders
+        //      4)  then I need to make the soldiers have the state that allows them to follow
+        //    orders if there are any orders and if they are in an idle state.
+        //    and make transfer out of that order following state if there is combat threats.
+
+        //objectSetGrabber allEnemyBasesGrabber = allEnemyBases();
+        //          agnosticTargetCalc randomEnemyBase = new randomTargetPicker(allEnemyBases()).pickNext();
+
+        //FSM feetGoToTheTarget = new generateFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+
+
+        //no, i'll give them just targets for now, not FSMs
+        //so, need leader to have a repeater and/or FSM that inputs SOMETHING into soldiers' rts modules
+        var fakeRepeater = new giveXRTSTargetsToYUnits(null, new randomTargetPicker(allEnemyBases()));
+        objectSetGrabber allAttackersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), attackerHasNoOrders);
+        objectSetGrabber allDefendersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), defenderHasNoOrders);
+
+        fakeRepeater.MOREINFOgiveXRTSTargetsToYUnits(allAttackersWithNoOrders);
+        FSM giveOrders = new generateFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+
+        giveOrders.name = "giveOrders";
+
+        return giveOrders;
+    }
+
+
+
+    public void stuff()
+    {
+        //();
+        //(tag2.defenseSquad);
+        
+
+    }
+
+    private condition noUnitsWithThisTag(tag2 unitGroupIn)
+    {
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            );
+
+
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet));
+
+        return theCondition;
+    }
+
+
+
+
+
+
+    private objectSetGrabber allEnemyBases()
+    {
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        objectSetGrabber allEnemyBasesGrabber = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(tag2.militaryBase), theCriteria);
+
+        return allEnemyBasesGrabber;
+    }
+
+    private objectCriteria unitWithNoOrdersCriteriaByUnitGroup(tag2 unitGroup)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(unitGroup),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader)),
+            new hasRtsModule(),
+            new hasNoOrders()
+            );
+
+
+        return theCriteria;
+    }
+
+    private objectCriteria enemyBaseCriteria(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            //new objectHasTag(tag2.militaryBase),
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        return theCriteria;
+    }
+
+    private targetPicker enemyBaseTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theEnemyBaseObjectSet)
+    {
+
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theEnemyBaseObjectSet);
+
+        return theAttackTargetPicker;
+    }
+
+
+
+
+
+
+    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        FSM idle = new generateFSM();
+
+        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+
+
+
+        idle.addSwitchAndReverse(switchToAttack, combat1);
+
+
+
+        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+
+
+
+        idle.name = "hands, idle";
+        combat1.name = "hands, combat1";
+        equipGun.theFSM.name = "hands, equipGun";
+        return idle; ;
+    }
+
+    private objectCriteria createAttackCriteria(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new stickyTrueCriteria(new lineOfSight(theObjectDoingTheEnaction), 200),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        return theCriteria;
+    }
+
+    private targetPicker generateAttackTargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theAttackObjectSet)
+    {
+
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        return theAttackTargetPicker;
+    }
+
+    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    {
+        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            new lineOfSight(theObjectDoingTheEnaction),
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            );
+
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+        targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+
+        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+
+        condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
+
+
+        wander.addSwitchAndReverse(switchToAttack, combat1);
+
+        wander.name = "feet, wander";
+        combat1.name = "feet, combat1";
+
+        navAgent theNav = theObjectDoingTheEnaction.GetComponent<navAgent>();
+        theNav.theAgent.speed = this.speed;
+        theNav.theAgent.baseOffset = 0.5f;//theObjectDoingTheEnaction.transform.localScale.y;
+        //theNav.theAgent.
+
+        return wander;
+    }
+
+
+
+
+    public List<FSM> returnIt()
+    {
+        return theFSMList;
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+public class makeBaseMarker
+{
+    //So, for each team I need the following
+    //      a base LOCATION
+    //      a base object that is properly tagged
+    //      a leader
+    //      a hoarde wave callable update component  monobehavior I think? that can generate the waves at the correct times
+    //      I need two of those.or I need two different ways and two different conditions.so two of those probably.
+    //  one for attackers one for defenders.
+    //      Attackers need to be tagged as attackers, Defenders need to be tagged as Defenders
+    //      each of them needs to be able to receive orders
+    //      the leader needs to give attackers and Defenders different orders based on their tagged classification. 
+    //      And let's have one type of soldier generator, because I hate having to update two of them
+    //  and check two of them and everything. just have one. [that i can somehow plug in the "attacker" or "defender" tags]
+
+    private tag2 team;
+
+    public makeBaseMarker(tag2 teamIn)
+    {
+        team = teamIn;
+    }
+
+    internal GameObject doIt(Vector3 thisPoint)
+    {
+        GameObject emptyObject = new GameObject();
+        emptyObject.transform.position = thisPoint;
+
+
+        //needs a zone, otherwise it won't ever be called in "callableUpdate"
+        emptyObject.AddComponent<BoxCollider>();
+        tagging2.singleton.addTag(emptyObject, tag2.zoneable);
+        tagging2.singleton.addTag(emptyObject, tag2.militaryBase);
+        tagging2.singleton.addTag(emptyObject, team);
+
+        return emptyObject;
+    }
+}
+
+
+
+
+
+
+
+public class waveGen
+{
+    int currentWaveNumber = 0;
+
+    public tag2 team;
+    public tag2 unitGroup;
+    public condition newWaveCondition;
+
+    public List<objectSetInstantiator> listOfWaves = new List<objectSetInstantiator>();
+
+    List<Vector3> listOfSpawnPoints = new List<Vector3>();
+
+    public GameObject theBaseGeneratorObject;
+
+
+    public waveGen(tag2 unitGroupIn,List<Vector3> listOfSpawnPointsIn)
+    {
+        unitGroup = unitGroupIn;
+        listOfSpawnPoints = listOfSpawnPointsIn;
+
+        //newWaveCondition = zeroRemainingUnitGroupMembersAnywhere(unitGroupIn);
+
+        //Debug.Log("listOfSpawnPoints.Count:  " + listOfSpawnPoints.Count);
+    }
+    public waveGen(tag2 unitGroupIn, List<Vector3> listOfSpawnPointsIn, List<objectSetInstantiator> wavesIn)
+    {
+        unitGroup = unitGroupIn;
+        listOfSpawnPoints = listOfSpawnPointsIn;
+
+        //newWaveCondition = zeroRemainingUnitGroupMembersAnywhere(unitGroupIn);
+        listOfWaves = wavesIn;
+
+        //Debug.Log("listOfSpawnPoints.Count:  " + listOfSpawnPoints.Count);
+    }
+
+    public List<objectSetInstantiator> testWaves()
+    {
+        List<objectSetInstantiator> newList = new List<objectSetInstantiator>();
+
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.5f, 1.9f, 9, 33), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team), new basicSoldierGeneratorG(team) }));
+        newList.Add(new objectSetInstantiator(new objectGen[] { new basicPaintByNumbersSoldierGeneratorG(team, 3, 3.8f, 2.4f, 2, 99), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team), new basicPaintByNumbersSoldierGeneratorG(team, 2, 4, 1.3f, 13, 99), new basicSoldierGeneratorG(team) }));
+
+
+
+        return newList;
+    }
+
+
+
+
+    public void doOnUpdate()
+    {
+        if (newWaveCondition.met())
+        {
+            currentWaveNumber++;
+            generateNextWave();
+        }
+    }
+
+
+    public void generateNextWave()
+    {
+        if (listOfWaves.Count == 0)
+        {
+            Debug.Log("(listOfWaves.Count == 0)  for this team:  " + team);
+            return;
+        }
+
+        if (currentWaveNumber - 1 < listOfWaves.Count)
+        {
+
+            listOfWaves[currentWaveNumber - 1].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+            return;
+        }
+
+        listOfWaves[currentWaveNumber - listOfWaves.Count - 1].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+        listOfWaves[currentWaveNumber - listOfWaves.Count].generate(theBaseGeneratorObject.transform.position + randomTargetPickerSpawnPoint(listOfSpawnPoints));
+
+    }
+
+    private Vector3 randomTargetPickerSpawnPoint(List<Vector3> listOfSpawnPoints)
+    {
+        //Debug.Log("listOfSpawnPoints.Count:  "+listOfSpawnPoints.Count);
+        return listOfSpawnPoints[repository2.singleton.randomTargetPickerInteger(listOfSpawnPoints.Count - 1)];
+    }
+
+
+
+
+    public condition zeroRemainingUnitGroupMembersAnywhere(tag2 unitGroupIn)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            //new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            //new objectHasTag(team)
+            //new proximityCriteriaBool(thePlayer?, 25)
+            );
+
+
+
+        //Debug.Log("CONDITION MAKER | zone:  "+tagging2.singleton.whichZone(thePlaceholderObjectInZone)+", and id number:  " + thePlaceholderObjectInZone.GetHashCode());
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new stickyCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet), 0));// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return theCondition;
+    }
+
+}
+
+public class hoardUpdater1_2 : MonoBehaviour, IupdateCallable
+{
+    public List<IupdateCallable> currentUpdateList { get; set; }
+
+
+    void Start()
+    {
+        //Debug.Log("hoardUpdater | zone:  " + tagging2.singleton.whichZone(this.gameObject) + ", and id number:  " + this.gameObject.GetHashCode());
+
+        //messy [using collider to add this generator to a zone]
+        Destroy(this.gameObject.GetComponent<BoxCollider>());//.enabled = false;
+    }
+
+    public void callableUpdate()
+    {
+        //Debug.Log("hoardUpdater | zone:  " + tagging2.singleton.whichZone(this.gameObject) + ", and id number:  " + this.gameObject.GetHashCode());
+
+        foreach (waveGen hoard in hoardes)
+        {
+            //Debug.Log("hoard.team:  " + hoard.team);
+            hoard.doOnUpdate();
+        }
+    }
+    internal List<waveGen> hoardes = new List<waveGen>();
+}
+
+
+
+
+public class twoUnitGeneratorsPerTeam : doAtPoint
+{
+    public tag2 team;
+    public waveGen attackWaveGen;
+    public waveGen defenseWaveGen;
+    public twoUnitGeneratorsPerTeam(tag2 teamIn, waveGen attackWaveGenIn, waveGen defenseWaveGenIn)
+    {
+        team = teamIn;
+        attackWaveGen = attackWaveGenIn;
+        defenseWaveGen = defenseWaveGenIn;
+        //Debug.Log("??????????????????????");
+        attackWaveGen.team = team;
+        defenseWaveGen.team = team;
+        //messy, but otherwise the soldiers don't have the updated team that we set in the lines above:
+        attackWaveGen.listOfWaves = attackWaveGenIn.testWaves();
+        defenseWaveGen.listOfWaves = defenseWaveGen.testWaves();
+        //Debug.Log("attackWaveGen.team:  "+ attackWaveGen.team);
+        //aaaaaand same with condition:
+        attackWaveGen.newWaveCondition = attackWaveGenIn.zeroRemainingUnitGroupMembersAnywhere(attackWaveGen.unitGroup);
+        defenseWaveGen.newWaveCondition = defenseWaveGen.zeroRemainingUnitGroupMembersAnywhere(defenseWaveGen.unitGroup);
+    }
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+
+        GameObject newObj = new makeTestBase(team).doIt(thisPoint); //new GameObject();
+                                                                    //emptyObject.transform.position = thisPoint;
+
+
+        hoardUpdater1_2 theUpdater = newObj.AddComponent<hoardUpdater1_2>();
+        theUpdater.hoardes.Add(attackWaveGen);
+        theUpdater.hoardes.Add(defenseWaveGen);
+
+
+        //needs a zone, otherwise it won't ever be called in "callableUpdate"
+        newObj.AddComponent<BoxCollider>();
+
+        attackWaveGen.theBaseGeneratorObject = newObj;
+        defenseWaveGen.theBaseGeneratorObject = newObj;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class makeTestLeader
 {
     private tag2 team;
@@ -155,7 +2066,7 @@ public class makeTestBase
         team = teamIn;
     }
 
-    internal void doIt(Vector3 thisPoint)
+    internal GameObject doIt(Vector3 thisPoint)
     {
         GameObject emptyObject = new GameObject();
         emptyObject.transform.position = thisPoint;
@@ -166,6 +2077,8 @@ public class makeTestBase
         tagging2.singleton.addTag(emptyObject, tag2.zoneable);
         tagging2.singleton.addTag(emptyObject, tag2.militaryBase);
         tagging2.singleton.addTag(emptyObject, team);
+
+        return emptyObject;
     }
 }
 
@@ -574,7 +2487,7 @@ public class teamRankingOfficerFSM : FSM
         //    and make transfer out of that order following state if there is combat threats.
 
         //objectSetGrabber allEnemyBasesGrabber = allEnemyBases();
-        agnosticTargetCalc randomEnemyBase = new randomTargetPicker(allEnemyBases()).pickNext();
+        //          agnosticTargetCalc randomEnemyBase = new randomTargetPicker(allEnemyBases()).pickNext();
 
         //FSM feetGoToTheTarget = new generateFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
@@ -594,7 +2507,7 @@ public class teamRankingOfficerFSM : FSM
     {
 
         objectCriteria theCriteria = new objectMeetsAllCriteria(
-            new reverseCriteria( new objectHasTag(team))
+            new reverseCriteria(new objectHasTag(team))
             );
 
         objectSetGrabber allEnemyBasesGrabber = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(tag2.militaryBase), theCriteria);
@@ -848,25 +2761,27 @@ public class npcVersion : rtsModuleVersion
 public class oneTeamBaseGenAtPoint : doAtPoint
 {
     hoardeWaveGen1_1 teamBaseGen;
-
-    public oneTeamBaseGenAtPoint(hoardeWaveGen1_1 teamBaseGenIn)
+    tag2 team;
+    public oneTeamBaseGenAtPoint(tag2 teamIn, hoardeWaveGen1_1 teamBaseGenIn)
     {
+        team = teamIn;
         teamBaseGen = teamBaseGenIn;
     }
 
     internal override void doIt(Vector3 thisPoint)
     {
-        GameObject emptyObject = new GameObject();
-        emptyObject.transform.position = thisPoint;
 
-        hoardUpdater1_1 theUpdater = emptyObject.AddComponent<hoardUpdater1_1>();
+        GameObject newObj = new makeTestBase(team).doIt(thisPoint); //new GameObject();
+        //emptyObject.transform.position = thisPoint;
+
+        hoardUpdater1_1 theUpdater = newObj.AddComponent<hoardUpdater1_1>();
 
 
         List<Vector3> listOfSpawnPoints = new List<Vector3>();
-        listOfSpawnPoints.Add(new Vector3(5, 0, 5) + emptyObject.transform.position);
-        listOfSpawnPoints.Add(new Vector3(5, 0, -5) + emptyObject.transform.position);
-        listOfSpawnPoints.Add(new Vector3(-5, 0, 5) + emptyObject.transform.position);
-        listOfSpawnPoints.Add(new Vector3(-5, 0, -5) + emptyObject.transform.position);
+        listOfSpawnPoints.Add(new Vector3(5, 0, 5) + newObj.transform.position);
+        listOfSpawnPoints.Add(new Vector3(5, 0, -5) + newObj.transform.position);
+        listOfSpawnPoints.Add(new Vector3(-5, 0, 5) + newObj.transform.position);
+        listOfSpawnPoints.Add(new Vector3(-5, 0, -5) + newObj.transform.position);
         
 
         theUpdater.hoardes.Add(teamBaseGen);
@@ -875,11 +2790,9 @@ public class oneTeamBaseGenAtPoint : doAtPoint
 
 
         //needs a zone, otherwise it won't ever be called in "callableUpdate"
-        emptyObject.AddComponent<BoxCollider>();
-        tagging2.singleton.addTag(emptyObject, tagging2.tag2.zoneable);
-        tagging2.singleton.addTag(emptyObject, tagging2.tag2.militaryBase);
+        newObj.AddComponent<BoxCollider>();
 
-        teamBaseGen.theBaseGeneratorObject = emptyObject;
+        teamBaseGen.theBaseGeneratorObject = newObj;
     }
 }
 
@@ -1043,7 +2956,10 @@ public class hoardUpdater1_1 : MonoBehaviour, IupdateCallable
 
 
 
+public class playerTeamBase1_1
+{
 
+}
 
 
 
@@ -2700,6 +4616,7 @@ public class basicSoldierGeneratorG : objectGen
 
 
         Renderer theRenderer = newObj.GetComponent<Renderer>();
+        //Debug.Log(team);
         theRenderer.material.color = tagging2.singleton.teamColors[team];
 
         GameObject.Destroy(newObj.GetComponent<Collider>());
@@ -2818,7 +4735,7 @@ public class basicSoldierFSM : FSM
             new hasVirtualGamepad(),
             new reverseCriteria(new objectHasTag(team)),
             new stickyTrueCriteria( new lineOfSight(theObjectDoingTheEnaction),200),
-            new proximityCriteriaBool(theObjectDoingTheEnaction, 25)
+            new proximityCriteriaBool(theObjectDoingTheEnaction, 45)
             //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
             );
 
@@ -3321,7 +5238,7 @@ public class goToX
         //USING FAKE INPUTS FOR TARGETS
         permaPlan2 perma1 = new permaPlan2(
                 genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions,
-                theObjectDoingTheEnactions,
+                thingXToGoTo,
                 //thingXToGoTo.pickNext().realPositionOfTarget(), //messy
                 proximity)
                 //new aimTargetPlanGen(theObjectDoingTheEnactions, thingXToGoTo).returnIt(), //messy
@@ -3364,6 +5281,8 @@ public class giveXRTSTargetsToYUnits: repeatWithTargetPicker
         //Debug.Log("unitsToGiveOrdersTo.grab().Count:  " + unitsToGiveOrdersTo.grab().Count);
         foreach (GameObject unit in unitsToGiveOrdersTo.grab())
         {
+            //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
+            //tagging2.singleton.printAllTags(unit);
             rtsModule theComponent = unit.GetComponent<rtsModule>();
             theComponent.currentReceivedOrders = theTarget;
         }

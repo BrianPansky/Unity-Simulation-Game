@@ -1189,6 +1189,87 @@ public class applePatternTargetPicker : targetPicker
     }
 }
 
+public class nearestGoldilocksTargetPicker : targetPicker
+{
+    //so...take a set of objects........AND the position of "flee-er"?
+    //then.......weighted average the vectors running away from each object?
+    //i think?
+    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+
+    objectSetGrabber theSet;
+    GameObject theObjectDoingThePicking;
+    private float goldilocksRange;
+    string myConstructorTrace;
+
+    public nearestGoldilocksTargetPicker(GameObject theObjectDoingThePickingIn, objectSetGrabber theSetInput, float goldilocksRangeIn)
+    {
+        //Debug.Log("goldilocksRange:  " + goldilocksRange + "goldilocksRangeIn:  "+ goldilocksRangeIn);
+        theObjectDoingThePicking = theObjectDoingThePickingIn;
+        theSet = theSetInput;
+        this.goldilocksRange = goldilocksRangeIn;
+
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
+        //Debug.Log("goldilocksRange:  " + goldilocksRange + "goldilocksRangeIn:  " + goldilocksRangeIn);
+
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Debug.Log("goldilocksRange:  " + goldilocksRange);
+
+        return new agnosticTargetCalc(nearestGoldilocksPoint());
+    }
+
+
+    Vector3 nearestGoldilocksPoint()
+    {
+        /*
+        spatialDataPointFragment thisFragment = new spatialDataPointFragment();
+        {
+            if (thisFragment.lineOfSightBool == false) { continue; }
+
+
+            Vector3 fragmentVector = new Vector3();
+            fragmentVector = thisFragment.simpleRadialPattern();
+
+            float distance = thisFragment.distanceAsFloat;
+
+            theOutputVector += fragmentVector.normalized / distance;
+
+            return theFleeer.transform.position + (newDirection * 20);
+    }
+        */
+
+        //Debug.Log("new nearestTargetPickerExceptSelf(theObjectDoingThePicking, theSet).pickNext().realPositionOfTarget()"+new nearestTargetPickerExceptSelf(
+        //theObjectDoingThePicking, theSet).pickNext().realPositionOfTarget());
+        //                  Debug.Log("goldilocksRange:  "+goldilocksRange + ", "+myConstructorTrace);
+        Vector3 centerOfGoldilocksRadius = new nearestTargetPickerExceptSelf(theObjectDoingThePicking, theSet).pickNext().realPositionOfTarget();
+        Vector3 currentLineFromTheGoldilocksCenterTargetAndTheTargeter = theObjectDoingThePicking.transform.position - centerOfGoldilocksRadius;
+            //transform.position;
+
+        Vector3 normalized = currentLineFromTheGoldilocksCenterTargetAndTheTargeter.normalized;
+
+        //Debug.Log(",,,,,,,,,,,,,,,,,goldilocksRange:  " + goldilocksRange);
+        //Debug.Log("normalized:  " + normalized);
+        //Debug.Log("normalized*goldilocksRange:  " + normalized * goldilocksRange);
+        return normalized * goldilocksRange + centerOfGoldilocksRadius;// theObjectDoingThePicking.transform.position;
+
+    }
+
+    /*
+    Vector3 weightedRadialFleeingPoint()
+    {
+        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+
+        Vector3 newDirection = myData.weightedRadialPattern();
+        //Debug.Log(newDirection - Vector3.zero);
+
+        return theFleeer.transform.position + (newDirection.normalized * 20);
+    }
+    */
+}
+
+
 
 //end condition
 

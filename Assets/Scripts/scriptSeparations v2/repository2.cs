@@ -34,6 +34,7 @@ public class repository2 : MonoBehaviour
 
     public Material explosion1;
     public Material smoke1;
+    public Material bulletGlow1;
 
     void Awake()
     {

@@ -578,6 +578,10 @@ public class stickyCondition : nesterCondition
 
     public stickyCondition(condition nestedConditionIn, int maxTimerInSeconds =2)
     {
+        if(maxTimerInSeconds > 11)
+        {
+            Debug.Log("(maxTimerInSeconds > 11), are you sure you want this to possibly delay effects by " + maxTimerInSeconds + " seconds?");
+        }
         theNestedCondition = nestedConditionIn;
         maxTimer = maxTimerInSeconds;
     }
@@ -1116,6 +1120,13 @@ public class proximityRef : baseCondition
 
     public override bool met()
     {
+        /*
+        if(theTargetHolder.error() == true) 
+        {
+            Debug.Log("(theTargetHolder.error() == true)");
+            return false;
+        }
+        */
         //return false;
         Vector3 position1 = object1.transform.position;
         Debug.Assert(theTargetHolder != null);
@@ -1584,6 +1595,7 @@ public class depletableSingleEXEListComplete : baseCondition
         //Debug.Log("planList.Count:  " + planList.Count);
         foreach (singleEXE planEXE in planList)
         {
+            //Debug.Log("planEXE.asText():  " + planEXE.asText());
             if (planEXE == null) { continue; } //messy annoying for now
             if (planEXE.endConditionsMet() == false)
             {

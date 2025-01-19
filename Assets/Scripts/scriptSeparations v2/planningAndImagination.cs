@@ -1306,12 +1306,17 @@ public class agnosticTargetCalc:targetCalculator
     {
         return theTargetCalc.error();
     }
+
+    internal override Quaternion realRotationOfTarget()
+    {
+        return theTargetCalc.realRotationOfTarget();
+    }
 }
 
 public abstract class targetCalculator
 {
     public GameObject targeter;
-
+    public bool isThereAnError = false;
 
     public abstract Vector3 targetPosition();
     public abstract Vector3 realPositionOfTarget();
@@ -1339,6 +1344,9 @@ public abstract class targetCalculator
 
 
     public abstract bool error();
+
+
+    internal abstract Quaternion realRotationOfTarget();
 }
 
 public class movableObjectTargetCalculator : targetCalculator
@@ -1384,7 +1392,10 @@ public class movableObjectTargetCalculator : targetCalculator
         return target.transform.position;
     }
 
-
+    internal override Quaternion realRotationOfTarget()
+    {
+        return target.transform.rotation;
+    }
 }
 
 public class staticVectorTargetCalculator : targetCalculator
@@ -1414,14 +1425,22 @@ public class staticVectorTargetCalculator : targetCalculator
     {
         return false;
     }
+
+    internal override Quaternion realRotationOfTarget()
+    {
+        return Quaternion.identity;
+    }
 }
 
 public class singleMovableObjectTargetCalculator : targetCalculator
 {
+    //"single" as in "no TARGETER, just the TARGET"
     GameObject target;
+    private string myConstructorTrace;
 
     public singleMovableObjectTargetCalculator(GameObject targetIn)//, float offsetIn = 1.8f)
     {
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
         target = targetIn;
         //offset = offsetIn;
     }
@@ -1436,8 +1455,10 @@ public class singleMovableObjectTargetCalculator : targetCalculator
         //ad-hoc duct tape!
         if (target == null)
         {
-            //return Vector3.zero;
-            return targeter.transform.position;
+            isThereAnError = true;
+            Debug.Log(myConstructorTrace);
+            return Vector3.zero;
+            //return targeter.transform.position; //NO THIS VERSION HAS NO TARGETER!!!!!!!!!!
         }
 
         return target.transform.position;
@@ -1450,13 +1471,25 @@ public class singleMovableObjectTargetCalculator : targetCalculator
         //ad-hoc duct tape!
         if (target == null)
         {
-            //return Vector3.zero;
-            return targeter.transform.position;
+            isThereAnError = true;
+            Debug.Log(myConstructorTrace);
+            return Vector3.zero;
+            //return targeter.transform.position; //NO THIS VERSION HAS NO TARGETER!!!!!!!!!!
         }
         return realPositionOfTarget();
     }
 
-
+    internal override Quaternion realRotationOfTarget()
+    {//ad-hoc duct tape!
+        if (target == null)
+        {
+            isThereAnError = true;
+            Debug.Log(myConstructorTrace);
+            return Quaternion.identity;
+            //return targeter.transform.rotation;//NO THIS VERSION HAS NO TARGETER!!!!!!!!!!
+        }
+        return target.transform.rotation;
+    }
 }
 
 public class staticSingleVectorTargetCalculator : targetCalculator
@@ -1470,6 +1503,10 @@ public class staticSingleVectorTargetCalculator : targetCalculator
         asTextString = "static vector:  " + targetPositionVectorIn;
     }
 
+    internal override Quaternion realRotationOfTarget()
+    {
+        return Quaternion.identity;
+    }
     public override Vector3 realPositionOfTarget()
     {
         return targetPositionVector;
@@ -1535,6 +1572,13 @@ public class targetCalculatorFromPicker : targetCalculator
         updateTargetIfNecessary();
 
         return theCalculatorForCurrentTarget.targetPosition();
+    }
+
+    internal override Quaternion realRotationOfTarget()
+    {
+        updateTargetIfNecessary();
+
+        return theCalculatorForCurrentTarget.realRotationOfTarget();
     }
 }
 

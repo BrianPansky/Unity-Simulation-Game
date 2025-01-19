@@ -41,6 +41,8 @@ public class tagging2 : MonoBehaviour
         predator,
         militaryBase,
         teamLeader,
+        attackSquad, 
+        defenseSquad,
         team1,
         team2,
         team3,
@@ -417,6 +419,28 @@ public class tagging2 : MonoBehaviour
     public List<tag2> allTagsOnObject(GameObject gameObject)
     {
         return tagsOnObject[idPairGrabify(gameObject)];
+    }
+
+    internal void printAllTags(GameObject theObject)
+    {
+        string x = "tags:  [ ";
+        foreach(tag2 thisTag in allTagsOnObject(theObject))
+        {
+            x += thisTag.ToString() + ", ";
+        }
+        x += "]";
+        Debug.Log(x);
+    }
+    public List<GameObject> allObjectsWithTag(tag2 theTag)
+    {
+        return listInObjectFormat(objectsWithTag[theTag]);
+    }
+    internal void printAllObjectsWithTag(tag2 theTag)
+    {
+        foreach (GameObject thisObj in allObjectsWithTag(theTag))
+        {
+            Debug.Log(thisObj);
+        }
     }
 }
 
@@ -806,8 +830,13 @@ public class randomTargetPicker : targetPicker
 
     public override agnosticTargetCalc pickNext()
     {
+        //      tagging2.singleton.printAllObjectsWithTag(tag2.militaryBase);
         //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
         GameObject target = repository2.singleton.randomTargetPickerObjectFromList(theObjectSetGrabber.grab());
+        //what if it's null?  no target????  zero on list??????
+        //check that condition BEFORE using this?  probably?  bit....tenuous, though.....risky....could forget.......
+        //Debug.Log("'''SUCCESSFUL PICK''' target, target.GetHashCode():  " + target + ", " + target.GetHashCode());
+        //tagging2.singleton.printAllTags(target);
 
         agnosticTargetCalc targ = new agnosticTargetCalc(target);
 
@@ -922,6 +951,28 @@ public class targetCacheReceiver : targetPicker
 }
 
 */
+
+public class averageOfTargetPickers : targetPicker
+{
+    private targetPicker[] targetPickers;
+
+    public averageOfTargetPickers(targetPicker[] targetPickersIn)
+    {
+        this.targetPickers = targetPickersIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        Vector3 averageVector = new Vector3();
+        foreach(targetPicker thisTargetPicker in targetPickers)
+        {
+            averageVector += thisTargetPicker.pickNext().targetPosition();
+        }
+
+        return new agnosticTargetCalc(averageVector/(targetPickers.Length));
+    }
+}
+
 
 
 public class firstFromListTargetPicker : targetPicker
