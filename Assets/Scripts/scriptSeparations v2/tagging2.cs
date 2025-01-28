@@ -1202,13 +1202,13 @@ public class COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones : objectSetG
     {
         List < GameObject > allObjects = new List < GameObject >();
 
-        Debug.Log("zonesSortedByNearest.Count:  "+zonesSortedByNearest.Count);
+        //Debug.Log("zonesSortedByNearest.Count:  "+zonesSortedByNearest.Count);
         
         int currentIndex = 0;
-        Debug.Log("howManyNearZonesToLookIn:  " + howManyNearZonesToLookIn);
+        //Debug.Log("howManyNearZonesToLookIn:  " + howManyNearZonesToLookIn);
         while (currentIndex < howManyNearZonesToLookIn-1)
         {
-            Debug.Log("currentIndex:  " + currentIndex);
+            //Debug.Log("currentIndex:  " + currentIndex);
             List<GameObject> allObjectsInThisZone = allObjectsInZoneX(zonesSortedByNearest[currentIndex]);
 
             foreach (GameObject thisObject in allObjectsInThisZone)

@@ -131,7 +131,7 @@ public class initialGenerator2 : MonoBehaviour
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.95f);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.45f);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);

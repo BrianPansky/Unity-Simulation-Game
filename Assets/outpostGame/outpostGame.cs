@@ -297,6 +297,9 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
     public List<IupdateCallable> currentUpdateList { get; set; }
     public objectSetGrabber theGrabber;
 
+    int playerBlipSpacing = 75;
+    int playerBlipCountup = 0;
+
     public static testRadarComponent addThisComponent(GameObject screen)
     {
         testRadarComponent theComponent = screen.AddComponent<testRadarComponent>();
@@ -314,11 +317,11 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
 
     public void callableUpdate()
     {
-        Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+        //Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
     }
     public void Update()
     {
-        Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+        //Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
         /*
         -------------------------------------------------------------
         object "screen"
@@ -339,8 +342,12 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
 
     private void renderObjectsToScreen(List<GameObject> ListOfObjects)
     {
+        ListOfObjects.Add(tagging2.singleton.allObjectsWithTag(tag2.player)[0]);
+        Debug.Log("ListOfObjects.Count:  "+ListOfObjects.Count);
         foreach (GameObject thisObject in ListOfObjects)
         {
+            //Debug.Log(thisObject);
+            //tagging2.singleton.printAllTags(thisObject);
             renderOneObjectToScreen(thisObject);
         }
     }
@@ -363,15 +370,27 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
         genGen.singleton.addCube(theMapMarker);
         theMapMarker.transform.localScale = new Vector3(0.07f, 0.07f, 0.07f);
 
-
         Color teamColor = teamColorFinder(theRealObject);
         Renderer theRenderer = theMapMarker.AddComponent<MeshRenderer>();
         theRenderer.material.color = Color.yellow;//teamColor;
 
         theMapMarker.AddComponent<selfDestructScript1>();
 
-        placeonCorrospondingScreenPosition(theRealObject, theMapMarker);
 
+
+
+        //player blip:
+        playerBlipCountup++;
+        if (playerBlipCountup > playerBlipSpacing && tagging2.singleton.allTagsOnObject(theRealObject).Contains(tag2.player))
+        {
+            theMapMarker.transform.localScale = new Vector3(0.17f, 0.17f, 0.17f);
+            theMapMarker.GetComponent<selfDestructScript1>().timeUntilSelfDestruct=1;
+            playerBlipCountup = 0;
+        }
+
+
+
+        placeonCorrospondingScreenPosition(theRealObject, theMapMarker);
     }
 
     private void placeonCorrospondingScreenPosition(GameObject theRealObject, GameObject theMapMarker)
@@ -379,7 +398,7 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
         float realx = theRealObject.transform.position.x;
         float realy = theRealObject.transform.position.y;
         float realz = theRealObject.transform.position.z;
-        Vector3 test3dPoint = (new Vector3(-80f, realz, realx) / 500) + (this.gameObject.transform.position)+new Vector3(0,1,0);
+        Vector3 test3dPoint = (new Vector3(-80f, realz, realx) / 180) + (this.gameObject.transform.position)+new Vector3(0,0.6f,0);
 
         theMapMarker.transform.position = test3dPoint;
     }
