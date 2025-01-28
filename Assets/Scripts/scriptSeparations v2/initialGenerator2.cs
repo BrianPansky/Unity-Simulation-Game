@@ -8,6 +8,8 @@ using UnityEngine.AI;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
+using static enactionCreator;
+using static interactionCreator;
 using static tagging2;
 using static UnityEngine.UI.Image;
 
@@ -101,16 +103,17 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        int rows = 5;
-        int columns = 5;
+        int rows = 2;
+        int columns = 2;
         int verticalColumns = 1;
 
-        float zScale = 550f;
-        float xScale = 550f;
+        float zScale = 1100f;
+        float xScale = 1100f;
         float yScale = 30f;
 
         //approximate center point calculation:
-        Vector3 startPoint = new Vector3(-xScale * columns / 2, 1, -zScale * rows / 2);
+        //Vector3 startPoint = new Vector3();
+        Vector3 startPoint = new Vector3(-xScale * columns / 2, 1, -zScale * rows / 2) + new Vector3(xScale/2,0,zScale/2);
 
         //creating, filling and marking zones, based on geometry above:
         List<Vector3> points = new gridOfPoints(startPoint, rows, columns, zScale, xScale, yScale, verticalColumns).returnIt();
@@ -122,13 +125,13 @@ public class initialGenerator2 : MonoBehaviour
 
 
         //OFFSET FOR PLACING THINGS IN THE ZONES
-        Vector3 offset = new Vector3(-230, 1, 120);
+        //Vector3 offset = new Vector3(-230, 1, -120);
 
         //new doAtEachPoint(new makeHoardeGenAtPoint(xScale, yScale, zScale), points);
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.55f, offset);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.95f);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
@@ -184,6 +187,11 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(team9Base());
         */
 
+
+
+
+
+        listOfTeamBaseGenerators.Add(new playerTeamGen());
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));//, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team3));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team4));
@@ -192,17 +200,58 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
 
+
+
+
+        /*
+        listOfTeamBaseGenerators.Add(new playerTeamGen());
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));//, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team3));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team4));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team5));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team6));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
+        
+        new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
+        new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
+        */
+
         new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
         new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
 
 
-        Vector3 location = Vector3.zero;
-        location = new Vector3(-20, 2.5f, -55);
-        makePLAYER(new Vector3(-5, 1, -1));
+
+
+        new testNewFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
+        new testNewFSMGenerator2(new Vector3(815, 1.5f, 850)).doIt();
+        returnBasicGrabbable(stuffType.meat1, new Vector3(780, 1.5f, 845));
+        returnBasicGrabbable(stuffType.fruit, new Vector3(810, 1.5f, 835));
+        //                      worldScript.singleton.thePlayer = makePLAYER(new Vector3(820, 2.5f, 855));
+
+
 
         //Time.timeScale = 0f;
     }
 
+    public GameObject returnBasicGrabbable(stuffType stuffX, Vector3 where, float scale = 1f)
+    {
+
+        GameObject newObj = genGen.singleton.returnPineTree1(where);
+
+        newObj.transform.localScale = scale * newObj.transform.localScale;
+
+        tagging2.singleton.addTag(newObj, tagging2.tag2.interactable);
+        tagging2.singleton.addTag(newObj, tagging2.tag2.equippable2);
+        tagging2.singleton.addTag(newObj, tagging2.tag2.zoneable);
+
+        stuffStuff.addStuffStuff(newObj, stuffX);
+
+        interactionCreator.singleton.addInteraction(newObj, interType.standardClick, new interactionEffect(new deathEffect(newObj)));
+
+
+        return newObj;
+    }
     private List<Vector3> bigMapStartLocations1()
     {
 
@@ -222,11 +271,11 @@ public class initialGenerator2 : MonoBehaviour
 
     private List<Vector3> scalableMapStartLocations1(float scaleFactor, Vector3 offset)
     {
-        
+
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
 
-        listOfTeamStartLocations.Add(new Vector3(500* scaleFactor, 0, 500 * scaleFactor)+ offset);
+        listOfTeamStartLocations.Add(new Vector3(500 * scaleFactor, 0, 500 * scaleFactor) + offset);
         listOfTeamStartLocations.Add(new Vector3(-200 * scaleFactor, 0, 300 * scaleFactor) + offset);
         listOfTeamStartLocations.Add(new Vector3(-300 * scaleFactor, 0, -400 * scaleFactor) + offset);
         listOfTeamStartLocations.Add(new Vector3(300 * scaleFactor, 0, -500 * scaleFactor) + offset);
@@ -234,6 +283,25 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamStartLocations.Add(new Vector3(400 * scaleFactor, 0, 0 * scaleFactor) + offset);
         listOfTeamStartLocations.Add(new Vector3(50 * scaleFactor, 0, 400 * scaleFactor) + offset);
         listOfTeamStartLocations.Add(new Vector3(-20 * scaleFactor, 0, -600 * scaleFactor) + offset);
+
+
+        return listOfTeamStartLocations;
+    }
+
+    private List<Vector3> scalableMapStartLocations1(float scaleFactor)
+    {
+
+
+        List<Vector3> listOfTeamStartLocations = new List<Vector3>();
+
+        listOfTeamStartLocations.Add(new Vector3(500 * scaleFactor, 0, 500 * scaleFactor) );
+        listOfTeamStartLocations.Add(new Vector3(-200 * scaleFactor, 0, 300 * scaleFactor) );
+        listOfTeamStartLocations.Add(new Vector3(-300 * scaleFactor, 0, -400 * scaleFactor) );
+        listOfTeamStartLocations.Add(new Vector3(300 * scaleFactor, 0, -500 * scaleFactor) );
+        listOfTeamStartLocations.Add(new Vector3(-500 * scaleFactor, 0, -70 * scaleFactor) );
+        listOfTeamStartLocations.Add(new Vector3(400 * scaleFactor, 0, 0 * scaleFactor));
+        listOfTeamStartLocations.Add(new Vector3(50 * scaleFactor, 0, 400 * scaleFactor));
+        listOfTeamStartLocations.Add(new Vector3(-20 * scaleFactor, 0, -600 * scaleFactor));
 
 
         return listOfTeamStartLocations;
@@ -348,10 +416,12 @@ public class initialGenerator2 : MonoBehaviour
         //new doAtEachPoint(new makeObjectAtPoint2(xWidth, verticalColumns, zLength), points);
     }
 
-    void makePLAYER(Vector3 location)
+    GameObject makePLAYER(Vector3 location)
     {
         GameObject player = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.player, location);
         genGen.singleton.addBody4ToObject(player);
+
+        return player;
     }
 
 

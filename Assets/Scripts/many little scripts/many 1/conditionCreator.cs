@@ -252,7 +252,7 @@ public abstract class condition
     {
         string stringToReturn = "";
 
-        stringToReturn += "met?  " + met() + ", ";
+        stringToReturn += "met?  " + met() + ", ";  //doesn't seem to work??????????  doesn't call the override "met()"?
 
         stringToReturn += this.ToString();
 
@@ -376,12 +376,19 @@ public class multicondition : nesterCondition
     {
         foreach (condition condition in conditionList)
         {
-            //Debug.Log(".................condition:  " + condition);
+            //Debug.Log(".................condition:  " + condition + ", hash code:  " + condition.GetHashCode());
             //Debug.Log("condition.asTextSHORT():  " + condition.asTextSHORT());
             //Debug.Log("condition.asText():  " + condition.asText());
-            if (condition.met() == false) { return false; }
+            bool metttt = condition.met();
+            //Debug.Log("metttt:  " + metttt + condition.GetHashCode());
+            if (metttt == false)
+            {
+                //Debug.Log("condition is false/NOT met!!");
+                return false; 
+            }
         }
 
+        //Debug.Log("condition is true/met!!");
         return true;
     }
 
@@ -989,12 +996,13 @@ public class proximityFromTargetPicker : baseCondition
     public override bool met()
     {
 
+        if (theTargetPicker.pickNext().error()) { return false; }//??????????  depends if i want it or not?  well then, just reverse outcome?  dunno...
 
         //return false;
         Vector3 position1 = object1.transform.position;
         Vector3 position2 = theTargetPicker.pickNext().targetPosition();// object2.transform.position;
-        Debug.Log("theTargetPicker.pickNext():  " + theTargetPicker.pickNext());
-        Debug.Log("theTargetPicker.pickNext().targetPosition():  " + theTargetPicker.pickNext().targetPosition());
+        //  Debug.Log("theTargetPicker.pickNext():  " + theTargetPicker.pickNext());
+        //  Debug.Log("theTargetPicker.pickNext().targetPosition():  " + theTargetPicker.pickNext().targetPosition());
         Vector3 vectorBetween = position1 - position2;
         float distance = vectorBetween.magnitude;
 
@@ -1466,11 +1474,21 @@ public class isThereAtLeastOneObjectInSet : baseCondition
             return true;
         }
 
-        //Debug.Log("fffffffffffffffffalssssssssssssssssse");
+        //Debug.Log("fffffffffffffffffalssssssssssssssssse"   + this.GetHashCode());
         return false;
     }
 
 
+    public override string asText()
+    {
+        string stringToReturn = "";
+
+        stringToReturn += "met?  " + met() + ", ";//why is this returning a different result???
+
+        stringToReturn += this.ToString();
+
+        return stringToReturn;
+    }
     public override string asTextBaseOnly()
     {
         //Debug.Log("444444444444444444444????????????????");
@@ -2312,3 +2330,243 @@ public abstract class objectEvaluator
 }
 
 
+
+
+public abstract class evaluateSet
+{
+    //objectEvaluator theEvaluator;
+    //objectSetGrabber theSetGrabber;
+
+    public abstract Dictionary<float, GameObject> evaluateObjectSet();
+}
+
+public abstract class sorter
+{
+    //objectEvaluator theEvaluator;
+    //objectSetGrabber theSetGrabber;
+    //evaluateSet theSetEvaluator;
+
+    public abstract List<GameObject> sortSet();
+}
+
+public class returnSortedIndexList
+{
+    //gives a list of index integers
+    //if you use the first integer on that list to grab from the unsorted other list,
+    //you get the first item that would be on the sorted list
+    //thus it doesn't matter what TYPE of thing the other list consists of [gameObject, component, class object, etc]
+    //ranked with highest float value first
+
+    List<int> sortedIndexList = new List<int>();
+
+    public returnSortedIndexList(List<float> unsortedListIn)
+    {
+        sortedIndexList = returnFullIndexMap(unsortedListIn);
+    }
+
+
+
+
+
+    /*
+    
+    public List<int> onePassSort(List<float> unsortedListIn)
+    {
+
+
+        foreach (float thisValue in unsortedListIn)
+        {
+
+        }
+
+
+
+    }
+
+    public List<int> onePassIndexSorter(List<float> unsortedListIn)
+    {
+        List<int> sortingTheIndexList = new List<int>();
+
+        
+
+        foreach (float thisValue in unsortedListIn) 
+        {
+
+        }
+
+    }
+
+
+
+    public List<int> rankThisMess(Dictionary<int, GameObject> dictionaryOfObjects, Dictionary<int, float> dictionaryOfValues)
+    {
+        List<int> theRanking = new List<int>();
+        int numberOfRanks = 0;
+
+        foreach (int thisKey in dictionaryOfValues.Keys)
+        {
+            numberOfRanks++;  //is this NOT redundant?  don't i just need to know the count of "theRanking"?
+
+            if (theRanking.Count == 0)
+            {
+                //it's the first rank by default
+                theRanking.Add(thisKey);
+            }
+            else
+            {
+                //have to actaully rank this....key....
+                theRanking = thisMess(theRanking, dictionaryOfObjects, dictionaryOfValues, thisKey);
+            }
+        }
+
+        return theRanking;
+    }
+
+    public List<int> thisMess(List<int> theRanking, Dictionary<int, GameObject> dictionaryOfObjects, Dictionary<int, float> dictionaryOfValues, int thisKey)
+    {
+        //this function determines where the "current" distance [grabbed from the "dictionaryOfValues", using the "thisKey"]
+        //ranks among all of the other values that have been ranked so far.
+        //if it's worse than any of the ones ranked so far, it is added to the END of the ranking
+        bool lookingForPosition = true;
+
+        //create one index for each entry in "theRanking" [the list of keys ranked by value]
+        List<int> listOfRankIndexes = new List<int>();
+        int indexCounter = 0;
+        while (indexCounter < theRanking.Count)
+        {
+            listOfRankIndexes.Add(indexCounter);
+            indexCounter++;
+        }
+
+
+
+
+
+        //      so.....compare current distance (dictionaryOfDistances[thisKey]) against every single other distance that has been ranked so far,
+        //      until i find one it is better than [then STOP the loop!]
+        int needToKnowTheIndexForTheTheRankingList = 0;
+        foreach (int otherDistanceThatHasBeenRankedSoFarKey in theRanking)
+        {
+            if (dictionaryOfDistances[thisKey] < dictionaryOfDistances[otherDistanceThatHasBeenRankedSoFarKey])
+            {
+                theRanking.Insert(needToKnowTheIndexForTheTheRankingList, thisKey);
+                lookingForPosition = false;
+                break;
+            }
+
+            needToKnowTheIndexForTheTheRankingList++;
+        }
+
+        //if it wasn't better than any of the ones ranked so far, add it to the end of the list:
+        if (lookingForPosition)
+        {
+            //no position was found, append this key to the end of list
+            theRanking.Add(thisKey);
+        }
+
+        return theRanking;
+    }
+
+
+    public List<float> insertValueInRanking(List<float> theCurrentRanking, float valueToRank)
+    {
+        //sort by highest first
+
+        int oldIndex = 0;
+
+        while (oldIndex < theCurrentRanking.Count)
+        {
+            float thisRankedValue = theCurrentRanking[oldIndex];
+
+            if (valueToRank > thisRankedValue)
+            {
+                theCurrentRanking.Insert(oldIndex, valueToRank);
+                return theCurrentRanking;
+            }
+
+            oldIndex++;
+        }
+
+        //if it wasn't better than any of the ones ranked so far, add it to the end of the list:
+        theCurrentRanking.Add(valueToRank);
+        return theCurrentRanking;
+    }
+
+
+    public List<int> insertValueInRankingAndReturnIndexMap(List<int>  currentIndexMap, List<float> theCurrentRanking, float valueToRank, int indexOfValueToRank)
+    {
+        //sort by highest first
+
+        int oldIndex = 0;
+
+        while (oldIndex < theCurrentRanking.Count)
+        {
+            float thisRankedValue = theCurrentRanking[oldIndex];
+
+            if (valueToRank > thisRankedValue)
+            {
+                theCurrentRanking.Insert(oldIndex, valueToRank);
+                currentIndexMap.Insert(oldIndex, indexOfValueToRank);
+                return currentIndexMap;
+            }
+
+            oldIndex++;
+        }
+
+        //if it wasn't better than any of the ones ranked so far, add it to the end of the list:
+        theCurrentRanking.Add(valueToRank);
+        currentIndexMap.Add(indexOfValueToRank);
+        return currentIndexMap;
+    }
+
+    */
+
+    public List<int> returnFullIndexMap(List<float> unsortedValuesToRank)
+    {
+        if (unsortedValuesToRank.Count == 0) { return null; }
+
+        //sort by highest first
+        List<int> currentIndexMap = new List<int>();
+        //List<float> theCurrentRanking = new List<float>();
+
+        //currentIndexMap[0] = 0;
+        currentIndexMap.Add(0);
+        int currentOldIndex = 1;
+
+        //Debug.Assert((currentOldIndex < unsortedValuesToRank.Count));
+        while (currentOldIndex < unsortedValuesToRank.Count)
+        {
+            float thisUnsortedValue = unsortedValuesToRank[currentOldIndex];
+
+            int temporaryIndexOfCurrentIndexMap = 0;
+            while (temporaryIndexOfCurrentIndexMap < currentIndexMap.Count)
+            {
+                float thisTemporarilySortedValue = unsortedValuesToRank[currentIndexMap[temporaryIndexOfCurrentIndexMap]];
+
+                //Debug.Log("thisTemporarilySortedValue: " + thisTemporarilySortedValue);
+                //Debug.Log("thisUnsortedValue:  " + thisUnsortedValue);
+                //Debug.Log("(thisTemporarilySortedValue > thisUnsortedValue):  " + (thisTemporarilySortedValue > thisUnsortedValue));
+                if (thisTemporarilySortedValue > thisUnsortedValue){temporaryIndexOfCurrentIndexMap++; continue; }
+
+
+                //Debug.Log("currentIndexMap.Count:  " + currentIndexMap.Count);
+                temporaryIndexOfCurrentIndexMap++;
+            }
+
+            currentIndexMap.Insert(temporaryIndexOfCurrentIndexMap, currentOldIndex);
+            currentOldIndex++;
+        }
+
+        return currentIndexMap;
+    }
+
+
+
+
+
+
+    public List<int> returnIt()
+    {
+        return sortedIndexList;
+    }
+}

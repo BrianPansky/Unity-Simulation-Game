@@ -13,6 +13,7 @@ public class mapZoneScript : MonoBehaviour
     public List<GameObject> theList = new List<GameObject>();
     public List<GameObject> threatList = new List<GameObject>();
 
+
     public worldScript theWorldScript;
 
     void Awake()
@@ -31,6 +32,7 @@ public class mapZoneScript : MonoBehaviour
 
         tagging2.singleton.objectsInZone[thisZoneNumber] = new List<objectIdPair>();
         tagging2.singleton.zoneOfObject[tagging2.singleton.idPairGrabify(this.gameObject)] = thisZoneNumber;
+        tagging2.singleton.addTag(this.gameObject, tag2.mapZone);
     }
     
 

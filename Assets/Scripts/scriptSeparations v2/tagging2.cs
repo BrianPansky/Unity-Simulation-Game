@@ -30,6 +30,7 @@ public class tagging2 : MonoBehaviour
     public enum tag2
     {
         errorYouDidntSetEnumTypeForTAG2,
+        player,
         interactable,
         equippable2,
         playable2,
@@ -50,7 +51,8 @@ public class tagging2 : MonoBehaviour
         team5,
         team6,
         team7,
-        team8 //just use integers for teams????
+        team8,
+        team9 //just use integers for teams????
     }
 
 
@@ -63,13 +65,15 @@ public class tagging2 : MonoBehaviour
         singletonify();
 
 
+        teamColors[tag2.team1] = Color.gray;
         teamColors[tag2.team2] = Color.red;
         teamColors[tag2.team3] = Color.green;
         teamColors[tag2.team4] = Color.blue;
-        teamColors[tag2.team5] = Color.black;
-        teamColors[tag2.team6] = Color.cyan;
-        teamColors[tag2.team7] = Color.yellow;
-        teamColors[tag2.team8] = Color.magenta;
+        teamColors[tag2.team5] = Color.yellow;
+        teamColors[tag2.team6] = Color.magenta;
+        teamColors[tag2.team7] = Color.cyan;
+        teamColors[tag2.team8] = Color.black;
+        teamColors[tag2.team9] = Color.white;
     }
 
     void singletonify()
@@ -424,7 +428,9 @@ public class tagging2 : MonoBehaviour
     internal void printAllTags(GameObject theObject)
     {
         string x = "tags:  [ ";
-        foreach(tag2 thisTag in allTagsOnObject(theObject))
+        x += "(the zone:  "+whichZone(theObject); 
+        x += "), ";
+        foreach (tag2 thisTag in allTagsOnObject(theObject))
         {
             x += thisTag.ToString() + ", ";
         }
@@ -1098,7 +1104,6 @@ public class setOfAllObjectThatMeetCriteria : objectSetGrabber
         theObjectSetGrabber = theObjectSetGrabberIn;
         theCriteria = theCriteriaIn;
     }
-
     public override List<GameObject> grab()
     {
         List<GameObject> newList = new List<GameObject>();
@@ -1129,6 +1134,9 @@ public class setOfAllObjectThatMeetCriteria : objectSetGrabber
         return newList;
     }
 }
+
+
+
 
 
 
@@ -1166,6 +1174,175 @@ public class setOfAllObjectsInZone : objectSetGrabber
     */
 
 }
+
+
+public class COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones : objectSetGrabber
+{
+    GameObject theObjectWhoIsGrabbingSet;
+    int howManyNearZonesToLookIn;
+
+    public COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones(GameObject theObjectWhoIsGrabbingSetIn, int howManyNearZonesToLookInIn)
+    {
+        theObjectWhoIsGrabbingSet = theObjectWhoIsGrabbingSetIn;
+        howManyNearZonesToLookIn = howManyNearZonesToLookInIn;
+    }
+
+    public override List<GameObject> grab()
+    {
+        List<int> zonesSortedByNearest = getListOfZonesSortedByNearness();
+        if(howManyNearZonesToLookIn > zonesSortedByNearest.Count)
+        {
+            howManyNearZonesToLookIn = zonesSortedByNearest.Count;
+        }
+        List<GameObject> allObjectsFromFirstXZones = getAllObjectsFromFirstXZones(zonesSortedByNearest, howManyNearZonesToLookIn);
+        return allObjectsFromFirstXZones;
+    }
+
+    private List<GameObject> getAllObjectsFromFirstXZones(List<int> zonesSortedByNearest, int howManyNearZonesToLookIn)
+    {
+        List < GameObject > allObjects = new List < GameObject >();
+
+        Debug.Log("zonesSortedByNearest.Count:  "+zonesSortedByNearest.Count);
+        
+        int currentIndex = 0;
+        Debug.Log("howManyNearZonesToLookIn:  " + howManyNearZonesToLookIn);
+        while (currentIndex < howManyNearZonesToLookIn-1)
+        {
+            Debug.Log("currentIndex:  " + currentIndex);
+            List<GameObject> allObjectsInThisZone = allObjectsInZoneX(zonesSortedByNearest[currentIndex]);
+
+            foreach (GameObject thisObject in allObjectsInThisZone)
+            {
+                allObjects.Add(thisObject);
+            }
+
+            currentIndex++;
+        }
+        
+
+        return allObjects;
+    }
+
+    public List<GameObject> allObjectsInZoneX(int zone)
+    {
+        List<objectIdPair> pairs = tagging2.singleton.objectsInZone[zone];
+        return tagging2.singleton.listInObjectFormat(pairs);
+    }
+    private List<int> getListOfZonesSortedByNearness()
+    {
+        List<GameObject> zones = tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsWithTag[tag2.mapZone]);
+        //List<int> dummyZoneNumberList = new List<int>(RangeInt(1, zones.Count));
+        List<float> unsortedListOfDistancesToEachZone = findDistancesToEachZoneListedByZoneNumber(zones, theObjectWhoIsGrabbingSet.transform.position);
+        List<int> indexMapToSortZonesByClosest = new returnSortedIndexList(unsortedListOfDistancesToEachZone).returnIt();
+
+        //should work???????? for zones, because they should be on their tag list in order of their number already, so we JUST need this index map???>
+        return indexMapToSortZonesByClosest;//sortedZoneNumberListFromIndexMap(zones, indexMapToSortZonesByClosest);
+    }
+
+    private List<float> findDistancesToEachZoneListedByZoneNumber(List<GameObject> zones, Vector3 theLocationWeAreMeasuringDistanceFrom)
+    {
+        List<float> listOfDistancesToEachZone = new List<float>();
+
+        int whichZoneWeAreLookingAt = 1;
+
+
+
+        while (whichZoneWeAreLookingAt < tagging2.singleton.objectsInZone.Keys.Count)
+        {
+            listOfDistancesToEachZone.Add(distanceFromXToY(theLocationWeAreMeasuringDistanceFrom, zones[whichZoneWeAreLookingAt]));
+            whichZoneWeAreLookingAt++;
+        }
+
+        return listOfDistancesToEachZone;
+    }
+
+    private float distanceFromXToY(Vector3 theLocationWeAreMeasuringDistanceFrom, GameObject thisObject)
+    {
+        return (thisObject.transform.position - theLocationWeAreMeasuringDistanceFrom).magnitude;
+    }
+
+    /*
+    private List<int> sortedZoneNumberListFromIndexMap(List<GameObject> zones, List<int> indexMapToSortZonesByClosest)
+    {
+        List<int> sortedZoneNumbers = new List<int>();
+        List<int> zoneNumbers = new List<int>().Range(0, zones.Count);
+        int zoneNumber = 1;
+
+        foreach (int thisIndex in indexMapToSortZonesByClosest)
+        {
+            sortedZoneNumbers.Add(zones[thisIndex]);
+        }
+        return sortedZoneNumbers;
+    }
+    */
+
+
+    /*
+    private List<GameObject> sortedListFromIndexMap(List<GameObject> zones, List<int> indexMapToSortZonesByClosest)
+    {
+        List<GameObject> sortedZones = new List<GameObject>();
+        foreach(int thisIndex in indexMapToSortZonesByClosest)
+        {
+            sortedZones.Add(zones[thisIndex]);
+        }
+        return sortedZones;
+    }
+
+
+
+
+    private void sortZonesOntoLists()
+    {
+        List<GameObject> zones = tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsWithTag[tag2.mapZone]);
+        List<float> unsortedListOfDistancesToEachZone = findDistancesToEachZone(zones, thePlayer.transform.position);
+        List<int> indexMapToSortZonesByClosest = new returnSortedIndexList(unsortedListOfDistancesToEachZone).returnIt();
+
+
+        int whichZoneWeAreLookingAt = 0;
+        nearZones.Clear();
+        farZones.Clear();
+
+        //Debug.Log("000000000000000000");
+
+        while (whichZoneWeAreLookingAt < tagging2.singleton.objectsInZone.Keys.Count)
+        {
+
+            //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            List<IupdateCallable> alltheCallablesInThisZone = getAllCallablesInThisZone(indexMapToSortZonesByClosest[whichZoneWeAreLookingAt]);
+            //Debug.Log("alltheCallablesInThisZone.Count:  " + alltheCallablesInThisZone.Count);
+
+            if (whichZoneWeAreLookingAt < numberOfNearZones)
+            {
+                //Debug.Log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+                nearZones.Add(alltheCallablesInThisZone);
+            }
+            else
+            {
+                //Debug.Log("cccccccccccccccccccccccccccccccccccccc");
+                farZones.Add(alltheCallablesInThisZone);
+            }
+
+            whichZoneWeAreLookingAt++;
+        }
+
+
+        //Debug.Log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy zoneList.Count:  " + nearZones.Count);
+        //Debug.Log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz zoneList.Count:  " + farZones.Count);
+    }
+
+    */
+
+
+    /*
+    public List<objectIdPair> allInZone(int zone)
+    {
+        return tagging2.singleton.objectsInZone[zone];
+    }
+    */
+
+}
+
+
 
 public class setOfAllObjectsWithTag : objectSetGrabber
 {

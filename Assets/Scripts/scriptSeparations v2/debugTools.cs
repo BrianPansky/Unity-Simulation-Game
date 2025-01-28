@@ -270,3 +270,62 @@ public interface context
     string contextAsString();
 }
 */
+
+
+
+public class miscDebug:MonoBehaviour
+{
+    public bool debugPrintBool = false;
+
+    void Update()
+    {
+
+        if (debugPrintBool == true)
+        {
+            tagging2.singleton.printAllTags(this.gameObject);
+            //Debug.Log("the name of this FSM:  " + );
+        }
+    }
+}
+
+public class contradictionInvestigator2
+{
+    internal condition handsSwitchToAttack;
+    internal objectSetGrabber handsAttackObjectSetForAiming;
+    internal objectSetGrabber theRealObjectSet;
+    internal objectSetGrabber theVisibleNearObjectSet;
+    internal condition objectPermanenceKludgeUsingStickiness;
+    internal condition realObjectConditionWithNoStickiness;
+
+    internal void printout()
+    {
+        if (handsSwitchToAttack == null) { return; }
+        Debug.Log("= =     = =     = =     = =     = =     = =     = =     = =     = =     = =     = =     = =     = =     ");
+        Debug.Log(">>>>>>>>>>>>>handsSwitchToAttack.met():  " + handsSwitchToAttack.met());
+        Debug.Log("handsSwitchToAttack.asText():  " + handsSwitchToAttack.asText());
+        Debug.Log("handsSwitchToAttack.asTextAllTheWayDown():  " + handsSwitchToAttack.asTextAllTheWayDown());
+        Debug.Log("handsAttackObjectSet.grab().Count:  " + handsAttackObjectSetForAiming.grab().Count);
+        Debug.Log("theRealObjectSet.grab().Count:  " + theRealObjectSet.grab().Count);
+        Debug.Log("theVisibleNearObjectSet.grab().Count:  " + theVisibleNearObjectSet.grab().Count);
+        Debug.Log("objectPermanenceKludgeUsingStickiness.met():  " + objectPermanenceKludgeUsingStickiness.met());
+        Debug.Log("realObjectConditionWithNoStickiness.met():  " + realObjectConditionWithNoStickiness.met());
+        Debug.Log("_/     _/     _/     _/     _/     _/     _/     _/     _/     _/     _/     _/     _/     _/     _/     ");
+    }
+}
+
+public class contradictionInvestigator
+{
+    internal condition handsSwitchToAttack;
+    internal objectSetGrabber handsAttackObjectSet;
+    internal condition feetSwitchToAttack;
+    internal objectSetGrabber feetAttackObjectSet;
+
+    internal void printout()
+    {
+        if (handsSwitchToAttack == null) { return; }
+        Debug.Log(">>>>>>>>>>>>>handsSwitchToAttack.met():  "+handsSwitchToAttack.met());
+        Debug.Log("feetSwitchToAttack.met():  " + feetSwitchToAttack.met());
+        Debug.Log("handsAttackObjectSet.grab().Count:  " + handsAttackObjectSet.grab().Count);
+        Debug.Log("feetAttackObjectSet.grab().Count:  " + feetAttackObjectSet.grab().Count);
+    }
+}

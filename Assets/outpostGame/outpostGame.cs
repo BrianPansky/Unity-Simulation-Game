@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
@@ -153,6 +154,252 @@ public class outpostGame : MonoBehaviour
 
 
 
+public class playerTeamGen : doAtPoint
+{
+    //So, for each team I need the following
+    //      a base LOCATION
+    //      a base object that is properly tagged
+    //      a leader
+    //      a hoarde wave callable update component  monobehavior I think? that can generate the waves at the correct times
+    //      I need two of those.or I need two different ways and two different conditions.so two of those probably.
+    //  one for attackers one for defenders.
+    //      Attackers need to be tagged as attackers, Defenders need to be tagged as Defenders
+    //      each of them needs to be able to receive orders
+    //      the leader needs to give attackers and Defenders different orders based on their tagged classification. 
+    //      And let's have one type of soldier generator, because I hate having to update two of them
+    //  and check two of them and everything. just have one. [that i can somehow plug in the "attacker" or "defender" tags]
+
+    tag2 team = tag2.team1;
+
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject baseMarker = new makeBaseMarker(team).doIt(thisPoint);
+        new makeTestRadar(team, thisPoint);
+        makePLAYER(new Vector3(-5, 1, -1)+ thisPoint);
+
+        /*
+        new makeLeader(team).doIt(thisPoint * 8);
+        List<objectSetInstantiator> attackerWaveSet = new makeWaveList(team, tag2.attackSquad).returnWaves();
+        List<objectSetInstantiator> defenderWaveSet = new makeWaveList(team, tag2.defenseSquad).returnWaves();
+        Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDict = new Dictionary<condition, List<objectSetInstantiator>>();
+        condition attackerRespawnCondition = noUnitsWithThisTag(tag2.attackSquad);
+        condition defenderRespawnCondition = noUnitsWithThisTag(tag2.defenseSquad);
+        wavesAndConditionDict[attackerRespawnCondition] = attackerWaveSet;
+        wavesAndConditionDict[defenderRespawnCondition] = defenderWaveSet;
+        callableThatGeneratesWavesWhenTheirConditionIsMet.addThisComponent(baseMarker, relativeSpawnPoints(), wavesAndConditionDict); //can assume condition just checks their tags?  but then.....need to input those tags, or else hard wire them....
+        */
+
+    }
+    void makePLAYER(Vector3 location)
+    {
+        GameObject player = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.player, location);
+        genGen.singleton.addBody4ToObject(player);
+        tagging2.singleton.addTag(player, team);
+        tagging2.singleton.addTag(player, tag2.player);
+        //Debug.Log("???????????????????????????????????????????????");
+        worldScript.singleton.thePlayer = player;
+        //tagging2.singleton.addTag(player, tag2.defenseSquad);
+        //addTeamColors(newObj);
+        //addWeapon(newObj, weapon);
+    }
+
+
+    private List<Vector3> relativeSpawnPoints()
+    {
+        List<Vector3> listOfOffsetSpawnLocations = new List<Vector3>();
+        listOfOffsetSpawnLocations.Add(new Vector3(5, 0, 5));
+        listOfOffsetSpawnLocations.Add(new Vector3(-5, 0, 3));
+        listOfOffsetSpawnLocations.Add(new Vector3(-7, 0, -4));
+        listOfOffsetSpawnLocations.Add(new Vector3(6, 0, -5));
+
+        return listOfOffsetSpawnLocations;
+    }
+
+    private condition noUnitsWithThisTag(tag2 unitGroupIn)
+    {
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            );
+
+
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet));
+
+        return theCondition;
+    }
+
+
+    objectGen weaponMaker(float magnitudeOfInteractionIn, int firingRateIn, float projectileSpeedIn, float projectileSizeIn, bool sdOnCollisionIn = true, int levelIn = 0, float gunHeightIn = 1, float gunWidthIn = 1, float gunLengthIn = 1)
+    {
+        return new paintByNumbersGun1(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType)
+    {
+
+        return new newGunGen(projectileType, new objectModifier[]{
+        },
+        firingRateIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType, objectModifier[] gunItselfMods)
+    {
+
+        return new newGunGen(projectileType, gunItselfMods,
+        firingRateIn);
+    }
+
+}
+
+
+
+
+public class makeTestRadar
+{
+    public makeTestRadar(tag2 team, Vector3 thisPoint)
+    {
+        /*
+        -------------------------------------------------------------
+        object "screen"
+        grab set of all virtual gamepad objects
+        sort by team?  [no, just use team colors!]
+        updating every frame needs a component!  an updater!  maybe callable!
+        create little objects[box ? ball ?] with that same color
+        get info about their position in space
+        scale that position info down
+        flatten it into top view
+        rotate it up vertical or whatever onto a vertical screen.
+        -------------------------------------------------------------
+        */
+
+        GameObject screen = new GameObject();
+        screen.AddComponent<BoxCollider>();
+        genGen.singleton.addCube(screen);
+        screen.transform.position = thisPoint + new Vector3(0, 5, 0);
+        screen.transform.localScale = new Vector3(0.1f, 4, 4);
+        screen.name = "screen for this team:  " + team.ToString();
+        Renderer theRenderer = screen.AddComponent<MeshRenderer>();
+        theRenderer.material.color = Color.black;//teamColor;
+
+        tagging2.singleton.addTag(screen, tag2.zoneable);
+
+
+        testRadarComponent.addThisComponent(screen);
+    }
+}
+
+public class testRadarComponent : MonoBehaviour, IupdateCallable
+{
+    public List<IupdateCallable> currentUpdateList { get; set; }
+    public objectSetGrabber theGrabber;
+
+    public static testRadarComponent addThisComponent(GameObject screen)
+    {
+        testRadarComponent theComponent = screen.AddComponent<testRadarComponent>();
+
+        objectCriteria hasVirtualGamepad = new objectMeetsAllCriteria(new hasVirtualGamepad());
+
+        objectSetGrabber setOfAllVirtualGamepadObjects = new setOfAllObjectThatMeetCriteria(
+            new COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones(screen, 20),
+        hasVirtualGamepad);
+
+        theComponent.theGrabber = setOfAllVirtualGamepadObjects;
+
+        return theComponent;
+    }
+
+    public void callableUpdate()
+    {
+        Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    }
+    public void Update()
+    {
+        Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+        /*
+        -------------------------------------------------------------
+        object "screen"
+        grab set of all virtual gamepad objects
+        sort by team?  [no, just use team colors!]
+        updating every frame needs a component!  an updater!  maybe callable!
+        create little objects[box ? ball ?] with that same color
+        get info about their position in space
+        scale that position info down
+        flatten it into top view
+        rotate it up vertical or whatever onto a vertical screen.
+        -------------------------------------------------------------
+        */
+
+        List<GameObject> allDetectedObjects = theGrabber.grab();
+        renderObjectsToScreen(allDetectedObjects);
+    }
+
+    private void renderObjectsToScreen(List<GameObject> ListOfObjects)
+    {
+        foreach (GameObject thisObject in ListOfObjects)
+        {
+            renderOneObjectToScreen(thisObject);
+        }
+    }
+
+    private void renderOneObjectToScreen(GameObject theRealObject)
+    {
+        /*
+        -------------------------------------------------------------
+        create little objects[box ? ball ?] with its team color
+        get info about their position in space
+        scale that position info down [to the size of the screen]
+        flatten it into top view [or could do 3d, lol]
+        rotate it up vertical or whatever onto a vertical screen.
+        -------------------------------------------------------------
+        */
+
+
+        GameObject theMapMarker = new GameObject();
+        theMapMarker.name = "a map marker";
+        genGen.singleton.addCube(theMapMarker);
+        theMapMarker.transform.localScale = new Vector3(0.07f, 0.07f, 0.07f);
+
+
+        Color teamColor = teamColorFinder(theRealObject);
+        Renderer theRenderer = theMapMarker.AddComponent<MeshRenderer>();
+        theRenderer.material.color = Color.yellow;//teamColor;
+
+        theMapMarker.AddComponent<selfDestructScript1>();
+
+        placeonCorrospondingScreenPosition(theRealObject, theMapMarker);
+
+    }
+
+    private void placeonCorrospondingScreenPosition(GameObject theRealObject, GameObject theMapMarker)
+    {
+        float realx = theRealObject.transform.position.x;
+        float realy = theRealObject.transform.position.y;
+        float realz = theRealObject.transform.position.z;
+        Vector3 test3dPoint = (new Vector3(-80f, realz, realx) / 500) + (this.gameObject.transform.position)+new Vector3(0,1,0);
+
+        theMapMarker.transform.position = test3dPoint;
+    }
+
+    private Color teamColorFinder(GameObject thisObject)
+    {
+        List<tag2> allTheirTags = tagging2.singleton.allTagsOnObject(thisObject);
+
+        foreach(tag2 thisTag in allTheirTags)
+        {
+            if (tagging2.singleton.teamColors.Keys.Contains(thisTag))
+            {
+                return tagging2.singleton.teamColors[thisTag];
+            }
+        }
+
+        return new Color();
+    }
+
+}
 
 
 
@@ -358,7 +605,7 @@ public class makeWaveList
         float gunLengthIn = 1.4f;
 
         return unitMaker2(1, 2.9f, 0.9f, 5, 20,
-            weaponMaker(1, 10, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
+            weaponMaker(1, 40, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
         //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
     }
     public objectGen unit2()
@@ -744,7 +991,7 @@ public class soldierWithUnitGroupFSM : FSM
     float weaponFiringRange;
     private float targetDetectionRange;
 
-    public soldierWithUnitGroupFSM(GameObject theObjectDoingTheEnaction, tag2 team, tag2 unitGroupIn, float speed, float weaponFiringRangeIn = 50f, float targetDetectionRangeIn = 110f)
+    public soldierWithUnitGroupFSM(GameObject theObjectDoingTheEnaction, tag2 team, tag2 unitGroupIn, float speed, float weaponFiringRangeIn = 70f, float targetDetectionRangeIn = 210f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -753,7 +1000,7 @@ public class soldierWithUnitGroupFSM : FSM
         weaponFiringRange = weaponFiringRangeIn;
         this.targetDetectionRange = targetDetectionRangeIn;
 
-        Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        //Debug.Log("weaponFiringRange:  " + weaponFiringRange);
         theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
         theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
 
@@ -763,14 +1010,52 @@ public class soldierWithUnitGroupFSM : FSM
     {
         FSM idle = new generateFSM();
 
-        objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team, weaponFiringRange);
-        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-        condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction,weaponFiringRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
+        //objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team, weaponFiringRange);
+        //objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
+        
+        
+        
+        
+        
+        
+        
+        
+        //USING "OBJECT PERMANENCE" FOR THE AIMING STATE JUST MAKES IT LOOK BAD AIMING AT ITSELF WHEN THE SET ACTUALLY HAS NO ONE TO AIM AT
+        //condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction,weaponFiringRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 110);// theObjectDoingTheEnaction, numericalVariable.health);
 
+
+
+
+        objectCriteria theAttackCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team)),
+            //new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+            new lineOfSight(theObjectDoingTheEnaction, weaponFiringRange),
+            //new proximityCriteriaBool(theObjectDoingTheEnaction, range)  //REDUNDANT!  line of sight does range better for this purpose!
+            new objectVisibleInFOV(theObjectDoingTheEnaction.GetComponent<playable2>().enactionPoint1.transform)
+
+            );
+
+        objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theAttackCriteria);
+
+
+        //worldScript.singleton.theContradictionInvestigator.handsAttackObjectSetForAiming = theAttackObjectSet;
+        //worldScript.singleton.theContradictionInvestigator.handsSwitchToAttack = switchToAttack;
+
+        //worldScript.singleton.theContradictionInvestigator.handsAttackObjectSet = theAttackObjectSet;
+        //worldScript.singleton.theContradictionInvestigator.handsSwitchToAttack = switchToAttack;
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
+        
+        //FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        FSM combat1 = new generateFSM(new aimAtXAndPressYOnSameFrame(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
-        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+
+       condition switchToAttack = new isThereAtLeastOneObjectInSet(theAttackObjectSet);
+
+
+
+
 
 
 
@@ -815,14 +1100,15 @@ public class soldierWithUnitGroupFSM : FSM
 
     private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        Debug.Log("targetDetectionRange:  " + targetDetectionRange);
-        Debug.Log("weaponFiringRange:  " + weaponFiringRange);
+        //Debug.Log("targetDetectionRange:  " + targetDetectionRange);
+        //Debug.Log("weaponFiringRange:  " + weaponFiringRange);
         FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
         objectCriteria theCriteria = attackObjectCriteria(theObjectDoingTheEnaction);
+        //objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInNearestXZones(theObjectDoingTheEnaction, 4), theCriteria);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
-
+        //setOfAllObjectsInZone
         //targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
@@ -831,9 +1117,10 @@ public class soldierWithUnitGroupFSM : FSM
         //float goldilocksRange = weaponFiringRange * (2 / 3);
         float goldilocksRange = weaponFiringRange * (2f / 3f);
         //Debug.Log("goldilocksRange:  "+ goldilocksRange);
-        targetPicker theTargetPicker = new combatPositionPack3TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet, 27f);
+        //targetPicker theTargetPicker = new combatPositionPack3TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet, goldilocksRange);
+        targetPicker theTargetPicker = new combatPositionPack4TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet, goldilocksRange);
 
-        float desiredProximity = weaponFiringRange * (2f / 3f);
+        //float desiredProximity = weaponFiringRange * (2f / 3f);
         FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, 0).returnIt());
 
         condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction, targetDetectionRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
@@ -844,6 +1131,8 @@ public class soldierWithUnitGroupFSM : FSM
 
 
 
+        //worldScript.singleton.theContradictionInvestigator.feetAttackObjectSet = theAttackObjectSet;
+        //worldScript.singleton.theContradictionInvestigator.feetSwitchToAttack = switchToAttack;
 
 
 
@@ -905,10 +1194,20 @@ public class soldierWithUnitGroupFSM : FSM
 
         objectSetGrabber theVisibleNearObjectSet = new setOfAllObjectThatMeetCriteria(theRealObjectSet, theAdditionalSituationalCriteria);
 
+
+        //worldScript.singleton.theContradictionInvestigator.theRealObjectSet = theRealObjectSet;
+        //worldScript.singleton.theContradictionInvestigator.theVisibleNearObjectSet = theVisibleNearObjectSet;
+
+
+
         int stickyTimerInSeconds = 9;
         condition objectPermanenceKludgeUsingStickiness = new stickyCondition(new isThereAtLeastOneObjectInSet(theVisibleNearObjectSet), stickyTimerInSeconds);// theObjectDoingTheEnaction, numericalVariable.health);
         condition realObjectConditionWithNoStickiness = new isThereAtLeastOneObjectInSet(theRealObjectSet);
 
+        //worldScript.singleton.theContradictionInvestigator.objectPermanenceKludgeUsingStickiness = objectPermanenceKludgeUsingStickiness;
+        //worldScript.singleton.theContradictionInvestigator.realObjectConditionWithNoStickiness = realObjectConditionWithNoStickiness;
+
+        //k, but, why didn't i just do one set of criteria and one grabber and one condition to begin with?  isn't it the same result?
         condition theCondition = new multicondition(realObjectConditionWithNoStickiness, objectPermanenceKludgeUsingStickiness);
 
         //return realObjectConditionWithNoStickiness;
@@ -1128,7 +1427,7 @@ public class combatPositionPack3TargetPicker : targetPicker
     List<targetPicker> listOfTargetPickers = new List<targetPicker>();
     int currentPick = 0;
     int behaviorChangeCountdownTimeCurrent = 0;
-    int behaviorChangeCountdownTimeLIMIT = 40;
+    int behaviorChangeCountdownTimeLIMIT = 3;
 
     bool currentlyDoingMainBehavior = true;
 
@@ -1222,6 +1521,132 @@ public class combatPositionPack3TargetPicker : targetPicker
         behaviorChangeCountdownTimeCurrent = 0;
     }
 }
+
+
+public class combatPositionPack4TargetPicker : targetPicker
+{
+    //randomly pick from:
+    //      apple pattern
+    //      idle
+    //      flee
+    //      go towards
+    //      random wander
+    //can maybe bias in favor of some?  but for now, simple random.
+
+    List<targetPicker> listOfTargetPickers = new List<targetPicker>();
+    int currentPick = 0;
+    int behaviorChangeCountdownTimeCurrent = 0;
+    int behaviorChangeCountdownTimeLIMIT = 3;
+
+    bool currentlyDoingMainBehavior = true;
+
+
+
+
+
+    GameObject theObjectDoingTheEnaction;
+    objectSetGrabber theSet;
+    public combatPositionPack4TargetPicker(GameObject theObjectDoingTheEnaction, objectSetGrabber theSetInput, float goldilocksRangeIn)
+    {
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+        theSet = theSetInput;
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+        
+        wowItsBeautifulNiceCombatBehavior(goldilocksRangeIn);
+
+
+
+
+
+
+
+
+        /*
+        //listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        //listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby })); 
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        */
+        /*
+        listOfTargetPickers.Add(randomNearby);
+        listOfTargetPickers.Add(goldilocksCircle); //very good all on it's own!
+        listOfTargetPickers.Add(applePattern);
+        listOfTargetPickers.Add(new radialFleeingTargetPicker(theObjectDoingTheEnaction, theSetInput));
+        listOfTargetPickers.Add(new nearestTargetPicker(theObjectDoingTheEnaction, theSetInput));  //this is "go TOWARD" i think  //yup, this one is like normal combat in a game, nice
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { applePattern, randomNearby }));//this one is like kiting while dodging.  a very cautious fighting style.  nice
+        */
+        //how to do "idle"? can do single object target picker, and insert self.
+        //Debug.Log("goldilocksRange:  " + goldilocksRangeIn);
+    }
+
+    private void wowItsBeautifulNiceCombatBehavior(float goldilocksRangeIn)
+    {
+        targetPicker goldilocksCircle = new nearestGoldilocksTargetPicker(theObjectDoingTheEnaction, theSet, goldilocksRangeIn);
+        targetPicker applePattern = new applePatternTargetPicker(theObjectDoingTheEnaction, theSet);
+        targetPicker randomNearby = new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction);
+        targetPicker nearest = new randomNearbyLocationTargetPicker(theObjectDoingTheEnaction);
+
+
+        //wow it's beautiful, nice combat behavior
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, applePattern, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { nearest, applePattern, randomNearby }));
+        listOfTargetPickers.Add(new averageOfTargetPickers(new targetPicker[] { goldilocksCircle, nearest, randomNearby }));
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        if (theSet.grab().Count == 0)//SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK BEFORE WE DO THIS!  WHY IS IT HAPPENING???
+        {
+            Debug.Log("(theSet.grab().Count ==0) SHOULDN'T HAPPEN!  CONDITION SHOULD CHECK THIS SET BEFORE WE USE IT!");
+            return new agnosticTargetCalc(theObjectDoingTheEnaction);
+        }
+        randomlyPickDifferentStrategySometimes();
+        //Debug.Log("currentPick:  " + currentPick);
+
+
+
+        return listOfTargetPickers[currentPick].pickNext();
+    }
+
+    private void randomlyPickDifferentStrategySometimes()
+    {
+        behaviorChangeCountdownTimeCurrent++;
+        //Debug.Log("behaviorChangeCountdownTimeCurrent:  "+behaviorChangeCountdownTimeCurrent);
+
+        if (behaviorChangeCountdownTimeCurrent < behaviorChangeCountdownTimeLIMIT) { return; }
+
+
+        if (currentlyDoingMainBehavior)
+        {
+            currentlyDoingMainBehavior = false;
+            currentPick = repository2.singleton.randomTargetPickerInteger(listOfTargetPickers.Count);
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(270) + 110;
+
+        }
+        else
+        {
+            currentlyDoingMainBehavior = true;
+            currentPick = 0;
+
+            behaviorChangeCountdownTimeLIMIT = repository2.singleton.randomTargetPickerInteger(300) + 210;
+        }
+
+        behaviorChangeCountdownTimeCurrent = 0;
+    }
+}
+
+
+
+
+
+
+
 
 
 /*
@@ -1476,6 +1901,7 @@ public class makeBasicHuman: objectGen
 
         //newObj.GetComponent<NavMeshAgent>().enabled = false;
         newObj.AddComponent<reactivationOfNavMeshAgent>();
+        newObj.AddComponent<miscDebug>();
 
         return newObj;
     }
@@ -5345,6 +5771,8 @@ public class aimAtXAndInteractWithY
                 new aimTargetPlanGen(theObjectDoingTheEnactions, thingXToAimAt).returnIt(), //messy
                 interactWithType(theObjectDoingTheEnactions, theIntertypeY));
 
+
+
         repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, thingXToAimAt);
 
 
@@ -5376,12 +5804,17 @@ public class aimAtXAndInteractWithY
             return theSingle;
         }
 
+        Debug.Log("failed to find an enaction with this interaction:  "+ interTypeX+" on this object:  " + theObjectDoingTheEnactions);
 
         //if(theInteractionEnaction == null) { return null; }//hmmmmmmmm
 
 
         inventory1 theirInventory = theObjectDoingTheEnactions.GetComponent<inventory1>();
-        if (theirInventory == null) { return null; }  //or return "go find"?
+        if (theirInventory == null) 
+        {
+            Debug.Log("next thing to try was looking for interaction type in their INVENTORY, but failed to find an inventory on this object:  " +theObjectDoingTheEnactions);
+            return null; 
+        }  //or return "go find"?
 
         foreach (GameObject thisObject in theirInventory.inventoryItems)
         {
@@ -5407,6 +5840,127 @@ public class aimAtXAndInteractWithY
     }
 
 }
+
+
+
+
+public class aimAtXAndPressYOnSameFrame
+{
+    repeatWithTargetPicker theRepeater;
+
+    public aimAtXAndPressYOnSameFrame(GameObject theObjectDoingTheEnactions, targetPicker thingXToAimAt, buttonCategories buttonY, float proximity)
+    {
+        theRepeater = thinggggg(theObjectDoingTheEnactions, thingXToAimAt, buttonY, proximity);
+    }
+
+    public repeatWithTargetPicker returnIt()
+    {
+        return theRepeater;
+    }
+
+    private repeatWithTargetPicker thinggggg(GameObject theObjectDoingTheEnactions, targetPicker thingXToAimAt, buttonCategories buttonY, float proximity)
+    {
+
+        //targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+        //    new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+
+
+        singleEXE theSimultaneousEXE = new simultaneousEXE(
+            new aimTargetPlanGen(theObjectDoingTheEnactions, thingXToAimAt).returnIt(), //messy
+                pressY(theObjectDoingTheEnactions, buttonY));
+
+        //permaPlan2 perma1 = new permaPlan2(theEXE);
+
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(theSimultaneousEXE, thingXToAimAt);
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+    public singleEXE pressY(GameObject theObjectDoingTheEnactions, buttonCategories buttonY)
+    {
+        //have to see any available interactions:
+        //where?
+        //          in current "equipped" enactions in gamepad
+        //          in inventory [at which point, need to equip it!  ..............doesn't fit current "singleEXE" paradigm.....
+        //just add a step before this in the plan that equips/preps IF necessary???
+        //
+        //what kind of enaction?
+        //      ranged
+        //          hitscan
+        //          non-hitscan
+        //      [no others currently?]
+
+        virtualGamepad theVirtualGamepad = theObjectDoingTheEnactions.GetComponent<virtualGamepad>();
+
+        enaction theEnaction = theVirtualGamepad.allCurrentBoolEnactables[buttonY];//new find().enactionWithInteractionX(theObjectDoingTheEnactions, interTypeX);
+        if (theEnaction != null)
+        {
+            singleEXE theSingle = (singleEXE)theEnaction.standardEXEconversion();
+            theSingle.atLeastOnce();// untilListFinished();  //surely "list" is redundant for a single???
+
+            return theSingle;
+        }
+        else
+        {
+            //Debug.Log("theEnaction in gamepad button = null");
+            //return null;
+        }
+
+
+        inventory1 theirInventory = theObjectDoingTheEnactions.GetComponent<inventory1>();
+        if (theirInventory == null) { return null; }  //or return "go find"?
+
+        foreach (GameObject thisObject in theirInventory.inventoryItems)
+        {
+            theEnaction = new find().enactionWithButtonX(thisObject, buttonY);
+            if (theEnaction != null)
+            {
+                singleEXE theSingle = (singleEXE)theEnaction.standardEXEconversion();
+                theSingle.atLeastOnce();// untilListFinished();  //surely "list" is redundant for a single???
+
+                return theSingle;
+            }
+            //foreach (collisionEnaction thisEnaction in listOfCollisionEnactionsOnObject(theObject))
+            {
+                //Debug.Log(thisEnaction.interInfo.interactionType);
+                //if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+            }
+        }
+        //if(theInteractionEnaction == null) { return null; }//hmmmmmmmm
+
+        /*
+        inventory1 theirInventory = theObjectDoingTheEnactions.GetComponent<inventory1>();
+        if (theirInventory == null) { return null; }  //or return "go find"?
+
+        foreach (GameObject thisObject in theirInventory.inventoryItems)
+        {
+            theEnaction = new find().enactionWithInteractionX(thisObject, interTypeX);
+            if (theEnaction != null)
+            {
+                singleEXE theSingle = (singleEXE)theEnaction.standardEXEconversion();
+                theSingle.atLeastOnce();// untilListFinished();  //surely "list" is redundant for a single???
+
+                return theSingle;
+            }
+            //foreach (collisionEnaction thisEnaction in listOfCollisionEnactionsOnObject(theObject))
+            {
+                //Debug.Log(thisEnaction.interInfo.interactionType);
+                //if (thisEnaction.interInfo.interactionType == interTypeX) { return thisEnaction; }
+            }
+        }
+
+        */
+
+
+
+        return null;
+    }
+
+}
+
 
 
 

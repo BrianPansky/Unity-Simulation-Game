@@ -120,6 +120,19 @@ public class patternScript2 : MonoBehaviour
 
         return vectorToReturn;
     }
+    public Vector3 randomNearbyVector3d(Vector3 positionToBeNear, float spreadFactor = 1f)
+    {
+        Vector3 vectorToReturn = positionToBeNear;
+        float initialDistance = 0f;
+        float randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(initialDistance + randomAdditionalDistance * spreadFactor, 0, 0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(0, initialDistance + randomAdditionalDistance * spreadFactor,0);
+        randomAdditionalDistance = UnityEngine.Random.Range(-20, 20);
+        vectorToReturn += new Vector3(0, 0, initialDistance + randomAdditionalDistance * spreadFactor);
+
+        return vectorToReturn;
+    }
 
 }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.XR;
 using static UnityEngine.GraphicsBuffer;
+using static tagging2;
 
 public class worldScript : MonoBehaviour
 {
@@ -12,8 +13,10 @@ public class worldScript : MonoBehaviour
 
     public bool debugToggle = false;
 
-    int numberOfNearZones = 9;
+    int numberOfNearZones = 2;
 
+    public GameObject thePlayer;
+    public contradictionInvestigator2 theContradictionInvestigator = new contradictionInvestigator2();
 
     //List<List<IupdateCallable>> zoneListOfCallables = new List<List<IupdateCallable>>();
 
@@ -23,7 +26,7 @@ public class worldScript : MonoBehaviour
 
     void Awake()
     {
-
+        //theContradictionInvestigator = new contradictionInvestigator();
         singletonify();
 
     }
@@ -45,18 +48,19 @@ public class worldScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        new helpINeedRotation().doTesting();
+        //new helpINeedRotation().doTesting();
     }
 
     // Update is called once per frame
     void Update()
     {
+        //theContradictionInvestigator.printout();
         //tagging2.singleton.addTag(this.gameObject, tagging2.tag2.interactable);
 
 
         //Debug.Log("======================================================");
 
-        updateZoneLists();
+        sortZonesOntoLists();
 
         //Debug.Log("222222222222222222222222 zoneList.Count:  " + nearZones.Count);
         //Debug.Log("333333333333333333333333 zoneList.Count:  " + farZones.Count);
@@ -80,19 +84,30 @@ public class worldScript : MonoBehaviour
         currentFarZone = 0;
     }
 
-    private void updateZoneLists()
+    private void sortZonesOntoLists()
     {
+        //List<GameObject> list = new setOfAllObjectsInNearestXZones(this.gameObject, 5).grab();
+        //Debug.Log(list.Count);
+        List<GameObject> zones = tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsWithTag[tag2.mapZone]);
+        List<float> unsortedListOfDistancesToEachZone = findDistancesToEachZone(zones, this.transform.position);
+        List<int> indexMapToSortZonesByClosest = new returnSortedIndexList(unsortedListOfDistancesToEachZone).returnIt();
+
+        //Debug.Log("zones.Count:  " + zones.Count);
+        //Debug.Log("unsortedListOfDistancesToEachZone.Count:  " + unsortedListOfDistancesToEachZone.Count);
+        //Debug.Log("indexMapToSortZonesByClosest.Count:  " + indexMapToSortZonesByClosest.Count);
+
         int whichZoneWeAreLookingAt = 0;
         nearZones.Clear();
         farZones.Clear();
 
         //Debug.Log("000000000000000000");
 
+        Debug.Assert(indexMapToSortZonesByClosest.Count > 0);
         while (whichZoneWeAreLookingAt < tagging2.singleton.objectsInZone.Keys.Count)
         {
 
             //Debug.Log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            List<IupdateCallable> alltheCallablesInThisZone = getAllCallablesInThisZone(whichZoneWeAreLookingAt);
+            List<IupdateCallable> alltheCallablesInThisZone = getAllCallablesInThisZone(indexMapToSortZonesByClosest[whichZoneWeAreLookingAt]);
             //Debug.Log("alltheCallablesInThisZone.Count:  " + alltheCallablesInThisZone.Count);
 
             if (whichZoneWeAreLookingAt < numberOfNearZones)
@@ -114,9 +129,31 @@ public class worldScript : MonoBehaviour
         //Debug.Log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz zoneList.Count:  " + farZones.Count);
     }
 
+    private List<float> findDistancesToEachZone(List<GameObject> zones, Vector3 theLocationWeAreMeasuringDistanceFrom)
+    {
+        List<float> listOfDistancesToEachZone = new List<float>();
+
+        int whichZoneWeAreLookingAt = 0;
+
+
+
+        while (whichZoneWeAreLookingAt < tagging2.singleton.objectsInZone.Keys.Count)
+        {
+            listOfDistancesToEachZone.Add(distanceFromXToY(theLocationWeAreMeasuringDistanceFrom, zones[whichZoneWeAreLookingAt]));
+            whichZoneWeAreLookingAt++;
+        }
+
+        return listOfDistancesToEachZone;
+    }
+
+    private float distanceFromXToY(Vector3 theLocationWeAreMeasuringDistanceFrom, GameObject thisObject)
+    {
+        return (thisObject.transform.position - theLocationWeAreMeasuringDistanceFrom).magnitude;
+    }
+
     private List<IupdateCallable> getAllCallablesInThisZone(int whichZoneWeAreLookingAt)
     {
-
+        //Debug.Log("getAllCallablesInThisZone:  " + whichZoneWeAreLookingAt);
         //Debug.Log("1111111111111111111111111");
         List < IupdateCallable > newList = new List<IupdateCallable> ();
 
@@ -185,6 +222,8 @@ public class worldScript : MonoBehaviour
         //when object is destroyed
         //public List<IupdateCallable> currentUpdateList { get; set; }
 
+        if (theCallable == null) { return; }
+        if (theCallable.currentUpdateList == null) { return; }//not sure why this is happening so much, NEVER did before
         theCallable.currentUpdateList.Remove(theCallable);
 
     }

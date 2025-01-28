@@ -1588,6 +1588,12 @@ public class repeatWithTargetPicker:repeater
         theTargetPicker = theTargetPickerIn;
         //theDepletablePlan = convertToDepletableWithNextTarget();
     }
+    public repeatWithTargetPicker(singleEXE anEXE, targetPicker theTargetPickerIn)
+    {
+        this.thePerma = new permaPlan2(anEXE);
+        theTargetPicker = theTargetPickerIn;
+        //theDepletablePlan = convertToDepletableWithNextTarget();
+    }
 
     public override void doThisThing()
     {

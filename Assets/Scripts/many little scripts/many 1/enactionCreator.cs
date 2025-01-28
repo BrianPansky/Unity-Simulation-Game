@@ -640,7 +640,17 @@ public class projectileLauncher: rangedEnaction
 
     public override void enactJustThisIndividualEnaction(inputData theInput)
     {
-        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, firePoint.forward);
+        //float spreadFactor = (1f / 20f) * (1f / 8f);
+        float spreadFactor = (1f / 20f) * (1f / 8f);
+        //Debug.Log(spreadFactor);
+        Vector3 innacuracy = patternScript2.singleton.randomNearbyVector(firePoint.position);
+
+        //Debug.Log(innacuracy);
+        //Debug.Log(firePoint.forward);
+        //Debug.Log(firePoint.forward + innacuracy);
+        //Debug.Log((firePoint.forward + innacuracy).normalized);
+        float spreadFactor2 = 0.04f;
+        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, (firePoint.forward + (innacuracy.normalized* spreadFactor2)).normalized);
     }
 }
 

@@ -19,7 +19,7 @@ public class projectile1 : MonoBehaviour
     void Awake()
     {
         speed = 1.61f;
-        Vector3 Direction;
+        //Vector3 Direction;
     }
 
     public static void genProjectile1(GameObject theObject,projectileToGenerate inputprojectileToGenerate, Vector3 direction = new Vector3(), bool gravity = false)//IEnactaBool enactingThis)//(GameObject theObject, int timeUntilSelfDestruct, Vector3 direction = new Vector3(), bool sdOnCollision = true, bool explodeOnDestroy = false)//, IEnactaBool enactingThis)

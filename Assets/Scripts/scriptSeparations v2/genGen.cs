@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -557,6 +558,17 @@ public class genGen : MonoBehaviour
         return ensuredThing;
     }
 
+    public FSMcomponent ensureFSMcomponent(GameObject onThisObject)
+    {
+        FSMcomponent ensuredThing = onThisObject.GetComponent<FSMcomponent>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<FSMcomponent>();
+        }
+
+        return ensuredThing;
+    }
+
 
 
     public void ensureSafetyForDeletion(GameObject theObject)
@@ -916,6 +928,7 @@ public class paintByNumbersProjectile : objectGen
 
 public class FSM
 {
+    public bool debugBool = false;
     public string name;
     //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
     internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
@@ -926,7 +939,11 @@ public class FSM
 
     public FSM doAFrame()
     {
-        Debug.Log("the name of this FSM:  " + name);
+        if(debugBool == true)
+        {
+            Debug.Log("the name of this FSM:  " + name);
+        }
+        //Debug.Log("the name of this FSM:  " + name);
 
         //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
@@ -1155,17 +1172,27 @@ public class generateFSM : FSM
 
 public class FSMcomponent : MonoBehaviour, IupdateCallable
 {
+    public bool debugBool = false;
     //public FSM theFSM;
     public List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
 
     public List<IupdateCallable> currentUpdateList { get; set; }
     public void Update()
     {
+        if (debugBool == true)
+        {
+            Debug.Log("theFSMList.Count:  " + theFSMList.Count);
+            Debug.Log("currentUpdateList:  " + currentUpdateList);
+        }
         //Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
     }
 
     public void callableUpdate()
     {
+        if (debugBool == true)
+        {
+            Debug.Log("???????????????????????????????????????????????????????????????");
+        }
         //Debug.Log("============================     callableUpdate()        =================");
         //Debug.Log("this.gameObject:  " + this.gameObject);
         //tagging2.singleton.printAllTags(this.gameObject);
@@ -1177,6 +1204,7 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
 
         for (int index = 0; index < theFSMList.Count; index++)
         {
+            theFSMList[index].debugBool = debugBool;
             theFSMList[index] = theFSMList[index].doAFrame();
         }
 
@@ -1201,6 +1229,397 @@ public class reactivationOfNavMeshAgent : MonoBehaviour
 
 
 
+public abstract class plugInFSM
+{
+    public condition switchCondition;
+    public FSM theFSM;
+
+    public abstract void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction);
+}
+
+public abstract class simpleOneStateAndReturn : plugInFSM
+{
+    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    {
+        theFSMToAddItTo.addSwitchAndReverse(generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
+    }
+    public abstract condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction);
+    public abstract FSM generateTheFSM(GameObject theObjectDoingTheEnaction);
+}
+
+public  class skippableProcess : plugInFSM
+{
+    List<plugInFSM> theStepPlugins = new List<plugInFSM>();
+    public skippableProcess(plugInFSM step1)
+    {
+        theStepPlugins.Add(step1);
+    }
+    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    {
+        //so, all steps have their switch to [but not switch back!] conditions from all states below/before them in the list
+        //so, we're building a chain of FSMs
+        //then adding "switch to" to each of the previous ones on the list so far
+        //and then....done?
+
+        List<FSM> theChainOfFSMs = new List<FSM>();
+        theChainOfFSMs.Add(theFSMToAddItTo);
+        foreach(plugInFSM thisPlugin in theStepPlugins)
+        {
+            foreach (FSM thisFSM in theChainOfFSMs)
+            {
+                thisPlugin.addPlugin(thisFSM,theObjectDoingTheEnaction);
+            }
+
+            theChainOfFSMs.Add(thisPlugin.theFSM);
+        }
+    }
+}
+
+/*
+public class layer : plugInFSM
+{
+    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    {
+        fSMgen2.addSwitchAndReverse(switchCondition, theFSM);
+
+        foreach (var thisKey in fSMgen2.switchBoard.Keys)
+        {
+            fSMgen2.switchBoard[thisKey].addSwitch(switchCondition, theFSM);
+        }
+    }
+}
+*/
+
+
+public class nestedFSM_AsRepeater : repeater//FSM
+{
+    FSM theFSM;
+
+    public nestedFSM_AsRepeater(FSM theFSMIn)
+    {
+        theFSM = theFSMIn;
+    }
+
+    public override string baseEnactionsAsText()
+    {
+        return theFSM.baseEnactionsAsText();
+    }
+
+    public override void doThisThing()
+    {
+        theFSM.doAFrame();
+    }
+
+    public override void refill()
+    {
+        //not needed!  the only part of this tiny class that is not slick
+    }
+}
+
+
+
+public class FSMgen2
+{
+    FSM theBaseFSM;
+    //GameObject theObjectDoingTheEnaction;
+
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn)
+    {
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1)
+    {
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        //      addon1.addPlugin(this);
+        //addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+
+    }
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0)
+    {
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM addon1) : this(theObjectDoingTheEnactionIn, state0)
+    {
+
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM[] plugInFSMs) : this(theObjectDoingTheEnactionIn, state0)
+    {
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+
+        foreach (plugInFSM thisPlugin in plugInFSMs)
+        {
+            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen2(GameObject theObjectDoingTheEnactionIn,  plugInFSM[] plugInFSMs)
+    {
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+
+        foreach (plugInFSM thisPlugin in plugInFSMs)
+        {
+            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    private void addItToTheirFSMComponent(GameObject theObjectDoingTheEnactionIn)
+    {
+        FSMcomponent theFSMComponent = genGen.singleton.ensureFSMcomponent(theObjectDoingTheEnactionIn);
+        theFSMComponent.theFSMList.Add(theBaseFSM);
+    }
+
+    public FSM returnIt()
+    {
+        return theBaseFSM;
+    }
+    /*
+    public void addLayer(plugInFSM outerLayer)
+    {
+    }
+    */
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+}
+
+
+
+
+
+
+public class testNewFSMGenerator
+{
+    private Vector3 vector3;
+
+    public testNewFSMGenerator(Vector3 vector3)
+    {
+        this.vector3 = vector3;
+    }
+
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+
+
+
+
+        new FSMgen2(newObj, new randomWanderFSMgen(), new grabFoodFeetFSMGen(stuffType.fruit));
+        new FSMgen2(newObj, new grabFoodHandsFSMGen(stuffType.fruit));
+    }
+}
+
+public abstract class baseState
+{
+
+    public FSM theFSM;
+
+    public abstract void addPlugin(GameObject theObjectDoingTheEnaction, FSMgen2 fSMgen2);
+
+    internal abstract FSM makeState(GameObject theObjectDoingTheEnaction);
+}
+
+public class randomWanderFSMgen : baseState
+{
+    public override void addPlugin(GameObject theObjectDoingTheEnaction, FSMgen2 fSMgen2)
+    {
+    }
+
+    internal override FSM makeState(GameObject theObjectDoingTheEnaction)
+    {
+        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+
+        wander.name = "feet, wander";
+        theFSM = wander;
+
+        return theFSM;
+    }
+}
+
+
+public class grabFoodFeetFSMGen : simpleOneStateAndReturn
+{
+    private stuffType stuffToGrab;
+
+    public grabFoodFeetFSMGen(stuffType stuffToGrabIn)
+    {
+        stuffToGrab = stuffToGrabIn;
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        return grabFoodCondition(theObjectDoingTheEnaction, stuffToGrab);
+    }
+
+    private condition grabFoodCondition(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX)
+    {
+
+        //Debug.Log("stuffTypeX:  " + stuffTypeX);
+        objectSetGrabber theFoodObjectSet = new setOfAllNearbyStuffStuff(theObjectDoingTheEnaction, stuffTypeX);
+
+        condition switchToGrabFood = new stickyCondition(new isThereAtLeastOneObjectInSet(theFoodObjectSet), 7);// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return switchToGrabFood;
+    }
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        return grabFoodFeetFSM(theObjectDoingTheEnaction, stuffToGrab, 330);
+    }
+
+
+    private FSM grabFoodFeetFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float targetDetectionRange = 40)
+    {
+        FSM grabFood = new generateFSM(
+            new goToX(theObjectDoingTheEnaction, grabFoodTargetPicker(theObjectDoingTheEnaction, stuffTypeX), targetDetectionRange).returnIt());
+
+        grabFood.name = "feet, grabFood";
+        return grabFood;
+    }
+
+
+
+    private void changeNavSpeed(GameObject theObject, float speed)
+    {
+        navAgent theNav = theObject.GetComponent<navAgent>();
+        theNav.theAgent.speed = speed;
+        theNav.theAgent.baseOffset = 0.5f;//theObjectDoingTheEnaction.transform.localScale.y;
+                                          //theNav.theAgent.
+
+        //Debug.Log("targetDetectionRange:  " + targetDetectionRange);
+
+
+    }
+
+
+
+    private targetPicker grabFoodTargetPicker(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX)
+    {
+        targetPicker theTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, new setOfAllNearbyStuffStuff(theObjectDoingTheEnaction, stuffTypeX));
+
+        return theTargetPicker;
+    }
+
+
+}
+
+
+public class grabFoodHandsFSMGen: simpleOneStateAndReturn
+{
+    private stuffType stuffToGrab;
+
+    public grabFoodHandsFSMGen(stuffType stuffToGrabIn)
+    {
+        stuffToGrab = stuffToGrabIn;
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        return new proximityFromTargetPicker(theObjectDoingTheEnaction, grabFoodTargetPicker(theObjectDoingTheEnaction,stuffToGrab), 40);
+    }
+
+    /*
+    private condition grabFoodCondition(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX)
+    {
+
+        //Debug.Log("stuffTypeX:  " + stuffTypeX);
+        objectSetGrabber theFoodObjectSet = new setOfAllNearbyStuffStuff(theObjectDoingTheEnaction, stuffTypeX);
+
+        condition switchToGrabFood = new isThereAtLeastOneObjectInSet(theFoodObjectSet));// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return switchToGrabFood;
+    }
+    */
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        return grabFoodHandsFSM(theObjectDoingTheEnaction, stuffToGrab, 40);
+    }
+
+    private FSM grabFoodHandsFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float distance = 3f)
+    {
+        FSM grabFood = new generateFSM(grabTheStuff(theObjectDoingTheEnaction, stuffTypeX));
+
+        grabFood.name = "hands, grabFood";
+        return grabFood;
+    }
+
+    private repeatWithTargetPicker grabTheStuff(GameObject theObjectDoingTheEnaction, stuffType stuffX, float distance = 3f)
+    {
+        //singleEXE step1 = makeNavAgentPlanEXE(patternScript2.singleton.randomNearbyVector(this.transform.position));
+        //perma1 = new permaPlan2(step1);
+
+        //repeatWithTargetPicker otherBehavior = new repeatWithTargetPicker(perma1, new randomNearbyLocationTargetPicker(this.gameObject));
+
+
+        //return new ummAllThusStuffForGrab(theObjectDoingTheEnaction, stuffX).returnTheRepeatTargetThing();
+
+        return new aimAtXAndInteractWithY(theObjectDoingTheEnaction, grabFoodTargetPicker(theObjectDoingTheEnaction,stuffX), interType.standardClick, distance).returnIt();
+    }
+
+
+
+
+    private targetPicker grabFoodTargetPicker(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX)
+    {
+        targetPicker theTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, new setOfAllNearbyStuffStuff(theObjectDoingTheEnaction, stuffTypeX));
+
+        return theTargetPicker;
+    }
+
+}
 
 
 
@@ -1209,6 +1628,156 @@ public class reactivationOfNavMeshAgent : MonoBehaviour
 
 
 
+
+
+public class testNewFSMGenerator2
+{
+
+    private Vector3 vector3;
+
+    public testNewFSMGenerator2(Vector3 vector3)
+    {
+        this.vector3 = vector3;
+    }
+
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+
+
+
+
+        new FSMgen2(newObj, new randomWanderFSMgen(), new plugInFSM[] { new goToPreyFeetFSMGen(), new grabFoodFeetFSMGen(stuffType.meat1) });
+        new FSMgen2(newObj, new plugInFSM[] { new killPreyHandsFSMGen(), new grabFoodHandsFSMGen(stuffType.meat1) });
+    }
+}
+
+
+
+
+
+public class goToPreyFeetFSMGen : simpleOneStateAndReturn
+{
+    float targetDetectionRange;
+    public goToPreyFeetFSMGen(float targetDetectionRangeIn=90f)
+    {
+        targetDetectionRange = targetDetectionRangeIn;
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        return goToPreyCondition(theObjectDoingTheEnaction);
+    }
+
+    private condition goToPreyCondition(GameObject theObjectDoingTheEnaction)
+    {
+
+        //Debug.Log("stuffTypeX:  " + stuffTypeX);
+        objectSetGrabber theFoodObjectSet = preySet(theObjectDoingTheEnaction);
+
+        condition switchToGrabFood = new isThereAtLeastOneObjectInSet(theFoodObjectSet);// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return switchToGrabFood;
+    }
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        return goToPreyFeetFSM(theObjectDoingTheEnaction);
+    }
+
+    private FSM goToPreyFeetFSM(GameObject theObjectDoingTheEnaction, float targetDetectionRange = 40)
+    {
+        FSM grabFood = new generateFSM(
+            new goToX(theObjectDoingTheEnaction, killPreyTargetPicker(theObjectDoingTheEnaction), targetDetectionRange).returnIt());
+
+        grabFood.name = "feet, goToPrey";
+        return grabFood;
+    }
+
+
+
+
+
+    /*
+    private condition switchToKillPreyConditionHands()
+    {
+        //new stickyCondition(switchCondition2, 90)
+        //condition switchCondition2 = new canSeeNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health);
+
+
+
+        //ok this doesn't work yet because it doesn't ever 'return' "unmet" AKA "FALSE" when there is no target, 
+        //beacuse target picker has agnostic calc, ummmm, STUFF..........
+        //soooo, need to nest? FIRST see if there IS a target that is returned from picker[or one that meets criteria].
+        //.if so, THEN evaluate it on proximity criteria.  and [for the CONDITION] return bool result
+        //      condition killPreyCondition = new proximityFromTargetPicker(newObj, killPreyTargetPicker());
+
+
+
+        objectCriteria prox = new proximityCriteriaBool(newObj, 0);
+        condition killPreyCondition = new stickyCondition(new isThereAtLeastOneObjectInSet(new setOfAllObjectThatMeetCriteria(preySet(), prox)), 0);
+
+
+        return killPreyCondition;
+    }
+    */
+    private targetPicker killPreyTargetPicker(GameObject theObjectDoingTheEnaction)
+    {
+        targetPicker theTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, preySet(theObjectDoingTheEnaction));
+
+        return theTargetPicker;
+    }
+
+    private objectSetGrabber preySet(GameObject theObjectDoingTheEnaction)
+    {
+        return new excludeX(new setOfAllNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction);
+    }
+}
+
+
+public class killPreyHandsFSMGen : simpleOneStateAndReturn
+{
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        return new proximityFromTargetPicker(theObjectDoingTheEnaction, killPreyTargetPicker(theObjectDoingTheEnaction), 3);
+    }
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        return killPreyFSM(theObjectDoingTheEnaction);
+    }
+
+    private FSM killPreyFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //FSM getFood = new generateFSM(grabTheStuff(newObj, stuffTypeX));
+        FSM killPrey = new generateFSM(
+            new aimAtXAndInteractWithY(theObjectDoingTheEnaction, killPreyTargetPicker(theObjectDoingTheEnaction), interType.melee, 1.7f).returnIt()
+            );//new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(newObj, numericalVariable.health, interType.melee));
+
+        killPrey.name = "hands, kellPrey";
+        return killPrey;
+    }
+
+
+
+    private targetPicker killPreyTargetPicker(GameObject theObjectDoingTheEnaction)
+    {
+        targetPicker theTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, preySet(theObjectDoingTheEnaction));
+
+        return theTargetPicker;
+    }
+
+    private objectSetGrabber preySet(GameObject theObjectDoingTheEnaction)
+    {
+        return new excludeX(new setOfAllNearbyNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health), theObjectDoingTheEnaction);
+    }
+
+
+
+}
 
 
 

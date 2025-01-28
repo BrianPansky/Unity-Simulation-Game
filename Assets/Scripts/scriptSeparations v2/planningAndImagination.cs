@@ -743,7 +743,7 @@ public class seriesEXE : planEXE2
     }
 }
 
-public class simultaneousEXE : planEXE2
+public class simultaneousEXE : singleEXE
 {
 
     public simultaneousEXE()
@@ -1604,18 +1604,21 @@ public class permaPlan2
 
     //what?  just START conditions for the set?  or ALSO end conditions?  [and is there anything else to consider?]
 
-    List<singleEXE> thePlan = new List<singleEXE>();
+    public List<singleEXE> thePlan = new List<singleEXE>();
 
     List<condition> startConditions;
     List<condition> endConditions;
-
+    private string myConstructorTrace;
 
     public permaPlan2(singleEXE step1)
     {
+
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
         thePlan.Add(step1);
     }
     public permaPlan2(singleEXE step1, singleEXE step2)
     {
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
         thePlan.Add(step1);
         thePlan.Add(step2);
     }
@@ -1623,6 +1626,7 @@ public class permaPlan2
     public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3)
     {
 
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
         thePlan.Add(step1);
         thePlan.Add(step2);
         thePlan.Add(step3);
@@ -1630,6 +1634,7 @@ public class permaPlan2
     public permaPlan2(singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
     {
 
+        myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
         thePlan.Add(step1);
         thePlan.Add(step2);
         thePlan.Add(step3);
@@ -1713,6 +1718,12 @@ public class permaPlan2
 
         foreach (singleEXE thisOne in thePlan)
         {
+            if(thisOne == null) 
+            {
+                Debug.Log(myConstructorTrace);
+                continue; 
+            }//hmm, bad...
+
             thisOne.resetEnactionCounter();
             newThing.add(thisOne);
         }
