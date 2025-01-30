@@ -1231,9 +1231,13 @@ public class COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones : objectSetG
     private List<int> getListOfZonesSortedByNearness()
     {
         List<GameObject> zones = tagging2.singleton.listInObjectFormat(tagging2.singleton.objectsWithTag[tag2.mapZone]);
+        //Debug.Log("hhhhhhhhhhhhhhhhhhhhhhhhhhh   zones.Count:  "+zones.Count);
         //List<int> dummyZoneNumberList = new List<int>(RangeInt(1, zones.Count));
         List<float> unsortedListOfDistancesToEachZone = findDistancesToEachZoneListedByZoneNumber(zones, theObjectWhoIsGrabbingSet.transform.position);
+
+        //Debug.Log("unsortedListOfDistancesToEachZone.Count:  " + unsortedListOfDistancesToEachZone.Count); 
         List<int> indexMapToSortZonesByClosest = new returnSortedIndexList(unsortedListOfDistancesToEachZone).returnIt();
+        //Debug.Log("indexMapToSortZonesByClosest.Count:  " + indexMapToSortZonesByClosest.Count);
 
         //should work???????? for zones, because they should be on their tag list in order of their number already, so we JUST need this index map???>
         return indexMapToSortZonesByClosest;//sortedZoneNumberListFromIndexMap(zones, indexMapToSortZonesByClosest);
@@ -1243,7 +1247,7 @@ public class COMPUTATIONALLYEXPENSIVEsetOfAllObjectsInNearestXZones : objectSetG
     {
         List<float> listOfDistancesToEachZone = new List<float>();
 
-        int whichZoneWeAreLookingAt = 1;
+        int whichZoneWeAreLookingAt = 0;  //YES STARTS AT ZERO
 
 
 

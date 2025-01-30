@@ -300,8 +300,12 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
     int playerBlipSpacing = 75;
     int playerBlipCountup = 0;
 
+    int callableUpdateSpacing = 7;
+    int callableUpdateCountup = 0;
+
     public static testRadarComponent addThisComponent(GameObject screen)
     {
+        
         testRadarComponent theComponent = screen.AddComponent<testRadarComponent>();
 
         objectCriteria hasVirtualGamepad = new objectMeetsAllCriteria(new hasVirtualGamepad());
@@ -311,13 +315,31 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
         hasVirtualGamepad);
 
         theComponent.theGrabber = setOfAllVirtualGamepadObjects;
-
+        theComponent.playerBlipSpacing = 75/theComponent.callableUpdateSpacing;
         return theComponent;
     }
 
     public void callableUpdate()
     {
         //Debug.Log("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+        /*
+        -------------------------------------------------------------
+        object "screen"
+        grab set of all virtual gamepad objects
+        sort by team?  [no, just use team colors!]
+        updating every frame needs a component!  an updater!  maybe callable!
+        create little objects[box ? ball ?] with that same color
+        get info about their position in space
+        scale that position info down
+        flatten it into top view
+        rotate it up vertical or whatever onto a vertical screen.
+        -------------------------------------------------------------
+        */
+        callableUpdateCountup++;
+        if (callableUpdateCountup < callableUpdateSpacing) { return; }
+        callableUpdateCountup = 0;
+        List<GameObject> allDetectedObjects = theGrabber.grab();
+        renderObjectsToScreen(allDetectedObjects);
     }
     public void Update()
     {
@@ -336,14 +358,14 @@ public class testRadarComponent : MonoBehaviour, IupdateCallable
         -------------------------------------------------------------
         */
 
-        List<GameObject> allDetectedObjects = theGrabber.grab();
-        renderObjectsToScreen(allDetectedObjects);
+        //List<GameObject> allDetectedObjects = theGrabber.grab();
+        //renderObjectsToScreen(allDetectedObjects);
     }
 
     private void renderObjectsToScreen(List<GameObject> ListOfObjects)
     {
         ListOfObjects.Add(tagging2.singleton.allObjectsWithTag(tag2.player)[0]);
-        Debug.Log("ListOfObjects.Count:  "+ListOfObjects.Count);
+        //Debug.Log("ListOfObjects.Count:  "+ListOfObjects.Count);
         foreach (GameObject thisObject in ListOfObjects)
         {
             //Debug.Log(thisObject);

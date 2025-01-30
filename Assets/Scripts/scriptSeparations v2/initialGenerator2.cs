@@ -103,8 +103,8 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        int rows = 2;
-        int columns = 2;
+        int rows = 3;
+        int columns = 3;
         int verticalColumns = 1;
 
         float zScale = 1100f;
@@ -131,7 +131,7 @@ public class initialGenerator2 : MonoBehaviour
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.45f);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.35f);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
@@ -205,13 +205,14 @@ public class initialGenerator2 : MonoBehaviour
 
         /*
         listOfTeamBaseGenerators.Add(new playerTeamGen());
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));//, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team3));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team4));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team5));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team6));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
+        //, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
         
         new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
         new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
