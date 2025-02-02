@@ -96,6 +96,14 @@ public class interactionCreator : MonoBehaviour
     }
 
 
+    internal void addInteraction(GameObject objectToAddItTo, enactionCreator.interType interactionType, IInteraction interaction)
+    {
+        interactable2 theComponent = genGen.singleton.ensureInteractable2(objectToAddItTo);
+
+        theComponent.dictOfInteractions = addInteraction(theComponent.dictOfInteractions, interactionType, interaction);
+    }
+
+
     internal Dictionary<enactionCreator.interType, List<IInteraction>> addInteraction(Dictionary<enactionCreator.interType, List<IInteraction>> dictOfInteractionsX, enactionCreator.interType interactionType, IInteraction interaction)
     {
         if (dictOfInteractionsX == null)
@@ -115,18 +123,6 @@ public class interactionCreator : MonoBehaviour
         dictOfInteractionsX.Add(interactionType, list);
 
         return dictOfInteractionsX;
-    }
-
-    internal void addInteraction(GameObject objectToAddItTo, enactionCreator.interType interactionType, IInteraction interaction)
-    {
-        interactable2 theInter = objectToAddItTo.GetComponent<interactable2>();
-        if (theInter == null)
-        {
-            theInter = objectToAddItTo.AddComponent<interactable2>();
-        }
-
-        theInter.dictOfInteractions = addInteraction(theInter.dictOfInteractions, interactionType, interaction);
-
     }
 
     public List<Ieffect> makeEffectIntoList(Ieffect e1)
@@ -431,6 +427,41 @@ public class putInInventory : IInteraction
         }
         inventory1 theInventory = interactionAuthor.GetComponent<inventory1>();
         theInventory.putInInventory(objectBeingInteractedWith);
+    }
+}
+
+public class occupyPlayable : IInteraction
+{
+    playable2 thePlayable;
+
+    public occupyPlayable(GameObject theObjectToPlayAs)
+    {
+        thePlayable = theObjectToPlayAs.GetComponent<playable2>();
+    }
+
+    public occupyPlayable(testAircraftComponent thePlayableIn)
+    {
+        thePlayable = thePlayableIn;
+    }
+
+    public override void doInteraction(GameObject objectBeingInteractedWith, GameObject interactionAuthor, interactionInfo theInfo)
+    {
+        //Debug.Log("objectBeingInteractedWith:  " + objectBeingInteractedWith);
+
+
+        //     !!!!!!!!!!!!!!!!!!!     quick way to prevent stealing people's guns!
+        //              objectBeingInteractedWith.GetComponent<Collider>().enabled = false;
+        
+        //thePlayable.occupied = true;  DON'T DO THIS HERE!  THAT GETS CHECKED AND SWITCHED BY THE "PLAY AS" CODE!!!!!!!!
+
+        //Debug.Log("author:  " + author);
+        if (interactionAuthor == null)
+        {
+            Debug.Log("author is null");
+        }
+
+        interactionCreator.singleton.dockXToY(interactionAuthor, thePlayable.gameObject);
+        thePlayable.playAsPlayable2(interactionAuthor);
     }
 }
 

@@ -203,6 +203,7 @@ public class genGen : MonoBehaviour
 
         aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
     }
+    
     public void makeEnactionsWithTorsoArticulation1(playable2 thePlayable)
     {
         hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
@@ -570,6 +571,16 @@ public class genGen : MonoBehaviour
     }
 
 
+    public interactable2 ensureInteractable2(GameObject theObject)
+    {
+        interactable2 theComponent = theObject.GetComponent<interactable2>();
+        if (theComponent == null)
+        {
+            theComponent = theObject.AddComponent<interactable2>();
+        }
+
+        return theComponent;
+    }
 
     public void ensureSafetyForDeletion(GameObject theObject)
     {

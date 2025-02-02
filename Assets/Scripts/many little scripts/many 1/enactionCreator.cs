@@ -5,6 +5,7 @@ using UnityEditor;
 //using System.Numerics;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine.SocialPlatforms;
 using static enactionCreator;
 using static UnityEngine.GraphicsBuffer;
@@ -650,7 +651,8 @@ public class projectileLauncher: rangedEnaction
         //Debug.Log(firePoint.forward + innacuracy);
         //Debug.Log((firePoint.forward + innacuracy).normalized);
         float spreadFactor2 = 0.19f;
-        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, (firePoint.forward + (innacuracy.normalized* spreadFactor2)).normalized);
+        //genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, (firePoint.forward + (innacuracy.normalized * spreadFactor2)).normalized);
+        genGen.singleton.projectileGenerator(theprojectileToGenerate, this, firePoint.position + firePoint.forward, firePoint.forward.normalized);
     }
 }
 
@@ -1153,5 +1155,258 @@ public class turningWithNoStrafe : vectorMovement
         theTransform.Rotate(theTransform.up * yawInput * yawSpeed);
     }
 }
+
+
+
+public class airplaneMovementTest1 : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+    //bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
+
+    float maximumSpeed = 300;
+    Vector3 currentVelocity = new Vector3();
+    float acceleration = 10;
+
+    float drag = 0.071f;
+
+    Transform theSteeringAim;
+
+
+    public static void addThisComponent(GameObject objectToAddItTo, buttonCategories gamepadButtonType)//, float inputSpeed, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        airplaneMovementTest1 theComponent = objectToAddItTo.AddComponent<airplaneMovementTest1>();
+        theComponent.gamepadButtonType = gamepadButtonType;
+        theComponent.theSteeringAim = objectToAddItTo.transform;
+
+        theComponent.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (theComponent.controller == null)
+        {
+            theComponent.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+
+        //theComponent.controller = genGen.singleton.ensureVirtualGamePad(objectToAddItTo);
+        /*
+        vT.speed = inputSpeed;
+        vT.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        vT.theTransform = objectToAddItTo.transform;
+        vT.gamepadButtonType = gamepadButtonType;
+
+
+        vT.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (vT.controller == null)
+        {
+            vT.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+        */
+    }
+
+    public airplaneMovementTest1(float inputSpeed, Transform theTransform, buttonCategories gamepadButtonType, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        speed = inputSpeed;
+        //this.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        this.theTransform = theTransform;
+        this.gamepadButtonType = gamepadButtonType;
+
+        controller = theTransform.GetComponent<CharacterController>();
+        if (controller == null)
+        {
+            controller = theTransform.gameObject.AddComponent<CharacterController>();
+        }
+    }
+
+
+    public override void enact(inputData theInput)
+    {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        //Vector3 move = theTransform.right * theInput.vect2.x + theTransform.forward * theInput.vect2.y;
+        currentVelocity += 1 * theSteeringAim.forward * theInput.vect2.y;
+    }
+
+    void Update()
+    {
+        //Debug.Log("currentVelocity:  " + currentVelocity);
+        //Debug.Log("currentVelocity.magnitude:  " + currentVelocity.magnitude);
+        if (currentVelocity.magnitude < 0.5f)
+        {
+            //Debug.Log("(currentVelocity.magnitude < 0.5f) , return");
+            return;
+        }
+        //Debug.Log("-------------should move!!!!!!!");
+
+
+        //ohhh, my "speed" = 0.......
+        //Debug.Log(",,,,,,,,,,,,,(currentVelocity * speed * Time.deltaTime):  "+ (currentVelocity * speed * Time.deltaTime));
+        controller.Move(currentVelocity * Time.deltaTime);
+
+        currentVelocity += -currentVelocity * drag;
+    }
+}
+
+
+
+public class airplaneMovementTest2 : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+    //bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
+
+    float maximumSpeed = 300;
+    Vector3 currentVelocity = new Vector3();
+    float acceleration = 10;
+
+    float drag = 0.011f;
+
+    Transform theSteeringAim;
+
+
+    public static void addThisComponent(GameObject objectToAddItTo, buttonCategories gamepadButtonType)//, float inputSpeed, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        airplaneMovementTest2 theComponent = objectToAddItTo.AddComponent<airplaneMovementTest2>();
+        theComponent.gamepadButtonType = gamepadButtonType;
+        theComponent.theSteeringAim = objectToAddItTo.transform;
+
+        theComponent.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (theComponent.controller == null)
+        {
+            theComponent.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+
+        //theComponent.controller = genGen.singleton.ensureVirtualGamePad(objectToAddItTo);
+        /*
+        vT.speed = inputSpeed;
+        vT.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        vT.theTransform = objectToAddItTo.transform;
+        vT.gamepadButtonType = gamepadButtonType;
+
+
+        vT.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (vT.controller == null)
+        {
+            vT.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+        */
+    }
+
+
+
+    public override void enact(inputData theInput)
+    {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        //Vector3 move = theTransform.right * theInput.vect2.x + theTransform.forward * theInput.vect2.y;
+        currentVelocity += 1 * theSteeringAim.forward * theInput.vect2.y;
+    }
+
+    void Update()
+    {
+        //Debug.Log("currentVelocity:  " + currentVelocity);
+        //Debug.Log("currentVelocity.magnitude:  " + currentVelocity.magnitude);
+        if (currentVelocity.magnitude < 0.5f)
+        {
+            //Debug.Log("(currentVelocity.magnitude < 0.5f) , return");
+            return;
+        }
+        //Debug.Log("-------------should move!!!!!!!");
+
+
+        //ohhh, my "speed" = 0.......
+        //Debug.Log(",,,,,,,,,,,,,(currentVelocity * speed * Time.deltaTime):  "+ (currentVelocity * speed * Time.deltaTime));
+        controller.Move(theSteeringAim.forward * currentVelocity.magnitude * Time.deltaTime);
+
+        currentVelocity += -currentVelocity * drag;
+    }
+}
+
+public class airplaneMovementTest3 : vectorMovement
+{
+    //translation motion, like walking forward/back, and STRAFING left/right
+    //bool screenPlaneInsteadoOfHorizonPlane = false;  //like moving up/down and left/right in starfox.  ad-hoc for now
+
+    float maximumSpeed = 300;
+    Vector3 currentVelocity = new Vector3();
+    float acceleration = 10;
+
+    float drag = 0.011f;
+
+    Transform theSteeringAim;
+
+
+    public static void addThisComponent(GameObject objectToAddItTo, Transform theSteeringAimIn, buttonCategories gamepadButtonType)//, float inputSpeed, bool screenPlaneInsteadoOfHorizonPlane = false, bool navmeshToo = true)
+    {
+        airplaneMovementTest3 theComponent = objectToAddItTo.AddComponent<airplaneMovementTest3>();
+        theComponent.gamepadButtonType = gamepadButtonType;
+        theComponent.theSteeringAim = theSteeringAimIn;
+
+        theComponent.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (theComponent.controller == null)
+        {
+            theComponent.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+
+        //theComponent.controller = genGen.singleton.ensureVirtualGamePad(objectToAddItTo);
+        /*
+        vT.speed = inputSpeed;
+        vT.screenPlaneInsteadoOfHorizonPlane = screenPlaneInsteadoOfHorizonPlane;
+        vT.theTransform = objectToAddItTo.transform;
+        vT.gamepadButtonType = gamepadButtonType;
+
+
+        vT.controller = objectToAddItTo.GetComponent<CharacterController>();
+        if (vT.controller == null)
+        {
+            vT.controller = objectToAddItTo.gameObject.AddComponent<CharacterController>();
+        }
+        */
+    }
+
+
+
+    public override void enact(inputData theInput)
+    {
+        enactJustThisIndividualEnaction(theInput);
+        enactAllLinkedEnactionAtoms(theInput);
+    }
+
+    public override void enactJustThisIndividualEnaction(inputData theInput)
+    {
+        //Vector3 move = theTransform.right * theInput.vect2.x + theTransform.forward * theInput.vect2.y;
+        currentVelocity += 1 * theSteeringAim.forward * theInput.vect2.y;
+    }
+
+    void Update()
+    {
+        //Debug.Log("currentVelocity:  " + currentVelocity);
+        //Debug.Log("currentVelocity.magnitude:  " + currentVelocity.magnitude);
+        if (currentVelocity.magnitude < 0.5f)
+        {
+            //Debug.Log("(currentVelocity.magnitude < 0.5f) , return");
+            return;
+        }
+        //Debug.Log("-------------should move!!!!!!!");
+
+
+        //ohhh, my "speed" = 0.......
+        //Debug.Log(",,,,,,,,,,,,,(currentVelocity * speed * Time.deltaTime):  "+ (currentVelocity * speed * Time.deltaTime));
+        controller.Move(theSteeringAim.forward * currentVelocity.magnitude * Time.deltaTime);
+
+        currentVelocity += -currentVelocity * drag;
+    }
+}
+
+
+
+
+
+
+
+
 
 

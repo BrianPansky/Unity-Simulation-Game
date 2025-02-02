@@ -42,7 +42,7 @@ public class projectile1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        speed = 1.5f;
+        //speed = 1.5f;
 
         this.gameObject.transform.position = this.gameObject.transform.position + Direction*speed;
         if (canWeDebugThisOrWhat)

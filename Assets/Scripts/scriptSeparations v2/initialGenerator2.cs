@@ -192,13 +192,7 @@ public class initialGenerator2 : MonoBehaviour
 
 
         listOfTeamBaseGenerators.Add(new playerTeamGen());
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));//, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team3));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team4));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team5));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team6));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
+        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
 
 
 

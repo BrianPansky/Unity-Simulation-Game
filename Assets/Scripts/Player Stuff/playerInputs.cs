@@ -23,8 +23,12 @@ public class playerInputs : MonoBehaviour
         theVirtualGamePad = genGen.singleton.ensureVirtualGamePad(this.gameObject);
 
 
-
-        this.gameObject.GetComponent<NavMeshAgent>().enabled = false;
+        NavMeshAgent anyNavAgent = this.gameObject.GetComponent<NavMeshAgent>();
+        if (anyNavAgent != null)
+        {
+            anyNavAgent.enabled = false;
+        }
+        
         this.gameObject.AddComponent<gravityToFall>();
     }
 }

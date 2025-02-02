@@ -74,14 +74,26 @@ public class playable2 : interactable2
 
     }
 
-    public void initializeCustomEnactionPoint1(GameObject parent, Vector3 offset)
+    public void initializeEnactionPoint1(Vector3 offset)
     {
         enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1(), playable2 script"); //hmm, shouldn't playable2 AND equippable2s both have this?  a class encompassing them both?
-        enactionPoint1.transform.parent = parent.transform;
-        enactionPoint1.transform.position = parent.transform.position + offset;
+        enactionPoint1.transform.parent = transform;
+        enactionPoint1.transform.position = this.transform.position + offset;
         enactionPoint1.transform.rotation = this.transform.rotation;
 
-        enactionPoint1.transform.localScale = -parent.transform.localScale;
+    }
+
+    public void initializeCustomEnactionPoint1(GameObject parent, Vector3 offset)
+    {
+        //this one just puts camera below floor for some reason?????????  NO FIXED IT WAS THAT LOCALSCALE LINE
+        enactionPoint1 = new GameObject("enactionPoint1 in initializeEnactionPoint1(), playable2 script"); //hmm, shouldn't playable2 AND equippable2s both have this?  a class encompassing them both?
+        enactionPoint1.transform.parent = parent.transform;
+
+        //enactionPoint1.transform.SetParent(parent.transform, true);
+        enactionPoint1.transform.position = parent.transform.position + offset;
+        enactionPoint1.transform.rotation = parent.transform.rotation;//using "this"???  not "parent"???
+
+        //enactionPoint1.transform.localScale = -parent.transform.localScale;  OHHHH THIS WAS THE PROBLEM, WHAT WAS THE POINT OF THIS LINE OF CODE ANYWAYS???????
 
     }
 
@@ -99,6 +111,7 @@ public class playable2 : interactable2
 
         cameraMount.transform.SetParent(attachNewObjectForCameraOnThisInputTransform, false); //has to be child of ENACTION point for this body!  because THAT is the point which the gamepad rotates!!!
         cameraMount.transform.position += offset;
+        //Debug.Log("cameramount with hash code:  " + cameraMount + ", " + cameraMount.GetHashCode());
     }
 
 
@@ -118,6 +131,18 @@ public class playable2 : interactable2
 
 
 
+    public void playAsPlayable2(GameObject thePilot)
+    {
+        virtualGamepad gamepad = thePilot.GetComponent<virtualGamepad>();
+        if (gamepad == null)
+        {
+            Debug.Log("gamepad == null for:  " + thePilot.gameObject.name);
+            return;
+        }
+
+        playAsPlayable2(gamepad);
+    }
+
 
 
 
@@ -128,8 +153,11 @@ public class playable2 : interactable2
         if (occupied == true) { return; }
         occupied = true;
 
+        //Debug.Log("cameramount with hash code:  " + cameraMount + ", " + cameraMount.GetHashCode());
         if (cameraMount != null && gamepad.theCamera != null)
         {
+            //Debug.Log("hello???????????????????");
+            //Debug.Log("cameraMount.transform.position" + cameraMount.transform.position);
             gamepad.theCamera.transform.SetParent(cameraMount, false);
         }
 

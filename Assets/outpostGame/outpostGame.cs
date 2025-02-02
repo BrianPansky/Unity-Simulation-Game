@@ -176,6 +176,7 @@ public class playerTeamGen : doAtPoint
     {
         GameObject baseMarker = new makeBaseMarker(team).doIt(thisPoint);
         new makeTestRadar(team, thisPoint);
+        new makeTestAircraft(thisPoint + new Vector3(9, 1, 7));
         makePLAYER(new Vector3(-5, 1, -1)+ thisPoint);
 
         /*
@@ -191,10 +192,12 @@ public class playerTeamGen : doAtPoint
         */
 
     }
+    
     void makePLAYER(Vector3 location)
     {
         GameObject player = genGen.singleton.createPrefabAtPointAndRETURN(repository2.singleton.player, location);
-        genGen.singleton.addBody4ToObject(player);
+        //genGen.singleton.addBody4ToObject(player);
+        addTestBodyToObject(player);
         tagging2.singleton.addTag(player, team);
         tagging2.singleton.addTag(player, tag2.player);
         //Debug.Log("???????????????????????????????????????????????");
@@ -204,6 +207,46 @@ public class playerTeamGen : doAtPoint
         //addWeapon(newObj, weapon);
     }
 
+    public void addTestBodyToObject(GameObject newObj)
+    {
+        tagging2.singleton.addTag(newObj, tagging2.tag2.threat1);
+        playable2 thePlayable = newObj.AddComponent<playable2>();
+
+
+        //thePlayable.dictOfInteractions = new Dictionary<enactionCreator.interType, List<Ieffect>>();
+        //thePlayable.dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+
+        thePlayable.dictOfIvariables[numericalVariable.health] = 2;
+        thePlayable.equipperSlotsAndContents[interactionCreator.simpleSlot.hands] = null;
+
+
+
+        thePlayable.initializeEnactionPoint1();
+
+        genGen.singleton.addArrowForward(thePlayable.enactionPoint1);
+        genGen.singleton.addCube(thePlayable.enactionPoint1, 0.1f);
+
+        thePlayable.initializeCameraMount(thePlayable.enactionPoint1.transform, new Vector3(0, 2, 0));
+
+        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+        makeBasicEnactionssss(thePlayable);
+        //genGen.singleton.makeInteractionsBody4(thePlayable);
+
+
+        inventory1 theirInventory = newObj.AddComponent<inventory1>();
+    }
+    public void makeBasicEnactionssss(playable2 thePlayable)
+    {
+        hitscanEnactor.addHitscanEnactor(thePlayable.gameObject, thePlayable.enactionPoint1.transform, buttonCategories.primary,
+            new interactionInfo(interType.standardClick));
+
+
+        vecTranslation.addVecTranslation(thePlayable.gameObject, thePlayable.speed, buttonCategories.vector1);
+
+        navAgent.addNavAgentEnaction(thePlayable.gameObject);
+
+        aimTarget.addAimTargetAndVecRotation(thePlayable.gameObject, thePlayable.lookSpeed, thePlayable.transform, thePlayable.enactionPoint1.transform, buttonCategories.vector2);
+    }
 
     private List<Vector3> relativeSpawnPoints()
     {
@@ -254,6 +297,182 @@ public class playerTeamGen : doAtPoint
     }
 
 }
+
+
+
+
+public class makeTestAircraft
+{
+    public makeTestAircraft(Vector3 thisPoint)
+    {
+        /*
+        -------------------------------------------------------------
+        object "screen"
+        grab set of all virtual gamepad objects
+        sort by team?  [no, just use team colors!]
+        updating every frame needs a component!  an updater!  maybe callable!
+        create little objects[box ? ball ?] with that same color
+        get info about their position in space
+        scale that position info down
+        flatten it into top view
+        rotate it up vertical or whatever onto a vertical screen.
+        -------------------------------------------------------------
+        */
+
+        GameObject aircraft = new GameObject();
+        genGen.singleton.addArrowForward(aircraft);
+        aircraft.transform.position = thisPoint;// + new Vector3(0, -5, 0);
+        aircraft.transform.localScale = new Vector3(28, 28, 28);
+        aircraft.name = "aircraft1";
+
+        //aircraft.AddComponent<BoxCollider>();
+        //GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = aircraft.AddComponent<BoxCollider>();
+        //hitbox.size += new Vector3(width-1, height-1, width-1);
+        //hitbox.center += new Vector3(0, (height-1)/2, 0);
+        hitbox.size = new Vector3(0.1f, 0.1f, 0.3f);
+        hitbox.center = new Vector3(0, 0.37f, 0);
+
+        //tagging2.singleton.addTag(aircraft, tag2.zoneable);
+
+
+        testAircraftComponent.addThisComponent(aircraft);
+    }
+}
+
+public class testAircraftComponent : playable2
+{
+
+    public static testAircraftComponent addThisComponent(GameObject theObject)
+    {
+        //Debug.Log("-------------------aircraft object has hash code:  " + theObject + ", " + theObject.GetHashCode());
+        testAircraftComponent theComponent = theObject.AddComponent<testAircraftComponent>();
+        //theComponent.initializeEnactionPoint1();
+        //theComponent.initializeEnactionPoint1(new Vector3(0, 0, 0));
+        theComponent.initializeCustomEnactionPoint1(theComponent.gameObject, new Vector3(0, 10, 12));
+        theComponent.initializeCameraMount(theComponent.enactionPoint1.transform, new Vector3(0,0,-5));
+
+
+
+
+
+
+        //theComponent.theVerticalRotationTransform = theObject.transform;
+
+
+
+
+
+
+
+        //addAirplaneFlightModel();
+
+        theComponent.dictOfIvariables[numericalVariable.health] = 13;
+        //thePlayable.equipperSlotsAndContents[simpleSlot.hands] = null;
+
+        addEnactions(theComponent);
+        addInteractions(theComponent);
+
+
+        Debug.Log("-------------------aircraft maker END-----------------------------" + theObject + ", " + theObject.GetHashCode());
+        return theComponent;
+    }
+
+    private static void addInteractions(testAircraftComponent theComponent)
+    {
+        interactionCreator.singleton.addInteraction(theComponent.gameObject, interType.standardClick, new occupyPlayable(theComponent));
+
+        genGen.createWeaponLevels(theComponent, interType.peircing, 0, 4);
+        genGen.createWeaponLevels(theComponent, interType.melee, 0, 4);
+        //createWeaponLevels(theInteractable, interType.shootFlamethrower1, 0, 5);
+        //createWeaponLevels(theInteractable, interType.tankShot, 0, 0);
+
+        genGen.singleton.deathWhenHealthIsZero(theComponent);
+    }
+
+    private static void addEnactions(testAircraftComponent theComponent)
+    {
+        //vecTranslation.addVecTranslation(theComponent.gameObject, theComponent.speed, buttonCategories.vector1);
+        airplaneMovementTest3.addThisComponent(theComponent.gameObject, theComponent.enactionPoint1.transform ,buttonCategories.vector1);
+
+        aimTarget.addAimTargetAndVecRotation(theComponent.gameObject, theComponent.lookSpeed, theComponent.transform, theComponent.enactionPoint1.transform, buttonCategories.vector2);
+        theComponent.addGun(theComponent);
+    }
+
+    public void addGun(playable2 theComponent, float magnitudeOfInteraction = 1f, int level = 0, bool sdOnCollision = true, float speed = 5f)
+    {
+        theComponent.dictOfIvariables[numericalVariable.cooldown] = 0f;
+
+        /*
+        projectileLauncher theShooter = new projectileLauncher(theEquippable.enactionPoint1.transform, 
+            buttonCategories.errorYouDidntSetEnumTypeForBUTTONCATEGORIES, 
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0));
+        */
+
+
+        //bit messy?  made "thisButtonCategoryIntentionallyLeftBlank" so that i can add component to object [thus easy search object for component of that type] WITHOUT having it plug into a gamepad button when equipped......
+        projectileLauncher.addProjectileLauncher(theComponent.transform.gameObject,
+            theComponent.enactionPoint1.transform,
+            buttonCategories.thisButtonCategoryIntentionallyLeftBlank,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 99, 0),
+            20);
+
+        numericalEffect(theComponent, numericalVariable.cooldown, 40);
+
+        projectileLauncher theShooter = theComponent.transform.gameObject.GetComponent<projectileLauncher>();
+        enactEffect theFiringEffectOnCooldown = theComponent.transform.gameObject.GetComponent<enactEffect>();
+
+        //IEnactaBool theFiringEffectOnCooldown = enactEffect.returnEnactEffect(new numericalEffect(theEquippable, numericalVariable.cooldown));
+
+
+
+
+
+        //Debug.Assert(enactEffect.returnEnactEffect(new deathEffect(theEquippable.transform.gameObject)) != null);
+        //Debug.Assert(theFiringEffectOnCooldown != null);
+        Debug.Assert(theFiringEffectOnCooldown != null);
+
+        condition cooldownCondition = new numericalCondition(numericalVariable.cooldown, theComponent.dictOfIvariables);
+
+        //compoundEnactaBool.addCompoundEnactaBool(theEquippable.transform.gameObject, buttonCategories.primary, theShooter, theFiringEffectOnCooldown, cooldownCondition);
+        theShooter.linkedEnactionAtoms.Add(theFiringEffectOnCooldown);//messy [but better than the above "compound" nonsense]
+        theShooter.gamepadButtonType = buttonCategories.primary;
+
+        /*
+        objectGen theFlash =  new genObjectAndModify(new gunFlash(), new objectModifier[] { new simpleMovingMod(0.2f, false, 4) });
+
+        enactEffect theGunFlash = enactEffect.addEnactEffectAndReturn(theEquippable.gameObject, new generateObjectAtLocation(theFlash, theEquippable.enactionPoint1));
+        theShooter.linkedEnactionAtoms.Add(theGunFlash);//messy [but better than the above "compound" nonsense]
+        
+
+
+        objectGen theBulletGlow = new genObjectAndModify(new bulletGlow(), new objectModifier[] { new simpleMovingMod(speed, false, 99) });
+
+        enactEffect theGlowEnactEffect = enactEffect.addEnactEffectAndReturn(theEquippable.gameObject, new generateObjectAtLocation(theBulletGlow, theEquippable.enactionPoint1));
+        theShooter.linkedEnactionAtoms.Add(theGlowEnactEffect);//messy [but better than the above "compound" nonsense]
+        */
+
+        /*
+        projectileLauncher.addProjectileLauncher(theEquippable.transform.gameObject,
+            theEquippable.enactionPoint1.transform,
+            buttonCategories.primary,
+            new interactionInfo(interType.peircing, magnitudeOfInteraction, level),
+            new projectileToGenerate(speed, sdOnCollision, 999, 0),
+            20);
+
+        */
+
+    }
+    
+    public static void numericalEffect(playable2 theComponent, numericalVariable numVarX, int amountToSubtract = 1)
+    {
+        enactEffect.addEnactEffect(theComponent.transform.gameObject, new numericalEffect(theComponent, numericalVariable.cooldown, amountToSubtract));
+    }
+
+}
+
 
 
 
