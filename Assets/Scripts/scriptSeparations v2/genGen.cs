@@ -559,6 +559,17 @@ public class genGen : MonoBehaviour
         return ensuredThing;
     }
 
+    public OldFSMcomponent ensureOldFSMcomponent(GameObject onThisObject)
+    {
+        OldFSMcomponent ensuredThing = onThisObject.GetComponent<OldFSMcomponent>();
+        if (ensuredThing == null)
+        {
+            ensuredThing = onThisObject.AddComponent<OldFSMcomponent>();
+        }
+
+        return ensuredThing;
+    }
+
     public FSMcomponent ensureFSMcomponent(GameObject onThisObject)
     {
         FSMcomponent ensuredThing = onThisObject.GetComponent<FSMcomponent>();
@@ -600,12 +611,218 @@ public class genGen : MonoBehaviour
 
 
 
+public class testNewestFSMGenerator
+{
+
+    private Vector3 vector3;
+
+    public testNewestFSMGenerator(Vector3 vector3)
+    {
+        this.vector3 = vector3;
+    }
+
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
 
 
 
 
+        //new OldFSMgen2(newObj, new randomWanderOldFSMgen(), new plugInOldFSM[] { new goToPreyFeetOldFSMGen(), new grabFoodFeetOldFSMGen(stuffType.meat1) });
+        //new OldFSMgen2(newObj, new plugInOldFSM[] { new killPreyHandsOldFSMGen(), new grabFoodHandsOldFSMGen(stuffType.meat1) });
+
+        new FSMgen(newObj, new doSimplePatrolState1());
+    }
+}
 
 
+public class FSMgen
+{
+    FSM theBaseFSM;
+    //GameObject theObjectDoingTheEnaction;
+
+    /*
+    public FSMgen(GameObject theObjectDoingTheEnactionIn)
+    {
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1)
+    {
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        //      addon1.addPlugin(this);
+        //addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+
+    }
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, baseState state0)
+    {
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM addon1) : this(theObjectDoingTheEnactionIn, state0)
+    {
+
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM[] plugInFSMs) : this(theObjectDoingTheEnactionIn, state0)
+    {
+        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+
+        foreach (plugInFSM thisPlugin in plugInFSMs)
+        {
+            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM[] plugInFSMs)
+    {
+        theBaseFSM = new generateFSM(); //idle
+        theBaseFSM.name = "idle";
+
+        foreach (plugInFSM thisPlugin in plugInFSMs)
+        {
+            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    */
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, state baseStateIn)
+    {
+        baseStateIn.setup(theObjectDoingTheEnactionIn);
+
+        theBaseFSM = new FSM(baseStateIn);
+
+        /*
+        foreach (plugInFSM thisPlugin in plugInFSMs)
+        {
+            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        */
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    private void addTheGeneratedFSMToTheirFSMComponent(GameObject theObjectDoingTheEnactionIn)
+    {
+        FSMcomponent theFSMComponent = genGen.singleton.ensureFSMcomponent(theObjectDoingTheEnactionIn);
+        theFSMComponent.theFSMList.Add(theBaseFSM);
+    }
+
+    public FSM returnIt()
+    {
+        return theBaseFSM;
+    }
+    /*
+    public void addLayer(plugInFSM outerLayer)
+    {
+    }
+    */
+
+
+
+    agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    {
+        permaPlan2 perma1 = new permaPlan2(step1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
+        return repeatWithTargetPickerTest;
+    }
+
+    agnostRepeater singleExeToRepeater(singleEXE exe1, targetPicker getter)
+    {
+        permaPlan2 perma1 = new permaPlan2(exe1);
+        agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1, getter);
+        return repeatWithTargetPickerTest;
+    }
+
+
+
+    //single nav!  [should be standard conversion???????]
+    singleEXE singleNav(GameObject theObjectDoingTheEnaction, Vector3 staticTargetPosition, float offsetRoom = 0f)
+    {
+        //give it some room so they don't step on object they want to arrive at!
+        //just do their navmesh agent enaction.
+        navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+
+        vect3EXE2 theEXE = new vect3EXE2(theNavAgent, staticTargetPosition);
+        proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        theEXE.endConditions.Add(condition);
+
+        return theEXE;
+    }
+}
+
+
+/*
+public abstract class plugInFSM
+{
+    public condition switchCondition;
+    public FSM theFSM;
+
+    public abstract void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction);
+}
+
+public abstract class simpleOneStateAndReturn : plugInFSM
+{
+    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    {
+        theFSMToAddItTo.addSwitchAndReverse(generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
+    }
+    public abstract condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction);
+    public abstract FSM generateTheFSM(GameObject theObjectDoingTheEnaction);
+}
+
+public class skippableProcess : plugInFSM
+{
+    List<plugInFSM> theStepPlugins = new List<plugInFSM>();
+    public skippableProcess(plugInFSM step1)
+    {
+        theStepPlugins.Add(step1);
+    }
+    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    {
+        //so, all steps have their switch to [but not switch back!] conditions from all states below/before them in the list
+        //so, we're building a chain of FSMs
+        //then adding "switch to" to each of the previous ones on the list so far
+        //and then....done?
+
+        List<FSM> theChainOfFSMs = new List<FSM>();
+        theChainOfFSMs.Add(theFSMToAddItTo);
+        foreach (plugInFSM thisPlugin in theStepPlugins)
+        {
+            foreach (FSM thisFSM in theChainOfFSMs)
+            {
+                thisPlugin.addPlugin(thisFSM, theObjectDoingTheEnaction);
+            }
+
+            theChainOfFSMs.Add(thisPlugin.theFSM);
+        }
+    }
+}
+
+
+*/
 
 
 
@@ -937,28 +1154,28 @@ public class paintByNumbersProjectile : objectGen
 
 
 
-public class FSM
+public class OldFSM
 {
     public bool debugBool = false;
     public string name;
-    //internal Dictionary<multicondition, FSM> switchBoard = new Dictionary<multicondition, FSM>();
-    internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
+    //internal Dictionary<multicondition, OldFSM> switchBoard = new Dictionary<multicondition, OldFSM>();
+    internal Dictionary<condition, OldFSM> switchBoard = new Dictionary<condition, OldFSM>();
 
     internal List<repeater> repeatingPlans = new List<repeater>();
 
 
 
-    public FSM doAFrame()
+    public OldFSM doAFrame()
     {
         if(debugBool == true)
         {
-            Debug.Log("the name of this FSM:  " + name);
+            Debug.Log("the name of this OldFSM:  " + name);
         }
-        //Debug.Log("the name of this FSM:  " + name);
+        //Debug.Log("the name of this OldFSM:  " + name);
 
-        //Debug.Log("the base enactions of this FSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
+        //Debug.Log("the base enactions of this OldFSM:  " + baseEnactionsAsText());  //null error because "nested" repeaters don't store a perma plan in the top shell
 
-        FSM toSwitchTo = null;
+        OldFSM toSwitchTo = null;
 
         toSwitchTo = firstMetSwitchtCondition();
         if (toSwitchTo != null)
@@ -997,7 +1214,7 @@ public class FSM
     }
 
 
-    private FSM firstMetSwitchtCondition()
+    private OldFSM firstMetSwitchtCondition()
     {
         foreach (condition thisCondition in switchBoard.Keys)
         {
@@ -1024,34 +1241,34 @@ public class FSM
     public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
     {
 
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+        OldFSM otherOldFSM = new generateOldFSM(doThisAfterSwitchCondition);
 
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
-    public void addSwitch(condition switchCondition, FSM otherFSM)
+    public void addSwitch(condition switchCondition, OldFSM otherOldFSM)
     {
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
 
     public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
     {
 
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition);
+        OldFSM otherOldFSM = new generateOldFSM(doThisAfterSwitchCondition);
 
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+        switchBoard[switchCondition] = otherOldFSM;
+        otherOldFSM.switchBoard[new reverseCondition(switchCondition)] = this;
     }
-    public void addSwitchAndReverse(condition switchCondition, FSM otherFSM)
+    public void addSwitchAndReverse(condition switchCondition, OldFSM otherOldFSM)
     {
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+        switchBoard[switchCondition] = otherOldFSM;
+        otherOldFSM.switchBoard[new reverseCondition(switchCondition)] = this;
     }
 
 
     public string baseEnactionsAsText()
     {
         string newString = "";
-        //newString += "the base enactions of this FSM:  ";
+        //newString += "the base enactions of this OldFSM:  ";
         newString += "[";
         foreach (repeater thisRep in repeatingPlans)
         {
@@ -1068,15 +1285,15 @@ public class FSM
     }
 }
 
-public class generateFSM : FSM
+public class generateOldFSM : OldFSM
 {
 
-    public generateFSM()
+    public generateOldFSM()
     {
         //      new permaPlan();
     }
 
-    public generateFSM(repeater doThisImmediately)
+    public generateOldFSM(repeater doThisImmediately)
     {
         //justDoThisForNow = doThisImmediately;
 
@@ -1084,14 +1301,14 @@ public class generateFSM : FSM
 
     }
 
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    public generateOldFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
     {
         permaPlan2 perma1 = new permaPlan2(step1);
         agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
         repeatingPlans.Add(repeatWithTargetPickerTest);
 
     }
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2)
+    public generateOldFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2)
     {
         permaPlan2 perma1 = new permaPlan2(step1, step2);
         agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
@@ -1099,14 +1316,14 @@ public class generateFSM : FSM
 
     }
 
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3)
+    public generateOldFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3)
     {
         permaPlan2 perma1 = new permaPlan2(step1, step2, step3);
         agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
         repeatingPlans.Add(repeatWithTargetPickerTest);
 
     }
-    public generateFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
+    public generateOldFSM(GameObject theObjectDoingTheEnaction, singleEXE step1, singleEXE step2, singleEXE step3, singleEXE step4)
     {
         permaPlan2 perma1 = new permaPlan2(step1, step2, step3, step4);
         agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
@@ -1114,7 +1331,7 @@ public class generateFSM : FSM
 
     }
 
-    public generateFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
+    public generateOldFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
 
@@ -1122,19 +1339,19 @@ public class generateFSM : FSM
 
 
 
-        FSM otherFSM = new generateFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+        OldFSM otherOldFSM = new generateOldFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
 
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
 
-    public generateFSM(repeater doThisImmediately, condition switchCondition, FSM doThisAfterSwitchCondition)
+    public generateOldFSM(repeater doThisImmediately, condition switchCondition, OldFSM doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
 
         repeatingPlans.Add(doThisImmediately);
 
 
-        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+        //animalOldFSM otherOldFSM = new animalOldFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
 
         switchBoard[switchCondition] = doThisAfterSwitchCondition;
     }
@@ -1181,18 +1398,18 @@ public class generateFSM : FSM
 
 
 
-public class FSMcomponent : MonoBehaviour, IupdateCallable
+public class OldFSMcomponent : MonoBehaviour, IupdateCallable
 {
     public bool debugBool = false;
-    //public FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+    //public OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();// = new List<OldFSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
 
     public List<IupdateCallable> currentUpdateList { get; set; }
     public void Update()
     {
         if (debugBool == true)
         {
-            Debug.Log("theFSMList.Count:  " + theFSMList.Count);
+            Debug.Log("theOldFSMList.Count:  " + theOldFSMList.Count);
             Debug.Log("currentUpdateList:  " + currentUpdateList);
         }
         //Debug.Log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&     regular Update()        &&&&&&&&&&&&&&&&&&&");
@@ -1207,16 +1424,16 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
         //Debug.Log("============================     callableUpdate()        =================");
         //Debug.Log("this.gameObject:  " + this.gameObject);
         //tagging2.singleton.printAllTags(this.gameObject);
-        foreach (FSM theFSM in theFSMList)
+        foreach (OldFSM theOldFSM in theOldFSMList)
         {
-            //Debug.Log("theFSM:  "+ theFSM);
-            //theFSM = theFSM.doAFrame();  //will this be an issue?  or only if i add/remove items from list?
+            //Debug.Log("theOldFSM:  "+ theOldFSM);
+            //theOldFSM = theOldFSM.doAFrame();  //will this be an issue?  or only if i add/remove items from list?
         }
 
-        for (int index = 0; index < theFSMList.Count; index++)
+        for (int index = 0; index < theOldFSMList.Count; index++)
         {
-            theFSMList[index].debugBool = debugBool;
-            theFSMList[index] = theFSMList[index].doAFrame();
+            theOldFSMList[index].debugBool = debugBool;
+            theOldFSMList[index] = theOldFSMList[index].doAFrame();
         }
 
     }
@@ -1240,85 +1457,85 @@ public class reactivationOfNavMeshAgent : MonoBehaviour
 
 
 
-public abstract class plugInFSM
+public abstract class plugInOldFSM
 {
     public condition switchCondition;
-    public FSM theFSM;
+    public OldFSM theOldFSM;
 
-    public abstract void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction);
+    public abstract void addPlugin(OldFSM theOldFSMToAddItTo, GameObject theObjectDoingTheEnaction);
 }
 
-public abstract class simpleOneStateAndReturn : plugInFSM
+public abstract class OldSimpleOneStateAndReturn : plugInOldFSM
 {
-    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    public override void addPlugin(OldFSM theOldFSMToAddItTo, GameObject theObjectDoingTheEnaction)
     {
-        theFSMToAddItTo.addSwitchAndReverse(generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
+        theOldFSMToAddItTo.addSwitchAndReverse(generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheOldFSM(theObjectDoingTheEnaction));
     }
     public abstract condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction);
-    public abstract FSM generateTheFSM(GameObject theObjectDoingTheEnaction);
+    public abstract OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction);
 }
 
-public  class skippableProcess : plugInFSM
+public  class OldSkippableProcess : plugInOldFSM
 {
-    List<plugInFSM> theStepPlugins = new List<plugInFSM>();
-    public skippableProcess(plugInFSM step1)
+    List<plugInOldFSM> theStepPlugins = new List<plugInOldFSM>();
+    public OldSkippableProcess(plugInOldFSM step1)
     {
         theStepPlugins.Add(step1);
     }
-    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    public override void addPlugin(OldFSM theOldFSMToAddItTo, GameObject theObjectDoingTheEnaction)
     {
         //so, all steps have their switch to [but not switch back!] conditions from all states below/before them in the list
-        //so, we're building a chain of FSMs
+        //so, we're building a chain of OldFSMs
         //then adding "switch to" to each of the previous ones on the list so far
         //and then....done?
 
-        List<FSM> theChainOfFSMs = new List<FSM>();
-        theChainOfFSMs.Add(theFSMToAddItTo);
-        foreach(plugInFSM thisPlugin in theStepPlugins)
+        List<OldFSM> theChainOfOldFSMs = new List<OldFSM>();
+        theChainOfOldFSMs.Add(theOldFSMToAddItTo);
+        foreach(plugInOldFSM thisPlugin in theStepPlugins)
         {
-            foreach (FSM thisFSM in theChainOfFSMs)
+            foreach (OldFSM thisOldFSM in theChainOfOldFSMs)
             {
-                thisPlugin.addPlugin(thisFSM,theObjectDoingTheEnaction);
+                thisPlugin.addPlugin(thisOldFSM,theObjectDoingTheEnaction);
             }
 
-            theChainOfFSMs.Add(thisPlugin.theFSM);
+            theChainOfOldFSMs.Add(thisPlugin.theOldFSM);
         }
     }
 }
 
 /*
-public class layer : plugInFSM
+public class layer : plugInOldFSM
 {
-    public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
+    public override void addPlugin(OldFSM theOldFSMToAddItTo, GameObject theObjectDoingTheEnaction)
     {
-        fSMgen2.addSwitchAndReverse(switchCondition, theFSM);
+        OldFSMgen2.addSwitchAndReverse(switchCondition, theOldFSM);
 
-        foreach (var thisKey in fSMgen2.switchBoard.Keys)
+        foreach (var thisKey in OldFSMgen2.switchBoard.Keys)
         {
-            fSMgen2.switchBoard[thisKey].addSwitch(switchCondition, theFSM);
+            OldFSMgen2.switchBoard[thisKey].addSwitch(switchCondition, theOldFSM);
         }
     }
 }
 */
 
 
-public class nestedFSM_AsRepeater : repeater//FSM
+public class nestedOldFSM_AsRepeater : repeater//OldFSM
 {
-    FSM theFSM;
+    OldFSM theOldFSM;
 
-    public nestedFSM_AsRepeater(FSM theFSMIn)
+    public nestedOldFSM_AsRepeater(OldFSM theOldFSMIn)
     {
-        theFSM = theFSMIn;
+        theOldFSM = theOldFSMIn;
     }
 
     public override string baseEnactionsAsText()
     {
-        return theFSM.baseEnactionsAsText();
+        return theOldFSM.baseEnactionsAsText();
     }
 
     public override void doThisThing()
     {
-        theFSM.doAFrame();
+        theOldFSM.doAFrame();
     }
 
     public override void refill()
@@ -1329,84 +1546,84 @@ public class nestedFSM_AsRepeater : repeater//FSM
 
 
 
-public class FSMgen2
+public class OldFSMgen2
 {
-    FSM theBaseFSM;
+    OldFSM theBaseOldFSM;
     //GameObject theObjectDoingTheEnaction;
 
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn)
     {
         //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
-        theBaseFSM = new generateFSM(); //idle
-        theBaseFSM.name = "idle";
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        theBaseOldFSM = new generateOldFSM(); //idle
+        theBaseOldFSM.name = "idle";
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
     }
 
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn, plugInOldFSM addon1)
     {
         //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
         //      addon1.addPlugin(this);
-        //addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
-        theBaseFSM = new generateFSM(); //idle
-        theBaseFSM.name = "idle";
-        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        //addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
+        theBaseOldFSM = new generateOldFSM(); //idle
+        theBaseOldFSM.name = "idle";
+        addon1.addPlugin(theBaseOldFSM, theObjectDoingTheEnactionIn);
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
 
     }
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0)
     {
         //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
-        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        theBaseOldFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
     }
 
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM addon1) : this(theObjectDoingTheEnactionIn, state0)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInOldFSM addon1) : this(theObjectDoingTheEnactionIn, state0)
     {
 
-        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
-        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        theBaseOldFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        addon1.addPlugin(theBaseOldFSM, theObjectDoingTheEnactionIn);
 
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
     }
 
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInFSM[] plugInFSMs) : this(theObjectDoingTheEnactionIn, state0)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInOldFSM[] plugInOldFSMs) : this(theObjectDoingTheEnactionIn, state0)
     {
-        theBaseFSM = state0.makeState(theObjectDoingTheEnactionIn);
+        theBaseOldFSM = state0.makeState(theObjectDoingTheEnactionIn);
 
-        foreach (plugInFSM thisPlugin in plugInFSMs)
+        foreach (plugInOldFSM thisPlugin in plugInOldFSMs)
         {
-            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+            thisPlugin.addPlugin(theBaseOldFSM, theObjectDoingTheEnactionIn);
         }
 
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
     }
 
-    public FSMgen2(GameObject theObjectDoingTheEnactionIn,  plugInFSM[] plugInFSMs)
+    public OldFSMgen2(GameObject theObjectDoingTheEnactionIn,  plugInOldFSM[] plugInOldFSMs)
     {
-        theBaseFSM = new generateFSM(); //idle
-        theBaseFSM.name = "idle";
+        theBaseOldFSM = new generateOldFSM(); //idle
+        theBaseOldFSM.name = "idle";
 
-        foreach (plugInFSM thisPlugin in plugInFSMs)
+        foreach (plugInOldFSM thisPlugin in plugInOldFSMs)
         {
-            thisPlugin.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+            thisPlugin.addPlugin(theBaseOldFSM, theObjectDoingTheEnactionIn);
         }
 
-        addItToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
     }
 
-    private void addItToTheirFSMComponent(GameObject theObjectDoingTheEnactionIn)
+    private void addItToTheirOldFSMComponent(GameObject theObjectDoingTheEnactionIn)
     {
-        FSMcomponent theFSMComponent = genGen.singleton.ensureFSMcomponent(theObjectDoingTheEnactionIn);
-        theFSMComponent.theFSMList.Add(theBaseFSM);
+        OldFSMcomponent theOldFSMComponent = genGen.singleton.ensureOldFSMcomponent(theObjectDoingTheEnactionIn);
+        theOldFSMComponent.theOldFSMList.Add(theBaseOldFSM);
     }
 
-    public FSM returnIt()
+    public OldFSM returnIt()
     {
-        return theBaseFSM;
+        return theBaseOldFSM;
     }
     /*
-    public void addLayer(plugInFSM outerLayer)
+    public void addLayer(plugInOldFSM outerLayer)
     {
     }
     */
@@ -1450,11 +1667,11 @@ public class FSMgen2
 
 
 
-public class testNewFSMGenerator
+public class testNewOldFSMGenerator
 {
     private Vector3 vector3;
 
-    public testNewFSMGenerator(Vector3 vector3)
+    public testNewOldFSMGenerator(Vector3 vector3)
     {
         this.vector3 = vector3;
     }
@@ -1467,44 +1684,44 @@ public class testNewFSMGenerator
 
 
 
-        new FSMgen2(newObj, new randomWanderFSMgen(), new grabFoodFeetFSMGen(stuffType.fruit));
-        new FSMgen2(newObj, new grabFoodHandsFSMGen(stuffType.fruit));
+        new OldFSMgen2(newObj, new randomWanderOldFSMgen(), new grabFoodFeetOldFSMGen(stuffType.fruit));
+        new OldFSMgen2(newObj, new grabFoodHandsOldFSMGen(stuffType.fruit));
     }
 }
 
 public abstract class baseState
 {
 
-    public FSM theFSM;
+    public OldFSM theOldFSM;
 
-    public abstract void addPlugin(GameObject theObjectDoingTheEnaction, FSMgen2 fSMgen2);
+    public abstract void addPlugin(GameObject theObjectDoingTheEnaction, OldFSMgen2 OldFSMgen2);
 
-    internal abstract FSM makeState(GameObject theObjectDoingTheEnaction);
+    internal abstract OldFSM makeState(GameObject theObjectDoingTheEnaction);
 }
 
-public class randomWanderFSMgen : baseState
+public class randomWanderOldFSMgen : baseState
 {
-    public override void addPlugin(GameObject theObjectDoingTheEnaction, FSMgen2 fSMgen2)
+    public override void addPlugin(GameObject theObjectDoingTheEnaction, OldFSMgen2 OldFSMgen2)
     {
     }
 
-    internal override FSM makeState(GameObject theObjectDoingTheEnaction)
+    internal override OldFSM makeState(GameObject theObjectDoingTheEnaction)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
         wander.name = "feet, wander";
-        theFSM = wander;
+        theOldFSM = wander;
 
-        return theFSM;
+        return theOldFSM;
     }
 }
 
 
-public class grabFoodFeetFSMGen : simpleOneStateAndReturn
+public class grabFoodFeetOldFSMGen : OldSimpleOneStateAndReturn
 {
     private stuffType stuffToGrab;
 
-    public grabFoodFeetFSMGen(stuffType stuffToGrabIn)
+    public grabFoodFeetOldFSMGen(stuffType stuffToGrabIn)
     {
         stuffToGrab = stuffToGrabIn;
     }
@@ -1525,15 +1742,15 @@ public class grabFoodFeetFSMGen : simpleOneStateAndReturn
         return switchToGrabFood;
     }
 
-    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
     {
-        return grabFoodFeetFSM(theObjectDoingTheEnaction, stuffToGrab, 330);
+        return grabFoodFeetOldFSM(theObjectDoingTheEnaction, stuffToGrab, 330);
     }
 
 
-    private FSM grabFoodFeetFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float targetDetectionRange = 40)
+    private OldFSM grabFoodFeetOldFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float targetDetectionRange = 40)
     {
-        FSM grabFood = new generateFSM(
+        OldFSM grabFood = new generateOldFSM(
             new goToX(theObjectDoingTheEnaction, grabFoodTargetPicker(theObjectDoingTheEnaction, stuffTypeX), targetDetectionRange).returnIt());
 
         grabFood.name = "feet, grabFood";
@@ -1567,11 +1784,11 @@ public class grabFoodFeetFSMGen : simpleOneStateAndReturn
 }
 
 
-public class grabFoodHandsFSMGen: simpleOneStateAndReturn
+public class grabFoodHandsOldFSMGen: OldSimpleOneStateAndReturn
 {
     private stuffType stuffToGrab;
 
-    public grabFoodHandsFSMGen(stuffType stuffToGrabIn)
+    public grabFoodHandsOldFSMGen(stuffType stuffToGrabIn)
     {
         stuffToGrab = stuffToGrabIn;
     }
@@ -1594,14 +1811,14 @@ public class grabFoodHandsFSMGen: simpleOneStateAndReturn
     }
     */
 
-    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
     {
-        return grabFoodHandsFSM(theObjectDoingTheEnaction, stuffToGrab, 40);
+        return grabFoodHandsOldFSM(theObjectDoingTheEnaction, stuffToGrab, 40);
     }
 
-    private FSM grabFoodHandsFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float distance = 3f)
+    private OldFSM grabFoodHandsOldFSM(GameObject theObjectDoingTheEnaction, stuffType stuffTypeX, float distance = 3f)
     {
-        FSM grabFood = new generateFSM(grabTheStuff(theObjectDoingTheEnaction, stuffTypeX));
+        OldFSM grabFood = new generateOldFSM(grabTheStuff(theObjectDoingTheEnaction, stuffTypeX));
 
         grabFood.name = "hands, grabFood";
         return grabFood;
@@ -1641,12 +1858,12 @@ public class grabFoodHandsFSMGen: simpleOneStateAndReturn
 
 
 
-public class testNewFSMGenerator2
+public class testNewOldFSMGenerator2
 {
 
     private Vector3 vector3;
 
-    public testNewFSMGenerator2(Vector3 vector3)
+    public testNewOldFSMGenerator2(Vector3 vector3)
     {
         this.vector3 = vector3;
     }
@@ -1659,8 +1876,8 @@ public class testNewFSMGenerator2
 
 
 
-        new FSMgen2(newObj, new randomWanderFSMgen(), new plugInFSM[] { new goToPreyFeetFSMGen(), new grabFoodFeetFSMGen(stuffType.meat1) });
-        new FSMgen2(newObj, new plugInFSM[] { new killPreyHandsFSMGen(), new grabFoodHandsFSMGen(stuffType.meat1) });
+        new OldFSMgen2(newObj, new randomWanderOldFSMgen(), new plugInOldFSM[] { new goToPreyFeetOldFSMGen(), new grabFoodFeetOldFSMGen(stuffType.meat1) });
+        new OldFSMgen2(newObj, new plugInOldFSM[] { new killPreyHandsOldFSMGen(), new grabFoodHandsOldFSMGen(stuffType.meat1) });
     }
 }
 
@@ -1668,10 +1885,10 @@ public class testNewFSMGenerator2
 
 
 
-public class goToPreyFeetFSMGen : simpleOneStateAndReturn
+public class goToPreyFeetOldFSMGen : OldSimpleOneStateAndReturn
 {
     float targetDetectionRange;
-    public goToPreyFeetFSMGen(float targetDetectionRangeIn=90f)
+    public goToPreyFeetOldFSMGen(float targetDetectionRangeIn=90f)
     {
         targetDetectionRange = targetDetectionRangeIn;
     }
@@ -1692,14 +1909,14 @@ public class goToPreyFeetFSMGen : simpleOneStateAndReturn
         return switchToGrabFood;
     }
 
-    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
     {
-        return goToPreyFeetFSM(theObjectDoingTheEnaction);
+        return goToPreyFeetOldFSM(theObjectDoingTheEnaction);
     }
 
-    private FSM goToPreyFeetFSM(GameObject theObjectDoingTheEnaction, float targetDetectionRange = 40)
+    private OldFSM goToPreyFeetOldFSM(GameObject theObjectDoingTheEnaction, float targetDetectionRange = 40)
     {
-        FSM grabFood = new generateFSM(
+        OldFSM grabFood = new generateOldFSM(
             new goToX(theObjectDoingTheEnaction, killPreyTargetPicker(theObjectDoingTheEnaction), targetDetectionRange).returnIt());
 
         grabFood.name = "feet, goToPrey";
@@ -1747,7 +1964,7 @@ public class goToPreyFeetFSMGen : simpleOneStateAndReturn
 }
 
 
-public class killPreyHandsFSMGen : simpleOneStateAndReturn
+public class killPreyHandsOldFSMGen : OldSimpleOneStateAndReturn
 {
 
     public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
@@ -1756,17 +1973,17 @@ public class killPreyHandsFSMGen : simpleOneStateAndReturn
     }
 
 
-    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
     {
-        return killPreyFSM(theObjectDoingTheEnaction);
+        return killPreyOldFSM(theObjectDoingTheEnaction);
     }
 
-    private FSM killPreyFSM(GameObject theObjectDoingTheEnaction)
+    private OldFSM killPreyOldFSM(GameObject theObjectDoingTheEnaction)
     {
-        //FSM getFood = new generateFSM(grabTheStuff(newObj, stuffTypeX));
-        FSM killPrey = new generateFSM(
+        //OldFSM getFood = new generateOldFSM(grabTheStuff(newObj, stuffTypeX));
+        OldFSM killPrey = new generateOldFSM(
             new aimAtXAndInteractWithY(theObjectDoingTheEnaction, killPreyTargetPicker(theObjectDoingTheEnaction), interType.melee, 1.7f).returnIt()
-            );//new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(newObj, numericalVariable.health, interType.melee));
+            );//new animalOldFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(newObj, numericalVariable.health, interType.melee));
 
         killPrey.name = "hands, kellPrey";
         return killPrey;
@@ -1814,7 +2031,7 @@ public class predatorGen2 : objectGen
     float speed;
     float targetDetectionRange;
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -1880,8 +2097,8 @@ public class predatorGen2 : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new predatorFSMGen2(newObj, team, speed, stuffType.meat1, targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new predatorOldFSMGen2(newObj, team, speed, stuffType.meat1, targetDetectionRange).returnIt();//theBehavior;
 
 
 
@@ -1956,9 +2173,9 @@ public class predatorGen2 : objectGen
 
         //genGen.singleton.ensureVirtualGamePad(newObj);
         animalUpdate theUpdate = newObj.GetComponent<animalUpdate>();
-        theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+        theUpdate.theOldFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
-        //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+        //      theUpdate.theOldFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
 
         MeshRenderer theRenderer = newObj.GetComponent<MeshRenderer>();
@@ -1976,11 +2193,11 @@ public class predatorGen2 : objectGen
 
 
 
-public class predatorFSMGen2 : FSM
+public class predatorOldFSMGen2 : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -1991,7 +2208,7 @@ public class predatorFSMGen2 : FSM
     stuffType stuffTypeX;
     objectCriteria defaultThreatCriteriaInAbsoluteTerms;
 
-    public predatorFSMGen2(GameObject theObjectDoingTheEnaction, tag2 team, float speed, stuffType stuffTypeX = stuffType.meat1, float targetDetectionRange = 40f)
+    public predatorOldFSMGen2(GameObject theObjectDoingTheEnaction, tag2 team, float speed, stuffType stuffTypeX = stuffType.meat1, float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -2002,23 +2219,23 @@ public class predatorFSMGen2 : FSM
 
         defaultThreatCriteriaInAbsoluteTerms = threatCriteriaInAbsolute();
 
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
 
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
-        FSM grabFood = grabFoodHandsFSM();
+        OldFSM idle = new generateOldFSM();
+        OldFSM grabFood = grabFoodHandsOldFSM();
 
         //idle.addSwitchAndReverse(switchToGrabFoodConditionHands(), grabFood);
 
 
 
-        FSM killPrey = killPreyFSM(); 
+        OldFSM killPrey = killPreyOldFSM(); 
         idle.addSwitchAndReverse(switchToKillPreyConditionHands(), killPrey);
         //killPrey.addSwitchAndReverse(switchToGrabFoodConditionHands(), grabFood);
 
@@ -2033,7 +2250,7 @@ public class predatorFSMGen2 : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -2046,16 +2263,16 @@ public class predatorFSMGen2 : FSM
         grabFood.name = "hands, grabFood";
         killPrey.name = "hands, killPrey";
         //combat1.name = "hands, combat1";
-        //equipGun.theFSM.name = "hands, equipGun";
+        //equipGun.theOldFSM.name = "hands, equipGun";
         return idle;
     }
 
-    private FSM killPreyFSM()
+    private OldFSM killPreyOldFSM()
     {
-        //FSM getFood = new generateFSM(grabTheStuff(newObj, stuffTypeX));
-        FSM killPrey = new generateFSM(
+        //OldFSM getFood = new generateOldFSM(grabTheStuff(newObj, stuffTypeX));
+        OldFSM killPrey = new generateOldFSM(
             new aimAtXAndInteractWithY(newObj, killPreyTargetPicker(), interType.melee, 1.7f).returnIt()
-            );//new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(newObj, numericalVariable.health, interType.melee));
+            );//new animalOldFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(newObj, numericalVariable.health, interType.melee));
 
 
         return killPrey;
@@ -2106,9 +2323,9 @@ public class predatorFSMGen2 : FSM
         return grabCondition;
     }
 
-    private FSM grabFoodHandsFSM()
+    private OldFSM grabFoodHandsOldFSM()
     {
-        FSM getFood = new generateFSM(grabTheStuff(newObj, stuffTypeX));
+        OldFSM getFood = new generateOldFSM(grabTheStuff(newObj, stuffTypeX));
 
         return getFood;
     }
@@ -2130,12 +2347,12 @@ public class predatorFSMGen2 : FSM
 
 
     /*
-    private animalFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    private animalOldFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
 
 
-        animalFSM wander = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
+        animalOldFSM wander = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalOldFSM grabMeat = new animalOldFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalOldFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
         
 
         condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
@@ -2186,12 +2403,12 @@ public class predatorFSMGen2 : FSM
 
 
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = wanderFSM();
-        FSM grabFood = grabFoodFeetFSM();
-        FSM killPrey = killPreyFeetFSM();
-        //FSM flee = fleeFSM();
+        OldFSM wander = wanderOldFSM();
+        OldFSM grabFood = grabFoodFeetOldFSM();
+        OldFSM killPrey = killPreyFeetOldFSM();
+        //OldFSM flee = fleeOldFSM();
 
         //condition switchToFlee = fleeCondition();
 
@@ -2228,9 +2445,9 @@ public class predatorFSMGen2 : FSM
         return switchCondition;
     }
 
-    private FSM killPreyFeetFSM()
+    private OldFSM killPreyFeetOldFSM()
     {
-        FSM killPrey = new generateFSM(
+        OldFSM killPrey = new generateOldFSM(
             new goToX(newObj, killPreyTargetPicker(), targetDetectionRange).returnIt());
 
         return killPrey;
@@ -2248,9 +2465,9 @@ public class predatorFSMGen2 : FSM
 
     }
 
-    private FSM fleeFSM()
+    private OldFSM fleeOldFSM()
     {
-        FSM flee = new generateFSM(
+        OldFSM flee = new generateOldFSM(
             new goToX(newObj, fleeingPathTargetPicker(), targetDetectionRange).returnIt()
             );
 
@@ -2258,17 +2475,17 @@ public class predatorFSMGen2 : FSM
         return flee;
     }
 
-    private FSM grabFoodFeetFSM()
+    private OldFSM grabFoodFeetOldFSM()
     {
-        FSM grabFood = new generateFSM(
+        OldFSM grabFood = new generateOldFSM(
             new goToX(newObj, grabFoodTargetPicker(), targetDetectionRange).returnIt());
 
         return grabFood;
     }
 
-    private FSM wanderFSM()
+    private OldFSM wanderOldFSM()
     {
-        FSM wander = new generateFSM(
+        OldFSM wander = new generateOldFSM(
             new randomWanderRepeatable(newObj).returnIt());
 
         return wander;
@@ -2391,9 +2608,9 @@ public class predatorFSMGen2 : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 }
@@ -2426,7 +2643,7 @@ public class animalGen2 : objectGen
     float speed;
     float targetDetectionRange;
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -2480,8 +2697,8 @@ public class animalGen2 : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new animalFSMGen2(newObj, team, speed, stuffType.fruit, targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new animalOldFSMGen2(newObj, team, speed, stuffType.fruit, targetDetectionRange).returnIt();//theBehavior;
 
         return newObj;
     }
@@ -2528,11 +2745,11 @@ public class animalGen2 : objectGen
     }
 }
 
-public class animalFSMGen2 : FSM
+public class animalOldFSMGen2 : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -2543,7 +2760,7 @@ public class animalFSMGen2 : FSM
     stuffType stuffTypeX;
     objectCriteria defaultThreatCriteriaInAbsoluteTerms;
 
-    public animalFSMGen2(GameObject theObjectDoingTheEnaction, tag2 team, float speed, stuffType stuffTypeX = stuffType.fruit,float targetDetectionRange = 40f)
+    public animalOldFSMGen2(GameObject theObjectDoingTheEnaction, tag2 team, float speed, stuffType stuffTypeX = stuffType.fruit,float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -2554,17 +2771,17 @@ public class animalFSMGen2 : FSM
 
         defaultThreatCriteriaInAbsoluteTerms = threatCriteriaInAbsolute();
 
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
     
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
-        FSM grabFood = grabFoodHandsFSM();
+        OldFSM idle = new generateOldFSM();
+        OldFSM grabFood = grabFoodHandsOldFSM();
 
         idle.addSwitchAndReverse(switchToGrabFoodConditionHands(), grabFood);
 
@@ -2576,7 +2793,7 @@ public class animalFSMGen2 : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -2587,7 +2804,7 @@ public class animalFSMGen2 : FSM
 
         idle.name = "hands, idle";
         //combat1.name = "hands, combat1";
-        //equipGun.theFSM.name = "hands, equipGun";
+        //equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -2598,9 +2815,9 @@ public class animalFSMGen2 : FSM
         return grabCondition;
     }
 
-    private FSM grabFoodHandsFSM()
+    private OldFSM grabFoodHandsOldFSM()
     {
-        FSM getFood = new generateFSM(grabTheStuff(newObj, stuffTypeX));
+        OldFSM getFood = new generateOldFSM(grabTheStuff(newObj, stuffTypeX));
 
         return getFood;
     }
@@ -2630,11 +2847,11 @@ public class animalFSMGen2 : FSM
 
 
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = wanderFSM();
-        FSM grabFood = grabFoodFeetFSM();
-        FSM flee = fleeFSM();
+        OldFSM wander = wanderOldFSM();
+        OldFSM grabFood = grabFoodFeetOldFSM();
+        OldFSM flee = fleeOldFSM();
 
         condition switchToFlee = fleeCondition();
 
@@ -2671,9 +2888,9 @@ public class animalFSMGen2 : FSM
 
     }
 
-    private FSM fleeFSM()
+    private OldFSM fleeOldFSM()
     {
-        FSM flee = new generateFSM(
+        OldFSM flee = new generateOldFSM(
             new goToX(newObj, fleeingPathTargetPicker(), targetDetectionRange).returnIt()
             );
 
@@ -2681,17 +2898,17 @@ public class animalFSMGen2 : FSM
         return flee;
     }
 
-    private FSM grabFoodFeetFSM()
+    private OldFSM grabFoodFeetOldFSM()
     {
-        FSM grabFood = new generateFSM(
+        OldFSM grabFood = new generateOldFSM(
             new goToX(newObj, grabFoodTargetPicker(),targetDetectionRange).returnIt());
 
         return grabFood;
     }
 
-    private FSM wanderFSM()
+    private OldFSM wanderOldFSM()
     {
-        FSM wander = new generateFSM(
+        OldFSM wander = new generateOldFSM(
             new randomWanderRepeatable(newObj).returnIt());
         
         return wander;
@@ -2814,9 +3031,9 @@ public class animalFSMGen2 : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 }
@@ -2953,11 +3170,11 @@ public class paintByNumbersNPCGenerator1 : objectGen
     float height;
     float width;
     objectGen weapon;
-    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
     float speed;
     float targetDetectionRange;
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -3019,19 +3236,19 @@ public class paintByNumbersNPCGenerator1 : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new basicPaintByNumbersSoldierFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new basicPaintByNumbersSoldierOldFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
 
         return newObj;
     }
 
 }
 
-public class paintByNumbersNPCFSMGenerator1 : FSM
+public class paintByNumbersNPCOldFSMGenerator1 : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -3039,7 +3256,7 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
     private float speed;
     private float targetDetectionRange;
 
-    public paintByNumbersNPCFSMGenerator1(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    public paintByNumbersNPCOldFSMGenerator1(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -3047,14 +3264,14 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
         this.targetDetectionRange = targetDetectionRange;
 
 
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -3063,7 +3280,7 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -3071,17 +3288,17 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -3106,9 +3323,9 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
 
@@ -3128,7 +3345,7 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
 
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -3149,9 +3366,9 @@ public class paintByNumbersNPCFSMGenerator1 : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -3306,7 +3523,7 @@ public class adhocAnimal1Gen : objectGen
         //Debug.Log("?????????????????????????????????????????????????????");
         animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
         //Debug.Log("?????????????????????    2   ??????????????????????????");
-        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+        theUpdate.theOldFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
 
 
         newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
@@ -3354,7 +3571,7 @@ public class adhocAnimal1Gen : objectGen
     }
 
 
-    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    animalOldFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
 
 
@@ -3364,15 +3581,15 @@ public class adhocAnimal1Gen : objectGen
 
         condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        animalOldFSM theOldFSM = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalOldFSM getFood = new animalOldFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalOldFSM flee = new animalOldFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
 
 
 
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+        //animalOldFSM repro = new animalOldFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
 
-        animalFSM repro = repro1(theObjectDoingTheEnaction, stuffX);
+        animalOldFSM repro = repro1(theObjectDoingTheEnaction, stuffX);
 
 
 
@@ -3412,9 +3629,9 @@ public class adhocAnimal1Gen : objectGen
 
 
         //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
-        theFSM.addSwitchAndReverse(switchCondition3, repro);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        theOldFSM.addSwitchAndReverse(switchCondition3, repro);
         getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
         getFood.addSwitch(switchCondition3, repro);
 
@@ -3424,10 +3641,10 @@ public class adhocAnimal1Gen : objectGen
 
 
 
-        return theFSM;
+        return theOldFSM;
     }
 
-    animalFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    animalOldFSM repro1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
 
 
@@ -3441,9 +3658,9 @@ public class adhocAnimal1Gen : objectGen
 
         //singleEXE step1 = new boolEXE2(theEnaction);
 
-        animalFSM repro = new animalFSM(theObjectDoingTheEnaction, step1);
+        animalOldFSM repro = new animalOldFSM(theObjectDoingTheEnaction, step1);
 
-        //animalFSM repro = new animalFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
+        //animalOldFSM repro = new animalOldFSM(genGen.singleton.reproRepeater(theObjectDoingTheEnaction, new adhocAnimal1Gen(stuffX)));
 
 
 
@@ -3549,7 +3766,7 @@ public class paintByNumbersAnimalBody1 : objectGen
         //              stuffStuff.addStuffStuff(newObj, stuffType.meat1);
 
         //                          animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
-        //                          theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+        //                          theUpdate.theOldFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
 
 
         newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;  //do they need this?  bad sign that i can't tell just by looking here

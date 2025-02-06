@@ -124,7 +124,7 @@ public class animalGen : MonoBehaviour
         //Debug.Log("?????????????????????????????????????????????????????");
         animalUpdate theUpdate = newObj.AddComponent<animalUpdate>();
         //Debug.Log("?????????????????????    2   ??????????????????????????");
-        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+        theUpdate.theOldFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
 
 
         newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
@@ -157,7 +157,7 @@ public class animalGen : MonoBehaviour
         //Debug.Log("?????????????????????????????????????????????????????");
         animalUpdate theUpdate= newObj.AddComponent<animalUpdate>();
         //Debug.Log("?????????????????????    2   ??????????????????????????");
-        theUpdate.theFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
+        theUpdate.theOldFSM = herbavoreForagingBehavior1(newObj, stuffTypeX);
 
 
         newObj.GetComponent<interactable2>().dictOfIvariables[numericalVariable.cooldown] = 0f;
@@ -183,9 +183,9 @@ public class animalGen : MonoBehaviour
 
         //genGen.singleton.ensureVirtualGamePad(newObj);
         animalUpdate theUpdate = newObj.GetComponent<animalUpdate>();
-        theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+        theUpdate.theOldFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
-        //      theUpdate.theFSM = predatorForagingBehavior1(newObj, stuffTypeX);
+        //      theUpdate.theOldFSM = predatorForagingBehavior1(newObj, stuffTypeX);
 
 
         MeshRenderer theRenderer = newObj.GetComponent<MeshRenderer>();
@@ -281,7 +281,7 @@ public class animalGen : MonoBehaviour
         //      how to make random wander take...ONE step?  but generate new location each time?
         //      generate location OUTSIDE the simple class, and input it........?
         //          and, what, that input........always takes vector3?  or sometimes GameObject?  so use "target calculator" as input?
-        //              i' doing that in animalFSM?  the switch conditions ALSO provide stuff like threats/target/navpoint?
+        //              i' doing that in animalOldFSM?  the switch conditions ALSO provide stuff like threats/target/navpoint?
 
 
     }
@@ -330,13 +330,13 @@ public class animalGen : MonoBehaviour
     */
 
 
-    private animalFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    private animalOldFSM predatorForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
 
 
-        animalFSM wander = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM grabMeat = new animalFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
-        animalFSM killPrey = new animalFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(theObjectDoingTheEnaction, numericalVariable.health, interType.melee));
+        animalOldFSM wander = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalOldFSM grabMeat = new animalOldFSM(returnTheGoToThingOfTypeXAndInteractWithTypeY(theObjectDoingTheEnaction, stuffX, interType.standardClick));//new animalOldFSM(new repeatWithTargetPicker(new permaPlan2(goGrabPlan2(theObjectDoingTheEnaction,stuffX)), new setOfAllNearbyStuffStuff(stuffX)));
+        animalOldFSM killPrey = new animalOldFSM(returnTheGoToThingWithNumericalVariableXAndInteractWithTypeY(theObjectDoingTheEnaction, numericalVariable.health, interType.melee));
 
 
         condition switchCondition1 = new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX);
@@ -376,13 +376,13 @@ public class animalGen : MonoBehaviour
 
     }
 
-    animalFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
+    animalOldFSM herbavoreForagingBehavior1(GameObject theObjectDoingTheEnaction, stuffType stuffX)
     {
         condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        animalOldFSM theOldFSM = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalOldFSM getFood = new animalOldFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalOldFSM flee = new animalOldFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
         //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
 
         /*
@@ -412,8 +412,8 @@ public class animalGen : MonoBehaviour
 
 
         //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
         getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
 
 
@@ -424,9 +424,9 @@ public class animalGen : MonoBehaviour
 
         //condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        //animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        animalOldFSM theOldFSM = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        //animalOldFSM getFood = new animalOldFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalOldFSM flee = new animalOldFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
         //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
 
 
@@ -449,18 +449,18 @@ public class animalGen : MonoBehaviour
 
 
         //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        //theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(switchToFlee, flee);
-        //theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        //theOldFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theOldFSM.addSwitchAndReverse(switchToFlee, flee);
+        //theOldFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
         //getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
 
 
         
         condition switchCondition1 = new stickyCondition(new canSeeStuffStuff(theObjectDoingTheEnaction, stuffX), 90);
 
-        animalFSM theFSM = new animalFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
-        animalFSM getFood = new animalFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
-        animalFSM flee = new animalFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
+        animalOldFSM theOldFSM = new animalOldFSM(randomWanderRepeatable(theObjectDoingTheEnaction));
+        animalOldFSM getFood = new animalOldFSM(grabTheStuff(theObjectDoingTheEnaction, stuffX));
+        animalOldFSM flee = new animalOldFSM(genGen.singleton.meleeDodge(theObjectDoingTheEnaction));
         //switchCondition, grabTheStuff(theObjectDoingTheEnaction,stuffX)
 
 
@@ -482,15 +482,15 @@ public class animalGen : MonoBehaviour
 
 
         //wander.addSwitchAndReverse(new stickyCondition(switchCondition1, 90), grabMeat);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
-        theFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchToFlee, 10), flee);
+        theOldFSM.addSwitchAndReverse(new stickyCondition(switchCondition1, 10), getFood);
         getFood.addSwitch(new stickyCondition(switchToFlee, 10), flee);
 
         */
 
 
 
-        return theFSM;
+        return theOldFSM;
     }
 
     private repeatWithTargetPicker randomWanderRepeatable(GameObject theObjectDoingTheEnaction)
@@ -727,7 +727,7 @@ public class animalGen : MonoBehaviour
 
 public class animalUpdate:MonoBehaviour
 {
-    public FSM theFSM;
+    public OldFSM theOldFSM;
 
     void Start()
     {
@@ -740,7 +740,7 @@ public class animalUpdate:MonoBehaviour
         //plan.doTheDepletablePlan();
         //simpleRepeat1.doThisThing();
         //repeatWithTargetPickerTest.doThisThing();
-        theFSM = theFSM.doAFrame();
+        theOldFSM = theOldFSM.doAFrame();
     }
 
 
@@ -753,9 +753,9 @@ public class animalUpdate:MonoBehaviour
 
 
 
-public class animalFSM: FSM
+public class animalOldFSM: OldFSM
 {
-    //Dictionary<multicondition, animalFSM> switchBoard = new Dictionary<multicondition, animalFSM>();
+    //Dictionary<multicondition, animalOldFSM> switchBoard = new Dictionary<multicondition, animalOldFSM>();
 
 
     //planEXE2 repeatingPlan;
@@ -770,12 +770,12 @@ public class animalFSM: FSM
     //repeatWithTargetPicker justDoThisForNow;
 
 
-    public animalFSM()
+    public animalOldFSM()
     {
         //      new permaPlan();
     }
 
-    public animalFSM(repeater doThisImmediately)
+    public animalOldFSM(repeater doThisImmediately)
     {
         //justDoThisForNow = doThisImmediately;
 
@@ -783,7 +783,7 @@ public class animalFSM: FSM
 
     }
 
-    public animalFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
+    public animalOldFSM(GameObject theObjectDoingTheEnaction, singleEXE step1)
     {
         permaPlan2 perma1 = new permaPlan2(step1);
         agnostRepeater repeatWithTargetPickerTest = new agnostRepeater(perma1);
@@ -844,7 +844,7 @@ public class animalFSM: FSM
 
 
 
-    public animalFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
+    public animalOldFSM(repeater doThisImmediately, condition switchCondition, repeater doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
 
@@ -852,19 +852,19 @@ public class animalFSM: FSM
 
 
 
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
+        animalOldFSM otherOldFSM = new animalOldFSM(doThisAfterSwitchCondition, new reverseCondition(switchCondition), this);
 
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
 
-    public animalFSM(repeater doThisImmediately, condition switchCondition, animalFSM doThisAfterSwitchCondition)
+    public animalOldFSM(repeater doThisImmediately, condition switchCondition, animalOldFSM doThisAfterSwitchCondition)
     {
         //justDoThisForNow = doThisImmediately;
 
         repeatingPlans.Add(doThisImmediately);
 
 
-        //animalFSM otherFSM = new animalFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
+        //animalOldFSM otherOldFSM = new animalOldFSM(repeatWithTargetPicker2, switchCondition, repeatWithTargetPicker1);
 
         switchBoard[switchCondition] = doThisAfterSwitchCondition;
     }
@@ -876,27 +876,27 @@ public class animalFSM: FSM
     public void addSwitch(condition switchCondition, repeater doThisAfterSwitchCondition)
     {
 
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+        animalOldFSM otherOldFSM = new animalOldFSM(doThisAfterSwitchCondition);
 
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
-    public void addSwitch(condition switchCondition, animalFSM otherFSM)
+    public void addSwitch(condition switchCondition, animalOldFSM otherOldFSM)
     {
-        switchBoard[switchCondition] = otherFSM;
+        switchBoard[switchCondition] = otherOldFSM;
     }
 
     public void addSwitchAndReverse(condition switchCondition, repeater doThisAfterSwitchCondition)
     {
 
-        animalFSM otherFSM = new animalFSM(doThisAfterSwitchCondition);
+        animalOldFSM otherOldFSM = new animalOldFSM(doThisAfterSwitchCondition);
 
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+        switchBoard[switchCondition] = otherOldFSM;
+        otherOldFSM.switchBoard[new reverseCondition(switchCondition)] = this;
     }
-    public void addSwitchAndReverse(condition switchCondition, animalFSM otherFSM)
+    public void addSwitchAndReverse(condition switchCondition, animalOldFSM otherOldFSM)
     {
-        switchBoard[switchCondition] = otherFSM;
-        otherFSM.switchBoard[new reverseCondition(switchCondition)] = this;
+        switchBoard[switchCondition] = otherOldFSM;
+        otherOldFSM.switchBoard[new reverseCondition(switchCondition)] = this;
     }
 
 
@@ -1660,7 +1660,7 @@ public class repeatWithTargetPicker:repeater
     public override string baseEnactionsAsText()
     {
         string newString = "";
-        //newString += "the base enactions of this FSM:  ";
+        //newString += "the base enactions of this OldFSM:  ";
         newString += "[";
 
         newString += thePerma.baseEnactionsAsText();
@@ -1699,7 +1699,7 @@ public class simpleExactRepeatOfPerma : repeater
     public override string baseEnactionsAsText()
     {
         string newString = "";
-        //newString += "the base enactions of this FSM:  ";
+        //newString += "the base enactions of this OldFSM:  ";
         newString += "[";
 
         newString += thePerma.baseEnactionsAsText();
@@ -1795,7 +1795,7 @@ public class repeatWithObjectReturner : repeater
     public override string baseEnactionsAsText()
     {
         string newString = "";
-        //newString += "the base enactions of this FSM:  ";
+        //newString += "the base enactions of this OldFSM:  ";
         newString += "[";
 
         newString += thePerma.baseEnactionsAsText();

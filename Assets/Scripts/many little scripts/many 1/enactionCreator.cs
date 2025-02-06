@@ -71,6 +71,40 @@ public class enactionCreator : MonoBehaviour
 }
 
 
+public interface enactionAtom
+{
+    //just bare code that DOES one specific thing
+    void enact(); //(inputData theInput); ???  is that always necessary?  well, no?  but then, how else to unite the 2 types of gamepad input?
+    //just have enactions LOOK AT the gamepad?  have gamepad that is merely observable?  but then....each enaction that is equipped has to look at it every frame?
+    //or, can i STILL have them plugged into gamepad slots that ONLY fire WHEN there is REAL input, and THEN gamepad can update its own state AND
+    //the enaction that is activated can decide for itself which gamepad data to look at?  [or whether to look AT ALL, in case of simple binary/button]
+    //soooo, ya.  SOME may want to have the gamepad plugged into them for convenience, but NOT REQUIRED by this overall calss/interface?  sure.
+}
+
+
+public interface syntheticEnactionAtom// abstract interface? class ???????????????  :enactionAtom???
+{
+    //human coder intelligently combines enaction atoms with conditions etc.
+    //JUST TO MAKE BARE LOGICAL/PHYSICAL SENSE [at least, within the rules of the fictional universe]
+    //other types of combinations and conditions should be handled elsewhere?
+    //buuuuut can handle that all internally in inheritors?  let THEM sort it out?  what lists etc they want?  maybe.
+    //so would this be redundant?  i guess?  maybe?
+    //but that DOES make the name confusing, AND makes it so i no longer have this nice cute "bare do stuff code" class.
+    //have base ones VS non-base ones.  that's basically this.  how did i do it elsewhere?  is this better than that way of doing it?
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 public abstract class enaction : MonoBehaviour
 {
     public buttonCategories gamepadButtonType { get; set; }

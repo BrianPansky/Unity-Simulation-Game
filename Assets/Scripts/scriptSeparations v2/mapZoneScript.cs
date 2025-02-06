@@ -69,6 +69,7 @@ public class mapZoneScript : MonoBehaviour
             return false;
         }
 
+
         return true;
     }
 
@@ -82,4 +83,9 @@ public class mapZoneScript : MonoBehaviour
 
 public class zoneable2 : MonoBehaviour
 {
+    //um, so, what's the point of this?
+    //doing a word search, NOTHING.  it does NOTHING.
+    //i think the idea was that i'd use this mere component INSTEAD of a tag?  ya.  ok.
+    //but i haven't done that yet.
+    //should do:  if(myGameObject.GetComponent<zoneable2>() == null) or whatever
 }

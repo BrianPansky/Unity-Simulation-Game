@@ -49,7 +49,7 @@ public class debugSwitchboard : MonoBehaviour
     public bool conditionShallow = false;
     public bool planEXEShallow = false;
     public bool repeaterShallow = false;
-    public bool FSMShallow = false;
+    public bool OldFSMShallow = false;
 
 
     //inner processes:
@@ -57,7 +57,7 @@ public class debugSwitchboard : MonoBehaviour
     public bool conditionDeep = false;
     public bool planEXEDeep = false;
     public bool repeaterDeep = false;
-    public bool FSMDeep = false;
+    public bool OldFSMDeep = false;
 }
 
 
@@ -283,7 +283,7 @@ public class miscDebug:MonoBehaviour
         if (debugPrintBool == true)
         {
             tagging2.singleton.printAllTags(this.gameObject);
-            //Debug.Log("the name of this FSM:  " + );
+            //Debug.Log("the name of this OldFSM:  " + );
         }
     }
 }

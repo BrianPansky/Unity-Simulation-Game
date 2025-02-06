@@ -192,7 +192,7 @@ public class initialGenerator2 : MonoBehaviour
 
 
         listOfTeamBaseGenerators.Add(new playerTeamGen());
-        listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
+        //listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
 
 
 
@@ -218,8 +218,9 @@ public class initialGenerator2 : MonoBehaviour
 
 
 
-        new testNewFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
-        new testNewFSMGenerator2(new Vector3(815, 1.5f, 850)).doIt();
+        //new testNewOldFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
+        //new testNewOldFSMGenerator2(new Vector3(815, 1.5f, 850)).doIt();
+        new testNewestFSMGenerator(new Vector3(15, 1.5f, 20)).doIt();
         returnBasicGrabbable(stuffType.meat1, new Vector3(780, 1.5f, 845));
         returnBasicGrabbable(stuffType.fruit, new Vector3(810, 1.5f, 835));
         //                      worldScript.singleton.thePlayer = makePLAYER(new Vector3(820, 2.5f, 855));

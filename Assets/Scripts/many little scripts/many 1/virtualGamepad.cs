@@ -285,6 +285,11 @@ public class inputData
     {
         vect3 = inputVect;
     }
+    public inputData(GameObject inputTargetObject)
+    {
+        //we don't need a "target calculator" because those are for storing target over multiple frames, and this input is just ONE frame.  right?
+        vect3 = inputTargetObject.transform.position;
+    }
 
 
 

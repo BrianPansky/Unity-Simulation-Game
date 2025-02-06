@@ -731,6 +731,267 @@ public class teamGen:doAtPoint
 
 
 
+
+
+public class teamLeaderOldFSMMadeWithPlugAndPlayPeices1 //: OldFSM
+{
+    OldFSM theOldFSM;
+    public teamLeaderOldFSMMadeWithPlugAndPlayPeices1(GameObject theObject)
+    {
+        //so:
+        //      which orders
+        //      to who
+        //      under what conditions?
+
+
+        //new OldFSMgen2(newObj, new randomWanderOldFSMgen(), new grabFoodFeetOldFSMGen(stuffType.fruit));
+        //new OldFSMgen2(newObj, new grabFoodHandsOldFSMGen(stuffType.fruit));
+
+
+
+
+
+        //so:
+        //      which orders
+        //          "goToTargetPicker" with a "loop list" target picker or something
+        //      to who
+        //          [criteriaX] defenders
+        //      [can assume] under what conditions?
+        //          [can assume] if the defenders have no other orders?
+
+        //but full picture here:
+        //      make the OldFSM orders, etc
+        //      create COMMAND OldFSM
+        //      give that command...etc...
+
+
+        OldFSM theCommandToFollow = new OldFSM();
+
+        OldFSM advancedCommandForDefenders = new OldFSM();
+
+        //      new OldFSMgen2(theObject, new leaderStateGivingDefenderPatrol());
+    }
+
+    public OldFSM returnIt()
+    { 
+        return theOldFSM;
+    }
+}
+
+
+/*
+public class leaderStateGivingDefenderPatrol : OldSimpleOneStateAndReturn
+{
+    //so:
+    //      which orders
+    //          "goToTargetPicker" with a "loop list" target picker or something
+    //      to who
+    //          [criteriaX] defenders
+    //      [can assume] under what conditions?
+    //          [can assume] if the defenders have no other orders? [ya that's part of "who", sorta
+
+    //but full picture here:
+    //      make the OldFSM orders, etc
+    //      create COMMAND OldFSM
+    //      give that command...etc...
+
+    tag2 team;
+
+    public leaderStateGivingDefenderPatrol(tag2 teamIn)
+    {
+        team = teamIn;
+    }
+
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
+    {
+        plugInOldFSM theOrders = new defenderPatrolState1();
+        objectCriteria whoToGiveItTo = allSquadMembersWithoutOrders(tag2.defenseSquad);
+
+        OldFSM theLeaderStateGivingDefenderPatrol = new giveXCommandToY(team,theOrders,whoToGiveItTo).returnIt();
+
+        return theLeaderStateGivingDefenderPatrol;
+    }
+
+    private objectCriteria allSquadMembersWithoutOrders(tag2 squadTag)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        //when this is nonzero:
+        objectCriteria whoToGiveItTo = allSquadMembersWithoutOrders(tag2.defenseSquad);
+        condition theCondition = new isThereAtLeastOneObjectThatMeetsCriteria(team, whoToGiveItTo);
+
+
+        return theCondition;
+    }
+}
+*/
+/*
+public class giveXCommandToY
+{
+    private tag2 team;
+    private plugInOldFSM theOrders;
+    private objectCriteria whoToGiveItTo;
+
+    public giveXCommandToY(tag2 teamIn, plugInOldFSM theOrdersIn, objectCriteria whoToGiveItToIn)
+    {
+        this.team = teamIn;
+        this.theOrders = theOrdersIn;
+        this.whoToGiveItTo = whoToGiveItToIn;
+    }
+
+    internal OldFSM returnIt()
+    {
+        //fuck this.
+
+
+
+
+        var fakeRepeater = new giveXRTSTargetsToYUnits(null, new randomTargetPicker(allEnemyBases()));
+        objectSetGrabber allAttackersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), attackerHasNoOrders);
+        objectSetGrabber allDefendersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), defenderHasNoOrders);
+
+        fakeRepeater.MOREINFOgiveXRTSTargetsToYUnits(allAttackersWithNoOrders);
+        OldFSM giveOrders = new generateOldFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+
+        giveOrders.name = "giveOrders";
+
+
+
+
+        agnosticTargetCalc theTarget = rtsTargetPicker.pickNext();
+
+        //Debug.Log("unitsToGiveOrdersTo.grab().Count:  " + unitsToGiveOrdersTo.grab().Count);
+        foreach (GameObject unit in unitsToGiveOrdersTo.grab())
+        {
+            //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
+            //tagging2.singleton.printAllTags(unit);
+            rtsModule theComponent = unit.GetComponent<rtsModule>();
+            theComponent.currentReceivedOrders = theTarget;
+        }
+
+
+
+        return giveOrders;
+    }
+}
+*/
+
+/*
+public class giveXAdvancedRTSOrdersToSetY : repeatWithTargetPicker
+{
+    OldFSM theOrders;
+    objectSetGrabber unitsToGiveOrdersTo;
+
+    public giveXAdvancedRTSOrdersToSetY(permaPlan2 thePermaIn, targetPicker theTargetPickerIn) : base(thePermaIn, theTargetPickerIn)
+    {
+    }
+
+    public void giveXRTSTargetsToYUnits(permaPlan2 thePermaIn, OldFSM theOrdersIn)//,  whoToGiveOrdersTo) : base(thePermaIn, whoToGiveOrdersTo)//?????
+    {
+        //rtsTargetPicker = theOrdersIn;
+
+    }
+
+    //agnosticTargetCalc rtsTarget
+    public void MOREINFOgiveXRTSTargetsToYUnits(objectSetGrabber unitsToGiveOrdersToIn)
+    {
+        unitsToGiveOrdersTo = unitsToGiveOrdersToIn;
+    }
+
+
+    public override void doThisThing() //a bit of a kludge, but maybe good???
+    {
+        //Debug.Log("?????????????????????????????????????");
+        agnosticTargetCalc theTarget = rtsTargetPicker.pickNext();
+
+        //Debug.Log("unitsToGiveOrdersTo.grab().Count:  " + unitsToGiveOrdersTo.grab().Count);
+        foreach (GameObject unit in unitsToGiveOrdersTo.grab())
+        {
+            //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
+            //tagging2.singleton.printAllTags(unit);
+            rtsModule theComponent = unit.GetComponent<rtsModule>();
+            theComponent.currentReceivedOrders = theTarget;
+        }
+    }
+
+    /*
+    private repeatWithTargetPicker thinggggg(GameObject theObjectDoingTheEnactions, targetPicker thingXToGoTo, float proximity)
+    {
+
+        //targetPicker getter = new nearestTargetPickerExceptSelf(theObjectDoingTheEnactions,
+        //    new setOfAllNearbyNumericalVariable(theObjectDoingTheEnactions, numVarX));
+
+        //USING FAKE INPUTS FOR TARGETS
+        permaPlan2 perma1 = new permaPlan2(
+                genGen.singleton.makeNavAgentPlanEXE(theObjectDoingTheEnactions,
+                thingXToGoTo.pickNext().realPositionOfTarget(), //messy
+                proximity)
+                //new aimTargetPlanGen(theObjectDoingTheEnactions, thingXToGoTo).returnIt(), //messy
+                //interactWithType(theObjectDoingTheEnactions, theIntertypeY)
+                );
+
+        repeatWithTargetPicker repeatWithTargetPickerTest = new repeatWithTargetPicker(perma1, thingXToGoTo);
+
+
+        return repeatWithTargetPickerTest;
+    }
+
+
+}
+*/
+
+
+
+public class followCommandsFromAdvancedRTS : OldSimpleOneStateAndReturn
+{
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+public class defenderPatrolState1 : OldSimpleOneStateAndReturn
+{
+    //so:
+    //      which orders
+    //          "goToTargetPicker" with a "loop list" target picker or something
+
+    public override OldFSM generateTheOldFSM(GameObject theObjectDoingTheEnaction)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class makeWaveList
 {
 
@@ -1132,12 +1393,12 @@ public class soldierGenWithCustomGunAndUnitGroup : objectGen
     float height;
     float width;
     objectGen weapon;
-    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
     float speed;
     float targetDetectionRange;
 
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -1164,7 +1425,7 @@ public class soldierGenWithCustomGunAndUnitGroup : objectGen
         newObj.AddComponent<rtsModule>();
 
         addWeapon(newObj, weapon);
-        addSoldierFSM(newObj);
+        addSoldierOldFSM(newObj);
 
 
         return newObj;
@@ -1180,10 +1441,10 @@ public class soldierGenWithCustomGunAndUnitGroup : objectGen
 
     }
 
-    private void addSoldierFSM(GameObject theObject)
+    private void addSoldierOldFSM(GameObject theObject)
     {
-        FSMcomponent theFSMcomponent = theObject.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new soldierWithUnitGroupFSM(theObject, team, unitGroup,speed).returnIt();
+        OldFSMcomponent theOldFSMcomponent = theObject.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new soldierWithUnitGroupOldFSM(theObject, team, unitGroup,speed).returnIt();
     }
 
     public void addTeamColors(GameObject theObject)
@@ -1237,11 +1498,11 @@ public class soldierGenWithCustomGunAndUnitGroup : objectGen
 }
 
 
-public class soldierWithUnitGroupFSM : FSM
+public class soldierWithUnitGroupOldFSM : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -1251,7 +1512,7 @@ public class soldierWithUnitGroupFSM : FSM
     float weaponFiringRange;
     private float targetDetectionRange;
 
-    public soldierWithUnitGroupFSM(GameObject theObjectDoingTheEnaction, tag2 team, tag2 unitGroupIn, float speed, float weaponFiringRangeIn = 70f, float targetDetectionRangeIn = 210f)
+    public soldierWithUnitGroupOldFSM(GameObject theObjectDoingTheEnaction, tag2 team, tag2 unitGroupIn, float speed, float weaponFiringRangeIn = 70f, float targetDetectionRangeIn = 210f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -1261,14 +1522,14 @@ public class soldierWithUnitGroupFSM : FSM
         this.targetDetectionRange = targetDetectionRangeIn;
 
         //Debug.Log("weaponFiringRange:  " + weaponFiringRange);
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         //objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team, weaponFiringRange);
         //objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -1307,8 +1568,8 @@ public class soldierWithUnitGroupFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         
-        //FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
-        FSM combat1 = new generateFSM(new aimAtXAndPressYOnSameFrame(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        //OldFSM combat1 = new generateOldFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndPressYOnSameFrame(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, weaponFiringRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
        condition switchToAttack = new isThereAtLeastOneObjectInSet(theAttackObjectSet);
@@ -1323,17 +1584,17 @@ public class soldierWithUnitGroupFSM : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -1358,11 +1619,11 @@ public class soldierWithUnitGroupFSM : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
         //Debug.Log("targetDetectionRange:  " + targetDetectionRange);
         //Debug.Log("weaponFiringRange:  " + weaponFiringRange);
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
         objectCriteria theCriteria = attackObjectCriteria(theObjectDoingTheEnaction);
@@ -1381,7 +1642,7 @@ public class soldierWithUnitGroupFSM : FSM
         targetPicker theTargetPicker = new combatPositionPack4TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet, goldilocksRange);
 
         //float desiredProximity = weaponFiringRange * (2f / 3f);
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, 0).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, 0).returnIt());
 
         condition switchToAttack = threatObjectPermanenceButFalseIfObjectIsTrulyAbsent(theObjectDoingTheEnaction, targetDetectionRange);//new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -1400,7 +1661,7 @@ public class soldierWithUnitGroupFSM : FSM
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction, team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = rtsOldFSM1(theObjectDoingTheEnaction, team);//new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -1494,13 +1755,13 @@ public class soldierWithUnitGroupFSM : FSM
         return theRealObjectCriteria;
     }
 
-    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    private OldFSM rtsOldFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
     {
-        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        //OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -1560,9 +1821,9 @@ public class soldierWithUnitGroupFSM : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -2182,14 +2443,14 @@ public class makeLeader
         tagging2.singleton.addTag(newObj, team);
         tagging2.singleton.addTag(newObj, tag2.teamLeader);
         addTeamColors(newObj);
-        addLeaderFSM(newObj);
+        addLeaderOldFSM(newObj);
         newObj.transform.position = vector3;
     }
 
-    private void addLeaderFSM(GameObject theObject)
+    private void addLeaderOldFSM(GameObject theObject)
     {
-        FSMcomponent theFSMcomponent = theObject.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new teamLeaderWithUnitGroupsFSM(theObject, team, 5, 44).returnIt();
+        OldFSMcomponent theOldFSMcomponent = theObject.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new teamLeaderWithUnitGroupsOldFSM(theObject, team, 5, 44).returnIt();
     }
 
     public void addTeamColors(GameObject theObject)
@@ -2203,11 +2464,11 @@ public class makeLeader
 
 
 
-public class teamLeaderWithUnitGroupsFSM : FSM
+public class teamLeaderWithUnitGroupsOldFSM : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -2215,7 +2476,7 @@ public class teamLeaderWithUnitGroupsFSM : FSM
     private float speed;
     private float targetDetectionRange;
 
-    public teamLeaderWithUnitGroupsFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    public teamLeaderWithUnitGroupsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -2223,13 +2484,13 @@ public class teamLeaderWithUnitGroupsFSM : FSM
         this.targetDetectionRange = targetDetectionRange;
 
 
-        //theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        //theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(giveTeamCommandsFSM(theObjectDoingTheEnaction, team));
+        //theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        //theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(giveTeamCommandsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM giveTeamCommandsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM giveTeamCommandsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
         objectSetGrabber theEnemyBaseObjectSet = new setOfAllObjectThatMeetCriteria(
             new setOfAllObjectsWithTag(tag2.militaryBase), enemyBaseCriteria(theObjectDoingTheEnaction, team));
@@ -2261,17 +2522,17 @@ public class teamLeaderWithUnitGroupsFSM : FSM
         //objectSetGrabber allEnemyBasesGrabber = allEnemyBases();
         //          agnosticTargetCalc randomEnemyBase = new randomTargetPicker(allEnemyBases()).pickNext();
 
-        //FSM feetGoToTheTarget = new generateFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+        //OldFSM feetGoToTheTarget = new generateOldFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
 
-        //no, i'll give them just targets for now, not FSMs
-        //so, need leader to have a repeater and/or FSM that inputs SOMETHING into soldiers' rts modules
+        //no, i'll give them just targets for now, not OldFSMs
+        //so, need leader to have a repeater and/or OldFSM that inputs SOMETHING into soldiers' rts modules
         var fakeRepeater = new giveXRTSTargetsToYUnits(null, new randomTargetPicker(allEnemyBases()));
         objectSetGrabber allAttackersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), attackerHasNoOrders);
         objectSetGrabber allDefendersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), defenderHasNoOrders);
 
         fakeRepeater.MOREINFOgiveXRTSTargetsToYUnits(allAttackersWithNoOrders);
-        FSM giveOrders = new generateFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+        OldFSM giveOrders = new generateOldFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
         giveOrders.name = "giveOrders";
 
@@ -2359,9 +2620,9 @@ public class teamLeaderWithUnitGroupsFSM : FSM
 
 
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -2370,7 +2631,7 @@ public class teamLeaderWithUnitGroupsFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -2378,17 +2639,17 @@ public class teamLeaderWithUnitGroupsFSM : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -2413,9 +2674,9 @@ public class teamLeaderWithUnitGroupsFSM : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
 
@@ -2435,7 +2696,7 @@ public class teamLeaderWithUnitGroupsFSM : FSM
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
 
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -2456,9 +2717,9 @@ public class teamLeaderWithUnitGroupsFSM : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -2829,8 +3090,8 @@ public class makeSimpleTestsToFixMyRTSStuff
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new testRTSFSM(newObj, team).returnIt();//new basicPaintByNumbersSoldierFSM(newObj, tag2.team3, 5, 33).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new testRTSOldFSM(newObj, team).returnIt();//new basicPaintByNumbersSoldierOldFSM(newObj, tag2.team3, 5, 33).returnIt();//theBehavior;
 
 
         //newObj.GetComponent<NavMeshAgent>().enabled = false;
@@ -2872,42 +3133,42 @@ public class makeSimpleTestsToFixMyRTSStuff
 
 
 
-public class testRTSFSM
+public class testRTSOldFSM
 {
-    List<FSM> theList = new List<FSM>();
+    List<OldFSM> theList = new List<OldFSM>();
     GameObject theObjectDoingTheEnaction;
     tag2 team;
 
-    public testRTSFSM(GameObject theObjectDoingTheEnactionIn, tag2 teamIn)
+    public testRTSOldFSM(GameObject theObjectDoingTheEnactionIn, tag2 teamIn)
     {
         theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
         team = teamIn;
-        theList.Add(theTestFSM());
+        theList.Add(theTestOldFSM());
     }
 
-    private FSM theTestFSM()
+    private OldFSM theTestOldFSM()
     {
         //use a pre-filled RTS script, get it to move
         //then get the condition to gate that behavior
         //then find a way for it to work while initially empty, and then being filled [currently, LOTS of null object errprs!]
 
-        return rtsFSM1(theObjectDoingTheEnaction, team);
+        return rtsOldFSM1(theObjectDoingTheEnaction, team);
     }
 
-    internal List<FSM> returnIt()
+    internal List<OldFSM> returnIt()
     {
         return theList;
     }
 
 
 
-    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    private OldFSM rtsOldFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
     {
-        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        //OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -3013,12 +3274,12 @@ public class teamRankingOfficerGenerator : objectGen
     float height;
     float width;
     objectGen weapon;
-    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
     float speed;
     float targetDetectionRange;
 
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -3074,8 +3335,8 @@ public class teamRankingOfficerGenerator : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new teamRankingOfficerFSM(newObj, team, speed, targetDetectionRange).returnIt();//new basicPaintByNumbersSoldierFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new teamRankingOfficerOldFSM(newObj, team, speed, targetDetectionRange).returnIt();//new basicPaintByNumbersSoldierOldFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
 
 
         //newObj.GetComponent<NavMeshAgent>().enabled = false;
@@ -3126,11 +3387,11 @@ public class teamRankingOfficerGenerator : objectGen
     }
 }
 
-public class teamRankingOfficerFSM : FSM
+public class teamRankingOfficerOldFSM : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -3138,7 +3399,7 @@ public class teamRankingOfficerFSM : FSM
     private float speed;
     private float targetDetectionRange;
 
-    public teamRankingOfficerFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    public teamRankingOfficerOldFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -3146,13 +3407,20 @@ public class teamRankingOfficerFSM : FSM
         this.targetDetectionRange = targetDetectionRange;
 
 
-        //theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        //theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(giveTeamCommandsFSM(theObjectDoingTheEnaction, team));
+        //theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        //theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(giveTeamCommandsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM giveTeamCommandsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+
+
+
+
+
+
+
+    private OldFSM giveTeamCommandsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
         objectSetGrabber theEnemyBaseObjectSet = new setOfAllObjectThatMeetCriteria(
             new setOfAllObjectsWithTag(tag2.militaryBase), enemyBaseCriteria(theObjectDoingTheEnaction, team));
@@ -3175,16 +3443,16 @@ public class teamRankingOfficerFSM : FSM
         //objectSetGrabber allEnemyBasesGrabber = allEnemyBases();
         //          agnosticTargetCalc randomEnemyBase = new randomTargetPicker(allEnemyBases()).pickNext();
 
-        //FSM feetGoToTheTarget = new generateFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+        //OldFSM feetGoToTheTarget = new generateOldFSM(new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
 
-        //no, i'll give them just targets for now, not FSMs
-        //so, need leader to have a repeater and/or FSM that inputs SOMETHING into soldiers' rts modules
+        //no, i'll give them just targets for now, not OldFSMs
+        //so, need leader to have a repeater and/or OldFSM that inputs SOMETHING into soldiers' rts modules
         var fakeRepeater = new giveXRTSTargetsToYUnits(null, new randomTargetPicker(allEnemyBases()));
         objectSetGrabber allUnitsWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), hasNoOrders);
 
         fakeRepeater.MOREINFOgiveXRTSTargetsToYUnits(allUnitsWithNoOrders);
-        FSM giveOrders = new generateFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
+        OldFSM giveOrders = new generateOldFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
         return giveOrders;
     }
@@ -3236,9 +3504,9 @@ public class teamRankingOfficerFSM : FSM
 
 
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -3247,7 +3515,7 @@ public class teamRankingOfficerFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -3255,17 +3523,17 @@ public class teamRankingOfficerFSM : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -3290,9 +3558,9 @@ public class teamRankingOfficerFSM : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
 
@@ -3312,7 +3580,7 @@ public class teamRankingOfficerFSM : FSM
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
 
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -3333,9 +3601,9 @@ public class teamRankingOfficerFSM : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -3346,18 +3614,124 @@ public class teamRankingOfficerFSM : FSM
 
 
 
+
+
+
+
+
+
+
+public class advancedRtsModule : MonoBehaviour
+{
+    public FSM currentOrdersToGive;
+    internal Dictionary<objectIdPair, FSM> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, FSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
+
+
+    public List<objectIdPair> currentlySelectedUnits; //annoying, but what else to do...
+    public advancedRtsModuleVersion theVersion;
+    internal FSM currentReceivedOrders = null;
+
+    public static advancedRtsModule ensureObjectHasThisComponent(GameObject theObject, advancedRtsModuleVersion theVersion)
+    {
+        advancedRtsModule theRTSModule = theObject.GetComponent<advancedRtsModule>();
+        if (theRTSModule == null)
+        {
+            theRTSModule = theObject.AddComponent<advancedRtsModule>();
+        }
+
+        theRTSModule.theVersion = theVersion;
+
+        return theRTSModule;
+    }
+
+    internal void giveCurrentOrdersToCurrentlySelectedUnits()
+    {
+        theVersion.giveCurrentOrdersToCurrentlySelectedUnits(this);
+    }
+
+
+    internal void basicImplementation()
+    {
+        foreach (objectIdPair thisID in currentlySelectedUnits)
+        {
+            if (thisID.theObject == null) { continue; }
+            advancedRtsModule theirRTSModule = thisID.theObject.GetComponent<advancedRtsModule>();
+            theirRTSModule.currentReceivedOrdersAndWhoGaveThem[tagging2.singleton.idPairGrabify(this.gameObject)] = currentOrdersToGive;
+        }
+    }
+
+    /*
+    public agnostRepeater translateOrdersIntoRepeaterPlan()
+    {
+
+    }
+    */
+}
+
+public abstract class advancedRtsModuleVersion
+{
+    internal abstract void giveCurrentOrdersToCurrentlySelectedUnits(advancedRtsModule rtsModule);
+}
+
+public class playerVersionOfAdvancedRTS : advancedRtsModuleVersion
+{
+    objectSetGrabber theDefaultSelectionSet;  //buuut........
+    internal override void giveCurrentOrdersToCurrentlySelectedUnits(advancedRtsModule rtsModule)
+    {
+        rtsModule.basicImplementation();
+
+
+        resetCurrentOrdersToGive(rtsModule);
+        resetCurrentlySelectedUnits(rtsModule);
+    }
+
+
+    private void resetCurrentOrdersToGive(advancedRtsModule rtsModule)
+    {
+        //make the orders be "go to player's waypoint1"
+        //and then have a bundled...enaction, enaction Effect?...that moves
+        //the player's waypoint1 to wherever they are pointing at that enaction moment.  should move it FIRST, really, to be sure....
+    }
+
+    private void resetCurrentlySelectedUnits(advancedRtsModule rtsModule)
+    {
+        List<objectIdPair> unitList = tagging2.singleton.listInIDPairFormat(theDefaultSelectionSet.grab());
+        rtsModule.currentlySelectedUnits = unitList;
+    }
+
+}
+
+public class npcVersionOfAdvancedRTS : advancedRtsModuleVersion
+{
+    internal override void giveCurrentOrdersToCurrentlySelectedUnits(advancedRtsModule rtsModule)
+    {
+        rtsModule.basicImplementation();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 public class rtsModule : MonoBehaviour
 {
-    //public FSM currentOrdersToGive;
-    //FSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
-    //internal Dictionary<objectIdPair, FSM> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, FSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
+    //public OldFSM currentOrdersToGive;
+    //OldFSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
+    //internal Dictionary<objectIdPair, OldFSM> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, OldFSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
     //too complex for now.  start simple.
-    //internal Dictionary<condition, FSM> currentReceivedOrders = new Dictionary<condition, FSM>();
+    //internal Dictionary<condition, OldFSM> currentReceivedOrders = new Dictionary<condition, OldFSM>();
     //List<GameObject> currentlySelectedUnits; //hmm, but will glitch when they die........
 
-    //just do targets for now, not FSM
+    //just do targets for now, not OldFSM
     public agnosticTargetCalc currentOrdersToGive;
-    //FSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
+    //OldFSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
     internal Dictionary<objectIdPair, agnosticTargetCalc> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, agnosticTargetCalc>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
 
 
@@ -4746,12 +5120,12 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
     float height;
     float width;
     objectGen weapon;
-    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
     float speed;
     float targetDetectionRange;
 
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -4809,8 +5183,8 @@ public class basicPaintByNumbersSoldierGeneratorG : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new basicPaintByNumbersSoldierFSM(newObj,team,speed,targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new basicPaintByNumbersSoldierOldFSM(newObj,team,speed,targetDetectionRange).returnIt();//theBehavior;
 
 
         //newObj.GetComponent<NavMeshAgent>().enabled = false;
@@ -4869,12 +5243,12 @@ public class soldierGeneratorWithCustomGun : objectGen
     float height;
     float width;
     objectGen weapon;
-    //List<FSM> theBehavior;  //gah!  needs the object as an input!
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
     float speed;
     float targetDetectionRange;
 
 
-    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<FSM> theBehavior )
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
 
     // 
     //basicBodyProperties
@@ -4930,8 +5304,8 @@ public class soldierGeneratorWithCustomGun : objectGen
 
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new basicPaintByNumbersSoldierFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new basicPaintByNumbersSoldierOldFSM(newObj, team, speed, targetDetectionRange).returnIt();//theBehavior;
 
 
         //newObj.GetComponent<NavMeshAgent>().enabled = false;
@@ -4983,11 +5357,11 @@ public class soldierGeneratorWithCustomGun : objectGen
 }
 
 
-public class basicPaintByNumbersSoldierFSM : FSM
+public class basicPaintByNumbersSoldierOldFSM : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     //float combatRange = 40f;
     private GameObject newObj;
@@ -4995,7 +5369,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
     private float speed;
     private float targetDetectionRange;
 
-    public basicPaintByNumbersSoldierFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
+    public basicPaintByNumbersSoldierOldFSM(GameObject theObjectDoingTheEnaction, tag2 team, float speed, float targetDetectionRange = 40f)
     {
         this.newObj = theObjectDoingTheEnaction;
         this.team = team;
@@ -5003,14 +5377,14 @@ public class basicPaintByNumbersSoldierFSM : FSM
         this.targetDetectionRange = targetDetectionRange;
 
 
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction, team);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -5019,7 +5393,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         
-        FSM combat1 = new generateFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndPressY(theObjectDoingTheEnaction, theAttackTargetPicker, buttonCategories.primary, targetDetectionRange).returnIt());//new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, targetDetectionRange).returnIt());
 
 
 
@@ -5027,17 +5401,17 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle; ;
     }
 
@@ -5062,9 +5436,9 @@ public class basicPaintByNumbersSoldierFSM : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tag2 team)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
 
@@ -5084,7 +5458,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, targetDetectionRange).returnIt());
 
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
 
@@ -5105,7 +5479,7 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction, team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = rtsOldFSM1(theObjectDoingTheEnaction, team);//new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -5136,13 +5510,13 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
 
 
-    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    private OldFSM rtsOldFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
     {
-        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        //OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -5202,9 +5576,9 @@ public class basicPaintByNumbersSoldierFSM : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -5267,8 +5641,8 @@ public class basicSoldierGenerator : doAtPoint
         interactionCreator.singleton.dockXToY(gun, newObj);
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new basicSoldierFSM(newObj, team).returnIt();
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new basicSoldierOldFSM(newObj, team).returnIt();
     }
 
 
@@ -5344,8 +5718,8 @@ public class basicSoldierGeneratorG : objectGen
         interactionCreator.singleton.dockXToY(gun, newObj);
 
 
-        FSMcomponent theFSMcomponent = newObj.AddComponent<FSMcomponent>();
-        theFSMcomponent.theFSMList = new basicSoldierFSM(newObj, team).returnIt();
+        OldFSMcomponent theOldFSMcomponent = newObj.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new basicSoldierOldFSM(newObj, team).returnIt();
 
 
 
@@ -5365,26 +5739,26 @@ public class basicSoldierGeneratorG : objectGen
 
 
 
-public class basicSoldierFSM : FSM
+public class basicSoldierOldFSM : OldFSM
 {
 
-    //FSM theFSM;
-    public List<FSM> theFSMList = new List<FSM>();
+    //OldFSM theOldFSM;
+    public List<OldFSM> theOldFSMList = new List<OldFSM>();
 
     float combatRange = 40f;
 
-    public basicSoldierFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    public basicSoldierOldFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
     {
 
 
-        theFSMList.Add(feetFSM(theObjectDoingTheEnaction, team));
-        theFSMList.Add(handsFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(feetOldFSM(theObjectDoingTheEnaction, team));
+        theOldFSMList.Add(handsOldFSM(theObjectDoingTheEnaction, team));
 
     }
 
-    private FSM handsFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    private OldFSM handsOldFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
     {
-        FSM idle = new generateFSM();
+        OldFSM idle = new generateOldFSM();
 
         objectCriteria theCriteria = createAttackCriteria(theObjectDoingTheEnaction,team);
         objectSetGrabber theAttackObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectDoingTheEnaction), theCriteria);
@@ -5393,7 +5767,7 @@ public class basicSoldierFSM : FSM
 
         targetPicker theAttackTargetPicker = generateAttackTargetPicker(theObjectDoingTheEnaction,theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, combatRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new aimAtXAndInteractWithY(theObjectDoingTheEnaction, theAttackTargetPicker, interType.peircing, combatRange).returnIt());
 
         
 
@@ -5401,17 +5775,17 @@ public class basicSoldierFSM : FSM
 
 
 
-        equipItemFSM equipGun = new equipItemFSM(theObjectDoingTheEnaction, interType.peircing);
+        equipItemOldFSM equipGun = new equipItemOldFSM(theObjectDoingTheEnaction, interType.peircing);
 
-        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);
-        //wander.addSwitchAndReverse(switchToAttack, equipGun.theFSM);
-        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theFSM);//messy
+        idle.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);
+        //wander.addSwitchAndReverse(switchToAttack, equipGun.theOldFSM);
+        combat1.addSwitchAndReverse(equipGun.theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction, interType.peircing), equipGun.theOldFSM);//messy
 
 
 
         idle.name = "hands, idle";
         combat1.name = "hands, combat1";
-        equipGun.theFSM.name = "hands, equipGun";
+        equipGun.theOldFSM.name = "hands, equipGun";
         return idle;;
     }
 
@@ -5436,9 +5810,9 @@ public class basicSoldierFSM : FSM
         return theAttackTargetPicker;
     }
 
-    private FSM feetFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
+    private OldFSM feetOldFSM(GameObject theObjectDoingTheEnaction, tagging2.tag2 team)
     {
-        FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
 
 
@@ -5458,7 +5832,7 @@ public class basicSoldierFSM : FSM
         //targetPicker theTargetPicker = new applePatternTargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
         targetPicker theTargetPicker = new combatDodgeVarietyPack1TargetPicker(theObjectDoingTheEnaction, theAttackObjectSet);
 
-        FSM combat1 = new generateFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
+        OldFSM combat1 = new generateOldFSM(new goToX(theObjectDoingTheEnaction, theTargetPicker, combatRange).returnIt());
 
         //condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 1);
         condition switchToAttack = new stickyCondition(new isThereAtLeastOneObjectInSet(theAttackObjectSet), 10);// theObjectDoingTheEnaction, numericalVariable.health);
@@ -5469,7 +5843,7 @@ public class basicSoldierFSM : FSM
 
         //targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = rtsFSM1(theObjectDoingTheEnaction,team);//new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = rtsOldFSM1(theObjectDoingTheEnaction,team);//new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -5487,13 +5861,13 @@ public class basicSoldierFSM : FSM
 
 
 
-    private FSM rtsFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
+    private OldFSM rtsOldFSM1(GameObject theObjectDoingTheEnaction, tag2 teamIn)
     {
-        //FSM wander = new generateFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
+        //OldFSM wander = new generateOldFSM(new randomWanderRepeatable(theObjectDoingTheEnaction).returnIt());
 
         targetPicker theRTSCommandTargetPicker = makeTheRTSCommandTargetPicker(theObjectDoingTheEnaction);
 
-        FSM goToRTSTarget = new generateFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
+        OldFSM goToRTSTarget = new generateOldFSM(new goToXFromTargetPicker(theObjectDoingTheEnaction, theRTSCommandTargetPicker, 2f).returnIt());
 
         //condition switchFromWanderToRTS = makeSwitchFromWanderToRTS(theObjectDoingTheEnaction);
 
@@ -5543,9 +5917,9 @@ public class basicSoldierFSM : FSM
 
 
 
-    public List<FSM> returnIt()
+    public List<OldFSM> returnIt()
     {
-        return theFSMList;
+        return theOldFSMList;
     }
 
 
@@ -5641,16 +6015,16 @@ public class targetPickerFromRTSModule : targetPicker
 }
 
 
-public class equipItemFSM
+public class equipItemOldFSM
 {
 
-    public FSM theFSM;
+    public OldFSM theOldFSM;
 
-    public equipItemFSM(GameObject theObjectDoingTheEnaction, interType interTypeX)
+    public equipItemOldFSM(GameObject theObjectDoingTheEnaction, interType interTypeX)
     {
 
         //equipObjectRepeater
-        theFSM = new generateFSM(new equipObjectRepeater(theObjectDoingTheEnaction)); //hmm, this doesn't share cache with the conditions......
+        theOldFSM = new generateOldFSM(new equipObjectRepeater(theObjectDoingTheEnaction)); //hmm, this doesn't share cache with the conditions......
         //MAKE SURE TO RETURN IT!!!!!!  
     }
 
@@ -5736,9 +6110,9 @@ public class equipItemFSM
     }
 
 
-    public FSM returnIt()
+    public OldFSM returnIt()
     {
-        return theFSM;
+        return theOldFSM;
     }
 
 

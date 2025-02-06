@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
+using TMPro;
 using UnityEngine;
 using static enactionCreator;
 using static UnityEngine.GraphicsBuffer;
@@ -17,6 +19,219 @@ public class planningAndImagination : MonoBehaviour
 
 
 }
+
+
+
+
+public class FSMcomponent : MonoBehaviour, IupdateCallable
+{
+    public List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+
+    public List<IupdateCallable> currentUpdateList { get; set; }
+
+    public void callableUpdate()
+    {
+        for (int index = 0; index < theFSMList.Count; index++)
+        {
+            theFSMList[index] = theFSMList[index].doAFrame();
+        }
+
+    }
+}
+
+public class FSM
+{
+    internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
+
+    internal List<state> stuffToDoInThisState = new List<state>();
+
+    public FSM(state baseStateIn)
+    {
+        stuffToDoInThisState.Add(baseStateIn);
+    }
+
+
+    public FSM doAFrame()
+    {
+        FSM toSwitchTo = firstMetSwitchtCondition();
+        if (toSwitchTo != null)
+        {
+            return toSwitchTo;
+        }
+
+
+
+
+
+        foreach (var thisThingToDo in stuffToDoInThisState)
+        {
+            thisThingToDo.doThisThing();
+        }
+
+
+
+
+        return this;
+    }
+
+    private FSM firstMetSwitchtCondition()
+    {
+        foreach (condition thisCondition in switchBoard.Keys)
+        {
+            if (thisCondition.met())
+            {
+                return switchBoard[thisCondition];
+            }
+        }
+
+        return null;
+    }
+
+
+}
+
+public interface state
+{
+    //arbitrary code to execute in a state [for FSM]
+    void doThisThing();
+    void setup(GameObject theObjectDoingTheEnactionIn);
+}
+
+
+
+
+
+public class giveAdvancedRTSCommands : state
+{
+    FSM commandFSMToGive;
+    objectSetGrabber unitsToGiveOrdersTo;
+    public void doThisThing()
+    {
+        giveAdvancedCommandToMembersOfObjectSet(commandFSMToGive, unitsToGiveOrdersTo);
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void giveAdvancedCommandToMembersOfObjectSet(FSM theCommandFSMToGive, objectSetGrabber grabUnitsToGiveOrdersTo)
+    {
+        foreach (GameObject unit in grabUnitsToGiveOrdersTo.grab())
+        {
+            advancedRtsModule theComponent = unit.GetComponent<advancedRtsModule>();
+            theComponent.currentReceivedOrders = theCommandFSMToGive;
+        }
+    }
+}
+
+public class doSimplePatrolState1 : state
+{
+    List<GameObject> theListOfLocationMarkers = new List<GameObject>();
+    GameObject theObjectDoingTheEnaction;
+    navAgent theNavAgent;
+    condition proxCondition;
+
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    /*
+    maybe like this BUT NOT HERE KEEP STATE SIMPLE?: ConstructorForOldFSMgen2ThatUsesPLUGINS(GameObject theObjectDoingTheEnactionIn, baseState state0, plugInOldFSM[] plugInOldFSMs) : this(theObjectDoingTheEnactionIn, state0)
+    {
+        theBaseOldFSM = state0.makeState(theObjectDoingTheEnactionIn);
+
+        foreach (plugInOldFSM thisPlugin in plugInOldFSMs)
+        {
+            thisPlugin.addPlugin(theBaseOldFSM, theObjectDoingTheEnactionIn);
+        }
+
+        addItToTheirOldFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    */
+
+    public void doThisThing()
+    {
+        //how to go to one until proximity to it, then another, then another?
+        //well, start with first point on list
+        //[when done with it, remove it and add it to end of list]
+        //i have a bunch of "goToX" code........
+
+
+        //old code basically boils down thos this, i think:
+        //      gets nav agent enaction
+        //      adds proximity condition to enaction/exe
+        //      gets target position
+        //      uses target position as input data for the vector enaction [nav agent enaction]
+        //see:
+        //      navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+        //      proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        //      theEXE.endConditions.Add(condition);
+        //      Vector3 targetPosition = theTargetCalculator.targetPosition();
+        //      theEnaction.enact(new inputData(targetPosition));
+
+        handleProxCondition();
+        theNavAgent.enact(new inputData(theListOfLocationMarkers[0]));
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+        GameObject p1 = new GameObject();
+        p1.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, 6);
+        GameObject p2 = new GameObject();
+        p2.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, 16);
+        GameObject p3 = new GameObject();
+        p3.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, -6);
+        GameObject p4 = new GameObject();
+        p4.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, -16);
+        theListOfLocationMarkers.Add(p1);
+        theListOfLocationMarkers.Add(p2);
+        theListOfLocationMarkers.Add(p3);
+        theListOfLocationMarkers.Add(p4);
+
+
+
+        makeProxConditionForFirstItemOnList();
+    }
+
+    private void handleProxCondition()
+    {
+        //looks to see if they are close to first point
+        //if so, moves first point of list to the end
+        //then makes new prox condition using that new first point
+        if (proxCondition.met())
+        {
+            moveFirstItemInListToTheEnd();
+            makeProxConditionForFirstItemOnList();
+        }
+    }
+
+    private void makeProxConditionForFirstItemOnList()
+    {
+        proxCondition = new proximity(theObjectDoingTheEnaction, theListOfLocationMarkers[0], 0,3);
+    }
+
+    private void moveFirstItemInListToTheEnd()
+    {
+        GameObject item1 = theListOfLocationMarkers[0];
+        theListOfLocationMarkers.RemoveAt(0);
+        theListOfLocationMarkers.Add(item1);
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1880,7 +2095,7 @@ public class permaPlan
 
 public class depletablePlan
 {
-    //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalFSM] holds PARALLEL.
+    //AKA "planEXE", basically?  no!  this REPLACES series exe, and ABOVE this [animalOldFSM] holds PARALLEL.
     //so here:  just use singleEXE instead of enaction?  [for "inputData" for enacting]
     //List<enaction> thePlan = new List<enaction>();
     public List<singleEXE> thePlan = new List<singleEXE>();  //should make a "SUPERsingleEXE" that CANNOT have any mess of holding series in it?
@@ -1900,7 +2115,7 @@ public class depletablePlan
     {
         thePlan.Add(step1);
 
-        //always need "empty plan list" as an end condition, for animalFSM or something?
+        //always need "empty plan list" as an end condition, for animalOldFSM or something?
 
         endConditions.Add(new depletableSingleEXEListComplete(thePlan));
     }
@@ -1909,7 +2124,7 @@ public class depletablePlan
         thePlan.Add(step1);
         thePlan.Add(step2);
 
-        //always need "empty plan list" as an end condition, for animalFSM or something?
+        //always need "empty plan list" as an end condition, for animalOldFSM or something?
 
         endConditions.Add(new depletableSingleEXEListComplete(thePlan));
     }
@@ -1919,7 +2134,7 @@ public class depletablePlan
         thePlan.Add(step2);
         thePlan.Add(step3);
 
-        //always need "empty plan list" as an end condition, for animalFSM or something?
+        //always need "empty plan list" as an end condition, for animalOldFSM or something?
 
         endConditions.Add(new depletableSingleEXEListComplete(thePlan));
     }
@@ -2130,7 +2345,7 @@ public class aimTargetPlanGen
 
 }
 
-public class equipInteractor : FSM
+public class equipInteractor : OldFSM
 {
     condition theStartCondition;
 
@@ -2146,7 +2361,7 @@ public class equipInteractor : FSM
     }
 
 
-    public void whatToSwitchToWhenDone(FSM theThingToSwitchToWhenDone)
+    public void whatToSwitchToWhenDone(OldFSM theThingToSwitchToWhenDone)
     {
         switchBoard[new reverseCondition(theStartCondition)] = theThingToSwitchToWhenDone;
     }

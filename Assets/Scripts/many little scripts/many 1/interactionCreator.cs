@@ -135,6 +135,56 @@ public class interactionCreator : MonoBehaviour
 
 }
 
+
+
+
+
+public class numVars2
+{
+    public Dictionary<interactionCreator.numericalVariable, float> dictOfIvariables = new Dictionary<interactionCreator.numericalVariable, float>();
+
+}
+
+public class interactable3
+{
+    //simpler, and no fiddly dictionary or enums.
+    //just let the interactions THEMSELVES receive the interaction object and decide how/whether to react
+    public List<IInteraction2> interactions = new List<IInteraction2>();
+
+
+    public void interact(GameObject interactionObject)
+    {
+        foreach(var thisInteraction in interactions)
+        {
+            thisInteraction.intersect(interactionObject);
+        }
+    }
+}
+
+public interface IInteraction2
+{
+
+
+    //the intended (but optional) use:
+    //check if there's any conditions first [each class can define this however it likes]
+    //if none, or if met, "doInteraction", basically. [each class can define this however it likes]
+    void intersect(GameObject interactionObject);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class interactionInfo
 {
     public enactionCreator.interType interactionType { get; set; }

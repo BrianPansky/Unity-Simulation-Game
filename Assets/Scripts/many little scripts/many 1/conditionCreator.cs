@@ -12,6 +12,7 @@ using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
+using static tagging2;
 using static UnityEngine.GraphicsBuffer;
 
 public class conditionCreator : MonoBehaviour
@@ -1101,6 +1102,7 @@ public class proximityFromTargetPicker : baseCondition
 public class proximityRef : baseCondition
 {
     //for when we want the objects to be CLOSER than the desired distance
+    //why is "Ref" in the name?????  ohhh, references an EXE?
 
     GameObject object1;
     //GameObject object2;
@@ -1494,6 +1496,34 @@ public class isThereAtLeastOneObjectInSet : baseCondition
         //Debug.Log("444444444444444444444????????????????");
         string theString = this + " (theObjectSetGrabber = " + theObjectSetGrabber + ")";
         return theString;
+    }
+}
+
+public class isThereAtLeastOneObjectThatMeetsCriteria : baseCondition
+{
+    private objectCriteria theCriteria;
+    private tag2 initialSearchTag;
+
+    public isThereAtLeastOneObjectThatMeetsCriteria(objectCriteria theCriteriaIn)
+    {
+        theCriteria = theCriteriaIn;
+        initialSearchTag = tag2.zoneable;
+    }
+    public isThereAtLeastOneObjectThatMeetsCriteria(tag2 initialSearchTagIn, objectCriteria theCriteriaIn)
+    {
+        theCriteria = theCriteriaIn;
+        initialSearchTag = initialSearchTagIn;
+    }
+
+    public override bool met()
+    {
+        List<GameObject> allObjects = tagging2.singleton.allObjectsWithTag(initialSearchTag);
+        foreach(GameObject thisObject in allObjects)
+        {
+            if (theCriteria.evaluateObject(thisObject) == true) { return true; }
+        }
+
+        return false;
     }
 }
 
