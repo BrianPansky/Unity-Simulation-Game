@@ -220,7 +220,9 @@ public class initialGenerator2 : MonoBehaviour
 
         //new testNewOldFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
         //new testNewOldFSMGenerator2(new Vector3(815, 1.5f, 850)).doIt();
-        new testNewestFSMGenerator(new Vector3(15, 1.5f, 20)).doIt();
+        //new testNewestFSMGenerator(new Vector3(15, 1.5f, 20)).doIt();
+        new testNewestFSMGeneratorSoldier(tag2.team2, tag2.defenseSquad, new Vector3(15, 1.5f, 20)).doIt();
+        new testNewestFSMGeneratorLeader(tag2.team2, new Vector3(215, 1.5f, 20)).doIt();
         returnBasicGrabbable(stuffType.meat1, new Vector3(780, 1.5f, 845));
         returnBasicGrabbable(stuffType.fruit, new Vector3(810, 1.5f, 835));
         //                      worldScript.singleton.thePlayer = makePLAYER(new Vector3(820, 2.5f, 855));

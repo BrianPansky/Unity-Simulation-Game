@@ -575,8 +575,10 @@ public class genGen : MonoBehaviour
         FSMcomponent ensuredThing = onThisObject.GetComponent<FSMcomponent>();
         if (ensuredThing == null)
         {
+            //Debug.Log("!!@$#@$#!$@#!@#$!#@$!@#$!@#!$%!#$^#^!@$*$#!#@*!$@*@$*!$@*^!$*@!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             ensuredThing = onThisObject.AddComponent<FSMcomponent>();
         }
+        
 
         return ensuredThing;
     }
@@ -636,6 +638,82 @@ public class testNewestFSMGenerator
     }
 }
 
+public class testNewestFSMGeneratorSoldier
+{
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testNewestFSMGeneratorSoldier(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+        newObj.AddComponent<advancedRtsModule>();
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+
+        //new OldFSMgen2(newObj, new randomWanderOldFSMgen(), new plugInOldFSM[] { new goToPreyFeetOldFSMGen(), new grabFoodFeetOldFSMGen(stuffType.meat1) });
+        //new OldFSMgen2(newObj, new plugInOldFSM[] { new killPreyHandsOldFSMGen(), new grabFoodHandsOldFSMGen(stuffType.meat1) });
+
+        /*
+        FSMcomponent ensuredThing = newObj.GetComponent<FSMcomponent>();
+        if (ensuredThing == null)
+        {
+            Debug.Log("1111111111111111111111111111111111111!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        followAdvancedCommands thisFuckingThing = new followAdvancedCommands();
+        thisFuckingThing.test();
+        */
+
+
+        new FSMgen(newObj, new followAdvancedCommands());
+
+        /*
+        ensuredThing = newObj.GetComponent<FSMcomponent>();
+        Debug.Log("(zzzzzzzzzz ensuredThing != null):  " + (ensuredThing != null));
+        Debug.Log("zzzzzzzzzz (ensuredThing == null):  " + (ensuredThing == null));
+        if (ensuredThing == null)
+        {
+            Debug.Log("88888888888888888888888888888888888!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+
+        thisFuckingThing.test();
+        */
+    }
+}
+public class testNewestFSMGeneratorLeader
+{
+    private tag2 team2;
+    private Vector3 vector3;
+
+    public testNewestFSMGeneratorLeader(tag2 team2, Vector3 vector3)
+    {
+        this.team2 = team2;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(5, 3, 2).generate();
+        newObj.transform.position = vector3;
+
+
+
+        new FSMgen(newObj, new giveSquadXAdvancedCommandY(team2, tag2.defenseSquad, new doSimplePatrolState1()));
+    }
+}
+
+public interface generateFSM
+{
+    FSM generateTheFSM(GameObject theObjectDoingTheEnaction);
+}
 
 public class FSMgen
 {
@@ -708,7 +786,16 @@ public class FSMgen
 
     public FSMgen(GameObject theObjectDoingTheEnactionIn, state baseStateIn)
     {
-        baseStateIn.setup(theObjectDoingTheEnactionIn);
+        //baseStateIn.setup(theObjectDoingTheEnactionIn);  REDUNDANT BECAUSE "addTheGeneratedFSMToTheirFSMComponent" already does it implicityl!!!!!!!!!!
+
+        /*
+        FSMcomponent ensuredThing = theObjectDoingTheEnactionIn.GetComponent<FSMcomponent>();
+        if (ensuredThing == null)
+        {
+            Debug.Log("2222222222222222222222222222222222222222222222222222222!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        */
+
 
         theBaseFSM = new FSM(baseStateIn);
 
@@ -726,7 +813,37 @@ public class FSMgen
     private void addTheGeneratedFSMToTheirFSMComponent(GameObject theObjectDoingTheEnactionIn)
     {
         FSMcomponent theFSMComponent = genGen.singleton.ensureFSMcomponent(theObjectDoingTheEnactionIn);
-        theFSMComponent.theFSMList.Add(theBaseFSM);
+        
+        /*
+        Debug.Log("(theFSMComponent != null):  " + (theFSMComponent != null));
+        if (theFSMComponent == null)
+        {
+            Debug.Log("1  ???????????????????????????????????????????????!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        FSMcomponent ensuredThing = theObjectDoingTheEnactionIn.GetComponent<FSMcomponent>();
+        Debug.Log("(ensuredThing != null):  " + (ensuredThing != null));
+        if (ensuredThing == null)
+        {
+            Debug.Log("1.5 !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        */
+
+        //theFSMComponent.theFSMList.Add(theBaseFSM);
+        theFSMComponent.addAndSetupFSM(theBaseFSM);
+
+        /*
+        Debug.Log("(theFSMComponent != null):  " + (theFSMComponent != null));
+        if (theFSMComponent == null)
+        {
+            Debug.Log("2  ???????????????????????????????????????????????!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        ensuredThing = theObjectDoingTheEnactionIn.GetComponent<FSMcomponent>();
+        Debug.Log("(ensuredThing != null):  " + (ensuredThing != null));
+        if (ensuredThing == null)
+        {
+            Debug.Log("2.5 !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+        */
     }
 
     public FSM returnIt()
@@ -740,7 +857,7 @@ public class FSMgen
     */
 
 
-
+    /*
     agnostRepeater singleExeToRepeater(GameObject theObjectDoingTheEnaction, singleEXE step1)
     {
         permaPlan2 perma1 = new permaPlan2(step1);
@@ -771,10 +888,10 @@ public class FSMgen
 
         return theEXE;
     }
+    */
 }
 
 
-/*
 public abstract class plugInFSM
 {
     public condition switchCondition;
@@ -783,12 +900,34 @@ public abstract class plugInFSM
     public abstract void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction);
 }
 
-public abstract class simpleOneStateAndReturn : plugInFSM
+public class baseStateGen : generateFSM
+{
+    private state baseState;
+
+    public baseStateGen(state stateIn)
+    {
+        this.baseState = stateIn;
+    }
+
+    public FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        FSM theFSM = new FSM(baseState.regenerateAndSetup(theObjectDoingTheEnaction));
+        return theFSM;
+    }
+}
+
+public abstract class simpleOneStateAndReturn : plugInFSM, generateFSM
 {
     public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
     {
-        theFSMToAddItTo.addSwitchAndReverse(generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
+        addSwitchAndReverse(theFSMToAddItTo, generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
     }
+    public void addSwitchAndReverse(FSM theFSMToAddItTo,condition switchCondition, FSM otherFSM)
+    {
+        theFSMToAddItTo.switchBoard[switchCondition] = otherFSM;
+        otherFSM.switchBoard[new reverseCondition(switchCondition)] = theFSMToAddItTo;
+    }
+
     public abstract condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction);
     public abstract FSM generateTheFSM(GameObject theObjectDoingTheEnaction);
 }
@@ -822,7 +961,7 @@ public class skippableProcess : plugInFSM
 }
 
 
-*/
+
 
 
 

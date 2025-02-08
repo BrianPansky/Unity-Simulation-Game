@@ -5,7 +5,9 @@ using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
 using static enactionCreator;
+using static tagging2;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.CanvasScaler;
 
 public class planningAndImagination : MonoBehaviour
 {
@@ -25,7 +27,8 @@ public class planningAndImagination : MonoBehaviour
 
 public class FSMcomponent : MonoBehaviour, IupdateCallable
 {
-    public List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
+    //PRIVATE BECAUSE THEY REQUIRE "SETUP"
+    private List<FSM> theFSMList = new List<FSM>();// = new List<FSM>();  //correct way to do parallel!  right at the top level!!!  one for walking/feet, one for hands/equipping/using items etc.
 
     public List<IupdateCallable> currentUpdateList { get; set; }
 
@@ -37,6 +40,12 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
         }
 
     }
+
+    public void addAndSetupFSM(FSM theFSM)
+    {
+        theFSM.setup(this.gameObject);
+        theFSMList.Add(theFSM);
+    }
 }
 
 public class FSM
@@ -44,6 +53,11 @@ public class FSM
     internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
 
     internal List<state> stuffToDoInThisState = new List<state>();
+
+    public FSM()
+    {
+
+    }
 
     public FSM(state baseStateIn)
     {
@@ -74,6 +88,16 @@ public class FSM
         return this;
     }
 
+    internal void setup(GameObject gameObject)
+    {
+        //so, setup all states, and all other linked FSMs?  BUT THAT'S AN INFINITE LOOP!
+        //soooo ONLY set up THIS FSM, the others need to be set up.......some other time........somehow....not sure how that will work....
+        foreach(var thisState in stuffToDoInThisState)
+        {
+            thisState.setup(gameObject);
+        }
+    }
+
     private FSM firstMetSwitchtCondition()
     {
         foreach (condition thisCondition in switchBoard.Keys)
@@ -87,27 +111,54 @@ public class FSM
         return null;
     }
 
+    /*
+    internal FSM generate(GameObject theNPC)
+    {
+        FSM deepCopy = new FSM();
 
+        deepCopy.addDeepCopyOfStates(theNPC, stuffToDoInThisState);
+        deepCopy.addDeepCopyOfSwitchBoard(theNPC, switchBoard);  //NO WAIT it will AGAIN do an infinite loop!
+
+        return deepCopy;
+    }
+
+    private void addDeepCopyOfStates(GameObject theNPC, List<state> stuffToDoInThisStateIn)
+    {
+        foreach(var thisState in stuffToDoInThisStateIn)
+        {
+            stuffToDoInThisState.Add(thisState.generate(theNPC));
+        }
+    }
+    */
 }
 
 public interface state
 {
     //arbitrary code to execute in a state [for FSM]
     void doThisThing();
+
+    //setup should do most of constructor?  anything PARTICUALR to a specific NPC
+    //regenerate must have all of the "universal" code/classes so that the particular NPC can be PLUGGED IN, a new NPC every time we need to
     void setup(GameObject theObjectDoingTheEnactionIn);
+    state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn);
 }
 
 
 
 
-
+/*
 public class giveAdvancedRTSCommands : state
 {
-    FSM commandFSMToGive;
+    generateFSM commandFSMToGive;
     objectSetGrabber unitsToGiveOrdersTo;
     public void doThisThing()
     {
         giveAdvancedCommandToMembersOfObjectSet(commandFSMToGive, unitsToGiveOrdersTo);
+    }
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        throw new NotImplementedException();
     }
 
     public void setup(GameObject theObjectDoingTheEnactionIn)
@@ -115,15 +166,18 @@ public class giveAdvancedRTSCommands : state
         throw new NotImplementedException();
     }
 
-    private void giveAdvancedCommandToMembersOfObjectSet(FSM theCommandFSMToGive, objectSetGrabber grabUnitsToGiveOrdersTo)
+    private void giveAdvancedCommandToMembersOfObjectSet(generateFSM theCommandFSMToGive, objectSetGrabber grabUnitsToGiveOrdersTo)
     {
         foreach (GameObject unit in grabUnitsToGiveOrdersTo.grab())
         {
             advancedRtsModule theComponent = unit.GetComponent<advancedRtsModule>();
-            theComponent.currentReceivedOrders = theCommandFSMToGive;
+
+            theComponent.currentReceivedCommand = theCommandFSMToGive;//.generate(unit);
         }
     }
 }
+*/
+
 
 public class doSimplePatrolState1 : state
 {
@@ -171,6 +225,13 @@ public class doSimplePatrolState1 : state
 
         handleProxCondition();
         theNavAgent.enact(new inputData(theListOfLocationMarkers[0]));
+    }
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new doSimplePatrolState1();
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
     }
 
     public void setup(GameObject theObjectDoingTheEnactionIn)
@@ -222,6 +283,160 @@ public class doSimplePatrolState1 : state
     }
 }
 
+
+public class followAdvancedCommands : state
+{
+    private advancedRtsModule theComponent;
+    private FSM nestedFSM;
+
+    //private string myConstructorTrace;
+    private generateFSM mostRecentlyReceivedCommand;
+
+    public followAdvancedCommands()
+    {
+
+        //Debug.Log("----------------------------  constructor");
+        //myConstructorTrace = new System.Diagnostics.StackTrace(true).ToString();
+    }
+
+    public void doThisThing()
+    {
+        updateThisFSMifThereAreNewOrders();
+
+        if(nestedFSM != null)
+        {
+            nestedFSM.doAFrame();
+        }
+
+
+        /*
+        Debug.Log("----------------------------  doThisThing()");
+        Debug.Log("(theComponent != null):  " + (theComponent != null));
+        //Debug.Assert(theComponent != null);
+        if (theComponent == null)
+        {
+            Debug.Log("this.GetHashCode()" + this.GetHashCode());
+            Debug.Log(myConstructorTrace);
+        }
+        
+
+
+
+        if(theComponent.currentReceivedCommand != null)
+        {
+            //theComponent.currentReceivedCommand.doAFrame();
+        }
+
+        */
+    }
+
+    private void updateThisFSMifThereAreNewOrders()
+    {
+        if(theComponent.currentReceivedCommand != mostRecentlyReceivedCommand)
+        {
+            mostRecentlyReceivedCommand = theComponent.currentReceivedCommand;
+            nestedFSM = mostRecentlyReceivedCommand.generateTheFSM(theComponent.gameObject);
+        }
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        //Debug.Log("----------------------------  setup");
+        //  OH WOW THERE'S MY ERROR!  I CAN'T BELEIVE IT DIDN"T WARN ME I CREATED A LOCAL VARIABLE WITH SAME NAME AS ANOTHER VARIABLE IN THIS CLASS AAAAAAAAA:   advancedRtsModule theComponent = theObjectDoingTheEnactionIn.GetComponent<advancedRtsModule>();
+        theComponent = theObjectDoingTheEnactionIn.GetComponent<advancedRtsModule>();
+
+        /*
+        Debug.Assert(theComponent != null);
+        Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        Debug.Log("this.GetHashCode()" + this.GetHashCode());
+        Debug.Log("theComponent:  " + theComponent);
+        Debug.Log("(theComponent != null):  " + (theComponent != null));
+        */
+    }
+    
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        //Debug.Log("----------------------------  88888888888888 just in case, regenerateAndSetup");
+        state newState = new followAdvancedCommands();
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    /*
+    internal void test()
+    {
+        Debug.Log("----------------------------  test() ******************");
+        Debug.Log("(theComponent != null):  " + (theComponent != null));
+        //Debug.Assert(theComponent != null);
+        if (theComponent == null)
+        {
+            Debug.Log("this.GetHashCode()" + this.GetHashCode());
+            Debug.Log(myConstructorTrace);
+        }
+    }
+    */
+}
+
+public class giveSquadXAdvancedCommandY : state
+{
+    generateFSM commandFSMToGive;
+    objectSetGrabber unitsToGiveOrdersTo;
+    private tag2 squad;
+    private tag2 team;
+
+    public giveSquadXAdvancedCommandY(tag2 teamIn, tag2 squadIn, state commandedStateIn)
+    {
+        squad = squadIn;
+        team = teamIn;
+
+        commandFSMToGive = new baseStateGen(commandedStateIn);// new FSM(commandedStateIn);
+    }
+    public giveSquadXAdvancedCommandY(tag2 teamIn, tag2 squadIn, generateFSM commandFSMToGiveIn)
+    {
+        squad = squadIn;
+        team = teamIn;
+
+        commandFSMToGive = commandFSMToGiveIn;
+    }
+
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new giveSquadXAdvancedCommandY(team,squad, commandFSMToGive);
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void doThisThing()
+    {
+        giveAdvancedCommandToMembersOfObjectSet(commandFSMToGive, unitsToGiveOrdersTo);
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(squad),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader)),
+            new hasAdvancedRtsModule(),
+            new hasNoAdvancedCommands()
+            );
+
+        unitsToGiveOrdersTo = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+    }
+
+    public void initializeCommandFSMToGive()
+    {
+    }
+
+    private void giveAdvancedCommandToMembersOfObjectSet(generateFSM theCommandFSMToGive, objectSetGrabber grabUnitsToGiveOrdersTo)
+    {
+        foreach (GameObject unit in grabUnitsToGiveOrdersTo.grab())
+        {
+            advancedRtsModule theComponent = unit.GetComponent<advancedRtsModule>();
+            theComponent.currentReceivedCommand = theCommandFSMToGive;
+        }
+    }
+}
 
 
 

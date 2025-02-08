@@ -869,7 +869,7 @@ public class giveXCommandToY
             //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
             //tagging2.singleton.printAllTags(unit);
             rtsModule theComponent = unit.GetComponent<rtsModule>();
-            theComponent.currentReceivedOrders = theTarget;
+            theComponent.currentReceivedCommand = theTarget;
         }
 
 
@@ -913,7 +913,7 @@ public class giveXAdvancedRTSOrdersToSetY : repeatWithTargetPicker
             //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
             //tagging2.singleton.printAllTags(unit);
             rtsModule theComponent = unit.GetComponent<rtsModule>();
-            theComponent.currentReceivedOrders = theTarget;
+            theComponent.currentReceivedCommand = theTarget;
         }
     }
 
@@ -3623,13 +3623,13 @@ public class teamRankingOfficerOldFSM : OldFSM
 
 public class advancedRtsModule : MonoBehaviour
 {
-    public FSM currentOrdersToGive;
-    internal Dictionary<objectIdPair, FSM> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, FSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
+    public generateFSM currentOrdersToGive;
+    internal Dictionary<objectIdPair, generateFSM> currentReceivedCommandAndWhoGaveThem = new Dictionary<objectIdPair, generateFSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
 
 
     public List<objectIdPair> currentlySelectedUnits; //annoying, but what else to do...
     public advancedRtsModuleVersion theVersion;
-    internal FSM currentReceivedOrders = null;
+    public generateFSM currentReceivedCommand = null;
 
     public static advancedRtsModule ensureObjectHasThisComponent(GameObject theObject, advancedRtsModuleVersion theVersion)
     {
@@ -3656,7 +3656,7 @@ public class advancedRtsModule : MonoBehaviour
         {
             if (thisID.theObject == null) { continue; }
             advancedRtsModule theirRTSModule = thisID.theObject.GetComponent<advancedRtsModule>();
-            theirRTSModule.currentReceivedOrdersAndWhoGaveThem[tagging2.singleton.idPairGrabify(this.gameObject)] = currentOrdersToGive;
+            theirRTSModule.currentReceivedCommandAndWhoGaveThem[tagging2.singleton.idPairGrabify(this.gameObject)] = currentOrdersToGive;
         }
     }
 
@@ -3723,21 +3723,21 @@ public class npcVersionOfAdvancedRTS : advancedRtsModuleVersion
 public class rtsModule : MonoBehaviour
 {
     //public OldFSM currentOrdersToGive;
-    //OldFSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
-    //internal Dictionary<objectIdPair, OldFSM> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, OldFSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
+    //OldFSM currentReceivedCommand;  //what about multiple missions from multiple sources?  list?
+    //internal Dictionary<objectIdPair, OldFSM> currentReceivedCommandAndWhoGaveThem = new Dictionary<objectIdPair, OldFSM>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
     //too complex for now.  start simple.
-    //internal Dictionary<condition, OldFSM> currentReceivedOrders = new Dictionary<condition, OldFSM>();
+    //internal Dictionary<condition, OldFSM> currentReceivedCommand = new Dictionary<condition, OldFSM>();
     //List<GameObject> currentlySelectedUnits; //hmm, but will glitch when they die........
 
     //just do targets for now, not OldFSM
     public agnosticTargetCalc currentOrdersToGive;
-    //OldFSM currentReceivedOrders;  //what about multiple missions from multiple sources?  list?
-    internal Dictionary<objectIdPair, agnosticTargetCalc> currentReceivedOrdersAndWhoGaveThem = new Dictionary<objectIdPair, agnosticTargetCalc>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
+    //OldFSM currentReceivedCommand;  //what about multiple missions from multiple sources?  list?
+    internal Dictionary<objectIdPair, agnosticTargetCalc> currentReceivedCommandAndWhoGaveThem = new Dictionary<objectIdPair, agnosticTargetCalc>();  //important to know who gave orders!  in case it's from wrong chain of command, or an ENEMY, or there's a mutiny and someone BECOMES an enemy
 
 
     public List<objectIdPair> currentlySelectedUnits; //annoying, but what else to do...
     public rtsModuleVersion theVersion;
-    internal agnosticTargetCalc currentReceivedOrders = null;
+    internal agnosticTargetCalc currentReceivedCommand = null;
 
     public static rtsModule ensureObjectHasThisComponent(GameObject theObject, rtsModuleVersion theVersion)
     {
@@ -3762,7 +3762,7 @@ public class rtsModule : MonoBehaviour
         {
             if(thisID.theObject == null) { continue; }
             rtsModule theirRTSModule = thisID.theObject.GetComponent<rtsModule>();
-            theirRTSModule.currentReceivedOrdersAndWhoGaveThem[tagging2.singleton.idPairGrabify(this.gameObject)] = currentOrdersToGive;
+            theirRTSModule.currentReceivedCommandAndWhoGaveThem[tagging2.singleton.idPairGrabify(this.gameObject)] = currentOrdersToGive;
         }
     }
 
@@ -6010,7 +6010,7 @@ public class targetPickerFromRTSModule : targetPicker
         theRTSModule = theObjectDoingTheEnaction.GetComponent<rtsModule>();
         if(theRTSModule == null) { return new agnosticTargetCalc(theObjectDoingTheEnaction, theObjectDoingTheEnaction); }//???
 
-        return theRTSModule.currentReceivedOrders;
+        return theRTSModule.currentReceivedCommand;
     }
 }
 
@@ -6344,7 +6344,7 @@ public class giveXRTSTargetsToYUnits: repeatWithTargetPicker
             //Debug.Log("unit, unit.GetHashCode():  " + unit + ", " + unit.GetHashCode());
             //tagging2.singleton.printAllTags(unit);
             rtsModule theComponent = unit.GetComponent<rtsModule>();
-            theComponent.currentReceivedOrders = theTarget;
+            theComponent.currentReceivedCommand = theTarget;
         }
     }
 

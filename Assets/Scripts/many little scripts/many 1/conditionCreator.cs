@@ -2199,6 +2199,7 @@ public class hasVirtualGamepad : objectCriteria
         return (theGamepad != null);
     }
 }
+
 public class hasRtsModule : objectCriteria
 {
     public override bool evaluateObject(GameObject theObject)
@@ -2211,14 +2212,35 @@ public class hasRtsModule : objectCriteria
     }
 }
 
+public class hasAdvancedRtsModule : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        advancedRtsModule theComponent = theObject.GetComponent<advancedRtsModule>();
+        
+        return (theComponent != null);
+    }
+}
+
 
 public class hasNoOrders : objectCriteria
 {
     public override bool evaluateObject(GameObject theObject)
     {
         rtsModule theComponent = theObject.GetComponent<rtsModule>();
-        //if(theComponent.currentReceivedOrdersAndWhoGaveThem == null || theComponent.currentReceivedOrdersAndWhoGaveThem.Count == 0) { return true; }
-        if (theComponent.currentReceivedOrders == null) { return true; }
+        //if(theComponent.currentReceivedCommandAndWhoGaveThem == null || theComponent.currentReceivedCommandAndWhoGaveThem.Count == 0) { return true; }
+        if (theComponent.currentReceivedCommand == null) { return true; }
+
+        return false;
+    }
+}
+public class hasNoAdvancedCommands : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        advancedRtsModule theComponent = theObject.GetComponent<advancedRtsModule>();
+        //if(theComponent.currentReceivedCommandAndWhoGaveThem == null || theComponent.currentReceivedCommandAndWhoGaveThem.Count == 0) { return true; }
+        if (theComponent.currentReceivedCommand == null) { return true; }
 
         return false;
     }
