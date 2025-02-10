@@ -227,20 +227,112 @@ public class visualSensor1 : sensor
 
             //Debug.Log("advancedSensingAdditionalFilterCriteria met");
 
-            float intensity = detectabilityEvaluator.evaluateObject(thisObject);
-            Debug.Log("intensity:  " + intensity);
-            Debug.DrawLine(theVisualSenseApparatus.position, thisObject.transform.position, new Color(intensity, intensity, intensity), 20f);
+            //List<GameObject> stealthArmature = thisObject.GetComponentsInChildren<GameObject>();
+            List<GameObject> theStealthArmature = getStealthArmature(thisObject);
 
-            if (intensity < illuminationIntensityThresholdForDetection)
+
+            float intensity = 0f;
+            //for now, just "detect" if any ONE "body part" reaches detectability threshhold
+            foreach (GameObject thisPart in theStealthArmature)
             {
+                intensity = detectabilityEvaluator.evaluateObject(thisPart);
+                Debug.Log("intensity:  " + intensity);
+                Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
 
-                continue;
+                if (intensity < illuminationIntensityThresholdForDetection)
+                {
+
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+
             }
-
             //newList.Add(tagging2.singleton.idPairGrabify(thisObject));
             theBeleifs.sensoryInput(newList);
         }
     }
+
+    private List<GameObject> getStealthArmature(GameObject thisObject)
+    {
+        List<GameObject> newList = new List<GameObject>();
+
+        stealthArmature theStealthArmature = thisObject.GetComponent<stealthArmature>();
+        if(theStealthArmature == null)
+        {
+            newList.Add(thisObject);
+            return newList;
+        }
+
+        newList = theStealthArmature.theListOfParts;
+
+        return newList;
+    }
+}
+
+
+
+public class stealthArmature : MonoBehaviour
+{
+    public List<GameObject> theListOfParts = new List<GameObject>();
+
+
+    public static stealthArmature addThisComponent(GameObject theObject, GameObject part1)
+    {
+        stealthArmature theComponent = theObject.AddComponent<stealthArmature>();
+        theComponent.theListOfParts.Add(part1);
+
+
+        return theComponent;
+    }
+    public static stealthArmature addThisComponent(GameObject theObject, GameObject part1, GameObject part2)
+    {
+        stealthArmature theComponent = theObject.AddComponent<stealthArmature>();
+        theComponent.theListOfParts.Add(part1);
+        theComponent.theListOfParts.Add(part2);
+
+
+        return theComponent;
+    }
+
+    public static stealthArmature addThisComponent(GameObject theObject, GameObject part1, GameObject part2, GameObject part3)
+    {
+        stealthArmature theComponent = theObject.AddComponent<stealthArmature>();
+        theComponent.theListOfParts.Add(part1);
+        theComponent.theListOfParts.Add(part2);
+        theComponent.theListOfParts.Add(part3);
+
+
+        return theComponent;
+    }
+
+    public static stealthArmature addThisComponent(GameObject theObject, GameObject part1, GameObject part2, GameObject part3, GameObject part4)
+    {
+        stealthArmature theComponent = theObject.AddComponent<stealthArmature>();
+        theComponent.theListOfParts.Add(part1);
+        theComponent.theListOfParts.Add(part2);
+        theComponent.theListOfParts.Add(part3);
+        theComponent.theListOfParts.Add(part4);
+
+
+        return theComponent;
+    }
+
+    public static stealthArmature addThisComponent(GameObject theObject, GameObject part1, GameObject part2, GameObject part3, GameObject part4, GameObject part5)
+    {
+        stealthArmature theComponent = theObject.AddComponent<stealthArmature>();
+        theComponent.theListOfParts.Add(part1);
+        theComponent.theListOfParts.Add(part2);
+        theComponent.theListOfParts.Add(part3);
+        theComponent.theListOfParts.Add(part4);
+        theComponent.theListOfParts.Add(part5);
+
+
+        return theComponent;
+    }
+
 }
 
 
@@ -282,7 +374,7 @@ public class detectabilityIlluminationEvaluator1 : objectEvaluator
         }
 
 
-        Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
+        //Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
         return totalIllumination;
     }
 }

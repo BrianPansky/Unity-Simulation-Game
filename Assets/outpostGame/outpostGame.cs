@@ -211,6 +211,13 @@ public class playerTeamGen : doAtPoint
         stealthModule stealthModule = player.AddComponent<stealthModule>();
         stealthModule.requestingStealth = true;
 
+        GameObject testPart1 = genGen.singleton.addCube(player, 0.4f, 0.6f, 1.5f, -1.2f); //repository2.Instantiate(repository2.singleton.placeHolderCubePrefab, new Vector3(), Quaternion.identity);
+        GameObject testPart2 = genGen.singleton.addCube(player, 0.4f, 1.1f, 0.3f, -0.4f);
+        GameObject testPart3 = genGen.singleton.addCube(player, 0.4f, -0.6f, 1.0f, 1.2f);
+
+        
+        stealthArmature.addThisComponent(player, testPart1, testPart2, testPart3);
+
     }
 
     public void addTestBodyToObject(GameObject newObj)

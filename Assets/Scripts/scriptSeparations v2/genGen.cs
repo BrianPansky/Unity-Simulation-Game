@@ -80,7 +80,7 @@ public class genGen : MonoBehaviour
         return newProjectile;
     }
 
-    public void addCube(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    public GameObject addCube(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
     {
         Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
         GameObject newObj = Instantiate(repository2.singleton.placeHolderCubePrefab, where, Quaternion.identity);
@@ -88,6 +88,7 @@ public class genGen : MonoBehaviour
 
         newObj.transform.parent = inputObject.transform;
 
+        return newObj;
     }
 
     public void addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)

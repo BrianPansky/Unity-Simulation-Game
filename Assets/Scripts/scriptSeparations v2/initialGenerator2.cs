@@ -225,9 +225,22 @@ public class initialGenerator2 : MonoBehaviour
         //          new testNewestFSMGeneratorLeader(tag2.team2, new Vector3(215, 1.5f, 20)).doIt();
         //new globalLightGenerator1(new Vector3(5, 15, 10)).doIt();
         new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(500*0.3f, 1.5f, 500 * 0.3f)).doIt();
-        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 500 * 0.11f), 70).doIt();
-        new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 400 * 0.51f), 50).doIt();
-        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 400 * 0.30f), 40).doIt();
+        new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();
+        new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 500 * 0.51f), 20, 0.6f).doIt();
+        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 600 * 0.30f), 100, 0.2f).doIt();
+
+        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 2, 500 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.31f, 2, 490 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 2, 500 * 0.5f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(505 * 0.31f, 2, 505 * 0.5f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 2, 500 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.31f, 2, 490 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 2, 500 * 0.5f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(625 * 0.31f, 2, 575 * 0.5f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(640 * 0.3f, 2, 570 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(640 * 0.31f, 2, 490 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 2, 550 * 0.5f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(605 * 0.31f, 2, 505 * 0.5f));
         //new pointLightGenerator1(new Vector3(3, 2, 4)).doIt();
         returnBasicGrabbable(stuffType.meat1, new Vector3(780, 1.5f, 845));
         returnBasicGrabbable(stuffType.fruit, new Vector3(810, 1.5f, 835));
