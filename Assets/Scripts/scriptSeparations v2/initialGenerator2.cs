@@ -221,8 +221,14 @@ public class initialGenerator2 : MonoBehaviour
         //new testNewOldFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
         //new testNewOldFSMGenerator2(new Vector3(815, 1.5f, 850)).doIt();
         //new testNewestFSMGenerator(new Vector3(15, 1.5f, 20)).doIt();
-        new testNewestFSMGeneratorSoldier(tag2.team2, tag2.defenseSquad, new Vector3(15, 1.5f, 20)).doIt();
-        new testNewestFSMGeneratorLeader(tag2.team2, new Vector3(215, 1.5f, 20)).doIt();
+        //          new testNewestFSMGeneratorSoldier(tag2.team2, tag2.defenseSquad, new Vector3(15, 1.5f, 20)).doIt();
+        //          new testNewestFSMGeneratorLeader(tag2.team2, new Vector3(215, 1.5f, 20)).doIt();
+        //new globalLightGenerator1(new Vector3(5, 15, 10)).doIt();
+        new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(500*0.3f, 1.5f, 500 * 0.3f)).doIt();
+        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 500 * 0.11f), 70).doIt();
+        new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 400 * 0.51f), 50).doIt();
+        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 400 * 0.30f), 40).doIt();
+        //new pointLightGenerator1(new Vector3(3, 2, 4)).doIt();
         returnBasicGrabbable(stuffType.meat1, new Vector3(780, 1.5f, 845));
         returnBasicGrabbable(stuffType.fruit, new Vector3(810, 1.5f, 835));
         //                      worldScript.singleton.thePlayer = makePLAYER(new Vector3(820, 2.5f, 855));

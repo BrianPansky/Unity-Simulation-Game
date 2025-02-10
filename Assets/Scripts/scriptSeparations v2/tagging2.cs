@@ -10,6 +10,9 @@ using static tagging2;
 
 public class tagging2 : MonoBehaviour
 {
+    //i have either ALL objects in zone, or ALL objects in ENTIRE SCENE that have a particular tag.
+    //eventually i should have each hold subsets of each other?????  maybe?
+
 
     public static tagging2 singleton;
 
@@ -40,6 +43,7 @@ public class tagging2 : MonoBehaviour
         threat1,
         herbivore,
         predator,
+        lightSource,
         militaryBase,
         teamLeader,
         attackSquad, 
@@ -52,7 +56,7 @@ public class tagging2 : MonoBehaviour
         team6,
         team7,
         team8,
-        team9 //just use integers for teams????
+        team9, //just use integers for teams????
     }
 
 
@@ -311,6 +315,17 @@ public class tagging2 : MonoBehaviour
         objectsInZone[zoneOfObject[thisObjectIdPair]].Remove(thisObjectIdPair);
     }
 
+    internal void addToALLzones(GameObject theObject)
+    {
+        genGen.singleton.ensureSafetyForDeletion(theObject);
+        objectIdPair thisObjectIdPair = idPairGrabify(theObject);
+        initializeObjectEntriesIfNecessary(thisObjectIdPair);
+
+        foreach (int zone in objectsInZone.Keys)
+        {
+            objectsInZone[zone].Add(thisObjectIdPair);
+        }
+    }
 
     public objectIdPair idPairGrabify(GameObject theObject)
     {
@@ -448,6 +463,7 @@ public class tagging2 : MonoBehaviour
             Debug.Log(thisObj);
         }
     }
+
 }
 
 public class find
@@ -1088,6 +1104,22 @@ public class pickMostXFromListYTargetPicker : targetPicker
 public abstract class objectSetGrabber
 {
     public abstract List<GameObject> grab();
+}
+
+public abstract class updateableSetGrabber : objectSetGrabber
+{
+    internal List<objectIdPair> theStoredSet = new List<objectIdPair>();
+
+    public abstract void updateSet(List<GameObject> inputList);
+
+    internal List<objectIdPair> convertToIds(List<GameObject> inputList)
+    {
+        return tagging2.singleton.listInIDPairFormat(inputList);
+    }
+    internal List<GameObject> convertToObjects(List<objectIdPair> inputList)
+    {
+        return tagging2.singleton.listInObjectFormat(inputList);
+    }
 }
 
 

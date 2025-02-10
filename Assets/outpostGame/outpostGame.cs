@@ -154,6 +154,8 @@ public class outpostGame : MonoBehaviour
 
 
 
+
+
 public class playerTeamGen : doAtPoint
 {
     //So, for each team I need the following
@@ -205,6 +207,10 @@ public class playerTeamGen : doAtPoint
         //tagging2.singleton.addTag(player, tag2.defenseSquad);
         //addTeamColors(newObj);
         //addWeapon(newObj, weapon);
+
+        stealthModule stealthModule = player.AddComponent<stealthModule>();
+        stealthModule.requestingStealth = true;
+
     }
 
     public void addTestBodyToObject(GameObject newObj)

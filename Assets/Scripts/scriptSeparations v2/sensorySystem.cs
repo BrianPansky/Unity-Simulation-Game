@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+
 //using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.PackageManager.UI;
 //using System.Drawing;
 //using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Networking.Types;
+using UnityEngine.Profiling;
 using UnityEngine.Timeline;
 using UnityEngine.UIElements;
+using UnityEngine.XR;
 using static enactionCreator;
 using static tagging2;
 using static UnityEngine.GraphicsBuffer;
@@ -130,6 +135,180 @@ public class sensorySystem : MonoBehaviour
 
 
 
+public class sensorySystemComponent : MonoBehaviour //callable update?
+{
+    internal List<sensor> theSenses = new List<sensor>();
+
+    public static sensorySystemComponent addThisComponent(GameObject theObject, sensor sense1)
+    {
+        sensorySystemComponent theComponent = theObject.AddComponent<sensorySystemComponent>();
+        theComponent.theSenses.Add(sense1);
+
+
+        return theComponent;
+    }
+
+    void Update()
+    {
+        foreach (sensor sensor in theSenses)
+        {
+            sensor.sense();
+        }
+    }
+}
+
+
+public interface sensor
+{
+    //the specifics of what they sense, how they sense it is left up to other classes implementing this interface
+    //i guess they also decide what to do with the resulting data, where to put it, or impacts/effects
+    
+    
+    //for collision-based sensing, just use "on collision" to update a set [or set grabber] which will AFTERWARDS be filtered further by "sense" and the results shared to beleifs?
+    void sense();
+}
+
+public class visualSensor1 : sensor
+{
+    private Transform theVisualSenseApparatus;  //hmmm, should be built-in to the criteria etc?
+    
+    public objectSetGrabber baseSetGrabberBeforeSensing;  //just a list to "whittle down", sort, etc
+    private objectCriteria basicSensingFilterCriteria;  //use this to FILTER before bothering with more complex computations of "detectability"?  include a condition/criteria to check if the object has "request stealth" set to true ...no that will be a pivot criteria, a "do full computation" criteria
+    private objectCriteria advancedSensingAdditionalFilterCriteria;
+    private objectEvaluator detectabilityEvaluator;  //the more complex calculations will likely go here?
+    //private objectSetGrabber setOfSensedObjects;  //is this a good way to do things???????  buuuut it's "boolean"?  well, ya, a cutoff of evaluation float numbers either adds it here or doesn't.  you don't half-react to a threat....or do you?  if you are unsure WHAT it is, etc.......that's INTERPRETATION, happens LATER.  but does mean we may want to output/store the evaluator float, and any other data, not just the objects
+    //public sensoryOutput theOutput;//????
+    private beleifs theBeleifs;
+    float illuminationIntensityThresholdForDetection = 0.017f;
+
+    private tag2 excludeThisTag;
+
+    public visualSensor1(GameObject theObject, beleifs theBeleifsIn, tag2 excludeThisTagIn, float theVisualRangeIn = 60f)
+    {
+        theVisualSenseApparatus = theObject.transform;
+        excludeThisTag = excludeThisTagIn;
+        theBeleifs = theBeleifsIn;
+        baseSetGrabberBeforeSensing = new setOfAllObjectsInZone(theObject);
+        basicSensingFilterCriteria = new objectMeetsAllCriteria(
+            new reverseCriteria(new objectHasTag(excludeThisTagIn)),
+            new lineOfSight(theObject, theVisualRangeIn));
+        advancedSensingAdditionalFilterCriteria = new requestingStealthCriteria();
+        detectabilityEvaluator = new detectabilityIlluminationEvaluator1(theObject);
+    }
+
+    public void sense()
+    {
+        //detection:
+        //    BEFORE any complex calculations are run:
+        //	run FILTER conditions[can either result in simple detection, or complete ignorance]
+        //        line of sight for vision[then distance, then feild of view]
+        //        boolean "request stealth" on target / "theif"
+        //THEN[if requersted] run some more advanced light / dark / camoflage code[in an "interface" plug -in]
+        //    for now, collisions with light - source volumes[like with map zones] and simultaneous distance / line of sight[from mlultiple body parts] to lights AND guard's vision
+
+        List<GameObject> newList = new List<GameObject>();
+
+
+        foreach (GameObject thisObject in baseSetGrabberBeforeSensing.grab())
+        {
+            //basic filter [line of sight]
+            //then choice of what next
+            //      either nothing, auto-detection,
+            //      or (if "requested"), stealth cmputatiions
+
+            //Debug.Log("foreach");
+
+            if (basicSensingFilterCriteria.evaluateObject(thisObject) == false) { continue; }
+
+
+            //Debug.Log("basicSensingFilterCriteria met");
+
+            if (advancedSensingAdditionalFilterCriteria.evaluateObject(thisObject) == false) { continue; }
+
+            //Debug.Log("advancedSensingAdditionalFilterCriteria met");
+
+            float intensity = detectabilityEvaluator.evaluateObject(thisObject);
+            Debug.Log("intensity:  " + intensity);
+            Debug.DrawLine(theVisualSenseApparatus.position, thisObject.transform.position, new Color(intensity, intensity, intensity), 20f);
+
+            if (intensity < illuminationIntensityThresholdForDetection)
+            {
+
+                continue;
+            }
+
+            //newList.Add(tagging2.singleton.idPairGrabify(thisObject));
+            theBeleifs.sensoryInput(newList);
+        }
+    }
+}
+
+
+
+public class detectabilityIlluminationEvaluator1 : objectEvaluator
+{
+    objectSetGrabber lightSourceGrabber;
+
+    public detectabilityIlluminationEvaluator1(GameObject theObjectWeUseForZone)
+    {
+        /*
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tag2.lightSource)
+            );
+
+        lightSourceGrabber = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsInZone(theObjectWeUseForZone), theCriteria);
+        */
+
+        lightSourceGrabber = new setOfAllObjectsWithTag(tag2.lightSource);
+    }
+
+
+    public override float evaluateObject(GameObject theObject)
+    {
+        //so:
+        //      [assume line of sight to the observer is already established]
+        //      AND at least one light source,
+        //      within range of both
+
+        float totalIllumination = 0f;
+
+        //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,evaluateObject");
+        foreach (GameObject thisLight in lightSourceGrabber.grab())
+        {
+            //Debug.Log("thisLight:  " + thisLight);
+            float intensityToAdd = thisLight.GetComponent<lightIlluminationCalculator>().evaluate(theObject);
+            //Debug.Log("intensityToAdd:  " + intensityToAdd);
+            totalIllumination += intensityToAdd;
+        }
+
+
+        Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
+        return totalIllumination;
+    }
+}
+
+
+
+public class stealthModule : MonoBehaviour
+{
+    public bool requestingStealth = false;
+    public List<GameObject> evaluatableParts = new List<GameObject>();
+
+
+}
+
+
+
+
+public class requestingStealthCriteria : objectCriteria
+{
+    public override bool evaluateObject(GameObject theObject)
+    {
+        stealthModule theComponent = theObject.GetComponent<stealthModule>();
+        if (theComponent == null) { return false; }
+        return theComponent.requestingStealth;
+    }
+}
 
 
 

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
+using UnityEngine.XR;
 using static enactionCreator;
 using static interactionCreator;
+using static sensorySystemComponent;
 using static tagging2;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
@@ -602,14 +605,193 @@ public class genGen : MonoBehaviour
             theObject.AddComponent<safeDestroy>();
         }
     }
+}
 
+
+public class proximityCalculator
+{
+    //instantaneous calculator, no storage of moveable game objects or target calculators
+    Vector3 position1;
+    Vector3 position2;
+
+    public proximityCalculator(GameObject object1, Vector3 vectorIn)
+    {
+        position1 = object1.transform.position;
+        position2 = vectorIn;
+    }
+    public proximityCalculator(GameObject object1, GameObject object2)
+    {
+        position1 = object1.transform.position;
+        position2 = object2.transform.position;
+    }
+    public proximityCalculator(Vector3 vectorIn1, Vector3 vectorIn2)
+    {
+        position1 = vectorIn1;
+        position2 = vectorIn2;
+    }
+
+    public float calculate()
+    {
+        Vector3 vectorBetween = position1 - position2;
+        float distance = vectorBetween.magnitude;
+
+        return distance;
+    }
 }
 
 
 
+public class lightIlluminationCalculator : MonoBehaviour
+{
+    //ok, but what about lights with infinite range?  can using a fake HUGE RANGE just make teh math work approximately correctly?  wastes tiny amount of computation...
+    //hmm, i don't think my math whould work well for that?  do i have it WRONG then?  shouldn't be?
+    //use -1 for infinite range?
+    internal float theRange;
+    internal float theIntensity;
+    internal lineOfSight lineOfSight;
+
+    public static lightIlluminationCalculator addThisComponent(GameObject theObject, float intensityIn, float rangeIn=-1)
+    {
+        lightIlluminationCalculator theComponent = theObject.AddComponent<lightIlluminationCalculator>();
+        theComponent.theRange = rangeIn;
+        theComponent.theIntensity = intensityIn;
+        theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
+        return theComponent;
+    }
+
+    internal float evaluate(GameObject theObject)
+    {
+        //return zero if there is no line of sight
+        if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
+
+        if (theRange < 0)
+        {
+            //this means infinite range.  just return intensity
+            return theIntensity;
+        }
+
+        return thisComplexCalcluation(theObject);
+    }
+
+    private float thisComplexCalcluation(GameObject theObject)
+    {
+        float distance = new proximityCalculator(this.gameObject, theObject).calculate();
+
+        if (distance > theRange) { return 0f; }
+
+        float illumination = linearInterpolation(distance);
+
+        return illumination;
+    }
+
+    private float linearInterpolation(float distance)
+    {
+        if(true == false)
+        {
+
+            Debug.Log("distance:  " + distance);
+            Debug.Log("theRange:  " + theRange);
+            Debug.Log("distance/theRange:  " + (distance / theRange));
+            Debug.Log("(1 - distance/theRange):  " + (1 - (distance / theRange)));
+            Debug.Log("theIntensity:  " + theIntensity);
+            Debug.Log("theIntensity*(1 - (distance / theRange)):  " + theIntensity * (1 - (distance / theRange)));
+
+
+        }
+
+        //so, need the percentage of how far between light source and range limit that an object is placed
+        float percentAlongRange = distance/theRange;
+        //so, what do i want?
+        //max amount (1??? or the FULL INTENSITY) when close
+        //almost zero when near to edge
+        float percentInsideRange = (1 - percentAlongRange);
+
+        return percentInsideRange * theIntensity;//no probabyl need (1-x) or something.... percentInRange* theIntensity; //something like that
+    }
+}
 
 
 
+public class globalLightGenerator1
+{
+    private Vector3 vector3;
+    float theRange = -1;
+    float theIntensity = 0.85f;
+
+    public globalLightGenerator1(Vector3 vector3 = new Vector3())
+    {
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new GameObject();
+        newObj.transform.position = vector3;
+
+        //DirectionalLight globalLight = newObj.AddComponent<DirectionalLight>();
+        Light globalLight = newObj.AddComponent<Light>();
+        //globalLight.type = DirectionalLight;
+        globalLight.type = LightType.Directional;
+        globalLight.shadows = LightShadows.Soft;
+
+        //newObj.transform.rotation
+        tagging2.singleton.addTag(newObj, tag2.lightSource);
+
+        newObj.transform.localRotation = Quaternion.Euler(60, 0f, 0f);
+        //Vector3 theRotation = new Vector3(60, 0f, 0f);  ononon, rotation can be found later from the monobehavior component
+        lightIlluminationCalculator.addThisComponent(newObj, theIntensity, theRange);
+        tagging2.singleton.addToALLzones(newObj);
+    }
+}
+
+
+public class pointLightGenerator1
+{
+    private Vector3 vector3;
+    float theRange = 20;
+    float theIntensity = 0.85f;
+
+    public pointLightGenerator1(Vector3 vector3 = new Vector3(), float theRangeIn = 20, float theIntensityIn = 0.85f)
+    {
+        this.vector3 = vector3;
+        this.theRange = theRangeIn;
+        this.theIntensity = theIntensityIn;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new GameObject();
+        newObj.transform.position = vector3;
+        newObj.name = "generated Point Light";
+        //DirectionalLight globalLight = newObj.AddComponent<DirectionalLight>();
+        Light light = newObj.AddComponent<Light>();
+        //globalLight.type = DirectionalLight;
+        light.type = LightType.Point;
+        light.shadows = LightShadows.Soft;
+        light.range = theRange;
+        //newObj.transform.rotation
+
+        //newObj.transform.localRotation = Quaternion.Euler(60, 0f, 0f);
+        tagging2.singleton.addTag(newObj,tag2.zoneable);
+        tagging2.singleton.addTag(newObj, tag2.lightSource);
+        //newObj.AddComponent<temporarySetupCollider>();
+        lightIlluminationCalculator.addThisComponent(newObj, theIntensity, theRange);
+    }
+}
+
+
+public class temporarySetupCollider : MonoBehaviour
+{
+    //a quick fix for "reposition errors", where things don't spawn in correct location due to nav mesh agent, somehow
+    void Awake()
+    {
+        this.gameObject.AddComponent<BoxCollider>();
+    }
+
+    void Start()
+    {
+        Destroy(this.gameObject.GetComponent<BoxCollider>());
+        Destroy(this);
+    }
+}
 
 
 
@@ -689,6 +871,7 @@ public class testNewestFSMGeneratorSoldier
         */
     }
 }
+
 public class testNewestFSMGeneratorLeader
 {
     private tag2 team2;
@@ -709,6 +892,75 @@ public class testNewestFSMGeneratorLeader
         new FSMgen(newObj, new giveSquadXAdvancedCommandY(team2, tag2.defenseSquad, new doSimplePatrolState1()));
     }
 }
+
+
+
+
+public class testStealthDetectorGuard
+{
+
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testStealthDetectorGuard(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+        //newObj.AddComponent<advancedRtsModule>();
+        beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+
+        //new FSMgen(newObj, new testStealthDetection1());
+
+    }
+}
+
+internal class testStealthDetection1 : state
+{
+    //a feild of view
+    //detection state
+    //      uses my new detection code
+    //      targets....all enemy units in range/zone
+    //      does a colored debug line as output for each visible enemy
+
+
+    //orrr the sensory system does these parts automatically?
+    //objectSetGrabber theSetGrabber;
+    //sensorySystem theSensorySystem;
+    beleifs theBeleifs;
+
+    public void doThisThing()
+    {
+        foreach(var x in theBeleifs.theSet.grab())
+        {
+
+        }
+    }
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+
 
 public interface generateFSM
 {

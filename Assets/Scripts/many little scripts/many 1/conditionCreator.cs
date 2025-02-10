@@ -876,7 +876,7 @@ public class proximity : baseCondition
         Vector3 position1 = object1.transform.position;
         Vector3 position2 = targetCalc.targetPosition();// object2.transform.position;
         Vector3 vectorBetween = position1 - position2;
-        float distance = vectorBetween.magnitude;
+        float distance = new proximityCalculator(object1,targetCalc.targetPosition()).calculate();
 
         //Debug.Log("condition:  " + this);
         //Debug.Log("distance:  " + distance);
@@ -2268,7 +2268,7 @@ public class lineOfSight : objectCriteria
         //return myData.threatLineOfSightBool();
 
 
-        bool theBool = false;
+        //bool theBool = false;
         RaycastHit myHit;
 
         //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
@@ -2376,7 +2376,7 @@ public class intertypeXisInInventory : objectCriteria
 
 public abstract class objectEvaluator
 {
-    // [FLOAT to RANK objects, and pick the "most"] function to evaluate a single object
+    // [FLOAT that can later/elsewhere be used to RANK objects, and pick the "most"] function to evaluate a single object
 
     public abstract float evaluateObject(GameObject theObject);
 }

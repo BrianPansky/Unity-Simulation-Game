@@ -149,6 +149,7 @@ public class interactable3
 {
     //simpler, and no fiddly dictionary or enums.
     //just let the interactions THEMSELVES receive the interaction object and decide how/whether to react
+    //and this is not a monobehavior.  can plug it into monobehaviors that can use it in different ways
     public List<IInteraction2> interactions = new List<IInteraction2>();
 
 

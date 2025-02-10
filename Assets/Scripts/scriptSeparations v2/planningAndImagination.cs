@@ -25,6 +25,62 @@ public class planningAndImagination : MonoBehaviour
 
 
 
+public class beleifs : MonoBehaviour
+{
+    public updateableSetGrabber theSet;
+
+    internal static beleifs addThisComponent(GameObject theObject)
+    {
+        beleifs theComponent = theObject.AddComponent<beleifs>();
+        theComponent.theSet = new beleifSet1();
+
+        return theComponent;
+    }
+
+    internal void sensoryInput(List<GameObject> inputList)
+    {
+        //update a "set grabber" with this
+        //buuut....that's not how set grabbers work......
+        //"updatable set grabber"???
+        theSet.updateSet(inputList);
+    }
+}
+
+
+public class beleifSet1 : updateableSetGrabber
+{
+    Dictionary<objectIdPair, condition> theForgetConditions = new Dictionary<objectIdPair, condition>();
+
+    public override List<GameObject> grab()
+    {
+        forgetListItemsIfNecessary();
+        return convertToObjects(theStoredSet);
+    }
+
+    private void forgetListItemsIfNecessary()
+    {
+        //ummm do this later
+        foreach (objectIdPair thisID in theStoredSet)
+        {
+            //if (theForgetConditions.Keys.Contains(thisID)) { continue; }
+
+        }
+    }
+
+    public override void updateSet(List<GameObject> inputList)
+    {
+        foreach (objectIdPair thisID in convertToIds(inputList))
+        {
+            if (theStoredSet.Contains(thisID)){ continue; }
+
+            theStoredSet.Add(thisID);
+        }
+    }
+}
+
+
+
+
 public class FSMcomponent : MonoBehaviour, IupdateCallable
 {
     //PRIVATE BECAUSE THEY REQUIRE "SETUP"
