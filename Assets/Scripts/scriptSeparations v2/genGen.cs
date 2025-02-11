@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
 using static enactionCreator;
@@ -644,23 +645,82 @@ public class proximityCalculator
 
 public class lightIlluminationCalculator : MonoBehaviour
 {
-    //ok, but what about lights with infinite range?  can using a fake HUGE RANGE just make teh math work approximately correctly?  wastes tiny amount of computation...
-    //hmm, i don't think my math whould work well for that?  do i have it WRONG then?  shouldn't be?
-    //use -1 for infinite range?
+    lightSourceTypeCalculator theSubTypeCalculator;
+
+    public static lightIlluminationCalculator addThisComponent(GameObject theLightEmittingObject, float intensityIn)
+    {
+        //global "directional" light
+        lightIlluminationCalculator theComponent = theLightEmittingObject.AddComponent<lightIlluminationCalculator>();
+        theComponent.theSubTypeCalculator = new directionalLightTypeCalculator(theLightEmittingObject, intensityIn);
+        return theComponent;
+    }
+    public static lightIlluminationCalculator addThisComponent(GameObject theLightEmittingObject, float intensityIn, float rangeIn)
+    {
+        //point light
+        lightIlluminationCalculator theComponent = theLightEmittingObject.AddComponent<lightIlluminationCalculator>();
+
+        theComponent.theSubTypeCalculator = new pointLightTypeCalculator(theLightEmittingObject, intensityIn, rangeIn);
+        //theComponent.theRange = rangeIn;
+        //theComponent.theIntensity = intensityIn;
+        //theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
+        return theComponent;
+    }
+    public static lightIlluminationCalculator addThisComponent(GameObject theLightEmittingObject, float intensityIn, float rangeIn, float spotlightWidthAngleIn)
+    {
+        //spot light
+        lightIlluminationCalculator theComponent = theLightEmittingObject.AddComponent<lightIlluminationCalculator>();
+
+        theComponent.theSubTypeCalculator = new spotLightTypeCalculator(theLightEmittingObject, intensityIn, rangeIn, spotlightWidthAngleIn);
+        //theComponent.theRange = rangeIn;
+        //theComponent.theIntensity = intensityIn;
+        //theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
+        return theComponent;
+    }
+
+
+
+    public float evaluate(GameObject theObject)
+    {
+        return theSubTypeCalculator.evaluate(theObject);
+    }
+
+}
+
+
+
+public interface lightSourceTypeCalculator
+{
+    float evaluate(GameObject theObject);
+}
+
+public class pointLightTypeCalculator : lightSourceTypeCalculator
+{
+    GameObject theLightEmittingObject;
     internal float theRange;
     internal float theIntensity;
     internal lineOfSight lineOfSight;
 
-    public static lightIlluminationCalculator addThisComponent(GameObject theObject, float intensityIn, float rangeIn=-1)
+    public pointLightTypeCalculator(GameObject theLightEmittingObjectIn, float intensityIn, float rangeIn = 40)
     {
-        lightIlluminationCalculator theComponent = theObject.AddComponent<lightIlluminationCalculator>();
+        theLightEmittingObject = theLightEmittingObjectIn;
+        theRange = rangeIn;
+        theIntensity = intensityIn;
+        lineOfSight = new lineOfSight(theLightEmittingObjectIn, rangeIn);
+    }
+
+    /*
+    public static pointLightTypeCalculator addThisComponent(GameObject theObject, float intensityIn, float rangeIn = -1)
+    {
+        pointLightTypeCalculator theComponent = theObject.AddComponent<pointLightTypeCalculator>();
         theComponent.theRange = rangeIn;
         theComponent.theIntensity = intensityIn;
         theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
         return theComponent;
     }
+    */
 
-    internal float evaluate(GameObject theObject)
+
+    public float evaluate(GameObject theObject)
     {
         //return zero if there is no line of sight
         if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
@@ -676,7 +736,7 @@ public class lightIlluminationCalculator : MonoBehaviour
 
     private float thisComplexCalcluation(GameObject theObject)
     {
-        float distance = new proximityCalculator(this.gameObject, theObject).calculate();
+        float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
 
         if (distance > theRange) { return 0f; }
 
@@ -687,7 +747,7 @@ public class lightIlluminationCalculator : MonoBehaviour
 
     private float linearInterpolation(float distance)
     {
-        if(true == false)
+        if (true == false)
         {
 
             Debug.Log("distance:  " + distance);
@@ -701,7 +761,141 @@ public class lightIlluminationCalculator : MonoBehaviour
         }
 
         //so, need the percentage of how far between light source and range limit that an object is placed
-        float percentAlongRange = distance/theRange;
+        float percentAlongRange = distance / theRange;
+        //so, what do i want?
+        //max amount (1??? or the FULL INTENSITY) when close
+        //almost zero when near to edge
+        float percentInsideRange = (1 - percentAlongRange);
+
+        return percentInsideRange * theIntensity;//no probabyl need (1-x) or something.... percentInRange* theIntensity; //something like that
+    }
+}
+
+public class directionalLightTypeCalculator : lightSourceTypeCalculator
+{
+    GameObject theLightEmittingObject;
+    internal float theIntensity;
+    float theFakeInfiniteRangeForRaycast = 100000;
+    //      internal lineOfSight lineOfSight;
+
+    public directionalLightTypeCalculator(GameObject theLightEmittingObjectIn, float intensityIn)
+    {
+        theLightEmittingObject = theLightEmittingObjectIn;
+        theIntensity = intensityIn;
+        //      lineOfSight = new lineOfSight(theObject, rangeIn);
+    }
+
+    /*
+    public static pointLightTypeCalculator addThisComponent(GameObject theObject, float intensityIn, float rangeIn = -1)
+    {
+        pointLightTypeCalculator theComponent = theObject.AddComponent<pointLightTypeCalculator>();
+        theComponent.theRange = rangeIn;
+        theComponent.theIntensity = intensityIn;
+        theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
+        return theComponent;
+    }
+    */
+
+
+    public float evaluate(GameObject theObject)
+    {
+        //return zero if there is no line of sight
+        if (fakeLineOfSight(theObject) == false) { return 0f; }
+
+        return theIntensity;
+    }
+
+    private bool fakeLineOfSight(GameObject theObject)
+    {
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = -theLightEmittingObject.transform.forward;
+        Ray myRay = new Ray(theObject.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theFakeInfiniteRangeForRaycast, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject == null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
+
+public class spotLightTypeCalculator : lightSourceTypeCalculator
+{
+    GameObject theLightEmittingObject;
+    internal float theRange;
+    internal float theIntensity;
+    internal lineOfSight lineOfSight;
+    objectVisibleInFOV theFOVCriteria;
+
+    public spotLightTypeCalculator(GameObject theLightEmittingObjectIn, float intensityIn, float rangeIn, float spotlightWidthAngleIn)
+    {
+        theLightEmittingObject = theLightEmittingObjectIn;
+        theRange = rangeIn;
+        theIntensity = intensityIn;
+        lineOfSight = new lineOfSight(theLightEmittingObjectIn, rangeIn);
+        //theFOVCriteria = new objectVisibleInFOV(theLightEmittingObjectIn.transform, spotlightWidthAngleIn, spotlightWidthAngleIn);
+        theFOVCriteria = new objectVisibleInFOV(theLightEmittingObjectIn.transform, spotlightWidthAngleIn/2, spotlightWidthAngleIn/2); //NEED TO DIVIDE THEM IN HALF
+        //theFOVCriteria = new objectVisibleInFOV(theLightEmittingObjectIn.transform, 2, 2);
+    }
+
+    /*
+    public static pointLightTypeCalculator addThisComponent(GameObject theObject, float intensityIn, float rangeIn = -1)
+    {
+        pointLightTypeCalculator theComponent = theObject.AddComponent<pointLightTypeCalculator>();
+        theComponent.theRange = rangeIn;
+        theComponent.theIntensity = intensityIn;
+        theComponent.lineOfSight = new lineOfSight(theObject, rangeIn);
+        return theComponent;
+    }
+    */
+
+
+    public float evaluate(GameObject theObject)
+    {
+        //return zero if there is no line of sight
+        if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
+        if (theFOVCriteria.evaluateObject(theObject) == false) { return 0f; }
+
+        return thisComplexCalcluation(theObject);
+    }
+
+    private float thisComplexCalcluation(GameObject theObject)
+    {
+        float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
+
+        if (distance > theRange) { return 0f; }
+
+        float illumination = linearInterpolation(distance);
+
+        return illumination;
+    }
+
+    private float linearInterpolation(float distance)
+    {
+        if (true == false)
+        {
+
+            Debug.Log("distance:  " + distance);
+            Debug.Log("theRange:  " + theRange);
+            Debug.Log("distance/theRange:  " + (distance / theRange));
+            Debug.Log("(1 - distance/theRange):  " + (1 - (distance / theRange)));
+            Debug.Log("theIntensity:  " + theIntensity);
+            Debug.Log("theIntensity*(1 - (distance / theRange)):  " + theIntensity * (1 - (distance / theRange)));
+
+
+        }
+
+        //so, need the percentage of how far between light source and range limit that an object is placed
+        float percentAlongRange = distance / theRange;
         //so, what do i want?
         //max amount (1??? or the FULL INTENSITY) when close
         //almost zero when near to edge
@@ -713,15 +907,21 @@ public class lightIlluminationCalculator : MonoBehaviour
 
 
 
+
+
+
+
+
+
 public class globalLightGenerator1
 {
     private Vector3 vector3;
-    float theRange = -1;
     float theIntensity = 0.85f;
 
-    public globalLightGenerator1(Vector3 vector3 = new Vector3())
+    public globalLightGenerator1(Vector3 vector3 = new Vector3(), float theIntensityIn = 0.85f)
     {
         this.vector3 = vector3;
+        this.theIntensity = theIntensityIn;
     }
     internal void doIt()
     {
@@ -729,17 +929,18 @@ public class globalLightGenerator1
         newObj.transform.position = vector3;
 
         //DirectionalLight globalLight = newObj.AddComponent<DirectionalLight>();
-        Light globalLight = newObj.AddComponent<Light>();
+        Light light = newObj.AddComponent<Light>();
         //globalLight.type = DirectionalLight;
-        globalLight.type = LightType.Directional;
-        globalLight.shadows = LightShadows.Soft;
+        light.type = LightType.Directional;
+        light.intensity = theIntensity;
+        light.shadows = LightShadows.Soft;
 
         //newObj.transform.rotation
         tagging2.singleton.addTag(newObj, tag2.lightSource);
 
         newObj.transform.localRotation = Quaternion.Euler(60, 0f, 0f);
         //Vector3 theRotation = new Vector3(60, 0f, 0f);  ononon, rotation can be found later from the monobehavior component
-        lightIlluminationCalculator.addThisComponent(newObj, theIntensity, theRange);
+        lightIlluminationCalculator.addThisComponent(newObj, theIntensity);
         tagging2.singleton.addToALLzones(newObj);
     }
 }
@@ -768,6 +969,7 @@ public class pointLightGenerator1
         light.type = LightType.Point;
         light.shadows = LightShadows.Soft;
         light.range = theRange;
+        light.intensity = theIntensity;
         //newObj.transform.rotation
 
         //newObj.transform.localRotation = Quaternion.Euler(60, 0f, 0f);
@@ -777,6 +979,58 @@ public class pointLightGenerator1
         lightIlluminationCalculator.addThisComponent(newObj, theIntensity, theRange);
     }
 }
+
+public class spotLightGenerator1
+{
+
+    private Vector3 position;
+    private Vector3 rotation;
+    float widthAngle = 20;
+    float theRange = 20;
+    float theIntensity = 0.85f;
+
+    public spotLightGenerator1(Vector3 positionIn = new Vector3(), Vector3 rotationIn = new Vector3(), float theWidthAngleIn = 20, float theRangeIn = 20, float theIntensityIn = 0.85f)
+    {
+        position = positionIn;
+        rotation = rotationIn;
+        widthAngle = theWidthAngleIn;
+        this.theRange = theRangeIn;
+        this.theIntensity = theIntensityIn;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new GameObject();
+        newObj.transform.position = position;
+        newObj.name = "generated Spot Light";
+        //DirectionalLight globalLight = newObj.AddComponent<DirectionalLight>();
+        Light light = newObj.AddComponent<Light>();
+        //globalLight.type = DirectionalLight;
+        light.type = LightType.Spot;
+        light.shadows = LightShadows.Soft;
+        light.range = theRange;
+        light.intensity = theIntensity;
+        light.spotAngle = widthAngle;
+        //light.innerSpotAngle = theRange;
+        //newObj.transform.rotation
+
+        //newObj.transform.localRotation = Quaternion.Euler(60, 0f, 0f);
+        tagging2.singleton.addTag(newObj, tag2.zoneable);
+        tagging2.singleton.addTag(newObj, tag2.lightSource);
+        //newObj.AddComponent<temporarySetupCollider>();
+
+        newObj.transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+
+        lightIlluminationCalculator.addThisComponent(newObj, theIntensity, theRange, widthAngle);
+    }
+}
+
+
+
+
+
+
+
+
 
 
 public class temporarySetupCollider : MonoBehaviour

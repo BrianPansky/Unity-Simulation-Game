@@ -224,17 +224,31 @@ public class initialGenerator2 : MonoBehaviour
         //          new testNewestFSMGeneratorSoldier(tag2.team2, tag2.defenseSquad, new Vector3(15, 1.5f, 20)).doIt();
         //          new testNewestFSMGeneratorLeader(tag2.team2, new Vector3(215, 1.5f, 20)).doIt();
         //new globalLightGenerator1(new Vector3(5, 15, 10)).doIt();
-        new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(500*0.3f, 1.5f, 500 * 0.3f)).doIt();
-        new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();
-        new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 500 * 0.51f), 20, 0.6f).doIt();
-        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 600 * 0.30f), 100, 0.2f).doIt();
 
-        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 2, 500 * 0.51f));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.31f, 2, 490 * 0.51f));
+
+        new globalLightGenerator1(new Vector3(5, 15, 10),0.006f).doIt();
+
+
+        new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(350*0.3f, 1.5f, 660 * 0.3f)).doIt();
+        //new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();
+        //new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 500 * 0.51f), 20, 0.6f).doIt();
+        //new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 600 * 0.30f), 100, 0.2f).doIt();
+
+        //new spotLightGenerator1(new Vector3(500 * 0.31f, 4, 600 * 0.30f), new Vector3(20, -30, -67), 70, 60, 0.2f).doIt();
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 20, 560 * 0.32f), new Vector3(90, 130, 67), 20, 80, 0.4f).doIt();
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 40, 560 * 0.32f), new Vector3(90, 130, 67), 130, 430, 0.13f).doIt();
+
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 2, 560 * 0.32f), new Vector3(10, 10, 7), 20, 80, 0.4f).doIt();
+
+
+        returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 0, 500 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(610 * 0.2f, 0, 540 * 0.32f));
         returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 2, 500 * 0.5f));
         returnBasicGrabbable(stuffType.meat1, new Vector3(505 * 0.31f, 2, 505 * 0.5f));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 2, 500 * 0.51f));
-        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.31f, 2, 490 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 0, 500 * 0.51f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(590 * 0.2f, 1, 540 * 0.3f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(570 * 0.2f, 1, 540 * 0.31f));
+        returnBasicGrabbable(stuffType.meat1, new Vector3(590 * 0.2f, 1, 520 * 0.3f));
         returnBasicGrabbable(stuffType.meat1, new Vector3(600 * 0.3f, 2, 500 * 0.5f));
         returnBasicGrabbable(stuffType.meat1, new Vector3(625 * 0.31f, 2, 575 * 0.5f));
         returnBasicGrabbable(stuffType.meat1, new Vector3(640 * 0.3f, 2, 570 * 0.51f));

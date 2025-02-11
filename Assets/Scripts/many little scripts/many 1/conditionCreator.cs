@@ -1977,15 +1977,123 @@ public class objectVisibleInFOV : objectCriteria
         //try:
         //      && horizontalAngleToObject < (360-horizontalAngleRange)
 
-        float horizontalAngleToObject = horizontalAngleFinder(theObject);
-        if (horizontalAngleToObject > horizontalAngleRange && horizontalAngleToObject < (360 - horizontalAngleRange)) { return false; }
 
-        float verticalAngleToObject = verticalAngleFinder(theObject);
-        if (verticalAngleToObject > verticalAngleRange && verticalAngleToObject < (360 - verticalAngleRange)) { return false; }
 
+
+
+
+
+        Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position + (theSensoryTransform.forward * 30)), Color.magenta, 20);
+
+        float horizontalAngleToObject = absoluteHorizontalAngleFinder(theObject);
+        Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
+        if (horizontalAngleToObject > horizontalAngleRange)
+        {
+            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            return false;
+        }
+
+        float verticalAngleToObject = absoluteVerticalAngleFinder(theObject);
+        Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
+        if (verticalAngleToObject > verticalAngleRange)
+        {
+            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            return false;
+        }
+
+        Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.green, 20);
 
         return true;
+
+
+
+
+
+
+
+        /*
+        Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position + (theSensoryTransform.forward * 30)), Color.magenta, 20);
+
+        float horizontalAngleToObject = absoluteHorizontalAngleFinder(theObject);
+        Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
+        float verticalAngleToObject = absoluteVerticalAngleFinder(theObject);
+        Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
+
+        Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.blue, 20);
+
+        return true;
+        */
+
+
+
+
+
+
+
+
+
+
+        /*
+        Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position+(theSensoryTransform.forward*30)), Color.magenta, 20);
+
+        float horizontalAngleToObject = horizontalAngleFinder(theObject);
+        Debug.Log("horizontalAngleToObject:  "+ horizontalAngleToObject);
+        if (horizontalAngleToObject > horizontalAngleRange && horizontalAngleToObject < (360 - horizontalAngleRange)) 
+        {
+            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            return false; 
+        }
+
+        float verticalAngleToObject = verticalAngleFinder(theObject);
+        Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
+        if (verticalAngleToObject > verticalAngleRange && verticalAngleToObject < (360 - verticalAngleRange))
+        {
+            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red,20);
+            return false; 
+        }
+
+        Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.green,20);
+
+        return true;
+        */
     }
+
+
+    private float absoluteVerticalAngleFinder(GameObject theObject)
+    {
+        //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
+        //Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+        Vector3 lineBetweenObserverAndInputObject = theObject.transform.position - theSensoryTransform.position;
+
+
+        //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.right);
+
+        if(theAngle < 0) {return - theAngle; }
+
+        return theAngle;
+    }
+
+    private float absoluteHorizontalAngleFinder(GameObject theObject)
+    {
+        //Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
+
+        Vector3 lineBetweenObserverAndInputObject = theObject.transform.position - theSensoryTransform.position;
+
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+            theSensoryTransform.forward,
+            theSensoryTransform.up);
+
+
+        if (theAngle < 0) { return -theAngle; }
+
+        return theAngle;
+    }
+
+
 
 
 
@@ -2001,7 +2109,7 @@ public class objectVisibleInFOV : objectCriteria
         //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
         float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
             theSensoryTransform.forward,
-            theSensoryTransform.up);
+            theSensoryTransform.right);
 
 
         return theAngle;

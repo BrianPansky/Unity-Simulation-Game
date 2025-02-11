@@ -237,7 +237,7 @@ public class visualSensor1 : sensor
             {
                 intensity = detectabilityEvaluator.evaluateObject(thisPart);
                 Debug.Log("intensity:  " + intensity);
-                Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
+                //      Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
 
                 if (intensity < illuminationIntensityThresholdForDetection)
                 {
