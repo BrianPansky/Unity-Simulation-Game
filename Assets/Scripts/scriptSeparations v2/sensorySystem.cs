@@ -179,7 +179,7 @@ public class visualSensor1 : sensor
     //private objectSetGrabber setOfSensedObjects;  //is this a good way to do things???????  buuuut it's "boolean"?  well, ya, a cutoff of evaluation float numbers either adds it here or doesn't.  you don't half-react to a threat....or do you?  if you are unsure WHAT it is, etc.......that's INTERPRETATION, happens LATER.  but does mean we may want to output/store the evaluator float, and any other data, not just the objects
     //public sensoryOutput theOutput;//????
     private beleifs theBeleifs;
-    float illuminationIntensityThresholdForDetection = 0.017f;
+    float illuminationIntensityThresholdForDetection = 0.15f;//0.017f;  //also eventually make it harder to see dark areas if eyes adjusted to sunlight!!!//eventually can lower this if i get "wearing dark clothes" to make a difference?
 
     private tag2 excludeThisTag;
 
@@ -206,7 +206,7 @@ public class visualSensor1 : sensor
         //THEN[if requersted] run some more advanced light / dark / camoflage code[in an "interface" plug -in]
         //    for now, collisions with light - source volumes[like with map zones] and simultaneous distance / line of sight[from mlultiple body parts] to lights AND guard's vision
 
-        List<GameObject> newList = new List<GameObject>();
+        //List<GameObject> newList = new List<GameObject>();
 
 
         foreach (GameObject thisObject in baseSetGrabberBeforeSensing.grab())
@@ -223,7 +223,11 @@ public class visualSensor1 : sensor
 
             //Debug.Log("basicSensingFilterCriteria met");
 
-            if (advancedSensingAdditionalFilterCriteria.evaluateObject(thisObject) == false) { continue; }
+            if (advancedSensingAdditionalFilterCriteria.evaluateObject(thisObject) == false)
+            {
+                theBeleifs.weDetectedThisObject(thisObject); 
+                continue; 
+            }
 
             //Debug.Log("advancedSensingAdditionalFilterCriteria met");
 
@@ -236,22 +240,20 @@ public class visualSensor1 : sensor
             foreach (GameObject thisPart in theStealthArmature)
             {
                 intensity = detectabilityEvaluator.evaluateObject(thisPart);
-                Debug.Log("intensity:  " + intensity);
-                //      Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
+                //Debug.Log("intensity:  " + intensity);
+                //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
 
                 if (intensity < illuminationIntensityThresholdForDetection)
                 {
-
                     continue;
                 }
-                else
-                {
-                    break;
-                }
 
+                //Debug.Log("weDetectedThisObject:  " + thisObject);
+                theBeleifs.weDetectedThisObject(thisObject);
+                break;
             }
             //newList.Add(tagging2.singleton.idPairGrabify(thisObject));
-            theBeleifs.sensoryInput(newList);
+            //theBeleifs.sensoryInput(newList);
         }
     }
 
@@ -277,6 +279,7 @@ public class visualSensor1 : sensor
 public class stealthArmature : MonoBehaviour
 {
     public List<GameObject> theListOfParts = new List<GameObject>();
+    public float simpleSizeOfObject = 0;
 
 
     public static stealthArmature addThisComponent(GameObject theObject, GameObject part1)
@@ -333,6 +336,29 @@ public class stealthArmature : MonoBehaviour
         return theComponent;
     }
 
+
+    internal float calculateSizeOfObject()
+    {
+        //just take average of distance between armature bits!
+        //can use this to make larger objects more likely to be noticed!
+        //although that fails if only a tiny part is illuminated
+        //so i'll have to "average" the illumination.  and i can use THIS SIZE to help that calculation!
+        //or something similar to this.
+
+        int numberOfComparisons = 0;
+        float totalDistance = 0f;
+        foreach (GameObject thisObject1 in theListOfParts)
+        {
+            foreach (GameObject thisObject2 in theListOfParts)
+            {
+                if(thisObject1 == thisObject2) { continue; }
+                totalDistance += (thisObject1.transform.position - thisObject2.transform.position).magnitude;
+                numberOfComparisons++;
+            }
+        }
+
+        return totalDistance/numberOfComparisons;
+    }
 }
 
 

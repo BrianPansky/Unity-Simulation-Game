@@ -22,17 +22,52 @@ public class planningAndImagination : MonoBehaviour
 
 }
 
+public class makeImaginary
+{
+    //is this a bad idea?  will it take up memory????  or not if i don't assign it to a variable? 
+    public makeImaginary(GameObject theObject)
+    {
+        int Layer = LayerMask.NameToLayer("imagination"); //eleven
+        //theObject.layer = Layer;
+        SetLayerRecursively(theObject, Layer);
+    }
 
+    public static void SetLayerRecursively(GameObject theObject, int layerNumber)
+    {
+        //from https://discussions.unity.com/t/change-gameobject-layer-at-run-time-wont-apply-to-child/381215/10
+        
+        if (theObject == null) return;
+        foreach (Transform trans in theObject.GetComponentsInChildren<Transform>(true))
+        {
+            trans.gameObject.layer = layerNumber;
+        }
+    }
+}
 
 
 public class beleifs : MonoBehaviour
 {
     public updateableSetGrabber theSet;
+    public updateableSetGrabber threatMarkerSet;
+    //public Dictionary<criteria, thingBeleif> thingBeleifsByCriteria = new Dictionary<Type, thingBeleif>();
+
 
     internal static beleifs addThisComponent(GameObject theObject)
     {
         beleifs theComponent = theObject.AddComponent<beleifs>();
-        theComponent.theSet = new beleifSet1();
+        //theComponent.theSet = new threatBeleifSet1(theObject);
+        theComponent.threatMarkerSet = new threatBeleifSet1(theObject);
+
+        return theComponent;
+    }
+
+    internal static beleifs ensureComponent(GameObject theObject)
+    {
+        beleifs theComponent = theObject.GetComponent<beleifs>();
+        if (theComponent == null)
+        {
+            theComponent = beleifs.addThisComponent(theObject);
+        }
 
         return theComponent;
     }
@@ -42,25 +77,79 @@ public class beleifs : MonoBehaviour
         //update a "set grabber" with this
         //buuut....that's not how set grabbers work......
         //"updatable set grabber"???
-        theSet.updateSet(inputList);
+        threatMarkerSet.updateSet(inputList);
     }
+
+    internal void weDetectedThisObject(GameObject thisObject)//or do we want to have a class/interface called "beleif", and we just add or update a "beleif" to a list or something?????
+    {
+        threatMarkerSet.updateSetWithOneObject(thisObject);
+    }
+
+}
+
+public class thingBeleif
+{
+    objectGen thingRecreator;
+    GameObject theShadowObjectOrMarker;
+
 }
 
 
-public class beleifSet1 : updateableSetGrabber
+
+
+
+
+public class threatBeleifSet1 : updateableSetGrabber
 {
-    Dictionary<objectIdPair, condition> theForgetConditions = new Dictionary<objectIdPair, condition>();
+    //Dictionary<objectIdPair, condition> theForgetConditions = new Dictionary<objectIdPair, condition>();
+    Dictionary<objectIdPair, GameObject> idPairsLinkedToShadowObjects = new Dictionary<objectIdPair, GameObject>();
+
+    objectCriteria theCriteria;  //criteria for unclusion in this beleif set
+
+    public threatBeleifSet1(tag2 teamIn)
+    {
+
+        objectCriteria theThreatObjectCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(teamIn))
+            );
+
+        theCriteria = theThreatObjectCriteria;
+    }
+    public threatBeleifSet1(GameObject theObject)
+    {
+
+        tag2 team = tagging2.singleton.teamOfObject(theObject);
+
+        objectCriteria theThreatObjectCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        theCriteria = theThreatObjectCriteria;
+    }
 
     public override List<GameObject> grab()
     {
         forgetListItemsIfNecessary();
-        return convertToObjects(theStoredSet);
+        return allShadowObjects();//convertToObjects(theStoredSet);
+
+    }
+
+    private List<GameObject> allShadowObjects()
+    {
+        List < GameObject > newList = new List<GameObject>();
+        foreach (objectIdPair thisID in idPairsLinkedToShadowObjects.Keys)
+        {
+            newList.Add(idPairsLinkedToShadowObjects[thisID]);
+        }
+        return newList;
     }
 
     private void forgetListItemsIfNecessary()
     {
         //ummm do this later
-        foreach (objectIdPair thisID in theStoredSet)
+        //foreach (objectIdPair thisID in theStoredSet)
         {
             //if (theForgetConditions.Keys.Contains(thisID)) { continue; }
 
@@ -71,11 +160,48 @@ public class beleifSet1 : updateableSetGrabber
     {
         foreach (objectIdPair thisID in convertToIds(inputList))
         {
-            if (theStoredSet.Contains(thisID)){ continue; }
-
-            theStoredSet.Add(thisID);
+            updateSetWithOneID(thisID, theCriteria);
         }
     }
+
+    private void updateSetWithOneID(objectIdPair thisID, objectCriteria theCriteria)
+    {
+        //if (theStoredSet.Contains(thisID)){ continue; }
+
+        //theStoredSet.Add(thisID);
+
+        //Debug.Log("updateSetWithOneID:  " + thisID.theObject);
+        if (theCriteria.evaluateObject(thisID.theObject) == false)
+        {
+            //Debug.Log("criteria NOT met"); 
+            return; }
+
+        //Debug.Log("criteria met:  " + thisID.theObject);
+        ensureDictionaryEntry(thisID);
+
+        updateTransform(thisID.theObject, idPairsLinkedToShadowObjects[thisID]);
+    }
+
+    private void ensureDictionaryEntry(objectIdPair thisID)
+    {
+        if (idPairsLinkedToShadowObjects.ContainsKey(thisID)) { return; }
+
+        idPairsLinkedToShadowObjects[thisID] = new GameObject();
+    }
+
+
+    internal override void updateSetWithOneObject(GameObject thisObject)
+    {
+        updateSetWithOneID(tagging2.singleton.idPairGrabify(thisObject), theCriteria);
+    }
+
+
+    private void updateTransform(GameObject realObject, GameObject shadowObject)
+    {
+        shadowObject.transform.position = realObject.transform.position;
+        shadowObject.transform.rotation = realObject.transform.rotation;
+    }
+
 }
 
 
@@ -109,6 +235,7 @@ public class FSM
     internal Dictionary<condition, FSM> switchBoard = new Dictionary<condition, FSM>();
 
     internal List<state> stuffToDoInThisState = new List<state>();
+    public string name;
 
     public FSM()
     {
@@ -197,9 +324,96 @@ public interface state
     //regenerate must have all of the "universal" code/classes so that the particular NPC can be PLUGGED IN, a new NPC every time we need to
     void setup(GameObject theObjectDoingTheEnactionIn);
     state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn);
+
+
+    //example:
+    /*
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new doSimplePatrolState1();
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+        GameObject p1 = new GameObject();
+        p1.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, 6);
+        GameObject p2 = new GameObject();
+        p2.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, 16);
+        GameObject p3 = new GameObject();
+        p3.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, -6);
+        GameObject p4 = new GameObject();
+        p4.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, -16);
+        theListOfLocationMarkers.Add(p1);
+        theListOfLocationMarkers.Add(p2);
+        theListOfLocationMarkers.Add(p3);
+        theListOfLocationMarkers.Add(p4);
+
+
+
+        makeProxConditionForFirstItemOnList();
+    }
+
+    */
 }
 
 
+/*
+public class repeaterState : state
+{
+    //basically the states of "OldFSM"
+
+    //internal List<repeater> repeatingPlans = new List<repeater>();
+    repeater theRepeater;
+
+    public void doThisThing()
+    {
+        /*
+        foreach (repeater plan in repeatingPlans)
+        {
+            //Debug.Log("plan:  " + plan);
+            plan.doThisThing();
+        }
+        
+        theRepeater.doThisThing();
+    }
+
+
+    /*
+    public void refillAllRepeaters()
+    {
+        foreach (repeater plan in repeatingPlans)
+        {
+            plan.refill();
+        }
+    }
+    
+
+
+
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        //theRepeater.refill();
+        state newState = new repeaterState(theRepeater);
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        //wait, we can't do this with repeaters.....that's why i made new fsm system....
+        throw new NotImplementedException();
+    }
+
+
+}
+
+*/
 
 
 /*
@@ -433,6 +647,7 @@ public class followAdvancedCommands : state
     */
 }
 
+
 public class giveSquadXAdvancedCommandY : state
 {
     generateFSM commandFSMToGive;
@@ -495,7 +710,36 @@ public class giveSquadXAdvancedCommandY : state
 }
 
 
+public class goToTargetPickerState : state
+{
+    GameObject theObjectDoingTheEnaction;
+    navAgent theNavAgent;
+    targetPicker theTargetPicker;
 
+    public goToTargetPickerState(targetPicker theTargetPickerIn)
+    {
+        theTargetPicker = theTargetPickerIn;
+    }
+
+
+    public void doThisThing()
+    {
+        theNavAgent.enact(new inputData(theTargetPicker.pickNext().realPositionOfTarget()));
+    }
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new goToTargetPickerState(theTargetPicker);
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+    }
+}
 
 
 

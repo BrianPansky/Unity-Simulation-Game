@@ -588,7 +588,6 @@ public class genGen : MonoBehaviour
         return ensuredThing;
     }
 
-
     public interactable2 ensureInteractable2(GameObject theObject)
     {
         interactable2 theComponent = theObject.GetComponent<interactable2>();
@@ -600,6 +599,21 @@ public class genGen : MonoBehaviour
         return theComponent;
     }
 
+    /*
+    public beleifs ensureBeleifsComponent(GameObject theObject)
+    {
+        beleifs theComponent = theObject.GetComponent<beleifs>();
+        if (theComponent == null)
+        {
+            theComponent = theObject.AddComponent<beleifs>();
+        }
+
+        return theComponent;
+    }
+    */
+
+
+
     public void ensureSafetyForDeletion(GameObject theObject)
     {
         if (theObject.GetComponent<safeDestroy>() == null)
@@ -608,6 +622,188 @@ public class genGen : MonoBehaviour
         }
     }
 }
+
+
+
+
+public class testGuardPursueLastKnownLocation
+{
+
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testGuardPursueLastKnownLocation(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+        //newObj.AddComponent<advancedRtsModule>();
+        beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+
+        new FSMgen(newObj, new pursueThreatLastKnownLocation());
+        //          new FSMgen(newObj, new shootThreatOnSight());
+
+    }
+}
+
+internal class pursueThreatLastKnownLocation : simpleOneStateAndReturn
+{
+    GameObject theObjectDoingTheEnaction;
+    float targetDetectionRange;
+    private objectSetGrabber threatSet()
+    {
+        return theObjectDoingTheEnaction.GetComponent<beleifs>().threatMarkerSet;
+    }
+
+
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //hmm, this is still oddly clunky and confusing to make........how to make it easier to make?
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new goToTargetPickerState(targetPickerFromSet(threatSet()));
+        
+        FSM goToThreat = new FSM(stateSetup.regenerateAndSetup(theObjectDoingTheEnaction));
+
+        goToThreat.name = "feet, goToThreat";
+        return goToThreat;
+    }
+
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        return goToPreyCondition();
+    }
+
+    private condition goToPreyCondition()
+    {
+
+        //Debug.Log("stuffTypeX:  " + stuffTypeX);
+        objectSetGrabber theSet = threatSet();
+
+        condition switchCondition = new isThereAtLeastOneObjectInSet(theSet);// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return switchCondition;
+    }
+
+    
+
+
+
+
+    /*
+    private condition switchToKillPreyConditionHands()
+    {
+        //new stickyCondition(switchCondition2, 90)
+        //condition switchCondition2 = new canSeeNumericalVariable(theObjectDoingTheEnaction, numericalVariable.health);
+
+
+
+        //ok this doesn't work yet because it doesn't ever 'return' "unmet" AKA "FALSE" when there is no target, 
+        //beacuse target picker has agnostic calc, ummmm, STUFF..........
+        //soooo, need to nest? FIRST see if there IS a target that is returned from picker[or one that meets criteria].
+        //.if so, THEN evaluate it on proximity criteria.  and [for the CONDITION] return bool result
+        //      condition killPreyCondition = new proximityFromTargetPicker(newObj, killPreyTargetPicker());
+
+
+
+        objectCriteria prox = new proximityCriteriaBool(newObj, 0);
+        condition killPreyCondition = new stickyCondition(new isThereAtLeastOneObjectInSet(new setOfAllObjectThatMeetCriteria(preySet(), prox)), 0);
+
+
+        return killPreyCondition;
+    }
+    */
+    private targetPicker targetPickerFromSet(objectSetGrabber theWiderSet)
+    {
+        targetPicker theTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theWiderSet);
+
+        return theTargetPicker;
+    }
+
+}
+
+public class testStealthDetectorGuardWithBeleifMarkers
+{
+
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testStealthDetectorGuardWithBeleifMarkers(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.transform.position = vector3;
+        //newObj.AddComponent<advancedRtsModule>();
+        beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+
+        new FSMgen(newObj, new testBeleifMarkerSet());
+
+    }
+}
+
+
+internal class testBeleifMarkerSet : state
+{
+    beleifs theBeleifs;
+
+    public void doThisThing()
+    {
+        Debug.Assert(theBeleifs != null);
+        Debug.Assert(theBeleifs.threatMarkerSet != null);
+        Debug.Assert(theBeleifs.threatMarkerSet.grab() != null);
+        Debug.Log("theBeleifs.threatMarkerSet.grab().Count:  " + theBeleifs.threatMarkerSet.grab().Count);
+        foreach (var obj in theBeleifs.threatMarkerSet.grab())
+        {
+            Debug.DrawLine(theBeleifs.gameObject.transform.position, obj.transform.position, Color.blue, 0.1f);
+        }
+    }
+
+    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new testBeleifMarkerSet();
+        newState.setup(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void setup(GameObject theObjectDoingTheEnactionIn)
+    {
+        theBeleifs = beleifs.ensureComponent(theObjectDoingTheEnactionIn);//genGen.singleton.ensureBeleifsComponent(theObjectDoingTheEnactionIn);
+    }
+}
+
+
+
+
+
+
 
 
 public class proximityCalculator
@@ -1314,6 +1510,14 @@ public class FSMgen
 
         addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
         */
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1)
+    {
+        theBaseFSM = new FSM(); //idle
+        theBaseFSM.name = "idle";
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
         addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
     }
 

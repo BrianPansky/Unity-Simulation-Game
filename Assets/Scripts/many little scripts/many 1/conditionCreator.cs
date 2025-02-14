@@ -1983,25 +1983,25 @@ public class objectVisibleInFOV : objectCriteria
 
 
 
-        Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position + (theSensoryTransform.forward * 30)), Color.magenta, 20);
+        //Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position + (theSensoryTransform.forward * 30)), Color.magenta, 20);
 
         float horizontalAngleToObject = absoluteHorizontalAngleFinder(theObject);
-        Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
+        //Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
         if (horizontalAngleToObject > horizontalAngleRange)
         {
-            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
             return false;
         }
 
         float verticalAngleToObject = absoluteVerticalAngleFinder(theObject);
-        Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
+        //Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
         if (verticalAngleToObject > verticalAngleRange)
         {
-            Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
             return false;
         }
 
-        Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.green, 20);
+        //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.green, 20);
 
         return true;
 

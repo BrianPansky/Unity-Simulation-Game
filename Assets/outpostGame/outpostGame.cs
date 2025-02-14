@@ -333,6 +333,8 @@ public class makeTestAircraft
         */
 
         GameObject aircraft = new GameObject();
+
+
         genGen.singleton.addArrowForward(aircraft);
         aircraft.transform.position = thisPoint;// + new Vector3(0, -5, 0);
         aircraft.transform.localScale = new Vector3(28, 28, 28);
@@ -350,6 +352,7 @@ public class makeTestAircraft
 
 
         testAircraftComponent.addThisComponent(aircraft);
+        new makeImaginary(aircraft);
     }
 }
 

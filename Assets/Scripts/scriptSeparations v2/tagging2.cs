@@ -464,6 +464,30 @@ public class tagging2 : MonoBehaviour
         }
     }
 
+    internal tag2 teamOfObject(GameObject theObject)
+    {
+        //objectIdPair theID = idPairGrabify(theObject);
+
+        foreach (tag2 thisTag in allTagsOnObject(theObject))
+        {
+            if(teamColors.ContainsKey(thisTag) == false) { continue; }
+
+            return thisTag;
+        }
+
+        /*
+        foreach (tag2 team in teamColors.Keys)
+        {
+            if (objectsWithTag[team].Contains(theID))
+            {
+                return team;
+            }
+        }
+        */
+        Debug.Log("error, no team found on object!!!!!!!!!");
+
+        return tag2.errorYouDidntSetEnumTypeForTAG2;
+    }
 }
 
 public class find
@@ -1111,6 +1135,7 @@ public abstract class updateableSetGrabber : objectSetGrabber
     internal List<objectIdPair> theStoredSet = new List<objectIdPair>();
 
     public abstract void updateSet(List<GameObject> inputList);
+    internal abstract void updateSetWithOneObject(GameObject thisObject);
 
     internal List<objectIdPair> convertToIds(List<GameObject> inputList)
     {
@@ -1120,6 +1145,7 @@ public abstract class updateableSetGrabber : objectSetGrabber
     {
         return tagging2.singleton.listInObjectFormat(inputList);
     }
+
 }
 
 
