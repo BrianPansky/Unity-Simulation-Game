@@ -47,16 +47,17 @@ public class makeImaginary
 
 public class beleifs : MonoBehaviour
 {
-    public updateableSetGrabber theSet;
-    public updateableSetGrabber threatMarkerSet;
+    //public updateableSetGrabber theSet;
+    //public updateableSetGrabber threatMarkerSet;
     //public Dictionary<criteria, thingBeleif> thingBeleifsByCriteria = new Dictionary<Type, thingBeleif>();
-
+    perceptions thePerceptions;
+    public List<updateableSetGrabber> beleifObjectSets = new List<updateableSetGrabber>();
 
     internal static beleifs addThisComponent(GameObject theObject)
     {
         beleifs theComponent = theObject.AddComponent<beleifs>();
         //theComponent.theSet = new threatBeleifSet1(theObject);
-        theComponent.threatMarkerSet = new threatBeleifSet1(theObject);
+        //theComponent.threatMarkerSet = new threatBeleifSet1(theObject);
 
         return theComponent;
     }
@@ -72,6 +73,40 @@ public class beleifs : MonoBehaviour
         return theComponent;
     }
 
+
+
+    /*
+    void Update()
+    {
+        //threatMarkerSet.updateSet(thePerceptions.setOfAllCurrentlySensedObjects.grab());  //bit inefficient conversion
+
+        //List<objectIdPair> theIDs = thePerceptions.setOfAllCurrentlySensedObjects.theStoredSet;//grab();
+
+        foreach (var beleifSet in beleifObjectSets)
+        {
+            beleifSet.updateSet(thePerceptions.setOfAllCurrentlySensedObjects.theStoredSet);
+        }
+    }
+    */
+
+    internal void weDetectedThisObject(GameObject thisObject)
+    {
+
+        foreach (var beleifSet in beleifObjectSets)
+        {
+            beleifSet.updateSetWithOneObject(thisObject);
+        }
+    }
+
+    internal void sensoryInput(List<GameObject> inputList)
+    {
+        foreach (var beleifSet in beleifObjectSets)
+        {
+            beleifSet.updateSet(inputList);
+        }
+    }
+
+    /*
     internal void sensoryInput(List<GameObject> inputList)
     {
         //update a "set grabber" with this
@@ -84,8 +119,98 @@ public class beleifs : MonoBehaviour
     {
         threatMarkerSet.updateSetWithOneObject(thisObject);
     }
+    */
 
 }
+
+public class objectsMeetingCriteriaBeleifSet1 : updateableSetGrabber
+{
+    //Dictionary<objectIdPair, condition> theForgetConditions = new Dictionary<objectIdPair, condition>();
+    Dictionary<objectIdPair, GameObject> idPairsLinkedToShadowObjects = new Dictionary<objectIdPair, GameObject>();
+
+    objectCriteria theCriteria;  //criteria for inclusion in this beleif set
+    threatPerceptionSet1 objectsSeenThisFrame;
+
+    public objectsMeetingCriteriaBeleifSet1(GameObject theObjectWithBeleifs, objectCriteria theCriteriaIn)
+    {
+        theCriteria = theCriteriaIn;
+        beleifs theBeleifs = theObjectWithBeleifs.GetComponent<beleifs>();
+        theBeleifs.beleifObjectSets.Add(this);
+    }
+
+    public override List<GameObject> grab()
+    {
+        return allShadowObjects();
+    }
+
+    private List<GameObject> allShadowObjects()
+    {
+        List<GameObject> newList = new List<GameObject>();
+        foreach (objectIdPair thisID in idPairsLinkedToShadowObjects.Keys)
+        {
+            newList.Add(idPairsLinkedToShadowObjects[thisID]);
+        }
+        return newList;
+    }
+
+
+    public override void updateSet(List<GameObject> inputList)
+    {
+        foreach (objectIdPair thisID in convertToIds(inputList))
+        {
+            updateSetWithOneID(thisID, theCriteria);
+        }
+    }
+    public override void updateSet(List<objectIdPair> inputList)
+    {
+        foreach (objectIdPair thisID in inputList)
+        {
+            updateSetWithOneID(thisID, theCriteria);
+        }
+    }
+
+    private void updateSetWithOneID(objectIdPair thisID, objectCriteria theCriteria)
+    {
+        //if (theStoredSet.Contains(thisID)){ continue; }
+
+        //theStoredSet.Add(thisID);
+
+        //Debug.Log("updateSetWithOneID:  " + thisID.theObject);
+        if (theCriteria.evaluateObject(thisID.theObject) == false)
+        {
+            //Debug.Log("criteria NOT met"); 
+            return;
+        }
+
+        //Debug.Log("criteria met:  " + thisID.theObject);
+        ensureDictionaryEntry(thisID);
+
+        updateTransform(thisID.theObject, idPairsLinkedToShadowObjects[thisID]);
+    }
+
+    private void ensureDictionaryEntry(objectIdPair thisID)
+    {
+        if (idPairsLinkedToShadowObjects.ContainsKey(thisID)) { return; }
+
+        idPairsLinkedToShadowObjects[thisID] = new GameObject();
+    }
+
+
+    internal override void updateSetWithOneObject(GameObject thisObject)
+    {
+        updateSetWithOneID(tagging2.singleton.idPairGrabify(thisObject), theCriteria);
+    }
+
+
+    private void updateTransform(GameObject realObject, GameObject shadowObject)
+    {
+        shadowObject.transform.position = realObject.transform.position;
+        shadowObject.transform.rotation = realObject.transform.rotation;
+    }
+
+}
+
+
 
 public class thingBeleif
 {
@@ -99,12 +224,22 @@ public class thingBeleif
 
 
 
+
+
+
+
+
+
+
+
+
 public class threatBeleifSet1 : updateableSetGrabber
 {
     //Dictionary<objectIdPair, condition> theForgetConditions = new Dictionary<objectIdPair, condition>();
     Dictionary<objectIdPair, GameObject> idPairsLinkedToShadowObjects = new Dictionary<objectIdPair, GameObject>();
 
-    objectCriteria theCriteria;  //criteria for unclusion in this beleif set
+    objectCriteria theCriteria;  //criteria for inclusion in this beleif set
+    threatPerceptionSet1 objectsSeenThisFrame;
 
     public threatBeleifSet1(tag2 teamIn)
     {
@@ -202,6 +337,10 @@ public class threatBeleifSet1 : updateableSetGrabber
         shadowObject.transform.rotation = realObject.transform.rotation;
     }
 
+    public override void updateSet(List<objectIdPair> inputList)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
@@ -271,15 +410,17 @@ public class FSM
         return this;
     }
 
+    
     internal void setup(GameObject gameObject)
     {
         //so, setup all states, and all other linked FSMs?  BUT THAT'S AN INFINITE LOOP!
         //soooo ONLY set up THIS FSM, the others need to be set up.......some other time........somehow....not sure how that will work....
         foreach(var thisState in stuffToDoInThisState)
         {
-            thisState.setup(gameObject);
+            thisState.myConstructor(gameObject);
         }
     }
+    
 
     private FSM firstMetSwitchtCondition()
     {
@@ -322,20 +463,20 @@ public interface state
 
     //setup should do most of constructor?  anything PARTICUALR to a specific NPC
     //regenerate must have all of the "universal" code/classes so that the particular NPC can be PLUGGED IN, a new NPC every time we need to
-    void setup(GameObject theObjectDoingTheEnactionIn);
-    state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn);
+    void myConstructor(GameObject theObjectDoingTheEnactionIn);
+    state reConstructor(GameObject theObjectDoingTheEnactionIn);
 
 
     //example:
     /*
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         state newState = new doSimplePatrolState1();
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
         theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
@@ -396,15 +537,15 @@ public class repeaterState : state
 
 
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         //theRepeater.refill();
         state newState = new repeaterState(theRepeater);
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         //wait, we can't do this with repeaters.....that's why i made new fsm system....
         throw new NotImplementedException();
@@ -426,12 +567,12 @@ public class giveAdvancedRTSCommands : state
         giveAdvancedCommandToMembersOfObjectSet(commandFSMToGive, unitsToGiveOrdersTo);
     }
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         throw new NotImplementedException();
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         throw new NotImplementedException();
     }
@@ -497,14 +638,14 @@ public class doSimplePatrolState1 : state
         theNavAgent.enact(new inputData(theListOfLocationMarkers[0]));
     }
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         state newState = new doSimplePatrolState1();
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
         theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
@@ -609,7 +750,7 @@ public class followAdvancedCommands : state
         }
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         //Debug.Log("----------------------------  setup");
         //  OH WOW THERE'S MY ERROR!  I CAN'T BELEIVE IT DIDN"T WARN ME I CREATED A LOCAL VARIABLE WITH SAME NAME AS ANOTHER VARIABLE IN THIS CLASS AAAAAAAAA:   advancedRtsModule theComponent = theObjectDoingTheEnactionIn.GetComponent<advancedRtsModule>();
@@ -624,11 +765,11 @@ public class followAdvancedCommands : state
         */
     }
     
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
-        //Debug.Log("----------------------------  88888888888888 just in case, regenerateAndSetup");
+        //Debug.Log("----------------------------  88888888888888 just in case, reConstructor");
         state newState = new followAdvancedCommands();
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
@@ -671,10 +812,10 @@ public class giveSquadXAdvancedCommandY : state
     }
 
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         state newState = new giveSquadXAdvancedCommandY(team,squad, commandFSMToGive);
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
@@ -683,7 +824,7 @@ public class giveSquadXAdvancedCommandY : state
         giveAdvancedCommandToMembersOfObjectSet(commandFSMToGive, unitsToGiveOrdersTo);
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         objectCriteria theCriteria = new objectMeetsAllCriteria(
             new objectHasTag(squad),
@@ -727,14 +868,14 @@ public class goToTargetPickerState : state
         theNavAgent.enact(new inputData(theTargetPicker.pickNext().realPositionOfTarget()));
     }
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         state newState = new goToTargetPickerState(theTargetPicker);
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
         theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();

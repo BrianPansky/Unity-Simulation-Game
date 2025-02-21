@@ -170,6 +170,7 @@ public interface sensor
 
 public class visualSensor1 : sensor
 {
+    float illuminationIntensityThresholdForDetection = 0.15f;//0.017f;  //also eventually make it harder to see dark areas if eyes adjusted to sunlight!!!//eventually can lower this if i get "wearing dark clothes" to make a difference?
     private Transform theVisualSenseApparatus;  //hmmm, should be built-in to the criteria etc?
     
     public objectSetGrabber baseSetGrabberBeforeSensing;  //just a list to "whittle down", sort, etc
@@ -179,8 +180,8 @@ public class visualSensor1 : sensor
     //private objectSetGrabber setOfSensedObjects;  //is this a good way to do things???????  buuuut it's "boolean"?  well, ya, a cutoff of evaluation float numbers either adds it here or doesn't.  you don't half-react to a threat....or do you?  if you are unsure WHAT it is, etc.......that's INTERPRETATION, happens LATER.  but does mean we may want to output/store the evaluator float, and any other data, not just the objects
     //public sensoryOutput theOutput;//????
     private beleifs theBeleifs;
-    float illuminationIntensityThresholdForDetection = 0.15f;//0.017f;  //also eventually make it harder to see dark areas if eyes adjusted to sunlight!!!//eventually can lower this if i get "wearing dark clothes" to make a difference?
-
+    private perceptions thePerceptions;
+    
     private tag2 excludeThisTag;
 
     public visualSensor1(GameObject theObject, beleifs theBeleifsIn, tag2 excludeThisTagIn, float theVisualRangeIn = 60f)
@@ -188,6 +189,7 @@ public class visualSensor1 : sensor
         theVisualSenseApparatus = theObject.transform;
         excludeThisTag = excludeThisTagIn;
         theBeleifs = theBeleifsIn;
+        thePerceptions = theObject.GetComponent<perceptions>();
         baseSetGrabberBeforeSensing = new setOfAllObjectsInZone(theObject);
         basicSensingFilterCriteria = new objectMeetsAllCriteria(
             new reverseCriteria(new objectHasTag(excludeThisTagIn)),
@@ -206,7 +208,7 @@ public class visualSensor1 : sensor
         //THEN[if requersted] run some more advanced light / dark / camoflage code[in an "interface" plug -in]
         //    for now, collisions with light - source volumes[like with map zones] and simultaneous distance / line of sight[from mlultiple body parts] to lights AND guard's vision
 
-        //List<GameObject> newList = new List<GameObject>();
+        List<GameObject> newList = new List<GameObject>();
 
 
         foreach (GameObject thisObject in baseSetGrabberBeforeSensing.grab())
@@ -225,7 +227,9 @@ public class visualSensor1 : sensor
 
             if (advancedSensingAdditionalFilterCriteria.evaluateObject(thisObject) == false)
             {
-                theBeleifs.weDetectedThisObject(thisObject); 
+                //theBeleifs.weDetectedThisObject(thisObject);
+                //thePerceptions.weDetectedThisObject(thisObject);
+                newList.Add(thisObject);
                 continue; 
             }
 
@@ -249,12 +253,17 @@ public class visualSensor1 : sensor
                 }
 
                 //Debug.Log("weDetectedThisObject:  " + thisObject);
-                theBeleifs.weDetectedThisObject(thisObject);
+                //theBeleifs.weDetectedThisObject(thisObject);
+                //thePerceptions.weDetectedThisObject(thisObject);
+                newList.Add(thisObject);
                 break;
             }
             //newList.Add(tagging2.singleton.idPairGrabify(thisObject));
             //theBeleifs.sensoryInput(newList);
         }
+
+        thePerceptions.sensoryInput(newList);
+        theBeleifs.sensoryInput(newList);
     }
 
     private List<GameObject> getStealthArmature(GameObject thisObject)
@@ -273,6 +282,169 @@ public class visualSensor1 : sensor
         return newList;
     }
 }
+
+
+
+
+
+public class perceptions : MonoBehaviour
+{
+    //public updateableSetGrabber theSet;
+    //public updateableSetGrabber threatPerceptionSet;
+    public updateableSetGrabber setOfAllCurrentlySensedObjects;
+
+
+
+    internal static perceptions addThisComponent(GameObject theObject)
+    {
+        perceptions theComponent = theObject.AddComponent<perceptions>();
+        //theComponent.theSet = new threatBeleifSet1(theObject);
+        //theComponent.threatPerceptionSet = new threatPerceptionSet1(theObject);
+        theComponent.setOfAllCurrentlySensedObjects = new perceptionSet1();
+
+
+        return theComponent;
+    }
+
+    internal static perceptions ensureComponent(GameObject theObject)
+    {
+        perceptions theComponent = theObject.GetComponent<perceptions>();
+        if (theComponent == null)
+        {
+            theComponent = perceptions.addThisComponent(theObject);
+        }
+
+        return theComponent;
+    }
+
+    internal void sensoryInput(List<GameObject> inputList)
+    {
+        //threatPerceptionSet.updateSet(inputList);
+        setOfAllCurrentlySensedObjects.updateSet(inputList);
+    }
+
+    internal void weDetectedThisObject(GameObject thisObject)//or do we want to have a class/interface called "beleif", and we just add or update a "beleif" to a list or something?????
+    {
+        //threatPerceptionSet.updateSetWithOneObject(thisObject);
+        //hmm how to reset the list each frame......... setOfAllCurrentlySensedObjects.updateSetWithOneObject(thisObject);
+    }
+}
+
+
+
+public class perceptionSet1 : updateableSetGrabber
+{
+    public override List<GameObject> grab()
+    {
+        return convertToObjects(theStoredSet);
+
+    }
+    public override void updateSet(List<GameObject> inputList)
+    {
+        //and RESET
+        theStoredSet = convertToIds(inputList);
+    }
+
+    public override void updateSet(List<objectIdPair> inputList)
+    {
+        theStoredSet = inputList;
+    }
+
+    internal override void updateSetWithOneObject(GameObject thisObject)
+    {
+        theStoredSet.Add(tagging2.singleton.idPairGrabify(thisObject));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class threatPerceptionSet1 : updateableSetGrabber
+{
+    objectCriteria theCriteria;  //criteria for inclusion in this set
+
+    public threatPerceptionSet1(tag2 teamIn)
+    {
+
+        objectCriteria theThreatObjectCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(teamIn))
+            );
+
+        theCriteria = theThreatObjectCriteria;
+    }
+    public threatPerceptionSet1(GameObject theObject)
+    {
+
+        tag2 team = tagging2.singleton.teamOfObject(theObject);
+
+        objectCriteria theThreatObjectCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        theCriteria = theThreatObjectCriteria;
+    }
+
+    public override List<GameObject> grab()
+    {
+        return convertToObjects(theStoredSet);
+
+    }
+    public override void updateSet(List<GameObject> inputList)
+    {
+        foreach (objectIdPair thisID in convertToIds(inputList))
+        {
+            updateSetWithOneID(thisID, theCriteria);
+        }
+    }
+
+    private void updateSetWithOneID(objectIdPair thisID, objectCriteria theCriteria)
+    {
+        //if (theStoredSet.Contains(thisID)){ continue; }
+
+        //theStoredSet.Add(thisID);
+
+        //Debug.Log("updateSetWithOneID:  " + thisID.theObject);
+        if (theCriteria.evaluateObject(thisID.theObject) == false)
+        {
+            //Debug.Log("criteria NOT met"); 
+            return;
+        }
+
+        //Debug.Log("criteria met:  " + thisID.theObject);
+        theStoredSet.Add(thisID);
+    }
+
+    internal override void updateSetWithOneObject(GameObject thisObject)
+    {
+        updateSetWithOneID(tagging2.singleton.idPairGrabify(thisObject), theCriteria);
+    }
+
+    public override void updateSet(List<objectIdPair> inputList)
+    {
+        foreach (objectIdPair thisID in inputList)
+        {
+            updateSetWithOneID(thisID, theCriteria);
+        }
+    }
+}
+
+
+
+
+
 
 
 

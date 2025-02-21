@@ -645,15 +645,267 @@ public class testGuardPursueLastKnownLocation
         newObj.transform.position = vector3;
         //newObj.AddComponent<advancedRtsModule>();
         beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        perceptions.addThisComponent(newObj);
+
         sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
 
         tagging2.singleton.addTag(newObj, team);
         tagging2.singleton.addTag(newObj, squad);
 
+        addWeapon(newObj, weaponMaker(1, 40, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
 
-        new FSMgen(newObj, new pursueThreatLastKnownLocation());
-        //          new FSMgen(newObj, new shootThreatOnSight());
+        new FSMgen(newObj, new pursueThreatLastKnownLocation(team));
+        new FSMgen(newObj, new equipIntertypeXFSM(interType.peircing),new interactUsingInterTypeXOnTargetYPlugin(interType.peircing,team));
 
+    }
+
+
+
+    private void addWeapon(GameObject theObject, objectGen theWeaponIn)
+    {
+        inventory1 theirInventory = theObject.GetComponent<inventory1>();
+        GameObject gun = theWeaponIn.generate();
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, theObject);
+
+    }
+    objectGen weaponMaker(float magnitudeOfInteractionIn, int firingRateIn, float projectileSpeedIn, float projectileSizeIn, bool sdOnCollisionIn = true, int levelIn = 0, float gunHeightIn = 1, float gunWidthIn = 1, float gunLengthIn = 1)
+    {
+        return new paintByNumbersGun1(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn);
+    }
+
+}
+
+internal class interactUsingInterTypeXOnTargetYPlugin : simpleOneStateAndReturn
+{
+    private interType intertypeX;
+    targetPicker theTargetPicker;
+    private tag2 team;
+
+    public interactUsingInterTypeXOnTargetYPlugin(interType intertypeXIn, targetPicker targetSetGrabberOrPickerDunnoYIn)
+    {
+        this.intertypeX = intertypeXIn;
+        theTargetPicker = targetSetGrabberOrPickerDunnoYIn;
+    }
+
+    public interactUsingInterTypeXOnTargetYPlugin(interType intertypeXIn, tag2 team)
+    {
+        this.intertypeX = intertypeXIn;
+        this.team = team;
+    }
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        state stateSetup = new aimAndInteractUsingInterTypeXOnTargetYState(intertypeX, new nearestTargetPicker(theObjectDoingTheEnaction, currentlyVisibleThreats(theObjectDoingTheEnaction)));
+
+        FSM interactUsingInterTypeXOnTargetY = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        interactUsingInterTypeXOnTargetY.name = "hands, interactUsingInterTypeXOnTargetY";
+        return interactUsingInterTypeXOnTargetY;
+    }
+
+    private objectSetGrabber currentlyVisibleThreats(GameObject theObjectDoingTheEnaction)
+    {
+        //get all from perception, then filter basic threat criteria
+        return new setOfAllObjectThatMeetCriteria(theObjectDoingTheEnaction.GetComponent<perceptions>().setOfAllCurrentlySensedObjects,
+            new objectMeetsAllCriteria(new hasVirtualGamepad(), new reverseCriteria(new objectHasTag(team))));
+    }
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        //if a REAL threat target is DETECTABLE [not imaginary, not hidden in shadow]
+        return new isThereAtLeastOneObjectInSet(currentlyVisibleThreats(theObjectDoingTheEnaction));
+    }
+}
+
+internal class aimAndInteractUsingInterTypeXOnTargetYState : state
+{
+    private interType intertypeX;
+    enaction theEnaction1;
+    enaction theEnaction2;
+    targetPicker theTargetPicker;
+    GameObject theObjectDoingTheEnaction;
+
+
+    public aimAndInteractUsingInterTypeXOnTargetYState(interType intertypeX, targetPicker theTargetPickerIn)
+    {
+        this.intertypeX = intertypeX;
+        theTargetPicker = theTargetPickerIn;
+    }
+
+    public void doThisThing()
+    {
+        //aim and fire, right?
+        theEnaction1.enact(new inputData(theTargetPicker.pickNext().targetPosition()));
+        getEnaction2IfNecessaryAndEnact();
+    }
+
+    private void getEnaction2IfNecessaryAndEnact()
+    {
+        if (theEnaction2 == null)
+        {
+            //just "grab" from current virtual gamepad
+            theEnaction2 = new find().enactionEquippedByObjectWithIntertypeX(theObjectDoingTheEnaction, intertypeX);
+        }
+
+        if (theEnaction2 == null) { return; }
+
+
+        theEnaction2.enact(new inputData());
+    }
+
+    public void myConstructor(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+        theEnaction1 = theObjectDoingTheEnaction.GetComponent<aimTarget>();
+        //theEnaction2 = //theObjectDoingTheEnaction.GetComponent<aimTarget>();
+    }
+
+    public state reConstructor(GameObject theObjectDoingTheEnaction)
+    {
+        state newState = new aimAndInteractUsingInterTypeXOnTargetYState(intertypeX, theTargetPicker);
+        newState.myConstructor(theObjectDoingTheEnaction);
+        return newState;
+    }
+}
+
+internal class equipIntertypeXFSM : simpleOneStateAndReturn
+{
+    interType intertypeX;
+
+    public equipIntertypeXFSM(interType intertypeXIn)
+    {
+        intertypeX = intertypeXIn;
+    }
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new equipIntertypeXState(intertypeX);
+
+        FSM equipIntertypeXFSM = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        equipIntertypeXFSM.name = "feet, equipIntertypeX";
+        return equipIntertypeXFSM;
+    }
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        return theNotEquippedButCanEquipSwitchCondition(theObjectDoingTheEnaction,intertypeX);
+    }
+
+
+
+    public condition theNotEquippedButCanEquipSwitchCondition(GameObject theObjectDoingTheEnaction, interType interTypeX)
+    {
+        //switch condition:
+        //      has item we want in inventory
+        //      but not in playable or equipped items [just search in virtual gamepad???]
+        //  AND we want to CACHE that item if possible, so we can equip it without searching for it again
+
+
+        objectCriteria hasInterTypeX = new intertypeXisOnObject(interTypeX);
+
+        condition hasInPlayable = new individualObjectMeetsAllCriteria(new presetObject(theObjectDoingTheEnaction), hasInterTypeX);
+
+
+
+
+
+
+
+        objectSetGrabber thesetOfAllEquippedObjects = new setOfAllEquippedObjects(theObjectDoingTheEnaction);
+        //objectCriteria hasInterTypeX = new intertypeXisOnObject(interTypeX);
+        pickFirstObjectXFromListY theEquippedObjectPicker = new pickFirstObjectXFromListY(hasInterTypeX, thesetOfAllEquippedObjects);
+
+
+        condition hasEquipped = new nonNullObject(theEquippedObjectPicker);
+
+
+
+
+
+
+
+
+        //      has item we want in inventory [AND we want to CACHE that item if possible]
+        //condition:  object returner returns non-null object
+        //object returner [main]:  object on list that meets criteria
+        //          the list:   inventory on [set?] object
+        //          the criteria: has intertypeX
+        //caching etc
+        //  plug cache setter into condition checker [so, wrap the above returner]
+        //  have cache observer as a variable we can plug into "equipping" enaction
+
+        setOfAllInventoryObjects theInvGrabber = new setOfAllInventoryObjects(theObjectDoingTheEnaction);
+        //objectCriteria hasInterTypeX = new intertypeXisOnObject(interTypeX);
+        pickFirstObjectXFromListY theInvObjectPicker = new pickFirstObjectXFromListY(hasInterTypeX, theInvGrabber);
+
+
+        objectCacheSetter theInvCacheSetter = new objectCacheSetter(theInvObjectPicker);
+        objectCacheReceiver theInvCacheReceiver = new objectCacheReceiver(theInvCacheSetter);
+
+        condition hasInInventory = new nonNullObject(theInvCacheSetter);
+
+
+
+
+
+
+        condition notEquippedButCanEquip = new multicondition(new reverseCondition(hasInPlayable), new reverseCondition(hasEquipped), hasInInventory);
+
+
+        //new intertypeXisOnObject();
+        //new intertypeXisInEquipperSlots();
+
+        //new targetCacheSetter
+        //new targetCacheReceiver
+
+
+
+        //      but not in playable or equipped items [just search in virtual gamepad???]
+        //similar to above.
+        //but the object lists are equipper slot contents, and ...playable is just one object, sooo a set of ONE?
+        //does this need cache too???
+        //new intertypeXisInInventory();
+
+        //new equipObjectRepeater();
+
+
+        return notEquippedButCanEquip;
+    }
+
+
+}
+
+internal class equipIntertypeXState : state
+{
+    private interType intertypeX;
+    enaction theEnaction;
+
+    public equipIntertypeXState(interType intertypeXIn)
+    {
+        this.intertypeX = intertypeXIn;
+    }
+
+    public void doThisThing()
+    {
+        theEnaction.enact(new inputData());
+    }
+
+    public void myConstructor(GameObject theObjectDoingTheEnaction)
+    {
+        theEnaction = theObjectDoingTheEnaction.GetComponent<takeFromAndPutBackIntoInventory>();
+    }
+
+    public state reConstructor(GameObject theObjectDoingTheEnaction)
+    {
+        state newState = new equipIntertypeXState(intertypeX);
+        newState.myConstructor(theObjectDoingTheEnaction);
+        return newState;
     }
 }
 
@@ -661,9 +913,33 @@ internal class pursueThreatLastKnownLocation : simpleOneStateAndReturn
 {
     GameObject theObjectDoingTheEnaction;
     float targetDetectionRange;
+    private tag2 team;
+
+    public pursueThreatLastKnownLocation(tag2 team)
+    {
+        this.team = team;
+    }
+
     private objectSetGrabber threatSet()
     {
-        return theObjectDoingTheEnaction.GetComponent<beleifs>().threatMarkerSet;
+        //return theObjectDoingTheEnaction.GetComponent<beleifs>().threatMarkerSet;
+
+        //so:
+        //      for feet, use shadow object markers
+        //      that are "threats" [meet threat criteria]
+        //ALSO this is where i CREATE the "beleif set", beleif component just UPDATES it....
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theObjectDoingTheEnaction,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theObjectDoingTheEnaction.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+        //objectSetGrabber theGrabber = threatObjectPermanence;//????i think???? //new setOfAllObjectThatMeetCriteria(threatObjectPermanence);
+        return threatObjectPermanence;//????i think????
     }
 
 
@@ -676,7 +952,7 @@ internal class pursueThreatLastKnownLocation : simpleOneStateAndReturn
 
         state stateSetup = new goToTargetPickerState(targetPickerFromSet(threatSet()));
         
-        FSM goToThreat = new FSM(stateSetup.regenerateAndSetup(theObjectDoingTheEnaction));
+        FSM goToThreat = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
 
         goToThreat.name = "feet, goToThreat";
         return goToThreat;
@@ -776,6 +1052,7 @@ internal class testBeleifMarkerSet : state
 
     public void doThisThing()
     {
+        /*
         Debug.Assert(theBeleifs != null);
         Debug.Assert(theBeleifs.threatMarkerSet != null);
         Debug.Assert(theBeleifs.threatMarkerSet.grab() != null);
@@ -784,16 +1061,17 @@ internal class testBeleifMarkerSet : state
         {
             Debug.DrawLine(theBeleifs.gameObject.transform.position, obj.transform.position, Color.blue, 0.1f);
         }
+        */
     }
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         state newState = new testBeleifMarkerSet();
-        newState.setup(theObjectDoingTheEnactionIn);
+        newState.myConstructor(theObjectDoingTheEnactionIn);
         return newState;
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         theBeleifs = beleifs.ensureComponent(theObjectDoingTheEnactionIn);//genGen.singleton.ensureBeleifsComponent(theObjectDoingTheEnactionIn);
     }
@@ -1393,18 +1671,18 @@ internal class testStealthDetection1 : state
 
     public void doThisThing()
     {
-        foreach(var x in theBeleifs.theSet.grab())
+        //foreach(var x in theBeleifs.theSet.grab())
         {
 
         }
     }
 
-    public state regenerateAndSetup(GameObject theObjectDoingTheEnactionIn)
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         throw new NotImplementedException();
     }
 
-    public void setup(GameObject theObjectDoingTheEnactionIn)
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
     {
         throw new NotImplementedException();
     }
@@ -1489,7 +1767,7 @@ public class FSMgen
 
     public FSMgen(GameObject theObjectDoingTheEnactionIn, state baseStateIn)
     {
-        //baseStateIn.setup(theObjectDoingTheEnactionIn);  REDUNDANT BECAUSE "addTheGeneratedFSMToTheirFSMComponent" already does it implicityl!!!!!!!!!!
+        //baseStateIn.myConstructor(theObjectDoingTheEnactionIn);  REDUNDANT BECAUSE "addTheGeneratedFSMToTheirFSMComponent" already does it implicityl!!!!!!!!!!
 
         /*
         FSMcomponent ensuredThing = theObjectDoingTheEnactionIn.GetComponent<FSMcomponent>();
@@ -1518,6 +1796,14 @@ public class FSMgen
         theBaseFSM = new FSM(); //idle
         theBaseFSM.name = "idle";
         addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1, plugInFSM addon2)
+    {
+        theBaseFSM = new FSM(); //idle
+        theBaseFSM.name = "idle";
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addon2.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
         addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
     }
 
@@ -1622,7 +1908,7 @@ public class baseStateGen : generateFSM
 
     public FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
     {
-        FSM theFSM = new FSM(baseState.regenerateAndSetup(theObjectDoingTheEnaction));
+        FSM theFSM = new FSM(baseState.reConstructor(theObjectDoingTheEnaction));
         return theFSM;
     }
 }

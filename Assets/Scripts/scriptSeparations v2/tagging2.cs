@@ -1135,6 +1135,7 @@ public abstract class updateableSetGrabber : objectSetGrabber
     internal List<objectIdPair> theStoredSet = new List<objectIdPair>();
 
     public abstract void updateSet(List<GameObject> inputList);
+    public abstract void updateSet(List<objectIdPair> inputList);
     internal abstract void updateSetWithOneObject(GameObject thisObject);
 
     internal List<objectIdPair> convertToIds(List<GameObject> inputList)
