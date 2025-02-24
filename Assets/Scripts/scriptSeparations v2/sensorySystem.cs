@@ -20,6 +20,7 @@ using UnityEngine.UIElements;
 using UnityEngine.XR;
 using static enactionCreator;
 using static tagging2;
+using static UnityEditor.ShaderData;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
 
@@ -131,6 +132,354 @@ public class sensorySystem : MonoBehaviour
     }
 
 }
+
+
+
+
+
+public class spatialDataSet
+{
+    //want to be able to:
+    //      have specified pattern of points [grid, line, circle/radial, etc?]?
+    //      gather multiple types of data [perhaps with dependencies between them] at each point
+    //      somehow be useable [but hard to "return" values of different types like bool, vector, float, etc]
+    //          welllll, just need different "spatial datum" types?  like regular data types?  something?
+    //ok, you plug in the "sample procedure" that computes stuff.  like a sensor.  separate from the set of points themselves.
+    //then ya it returns a certain regular list of variables of a certain regular data type?
+
+    List<Vector3> spatialPointSet = new List<Vector3>();
+
+    public spatialDataSet(List<Vector3> spatialPointSetIn)
+    {
+        spatialPointSet = spatialPointSetIn;
+    }
+
+    public List<bool> sample(boolSampleProcedure theSampleProcedure)
+    {
+        return theSampleProcedure.sample(spatialPointSet);
+    }
+    public List<float> sample(floatSampleProcedure theSampleProcedure)
+    {
+        return theSampleProcedure.sample(spatialPointSet);
+    }
+    public List<Vector3> sample(vectorSampleProcedure theSampleProcedure)
+    {
+        return theSampleProcedure.sample(spatialPointSet);
+    }
+}
+
+
+public class spatialDataPoint
+{
+
+}
+
+public class spatialDatum
+{
+    //well, 3 types?
+    //      bool
+    //      float
+    //      vector
+    //???
+    //orrr don't use this
+}
+
+
+
+/*
+public interface sampleProcedure
+{
+    //........not even needed?  can have just totally separate classes????????
+}
+*/
+
+public interface boolSampleProcedure// : sampleProcedure
+{
+    List<bool> sample(List<Vector3> spatialPointSet);
+
+}
+
+
+public interface floatSampleProcedure// : sampleProcedure
+{
+    List<float> sample(List<Vector3> spatialPointSet);
+}
+
+
+public interface vectorSampleProcedure// : sampleProcedure
+{
+    List<Vector3> sample(List<Vector3> spatialPointSet);
+}
+
+
+
+
+
+public class debugFeild
+{
+    public debugFeild(List<Vector3> spatialPointSet, List<bool> theSamples)
+    {
+        int index = 0;
+        Color theColor;
+        foreach (var spatialPoint in spatialPointSet)
+        {
+            if (theSamples[index] == true)
+            {
+                theColor = Color.green;
+            }
+            else
+            {
+                theColor = Color.red;
+            }
+
+            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up, theColor, 22f);
+            index++;
+        }
+    }
+}
+
+
+public abstract class spatialDataSampleProcedure
+{
+    public List<bool> sample(List<Vector3> spatialPointSet)
+    {
+        List<bool> newList = new List<bool>();
+
+        foreach (Vector3 thisPoint in spatialPointSet)
+        {
+            newList.Add(sampleOnePoint(thisPoint));
+        }
+
+        new debugFeild(spatialPointSet, newList);
+        return newList;
+    }
+
+    public abstract bool sampleOnePoint(Vector3 spatialPoint);
+
+}
+
+public abstract class stealthArmaturableSampleProcedure: spatialDataSampleProcedure
+{
+    internal objectSetGrabber theSet;
+    //List<Vector3> setOfOffsets = new List<Vector3>();
+    internal stealthArmature theArmature;
+
+    /*
+    public lineOfSightFromASetMember(objectSetGrabber theSetIn)
+    {
+        theSet = theSetIn;
+        //setOfOffsets.Add(new Vector3());
+    }
+    public lineOfSightFromASetMember(objectSetGrabber theSetIn, stealthArmature theArmatureIn)
+    {
+        theSet = theSetIn;
+        theArmature = theArmatureIn;
+    }
+    */
+
+
+    public override bool sampleOnePoint(Vector3 spatialPoint)
+    {
+        if (theArmature == null) { return oneSubPoint(spatialPoint); }
+
+        foreach (GameObject thisArmatureNode in theArmature.theListOfParts)
+        {
+            if (oneSubPoint(spatialPoint + armatureNodeOffset(thisArmatureNode)) == true) { return true; }
+        }
+
+
+        return false;
+    }
+
+    internal abstract bool oneSubPoint(Vector3 subPoint);
+
+    private Vector3 armatureNodeOffset(GameObject thisArmatureNode)
+    {
+        return thisArmatureNode.transform.localPosition;
+    }
+}
+
+public class lineOfSightFromASetMember : stealthArmaturableSampleProcedure, boolSampleProcedure
+{
+    //"true" = yes, line of sight, visible
+
+    public lineOfSightFromASetMember(objectSetGrabber theSetIn)
+    {
+        theSet = theSetIn;
+        //setOfOffsets.Add(new Vector3());
+    }
+    public lineOfSightFromASetMember(objectSetGrabber theSetIn, stealthArmature theArmatureIn)
+    {
+        theSet = theSetIn;
+        theArmature = theArmatureIn;
+    }
+
+    internal override bool oneSubPoint(Vector3 subPoint)
+    {
+        //"true" = yes, line of sight, visible
+
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        foreach (GameObject thisObserver in theSet.grab())
+        {
+            //Debug.Log("thisObserver:  " + thisObserver);
+            if (baseCalculation(subPoint, thisObserver.transform.position) == true) { return true; }
+        }
+
+        return false;
+    }
+    internal bool baseCalculation(Vector3 subPoint, Vector3 observerPosition)
+    {
+        //"true" = yes, line of sight, visible
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = subPoint-observerPosition;
+        Ray myRay = new Ray(observerPosition, theDirection);
+
+        //we don;t have objects for collision, soooo just see if LENGTH of the ray goes full distance???  or if NULL collider, ya
+        //Debug.Log("theDirection.magnitude:  "+ theDirection.magnitude);
+        if (Physics.Raycast(myRay, out myHit, theDirection.magnitude, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            //Debug.Log("myHit:  " + myHit);
+            //Debug.Log("myHit.collider:  " + myHit.collider);
+            //Debug.Log("myHit.transform:  " + myHit.transform);
+            //Debug.Log("myHit.transform.gameObject:  " + myHit.transform.gameObject);
+            //Debug.DrawLine(observerPosition, observerPosition+ theDirection,Color.yellow,3f);
+            return false; 
+        }
+
+        return true;
+    }
+
+}
+
+public class meetsIlluminationThreshhold : stealthArmaturableSampleProcedure, boolSampleProcedure
+{
+    float illuminationIntensityThresholdForDetection = 0.15f;
+    private detectabilityIlluminationEvaluator1 detectabilityEvaluator;
+
+    public meetsIlluminationThreshhold(GameObject objectForZone)
+    {
+
+        detectabilityEvaluator = new detectabilityIlluminationEvaluator1(objectForZone);
+    }
+
+    public meetsIlluminationThreshhold(GameObject objectForZone, float illuminationIntensityThresholdForDetectionIn) : this(objectForZone)
+    {
+        illuminationIntensityThresholdForDetection = illuminationIntensityThresholdForDetectionIn;
+    }
+
+    internal override bool oneSubPoint(Vector3 subPoint)
+    {
+        //"true" = yes, line of sight, visible
+
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+
+        if (baseCalculation(subPoint) == true) { return true; }
+
+        return false;
+    }
+    internal bool baseCalculation(Vector3 subPoint)
+    {
+        float intensity = detectabilityEvaluator.evaluatePosition(subPoint);
+        //Debug.Log("intensity:  " + intensity);
+        //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
+
+        return (intensity > illuminationIntensityThresholdForDetection);
+    }
+}
+
+
+public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleProcedure
+{
+    float illuminationIntensityThresholdForDetection = 0.15f;
+    private detectabilityIlluminationEvaluator1 detectabilityEvaluator;
+
+    public visibleToThreatSet(GameObject objectForZone, objectSetGrabber theSetIn)
+    {
+        theSet = theSetIn;
+        detectabilityEvaluator = new detectabilityIlluminationEvaluator1(objectForZone);
+    }
+
+    public visibleToThreatSet(GameObject objectForZone, objectSetGrabber theSetIn, float illuminationIntensityThresholdForDetectionIn) : this(objectForZone, theSetIn)
+    {
+        illuminationIntensityThresholdForDetection = illuminationIntensityThresholdForDetectionIn;
+    }
+
+    internal override bool oneSubPoint(Vector3 subPoint)
+    {
+        //"true" = yes, line of sight, visible
+
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        if (oneSubPointLineOfSightFilter(subPoint) == false) { return false; }
+
+        if (baseCalculation(subPoint) == true) { return true; }
+
+        return false;
+    }
+    internal bool baseCalculation(Vector3 subPoint)
+    {
+        float intensity = detectabilityEvaluator.evaluatePosition(subPoint);
+        //Debug.Log("intensity:  " + intensity);
+        //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
+
+        return (intensity > illuminationIntensityThresholdForDetection);
+    }
+
+
+
+    internal bool oneSubPointLineOfSightFilter(Vector3 subPoint)
+    {
+        //"true" = yes, line of sight, visible
+
+        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+        foreach (GameObject thisObserver in theSet.grab())
+        {
+            //Debug.Log("thisObserver:  " + thisObserver);
+            if (baseCalculationLineOfSightFilter(subPoint, thisObserver.transform.position) == true) { return true; }
+        }
+
+        return false;
+    }
+    internal bool baseCalculationLineOfSightFilter(Vector3 subPoint, Vector3 observerPosition)
+    {
+        //"true" = yes, line of sight, visible
+        RaycastHit myHit;
+
+        //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
+        Vector3 theDirection = subPoint - observerPosition;
+        Ray myRay = new Ray(observerPosition, theDirection);
+
+        //we don;t have objects for collision, soooo just see if LENGTH of the ray goes full distance???  or if NULL collider, ya
+        //Debug.Log("theDirection.magnitude:  "+ theDirection.magnitude);
+        if (Physics.Raycast(myRay, out myHit, theDirection.magnitude, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            //Debug.Log("myHit:  " + myHit);
+            //Debug.Log("myHit.collider:  " + myHit.collider);
+            //Debug.Log("myHit.transform:  " + myHit.transform);
+            //Debug.Log("myHit.transform.gameObject:  " + myHit.transform.gameObject);
+            //Debug.DrawLine(observerPosition, observerPosition+ theDirection,Color.yellow,3f);
+            return false;
+        }
+
+        return true;
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -535,7 +884,7 @@ public class stealthArmature : MonoBehaviour
 
 
 
-public class detectabilityIlluminationEvaluator1 : objectEvaluator
+public class detectabilityIlluminationEvaluator1 : objectEvaluator, positionEvaluation
 {
     objectSetGrabber lightSourceGrabber;
 
@@ -575,6 +924,29 @@ public class detectabilityIlluminationEvaluator1 : objectEvaluator
         //Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
         return totalIllumination;
     }
+
+    public float evaluatePosition(Vector3 thePosition)
+    {
+        //so:
+        //      [assume line of sight to the observer is already established]
+        //      AND at least one light source,
+        //      within range of both
+
+        float totalIllumination = 0f;
+
+        //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,evaluateObject");
+        foreach (GameObject thisLight in lightSourceGrabber.grab())
+        {
+            //Debug.Log("thisLight:  " + thisLight);
+            float intensityToAdd = thisLight.GetComponent<lightIlluminationCalculator>().evaluate(thePosition);
+            //Debug.Log("intensityToAdd:  " + intensityToAdd);
+            totalIllumination += intensityToAdd;
+        }
+
+
+        //Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
+        return totalIllumination;
+    }
 }
 
 
@@ -604,14 +976,14 @@ public class requestingStealthCriteria : objectCriteria
 
 
 
-public class spatialDataPointFragment
+public class OldSpatialDataPointFragment
 {
     //basically, i hate having anything significant nested inside of my "foreach" loops.
     //and if there IS much in there, it should be easy to "find" when i'm debugging.  not digging through layers of functions.
     //so put stuff HERE, in a different class object.  a base level, where i will know to look if that's what the error seems to be
     //[same for adding or modifying stuff, not just debugging]
 
-    //so, right now "spatialDataPoint" has multiple "threat" gameobjects.
+    //so, right now "OldSpatialDataPoint" has multiple "threat" gameobjects.
     //i'm replacing that with a list of THIS class object.  each of these will have one of those possible targets.
     //could i go the other way?  START with something like this, THEN gather them and even RE-USE them for different npcs?  i dunno.
 
@@ -716,7 +1088,7 @@ public class spatialDataPointFragment
 
     //      initializing
 
-    public spatialDataPointFragment(GameObject target, Vector3 location)
+    public OldSpatialDataPointFragment(GameObject target, Vector3 location)
     {
         //should just be done in constructor?
         targetObject = target;
@@ -842,12 +1214,12 @@ public class spatialDataPointFragment
     }
 }
 
-public class spatialDataPoint
+public class OldSpatialDataPoint
 {
     //this code should only ever be about one single point
     //anything plural [like "distances"] should still be about one sample point, and how far away other things [like threats] are from that one point
 
-    public List<spatialDataPointFragment> fragmentList = new List<spatialDataPointFragment>();
+    public List<OldSpatialDataPointFragment> fragmentList = new List<OldSpatialDataPointFragment>();
 
     public int listLenghts = 0;
 
@@ -901,7 +1273,7 @@ public class spatialDataPoint
 
         //          if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
 
-        foreach (spatialDataPointFragment thisFragment in fragmentList)
+        foreach (OldSpatialDataPointFragment thisFragment in fragmentList)
         {
             if (debugPrint == true) { Debug.Log("thisFragment.lineOfSightBool:  " + thisFragment.lineOfSightBool); }
             if (thisFragment.lineOfSightBool == true)
@@ -945,7 +1317,7 @@ public class spatialDataPoint
 
         //          if (debugPrint == true) { Debug.Log("fragmentList.Count:  " + fragmentList.Count); }
 
-        foreach (spatialDataPointFragment thisFragment in fragmentList)
+        foreach (OldSpatialDataPointFragment thisFragment in fragmentList)
         {
             if (thisFragment.lineOfSightBool == false) { continue; }
 
@@ -965,7 +1337,7 @@ public class spatialDataPoint
 
     //      initializing
 
-    public spatialDataPoint(List<GameObject> targetList, Vector3 inputPoint)
+    public OldSpatialDataPoint(List<GameObject> targetList, Vector3 inputPoint)
     {
         //should just be done in constructor?
         thisPoint = inputPoint;
@@ -974,7 +1346,7 @@ public class spatialDataPoint
 
         foreach (GameObject thisTarget in targetList)
         {
-            spatialDataPointFragment newFragment = new spatialDataPointFragment(thisTarget, thisPoint);
+            OldSpatialDataPointFragment newFragment = new OldSpatialDataPointFragment(thisTarget, thisPoint);
             fragmentList.Add(newFragment);
         }
     }
@@ -995,7 +1367,7 @@ public class spatialDataPoint
 
     internal bool threatLineOfSightBool()
     {
-        foreach (spatialDataPointFragment thisFragment in fragmentList)
+        foreach (OldSpatialDataPointFragment thisFragment in fragmentList)
         {
             if(thisFragment.lineOfSightBool == true) {return true;}
         }
@@ -1003,11 +1375,11 @@ public class spatialDataPoint
     }
 }
 
-public class spatialDataSet
+public class OldSpatialDataSet
 {
-    //this code should be about using more than one "spatialDataPoint" class object
+    //this code should be about using more than one "OldSpatialDataPoint" class object
 
-    public List<spatialDataPoint> theDataSet = null;// new List<spatialDataPoint>();
+    public List<OldSpatialDataPoint> theDataSet = null;// new List<OldSpatialDataPoint>();
 
     public List<Vector3> thePoints = new List<Vector3>();
     public List<GameObject> threatList = new List<GameObject>();
@@ -1023,7 +1395,7 @@ public class spatialDataSet
     {
         appleField();
 
-        foreach (spatialDataPoint thisDataPoint in theDataSet)
+        foreach (OldSpatialDataPoint thisDataPoint in theDataSet)
         {
 
             Vector3 endPointAdditionp = new Vector3();
@@ -1075,11 +1447,11 @@ public class spatialDataSet
 
     public void createBlankDataSetFromPoints()
     {
-        theDataSet = new List<spatialDataPoint>();
+        theDataSet = new List<OldSpatialDataPoint>();
 
         foreach (Vector3 thisPoint in thePoints)
         {
-            spatialDataPoint aDataPoint = new spatialDataPoint(threatList, thisPoint);
+            OldSpatialDataPoint aDataPoint = new OldSpatialDataPoint(threatList, thisPoint);
             theDataSet.Add(aDataPoint);
         }
     }
@@ -1128,7 +1500,7 @@ public class spatialDataSet
     //      ad-hoc, try to get rid of
     public Vector3 bestMiddlePoint()
     {
-        spatialDataPoint middleDataPoint = new spatialDataPoint(threatList, middlePoint);
+        OldSpatialDataPoint middleDataPoint = new OldSpatialDataPoint(threatList, middlePoint);
 
         return middleDataPoint.applePattern();
     }
@@ -1136,7 +1508,7 @@ public class spatialDataSet
     {
         int currentIndex = 0;
 
-        foreach (spatialDataPoint thisDataPoint in theDataSet)
+        foreach (OldSpatialDataPoint thisDataPoint in theDataSet)
         {
             //endPointsToGraph.Add(thisDataPoint.pattern1ForFightingArmedThreat());
             thisDataPoint.dontIneedACOMBINEDEndpoint = thisDataPoint.applePattern();
@@ -1149,7 +1521,7 @@ public class spatialDataSet
     {
         //just do regular blue vector feild of the "end points" for now.
 
-        foreach (spatialDataPoint thisDataPoint in theDataSet)
+        foreach (OldSpatialDataPoint thisDataPoint in theDataSet)
         {
             thisDataPoint.graphBetweenThisPointAndCOMBINEDpoint();
         }
@@ -1158,3 +1530,4 @@ public class spatialDataSet
 
 
 }
+

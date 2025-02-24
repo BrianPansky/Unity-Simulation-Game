@@ -865,7 +865,18 @@ public class goToTargetPickerState : state
 
     public void doThisThing()
     {
+
         theNavAgent.enact(new inputData(theTargetPicker.pickNext().realPositionOfTarget()));
+
+
+        //new spatialDataSet(new gridOfPoints(theObjectDoingTheEnaction.transform.position, 11, 11, 5, 5, 1, 1).returnIt()).sample(
+            //new lineOfSightFromASetMember(theObjectDoingTheEnaction.GetComponent<beleifs>().beleifObjectSets[0]));
+        //new spatialDataSet(new gridOfPoints(theObjectDoingTheEnaction.transform.position, 11, 11, 5, 5, 1, 1).returnIt()).sample(
+            //new meetsIlluminationThreshhold(theObjectDoingTheEnaction,0.15f));
+        //new spatialDataSet(new gridOfPoints(theObjectDoingTheEnaction.transform.position, 11, 11, 5, 5, 1, 1).returnIt()).sample(
+            //new visibleToThreatSet(theObjectDoingTheEnaction, theObjectDoingTheEnaction.GetComponent<beleifs>().beleifObjectSets[0], 0.15f));
+
+        
     }
 
     public state reConstructor(GameObject theObjectDoingTheEnactionIn)

@@ -8,6 +8,7 @@ using UnityEngine.SocialPlatforms;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
 using static enactionCreator;
+using static goToTargetPicker;
 using static interactionCreator;
 using static sensorySystemComponent;
 using static tagging2;
@@ -626,6 +627,52 @@ public class genGen : MonoBehaviour
 
 
 
+public class testStealthNPC
+{
+
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testStealthNPC(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.name = "testStealthNPC";
+        newObj.transform.position = vector3;
+        //newObj.AddComponent<advancedRtsModule>();
+        beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        perceptions.addThisComponent(newObj);
+
+        stealthModule stealthModule = newObj.AddComponent<stealthModule>();
+        stealthModule.requestingStealth = true;
+
+        sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+        //addWeapon(newObj, weaponMaker(1, 40, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
+
+        //new FSMgen(newObj, new pursueThreatLastKnownLocation(team));
+        //new FSMgen(newObj, new goToTargetPicker(new pickNextWhenTargetReached(newObj, new randomNearbyLocationTargetPicker(newObj))));//new randomHidingLocationTargetPicker(newObj,team)));
+        new FSMgen(newObj, new goToTargetPicker(
+            new pickNextWhenTargetReached(newObj, new randomHidingLocationTargetPicker(newObj, team))));//new randomHidingLocationTargetPicker(newObj,team)));
+        //new FSMgen(newObj, new equipIntertypeXFSM(interType.peircing), new interactUsingInterTypeXOnTargetYPlugin(interType.peircing, team));
+
+    }
+
+
+}
+
+
+
+
 public class testGuardPursueLastKnownLocation
 {
 
@@ -1079,6 +1126,49 @@ internal class testBeleifMarkerSet : state
 
 
 
+public class goToTargetPicker : simpleOneStateAndReturn
+{
+    GameObject theObjectDoingTheEnaction;
+    targetPicker theTargetPicker;
+
+    public goToTargetPicker(targetPicker theTargetPickerIn)
+    {
+        theTargetPicker = theTargetPickerIn;
+    }
+
+
+
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //hmm, this is still oddly clunky and confusing to make........how to make it easier to make?
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new goToTargetPickerState(theTargetPicker);
+
+        FSM goToThreat = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        goToThreat.name = "feet, goToTargetPicker";
+        return goToThreat;
+    }
+
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        return theCondition();
+    }
+
+    private condition theCondition()
+    {
+        condition switchCondition = new autoCondition();// theObjectDoingTheEnaction, numericalVariable.health);
+
+        return switchCondition;
+    }
+}
 
 
 
@@ -1158,6 +1248,11 @@ public class lightIlluminationCalculator : MonoBehaviour
         return theSubTypeCalculator.evaluate(theObject);
     }
 
+    public float evaluate(Vector3 thePoint)
+    {
+        return theSubTypeCalculator.evaluate(thePoint);
+    }
+
 }
 
 
@@ -1165,6 +1260,7 @@ public class lightIlluminationCalculator : MonoBehaviour
 public interface lightSourceTypeCalculator
 {
     float evaluate(GameObject theObject);
+    float evaluate(Vector3 thePoint);
 }
 
 public class pointLightTypeCalculator : lightSourceTypeCalculator
@@ -1205,10 +1301,10 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
             return theIntensity;
         }
 
-        return thisComplexCalcluation(theObject);
+        return thisComplexCalculation(theObject);
     }
 
-    private float thisComplexCalcluation(GameObject theObject)
+    private float thisComplexCalculation(GameObject theObject)
     {
         float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
 
@@ -1218,6 +1314,20 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
 
         return illumination;
     }
+
+    private float thisComplexCalculation(Vector3 thePoint)
+    {
+        Vector3 vectorBetween = thePoint - theLightEmittingObject.transform.position;
+        float distance = vectorBetween.magnitude;
+
+
+        if (distance > theRange) { return 0f; }
+
+        float illumination = linearInterpolation(distance);
+
+        return illumination;
+    }
+
 
     private float linearInterpolation(float distance)
     {
@@ -1242,6 +1352,21 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
         float percentInsideRange = (1 - percentAlongRange);
 
         return percentInsideRange * theIntensity;//no probabyl need (1-x) or something.... percentInRange* theIntensity; //something like that
+    }
+
+    public float evaluate(Vector3 thePoint)
+    {
+
+        //return zero if there is no line of sight
+        if (lineOfSight.evaluatePosition(thePoint) == false) { return 0f; }
+
+        if (theRange < 0)
+        {
+            //this means infinite range.  just return intensity UM I DON'T USE THIS ANYMORE, DO I???
+            return theIntensity;
+        }
+
+        return thisComplexCalculation(thePoint);
     }
 }
 
@@ -1274,18 +1399,18 @@ public class directionalLightTypeCalculator : lightSourceTypeCalculator
     public float evaluate(GameObject theObject)
     {
         //return zero if there is no line of sight
-        if (fakeLineOfSight(theObject) == false) { return 0f; }
+        if (fakeLineOfSight(theObject.transform.position) == false) { return 0f; }
 
         return theIntensity;
     }
 
-    private bool fakeLineOfSight(GameObject theObject)
+    private bool fakeLineOfSight(Vector3 thePoint)
     {
         RaycastHit myHit;
 
         //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
         Vector3 theDirection = -theLightEmittingObject.transform.forward;
-        Ray myRay = new Ray(theObject.transform.position, theDirection);
+        Ray myRay = new Ray(thePoint, theDirection);
 
 
         if (Physics.Raycast(myRay, out myHit, theFakeInfiniteRangeForRaycast, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
@@ -1297,6 +1422,14 @@ public class directionalLightTypeCalculator : lightSourceTypeCalculator
         }
 
         return false;
+    }
+
+    public float evaluate(Vector3 thePoint)
+    {
+        //return zero if there is no line of sight
+        if (fakeLineOfSight(thePoint) == false) { return 0f; }
+
+        return theIntensity;
     }
 }
 
@@ -1339,12 +1472,24 @@ public class spotLightTypeCalculator : lightSourceTypeCalculator
         if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
         if (theFOVCriteria.evaluateObject(theObject) == false) { return 0f; }
 
-        return thisComplexCalcluation(theObject);
+        return thisComplexCalculation(theObject);
     }
 
-    private float thisComplexCalcluation(GameObject theObject)
+    private float thisComplexCalculation(GameObject theObject)
     {
         float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
+
+        if (distance > theRange) { return 0f; }
+
+        float illumination = linearInterpolation(distance);
+
+        return illumination;
+    }
+    private float thisComplexCalculation(Vector3 thePoint)
+    {
+        Vector3 vectorBetween = thePoint - theLightEmittingObject.transform.position;
+        float distance = vectorBetween.magnitude;
+
 
         if (distance > theRange) { return 0f; }
 
@@ -1376,6 +1521,15 @@ public class spotLightTypeCalculator : lightSourceTypeCalculator
         float percentInsideRange = (1 - percentAlongRange);
 
         return percentInsideRange * theIntensity;//no probabyl need (1-x) or something.... percentInRange* theIntensity; //something like that
+    }
+
+    public float evaluate(Vector3 thePoint)
+    {
+        //return zero if there is no line of sight
+        if (lineOfSight.evaluatePosition(thePoint) == false) { return 0f; }
+        if (theFOVCriteria.evaluatePosition(thePoint) == false) { return 0f; }
+
+        return thisComplexCalculation(thePoint);
     }
 }
 

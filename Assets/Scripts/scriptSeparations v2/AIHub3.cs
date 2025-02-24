@@ -237,7 +237,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
 
         //conditionalPrint("inputs, threatList.Count:  " + threatList.Count);
         //conditionalPrint("inputs, this.transform.position:  " + this.transform.position);
-        spatialDataPoint dataPoint = new spatialDataPoint(threatList, this.transform.position);
+        OldSpatialDataPoint dataPoint = new OldSpatialDataPoint(threatList, this.transform.position);
         dataPoint.debugPrint = printThisNPC;
 
         //conditionalPrint("threatLineOfSight():  " + threatLineOfSight());
@@ -762,7 +762,7 @@ public class AIHub3 : planningAndImagination, IupdateCallable
     {
         //super ad-hoc for now
 
-        spatialDataPoint myData = new spatialDataPoint(threatListWithoutSelf(), this.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(threatListWithoutSelf(), this.transform.position);
 
 
 

@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.Presets;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Analytics;
@@ -149,6 +151,100 @@ public class outpostGame : MonoBehaviour
     }
 
 }
+
+
+
+
+
+
+public class randomHidingLocationTargetPicker : targetPicker
+{
+    //randomly pick from sampled locations where they won't be seen
+
+    //bool currentlyDoingMainBehavior = true;
+    List<Vector3> nearbyHidingPositions = new List<Vector3>();
+    
+    GameObject objectToBeNear;
+    float spreadFactor = 1.0f;
+    visibleToThreatSet visibilityCalc;
+
+    private tag2 team;
+
+    public randomHidingLocationTargetPicker(GameObject objectToBeNearIn, tag2 teamIn, float spreadFactorIn = 1f)
+    {
+        objectToBeNear = objectToBeNearIn;
+        this.team = teamIn;
+        spreadFactor = spreadFactorIn;
+        visibilityCalc = new visibleToThreatSet(objectToBeNearIn, threatSet(objectToBeNearIn));//objectToBeNearIn.GetComponent<beleifs>().beleifObjectSets[0]); //very ad-hoc
+    }
+
+    private objectSetGrabber threatSet(GameObject theObject)
+    {
+        //return theObjectDoingTheEnaction.GetComponent<beleifs>().threatMarkerSet;
+
+        //so:
+        //      for feet, use shadow object markers
+        //      that are "threats" [meet threat criteria]
+        //ALSO this is where i CREATE the "beleif set", beleif component just UPDATES it....
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theObject,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theObject.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+        //objectSetGrabber theGrabber = threatObjectPermanence;//????i think???? //new setOfAllObjectThatMeetCriteria(threatObjectPermanence);
+        return threatObjectPermanence;//????i think????
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        //Debug.Log(target);
+        //agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        //return targ;
+
+        Vector3 hidingSpot = new Vector3();
+        int tries = 25;
+        while(tries > 0)
+        {
+            hidingSpot = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+
+            if (thisIsAnUndetectableLocation(hidingSpot)==false) { return new agnosticTargetCalc(hidingSpot); }
+
+            tries--;
+        }
+
+        return new agnosticTargetCalc(new Vector3(-1000,0,-1500)); //just to be obvious
+
+        //int index = UnityEngine.Random.Range(0, nearbyHidingPositions.Count-1);
+        //return new agnosticTargetCalc(nearbyHidingPositions[index]);
+    }
+
+    private bool thisIsAnUndetectableLocation(Vector3 hidingSpot)
+    {
+        return visibilityCalc.sampleOnePoint(hidingSpot);
+    }
+
+    internal void updateSetOfNearbyHidingPositions()
+    {
+        //so:
+        //      sample field of points
+        //the data:
+        //      [armature?] line of sight to:
+        //          object permanence threat marker set
+        //          lights
+        //[and if those are both "true"]:
+        //      illumination level [or bool?]
+        //                  spatialDataSet myData = new spatialDataSet();
+
+    }
+}
+
 
 
 

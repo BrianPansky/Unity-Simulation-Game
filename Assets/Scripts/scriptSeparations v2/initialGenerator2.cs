@@ -231,16 +231,68 @@ public class initialGenerator2 : MonoBehaviour
 
         //new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
         //new testStealthDetectorGuardWithBeleifMarkers(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
-        new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
-        new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();
-        new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 500 * 0.51f), 20, 0.6f).doIt();
-        new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 600 * 0.30f), 100, 0.2f).doIt();
+        new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
+        new testStealthNPC(tag2.team3, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
 
+        //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, 67), 50, 160, 0.9f).doIt();
+        //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, -67), 50, 160, 0.9f).doIt();
+        //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, -30, 67), 50, 160, 0.9f).doIt();
+        //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, -30, -67), 50, 160, 0.9f).doIt();
+        //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, -30, -67), 50, 160, 0.9f).doIt();
+
+        //new spotLightGenerator1(new Vector3(580 * 0.3f, 55, 320 * 0.3f), new Vector3(90, -100, 67), 40, 80, 0.8f).doIt();
+
+        //new spotLightGenerator1(new Vector3(430 * 0.3f, 55, 550 * 0.3f), new Vector3(90, -100, 67), 40, 80, 0.8f).doIt();
+        float intensity = 0.7f;
+        float angle = 55;
+        
+        Vector3 lineOrigin = new Vector3(430 * 0.3f, 50, 550 * 0.3f);
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -20), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -50), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -70), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -100), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -130), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -160), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -190), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -220), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -250), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -270), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+
+        lineOrigin = new Vector3(640 * 0.3f, 50, 550 * 0.3f);
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -20), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -50), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -70), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -100), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -130), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -160), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -190), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -220), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -250), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -270), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+
+
+
+        //new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();
+        //new pointLightGenerator1(new Vector3(500 * 0.31f, 2, 500 * 0.51f), 20, 0.6f).doIt();
+        //new pointLightGenerator1(new Vector3(400 * 0.31f, 2, 600 * 0.30f), 100, 0.2f).doIt();
+
+        //new spotLightGenerator1(new Vector3(560 * 0.31f, 4, 600 * 0.30f), new Vector3(20, -30, -67), 70, 60, 0.4f).doIt();
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 20, 520 * 0.32f), new Vector3(90, 100, 67), 20, 80, 0.4f).doIt();
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 10, 560 * 0.3f), new Vector3(90, 170, 67), 130, 430, 0.25f).doIt();
+
+        //new spotLightGenerator1(new Vector3(600 * 0.2f, 2, 560 * 0.32f), new Vector3(10, 10, 7), 20, 80, 0.6f).doIt();
+
+        /*
         new spotLightGenerator1(new Vector3(500 * 0.31f, 4, 600 * 0.30f), new Vector3(20, -30, -67), 70, 60, 0.2f).doIt();
         new spotLightGenerator1(new Vector3(600 * 0.2f, 20, 560 * 0.32f), new Vector3(90, 130, 67), 20, 80, 0.2f).doIt();
         new spotLightGenerator1(new Vector3(600 * 0.2f, 40, 560 * 0.32f), new Vector3(90, 130, 67), 130, 430, 0.05f).doIt();
 
         new spotLightGenerator1(new Vector3(600 * 0.2f, 2, 560 * 0.32f), new Vector3(10, 10, 7), 20, 80, 0.4f).doIt();
+
+
+        */
+
+
 
 
         returnBasicGrabbable(stuffType.meat1, new Vector3(500 * 0.3f, 0, 500 * 0.51f));

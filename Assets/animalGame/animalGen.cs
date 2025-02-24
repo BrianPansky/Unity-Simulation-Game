@@ -1124,7 +1124,7 @@ public class radialFleeingTargetPicker : targetPicker
     //so...take a set of objects........AND the position of "flee-er"?
     //then.......weighted average the vectors running away from each object?
     //i think?
-    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+    //and i recently made that in "weightedRadialPattern()" in OldSpatialDataPoint.
 
     objectSetGrabber theSet;
     GameObject theFleeer;
@@ -1145,7 +1145,7 @@ public class radialFleeingTargetPicker : targetPicker
 
     Vector3 weightedRadialFleeingPoint()
     {
-        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(theSet.grab(), theFleeer.transform.position);
 
         Vector3 newDirection = myData.weightedRadialPattern();
         //Debug.Log(newDirection - Vector3.zero);
@@ -1159,7 +1159,7 @@ public class applePatternTargetPicker : targetPicker
     //so...take a set of objects........AND the position of "flee-er"?
     //then.......weighted average the vectors running away from each object?
     //i think?
-    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+    //and i recently made that in "weightedRadialPattern()" in OldSpatialDataPoint.
 
     objectSetGrabber theSet;
     GameObject theFleeer;
@@ -1180,7 +1180,7 @@ public class applePatternTargetPicker : targetPicker
 
     Vector3 applePatternPoint()
     {
-        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(theSet.grab(), theFleeer.transform.position);
 
         Vector3 newDirection = myData.applePattern();
         //Debug.Log(newDirection - Vector3.zero);
@@ -1194,7 +1194,7 @@ public class nearestGoldilocksTargetPicker : targetPicker
     //so...take a set of objects........AND the position of "flee-er"?
     //then.......weighted average the vectors running away from each object?
     //i think?
-    //and i recently made that in "weightedRadialPattern()" in spatialDataPoint.
+    //and i recently made that in "weightedRadialPattern()" in OldSpatialDataPoint.
 
     objectSetGrabber theSet;
     GameObject theObjectDoingThePicking;
@@ -1224,7 +1224,7 @@ public class nearestGoldilocksTargetPicker : targetPicker
     Vector3 nearestGoldilocksPoint()
     {
         /*
-        spatialDataPointFragment thisFragment = new spatialDataPointFragment();
+        OldSpatialDataPointFragment thisFragment = new OldSpatialDataPointFragment();
         {
             if (thisFragment.lineOfSightBool == false) { continue; }
 
@@ -1259,7 +1259,7 @@ public class nearestGoldilocksTargetPicker : targetPicker
     /*
     Vector3 weightedRadialFleeingPoint()
     {
-        spatialDataPoint myData = new spatialDataPoint(theSet.grab(), theFleeer.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(theSet.grab(), theFleeer.transform.position);
 
         Vector3 newDirection = myData.weightedRadialPattern();
         //Debug.Log(newDirection - Vector3.zero);

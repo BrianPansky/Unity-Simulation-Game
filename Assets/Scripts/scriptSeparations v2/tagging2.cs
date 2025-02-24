@@ -1122,6 +1122,41 @@ public class pickMostXFromListYTargetPicker : targetPicker
 
 
 
+public class pickNextWhenTargetReached : targetPicker
+{
+    GameObject targetSeeker;
+    agnosticTargetCalc theCurrectTarget;
+    targetPicker nestedTargetPicker;
+
+    public pickNextWhenTargetReached(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn)
+    {
+        targetSeeker = targetSeekerIn;
+        nestedTargetPicker = nestedTargetPickerIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        theCurrectTarget = pickNewIfNeeded();
+        return theCurrectTarget;
+    }
+
+    private agnosticTargetCalc pickNewIfNeeded()
+    {
+        if (theCurrectTarget == null)
+        {
+            return nestedTargetPicker.pickNext();
+        }
+
+        if (new proximityCriteriaBool(theCurrectTarget).evaluateObject(targetSeeker))
+        {
+            return nestedTargetPicker.pickNext();
+        }
+
+        return theCurrectTarget;
+    }
+}
+
+
 //object set grabbers
 
 

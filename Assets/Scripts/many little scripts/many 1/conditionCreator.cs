@@ -1549,7 +1549,7 @@ public class canSeeStuffStuff : baseCondition
 
     public override bool met()
     {
-        spatialDataPoint myData = new spatialDataPoint(new setOfAllNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(new setOfAllNearbyStuffStuff(theObjectThatIsLooking, theStuffType).grab(), theObjectThatIsLooking.transform.position);
 
 
         bool threatLineOfSightBool = myData.threatLineOfSightBool();
@@ -1599,7 +1599,7 @@ public class canSeeNumericalVariable : baseCondition
 
     public override bool met()
     {
-        spatialDataPoint myData = new spatialDataPoint(new setOfAllNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(new setOfAllNearbyNumericalVariable(theObjectThatIsLooking, theVariableType).grab(), theObjectThatIsLooking.transform.position);
 
 
         bool threatLineOfSightBool = myData.threatLineOfSightBool();
@@ -1948,7 +1948,7 @@ public class stickyTrueCriteria : objectCriteria
 }
 
 
-public class objectVisibleInFOV : objectCriteria
+public class objectVisibleInFOV : objectCriteria, positionCriteria
 {
     float horizontalAngleRange = 90f;
     float verticalAngleRange = 60f;
@@ -1985,7 +1985,7 @@ public class objectVisibleInFOV : objectCriteria
 
         //Debug.DrawLine(theSensoryTransform.position, (theSensoryTransform.position + (theSensoryTransform.forward * 30)), Color.magenta, 20);
 
-        float horizontalAngleToObject = absoluteHorizontalAngleFinder(theObject);
+        float horizontalAngleToObject = absoluteHorizontalAngleFinder(theObject.transform.position);
         //Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
         if (horizontalAngleToObject > horizontalAngleRange)
         {
@@ -1993,7 +1993,7 @@ public class objectVisibleInFOV : objectCriteria
             return false;
         }
 
-        float verticalAngleToObject = absoluteVerticalAngleFinder(theObject);
+        float verticalAngleToObject = absoluteVerticalAngleFinder(theObject.transform.position);
         //Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
         if (verticalAngleToObject > verticalAngleRange)
         {
@@ -2059,16 +2059,16 @@ public class objectVisibleInFOV : objectCriteria
     }
 
 
-    private float absoluteVerticalAngleFinder(GameObject theObject)
+    private float absoluteVerticalAngleFinder(Vector3 thePoint)
     {
         //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
         //Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
 
-        Vector3 lineBetweenObserverAndInputObject = theObject.transform.position - theSensoryTransform.position;
+        Vector3 lineBetweenObserverAndInput= thePoint - theSensoryTransform.position;
 
 
         //float theAngle = Vector3.Angle(observerLookingRay.direction, lineBetweenObserverAndInputObject);
-        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInput,
             theSensoryTransform.forward,
             theSensoryTransform.right);
 
@@ -2077,13 +2077,15 @@ public class objectVisibleInFOV : objectCriteria
         return theAngle;
     }
 
-    private float absoluteHorizontalAngleFinder(GameObject theObject)
+    private float absoluteHorizontalAngleFinder(Vector3 thePoint)
     {
+        //Ray observerLookingRay = new Ray(theSensoryTransform.position, theSensoryTransform.forward);//targetObject.GetComponent<sensorySystem>().lookingRay;
         //Vector3 lineBetweenObserverAndInputObject = theSensoryTransform.position - theObject.transform.position;
 
-        Vector3 lineBetweenObserverAndInputObject = theObject.transform.position - theSensoryTransform.position;
+        Vector3 lineBetweenObserverAndInput = thePoint - theSensoryTransform.position;
 
-        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInputObject,
+
+        float theAngle = AngleOffAroundAxis(lineBetweenObserverAndInput,
             theSensoryTransform.forward,
             theSensoryTransform.up);
 
@@ -2195,12 +2197,30 @@ public class objectVisibleInFOV : objectCriteria
         return Mathf.Atan2(Vector3.Dot(v, right), Vector3.Dot(v, forward)) * Mathf.Rad2Deg;
     }
 
+    public bool evaluatePosition(Vector3 thePosition)
+    {
+        float horizontalAngleToObject = absoluteHorizontalAngleFinder(thePosition);
+        //Debug.Log("horizontalAngleToObject:  " + horizontalAngleToObject);
+        if (horizontalAngleToObject > horizontalAngleRange)
+        {
+            //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            return false;
+        }
+
+        float verticalAngleToObject = absoluteVerticalAngleFinder(thePosition);
+        //Debug.Log("verticalAngleToObject:  " + verticalAngleToObject);
+        if (verticalAngleToObject > verticalAngleRange)
+        {
+            //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.red, 20);
+            return false;
+        }
+
+        //Debug.DrawLine(theSensoryTransform.position, theObject.transform.position, Color.green, 20);
+
+        return true;
 
 
-
-
-
-
+    }
 }
 
 
@@ -2260,6 +2280,13 @@ public class proximityCriteriaBool : objectCriteria
     public proximityCriteriaBool(Vector3 whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)
     {
         weWantSomethingNearToThis = new agnosticTargetCalc(whereWeWantToBeCloseToIn);
+
+        this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
+    }
+    public proximityCriteriaBool(targetCalculator whereWeWantToBeCloseToIn, float desiredDistance = 4f, float allowedMargin = 2f)
+    {
+        weWantSomethingNearToThis = whereWeWantToBeCloseToIn;
 
         this.desiredDistance = desiredDistance;
         this.allowedMargin = allowedMargin;
@@ -2354,7 +2381,7 @@ public class hasNoAdvancedCommands : objectCriteria
     }
 }
 
-public class lineOfSight : objectCriteria
+public class lineOfSight : objectCriteria, positionCriteria
 {
     GameObject theCentralObserver;
     float theRange = 60f;
@@ -2369,7 +2396,7 @@ public class lineOfSight : objectCriteria
     public override bool evaluateObject(GameObject theObject)
     {
 
-        //spatialDataPoint myData = new spatialDataPoint(threatListWithoutSelf(), this.transform.position);
+        //OldSpatialDataPoint myData = new OldSpatialDataPoint(threatListWithoutSelf(), this.transform.position);
 
 
 
@@ -2393,6 +2420,26 @@ public class lineOfSight : objectCriteria
         }
 
         return false;
+    }
+
+    public bool evaluatePosition(Vector3 thePosition)
+    {
+        //"true" = yes, line of sight, visible
+        RaycastHit myHit;
+
+        Vector3 theDirection = thePosition - theCentralObserver.transform.position;
+
+        if(theDirection.magnitude > theRange) { return false; }
+
+        Ray myRay = new Ray(theCentralObserver.transform.position, theDirection);
+
+        //we dont have objects for collision, soooo just see if NULL collider, ya
+        if (Physics.Raycast(myRay, out myHit, theDirection.magnitude, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -2480,6 +2527,15 @@ public class intertypeXisInInventory : objectCriteria
 
 
 
+public interface positionCriteria
+{
+    bool evaluatePosition(Vector3 thePosition);
+}
+
+
+
+
+
 //"float"/scalar criteria
 
 public abstract class objectEvaluator
@@ -2489,6 +2545,10 @@ public abstract class objectEvaluator
     public abstract float evaluateObject(GameObject theObject);
 }
 
+public interface positionEvaluation
+{
+    float evaluatePosition(Vector3 thePoint);
+}
 
 
 
