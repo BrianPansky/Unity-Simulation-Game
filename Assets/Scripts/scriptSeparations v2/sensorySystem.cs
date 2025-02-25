@@ -232,7 +232,7 @@ public class debugFeild
                 theColor = Color.red;
             }
 
-            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up, theColor, 22f);
+            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up, theColor, 2f);
             index++;
         }
     }

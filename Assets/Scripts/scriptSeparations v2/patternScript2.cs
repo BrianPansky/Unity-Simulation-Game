@@ -138,6 +138,136 @@ public class patternScript2 : MonoBehaviour
 
 
 
+public class directionalLineOfPoints
+{
+    List<Vector3> theList = new List<Vector3>();
+
+
+
+    public directionalLineOfPoints(Vector3 startPoint, Vector3 endPoint, int totalNumberOfPoints = 4)
+    {
+        theList.Add(startPoint);
+
+
+        Vector3 fromStartToEnd = endPoint - startPoint;
+
+        float distanceBetweenPoints = fromStartToEnd.magnitude/totalNumberOfPoints;
+        Vector3 vectorBetweenPoints = fromStartToEnd.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint+(vectorBetweenPoints*counter));
+            counter++;
+        }
+    }
+
+    public directionalLineOfPoints(Vector3 startPoint, Vector3 endPoint, float distanceBetweenPoints = 1f)
+    {
+        theList.Add(startPoint);
+
+
+        Vector3 fromStartToEnd = endPoint - startPoint;
+
+        float totalNumberOfPoints = fromStartToEnd.magnitude / distanceBetweenPoints;
+        Vector3 vectorBetweenPoints = fromStartToEnd.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint + (vectorBetweenPoints * counter));
+            counter++;
+        }
+    }
+
+    public directionalLineOfPoints(Vector3 startPoint, float distanceBetweenPoints, Vector3 direction, int totalNumberOfPoints = 4)
+    {
+        theList.Add(startPoint);
+
+        Vector3 vectorBetweenPoints = direction.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint + (vectorBetweenPoints * counter));
+            counter++;
+        }
+    }
+
+
+
+    public List<Vector3> returnIt()
+    {
+        return theList;
+    }
+}
+
+public class directionalLineOfExponentialPoints
+{
+    List<Vector3> theList = new List<Vector3>();
+
+
+
+    public directionalLineOfExponentialPoints(Vector3 startPoint, Vector3 endPoint, int totalNumberOfPoints = 4)
+    {
+        theList.Add(startPoint);
+
+
+        Vector3 fromStartToEnd = endPoint - startPoint;
+
+        float distanceBetweenPoints = fromStartToEnd.magnitude / totalNumberOfPoints;
+        Vector3 vectorBetweenPoints = fromStartToEnd.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint + (vectorBetweenPoints * counter*counter));
+            counter++;
+        }
+    }
+
+    public directionalLineOfExponentialPoints(Vector3 startPoint, Vector3 endPoint, float distanceBetweenPoints = 1f)
+    {
+        theList.Add(startPoint);
+
+
+        Vector3 fromStartToEnd = endPoint - startPoint;
+
+        float totalNumberOfPoints = fromStartToEnd.magnitude / distanceBetweenPoints;
+        Vector3 vectorBetweenPoints = fromStartToEnd.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint + (vectorBetweenPoints * counter * counter));
+            counter++;
+        }
+    }
+
+    public directionalLineOfExponentialPoints(Vector3 startPoint, float distanceBetweenPoints, Vector3 direction, int totalNumberOfPoints = 4)
+    {
+        theList.Add(startPoint);
+
+        Vector3 vectorBetweenPoints = direction.normalized * distanceBetweenPoints;
+
+        int counter = 1;
+        while (counter < totalNumberOfPoints)
+        {
+            theList.Add(startPoint + (vectorBetweenPoints * counter * counter));
+            counter++;
+        }
+    }
+
+
+
+    public List<Vector3> returnIt()
+    {
+        return theList;
+    }
+}
+
+
+
 public class gridOfPoints
 {
     //axes conventions:

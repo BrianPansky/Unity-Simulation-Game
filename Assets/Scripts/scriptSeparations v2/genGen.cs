@@ -93,14 +93,14 @@ public class genGen : MonoBehaviour
         return newObj;
     }
 
-    public void addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
+    public GameObject addArrowForward(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
     {
         Vector3 where = inputObject.transform.position + new Vector3(xOffset, yOffset, zOffset);
         GameObject newObj = Instantiate(repository2.singleton.arrowForward, where, Quaternion.identity);
         newObj.transform.localScale = scale * newObj.transform.localScale;
 
         newObj.transform.parent = inputObject.transform;
-
+        return newObj;
     }
 
     public void addArrowUp(GameObject inputObject, float scale = 1f, float xOffset = 0f, float yOffset = 0f, float zOffset = 0f)
@@ -661,10 +661,12 @@ public class testStealthNPC
 
         //new FSMgen(newObj, new pursueThreatLastKnownLocation(team));
         //new FSMgen(newObj, new goToTargetPicker(new pickNextWhenTargetReached(newObj, new randomNearbyLocationTargetPicker(newObj))));//new randomHidingLocationTargetPicker(newObj,team)));
-        new FSMgen(newObj, new goToTargetPicker(
-            new pickNextWhenTargetReached(newObj, new randomHidingLocationTargetPicker(newObj, team))));//new randomHidingLocationTargetPicker(newObj,team)));
+        //new FSMgen(newObj, new goToTargetPicker(
+        //new pickNextWhenTargetReached(newObj, new randomHidingLocationTargetPicker(newObj, team))));//new randomHidingLocationTargetPicker(newObj,team)));
         //new FSMgen(newObj, new equipIntertypeXFSM(interType.peircing), new interactUsingInterTypeXOnTargetYPlugin(interType.peircing, team));
-
+        new FSMgen(newObj, new goToTargetPicker(
+            new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination(newObj, team,
+            new randomHidingLocationTargetPicker(newObj, team, 10)))));
     }
 
 

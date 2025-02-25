@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Presets;
@@ -175,7 +176,7 @@ public class randomHidingLocationTargetPicker : targetPicker
         objectToBeNear = objectToBeNearIn;
         this.team = teamIn;
         spreadFactor = spreadFactorIn;
-        visibilityCalc = new visibleToThreatSet(objectToBeNearIn, threatSet(objectToBeNearIn));//objectToBeNearIn.GetComponent<beleifs>().beleifObjectSets[0]); //very ad-hoc
+        visibilityCalc = new visibleToThreatSet(objectToBeNearIn, threatSet(objectToBeNearIn), 0.05f);//objectToBeNearIn.GetComponent<beleifs>().beleifObjectSets[0]); //very ad-hoc
     }
 
     private objectSetGrabber threatSet(GameObject theObject)
@@ -208,17 +209,26 @@ public class randomHidingLocationTargetPicker : targetPicker
         //agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
         //return targ;
 
+
+
+        //attempt to stop raycast from hitting this object:
+        //objectToBeNear.GetComponent<Collider>().enabled = false;
         Vector3 hidingSpot = new Vector3();
         int tries = 25;
         while(tries > 0)
         {
             hidingSpot = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
 
-            if (thisIsAnUndetectableLocation(hidingSpot)==false) { return new agnosticTargetCalc(hidingSpot); }
+            if (thisIsAnUndetectableLocation(hidingSpot)==false)
+            {
+                //objectToBeNear.GetComponent<Collider>().enabled = true;
+                return new agnosticTargetCalc(hidingSpot); 
+            }
 
             tries--;
         }
 
+        //objectToBeNear.GetComponent<Collider>().enabled = true;
         return new agnosticTargetCalc(new Vector3(-1000,0,-1500)); //just to be obvious
 
         //int index = UnityEngine.Random.Range(0, nearbyHidingPositions.Count-1);
@@ -227,7 +237,17 @@ public class randomHidingLocationTargetPicker : targetPicker
 
     private bool thisIsAnUndetectableLocation(Vector3 hidingSpot)
     {
-        return visibilityCalc.sampleOnePoint(hidingSpot);
+        //to be more robust, let's test 3 offset locations around this point [and use "one drop visible rule"]
+        List<Vector3> offsets = new List<Vector3>();
+        offsets.Add(new Vector3(0, 0.1f, 0.9f));
+        offsets.Add(new Vector3(-0.7f, -0.1f, 0.6f));
+        offsets.Add(new Vector3(0.5f, 0.1f, -0.6f));
+        foreach (Vector3 offset in offsets)
+        {
+            if(visibilityCalc.sampleOnePoint(hidingSpot+ offset) == true) { return true; }
+        }
+
+        return false;
     }
 
     internal void updateSetOfNearbyHidingPositions()
@@ -244,6 +264,270 @@ public class randomHidingLocationTargetPicker : targetPicker
 
     }
 }
+
+
+
+
+
+
+public class makeStealthRouteToTargetPickerDestination : targetPicker
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 7f;
+    int recursionCounter = 0;
+    int recursionLimit = 135;
+
+    public makeStealthRouteToTargetPickerDestination(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
+    {
+        theSneaker = theSneakerIn;
+        team = teamIn;
+        theTargetPicker = theTargetPickerIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        ensureWeHaveGoodPath();
+
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+        currentPath = makeNewPath(theSneaker.transform.position, theTargetPicker.pickNext().realPositionOfTarget());
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        displayPath();
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        while(pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex-1], currentPath[pointIndex],Color.magenta,44);
+            pointIndex++;
+        }
+    }
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if(recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+        List<Vector3> lineOfPoints = new directionalLineOfPoints(startPoint,endPoint, samplePointSpacing).returnIt();
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+
+        int indexOfFirstBreak = findFirstBreak(samples);
+
+        //so, is there a break?
+        if(indexOfFirstBreak < 1) { return lineOfPoints; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint = firstDetourPoint(startPoint, lineOfPoints[indexOfFirstBreak]);
+
+        Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan,0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath = makeNewPath(startPoint, tentativeDetourPoint);
+        List<Vector3> fixedSecondHalfOfPath = makeNewPath(tentativeDetourPoint, endPoint);
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if(indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint-startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+    
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false) 
+            {
+
+                Debug.Log("return index:  "+index);
+                return index; 
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count+1;  //yes that's impossible.  need better way to handle
+    }
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath+1) { return false; }
+        
+
+
+
+        return true;
+    }
+}
+
+
+
+
+
+
+
 
 
 
@@ -2514,8 +2798,8 @@ public class makeBasicHuman: objectGen
 
         genGen.singleton.ensureVirtualGamePad(newObj);
 
-        genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
-
+        GameObject arrow = genGen.singleton.addArrowForward(newObj, 5f, 0f, 1.2f);
+        //arrow.GetComponent<Collider>().enabled = false;
 
         genGen.singleton.makeEnactionsWithTorsoArticulation1(thePlayable);
         genGen.singleton.makeInteractionsBody4(thePlayable);
