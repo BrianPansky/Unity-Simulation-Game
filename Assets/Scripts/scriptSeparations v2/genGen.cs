@@ -664,9 +664,10 @@ public class testStealthNPC
         //new FSMgen(newObj, new goToTargetPicker(
         //new pickNextWhenTargetReached(newObj, new randomHidingLocationTargetPicker(newObj, team))));//new randomHidingLocationTargetPicker(newObj,team)));
         //new FSMgen(newObj, new equipIntertypeXFSM(interType.peircing), new interactUsingInterTypeXOnTargetYPlugin(interType.peircing, team));
-        new FSMgen(newObj, new goToTargetPicker(
-            new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination(newObj, team,
-            new randomHidingLocationTargetPicker(newObj, team, 10)))));
+        
+        //new FSMgen(newObj, new goToTargetPicker(
+            //new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination(newObj, team,
+            //new randomHidingLocationTargetPicker(newObj, team, 10)))));
     }
 
 

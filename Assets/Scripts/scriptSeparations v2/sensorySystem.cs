@@ -137,6 +137,231 @@ public class sensorySystem : MonoBehaviour
 
 
 
+public class findSilhouetteBrightness
+{
+    public float calculate(Transform theViewer, GameObject theDarkObject, List<lightIlluminationCalculator> theLights)
+    {
+        //so:
+        //      [assume line of sight to the observer is already established]
+        //      AND at least one light source,
+        //      within range of both?
+
+
+        RaycastHit hitOffTheEdgeOfDarkObject = findAfterEdgeHit(theViewer.transform.position, theDarkObject);
+
+        float totalIllumination = evaluatePosition(hitOffTheEdgeOfDarkObject.point, theLights);
+
+
+        //Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
+        return totalIllumination;
+    }
+
+    private RaycastHit findAfterEdgeHit(Vector3 observerPosition, GameObject theDarkObject)
+    {
+        RaycastHit myHit = new RaycastHit();
+
+        
+        Vector3 theDirection = theDarkObject.transform.position - observerPosition;
+        Vector3 offsetDirection = horizontalPerpendicular(observerPosition, theDarkObject.transform.position).normalized;
+
+
+        int tries = 20;
+        int currentTry = 0;
+        float initialOffsetStep = 0.01f;
+        int directionChanger = 1;
+
+        Vector3 offset = offsetDirection * (initialOffsetStep + (initialOffsetStep * currentTry * currentTry));
+        theDirection = (theDarkObject.transform.position+ offset) - observerPosition;
+        Ray myRay = new Ray(observerPosition, theDirection);
+
+        while (currentTry < tries)
+        {
+            Physics.Raycast(myRay, out myHit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+            if(myHit.collider == null || myHit.collider.gameObject != theDarkObject)
+            {
+                //now, bisect [or other numerical methods] until edge threshhold is razor thin
+                Vector3 previousOffset = offsetDirection * (initialOffsetStep + (initialOffsetStep * (currentTry-1) * (currentTry - 1)*-directionChanger));
+
+                return findHitAfterEdgeUsingBisection(theDarkObject, observerPosition, offset, previousOffset);
+            }
+
+            currentTry++;
+            directionChanger = -directionChanger;
+            offset = offsetDirection * (initialOffsetStep + (initialOffsetStep * currentTry * currentTry* directionChanger)); //double negative for reversal
+            theDirection = (theDarkObject.transform.position + offset) - observerPosition;
+            myRay = new Ray(observerPosition, theDirection);
+        }
+
+        return myHit;
+    }
+
+
+
+    private Vector3 findMidpoint(Vector3 startPoint, Vector3 endpoint)
+    {
+        Vector3 lineBetween = endpoint - startPoint;
+        float spanLength = lineBetween.magnitude / 2;
+        Vector3 span = (lineBetween.normalized * spanLength);
+        Vector3 midpoint = startPoint + span;
+
+        return midpoint;
+    }
+
+
+
+    private RaycastHit findHitAfterEdgeUsingBisection(GameObject theDarkObject, Vector3 observerPosition, Vector3 offset, Vector3 previousOffset)
+    {
+        RaycastHit myHit = new RaycastHit();
+
+        int tries = 20;
+        int currentTry = 0;
+
+
+
+        //so.  what do we do?
+        //      test midpoint
+        //          if its the input object, test next midpoint between that point and the point that didn't hit that object
+        //          if not, test between it and the one that DID hit the object
+        //      measure remaining gap
+        //      stop after number of tries OR gap becomes negligible in magnitude
+        Vector3 thePointThatDIDHitTheDarkObject = theDarkObject.transform.position + previousOffset;
+        Vector3 thePointThatWentPastTheEdge = theDarkObject.transform.position + offset;
+
+
+
+        while (currentTry < tries)
+        {
+            Vector3 midpoint = findMidpoint(thePointThatDIDHitTheDarkObject, thePointThatWentPastTheEdge);
+            //Vector3 offset = offsetDirection * (initialOffsetStep + (initialOffsetStep * currentTry * currentTry));
+            Vector3 theDirection = midpoint - observerPosition;
+            Ray myRay = new Ray(observerPosition, theDirection);
+
+            Physics.Raycast(myRay, out myHit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+            if (myHit.collider == null || myHit.collider.gameObject != theDarkObject)
+            {
+                //so we went past the edge
+                //so this will be our NEW "went past the edge" point:
+                thePointThatWentPastTheEdge = midpoint;
+
+                //now repeat
+            }
+            else
+            {
+                //so we hit the dark object
+                //so this will be our NEW "hit dark object" point:
+                thePointThatDIDHitTheDarkObject = midpoint;
+
+                //now repeat
+            }
+
+
+            if (successfulEdgeEstimation(thePointThatWentPastTheEdge, thePointThatDIDHitTheDarkObject) == true) 
+            { 
+                return myHit; 
+            }
+
+            currentTry++;
+        }
+
+
+        return myHit;
+    }
+
+    private bool successfulEdgeEstimation(Vector3 thePointThatWentPastTheEdge, Vector3 thePointThatDIDHitTheDarkObject)
+    {
+        //see if distance between the two points is smaller than the desired threshhold:
+        float threshhold = 0.01f;
+
+        return ((thePointThatWentPastTheEdge- thePointThatDIDHitTheDarkObject).magnitude < threshhold);
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    public float evaluatePosition(Vector3 thePosition, List<lightIlluminationCalculator> theLights)
+    {
+        float totalIllumination = 0f;
+
+
+
+
+        //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,evaluateObject");
+        foreach (lightIlluminationCalculator thisLight in theLights)
+        {
+            //Debug.Log("thisLight:  " + thisLight);
+            float intensityToAdd = thisLight.evaluate(thePosition);
+            //Debug.Log("intensityToAdd:  " + intensityToAdd);
+            totalIllumination += intensityToAdd;
+        }
+
+
+        //so:
+        //      [assume line of sight to the observer is already established]
+        //      AND at least one light source,
+        //      within range of both
+
+
+        /*
+
+        float totalIllumination = 0f;
+
+        //Debug.Log(",,,,,,,,,,,,,,,,,,,,,,,,evaluateObject");
+        foreach (GameObject thisLight in lightSourceGrabber.grab())
+        {
+            //Debug.Log("thisLight:  " + thisLight);
+            float intensityToAdd = thisLight.GetComponent<lightIlluminationCalculator>().evaluate(thePosition);
+            //Debug.Log("intensityToAdd:  " + intensityToAdd);
+            totalIllumination += intensityToAdd;
+        }
+
+
+        */
+
+
+        //Debug.Log("^^^^^^^^^^^totalIllumination:  " + totalIllumination);
+        return totalIllumination;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class boolDataSet
+{
+    List<Vector3> spatialPointSet = new List<Vector3>();
+    List<bool> boolSet = new List<bool>();
+
+    public void add(Vector3 point, bool theBool)
+    {
+        spatialPointSet.Add(point);
+        boolSet.Add(theBool);
+    }
+}
+
+
 public class spatialDataSet
 {
     //want to be able to:
@@ -197,6 +422,7 @@ public interface boolSampleProcedure// : sampleProcedure
 {
     List<bool> sample(List<Vector3> spatialPointSet);
 
+    bool sampleOne(Vector3 spatialPoint);
 }
 
 
@@ -289,6 +515,11 @@ public abstract class stealthArmaturableSampleProcedure: spatialDataSampleProced
 
 
         return false;
+    }
+
+    public bool sampleOne(Vector3 spatialPoint)
+    {
+        return sampleOnePoint(spatialPoint);
     }
 
     internal abstract bool oneSubPoint(Vector3 subPoint);
@@ -523,9 +754,12 @@ public class visualSensor1 : sensor
     private Transform theVisualSenseApparatus;  //hmmm, should be built-in to the criteria etc?
     
     public objectSetGrabber baseSetGrabberBeforeSensing;  //just a list to "whittle down", sort, etc
-    private objectCriteria basicSensingFilterCriteria;  //use this to FILTER before bothering with more complex computations of "detectability"?  include a condition/criteria to check if the object has "request stealth" set to true ...no that will be a pivot criteria, a "do full computation" criteria
-    private objectCriteria advancedSensingAdditionalFilterCriteria;
-    private objectEvaluator detectabilityEvaluator;  //the more complex calculations will likely go here?
+    private objectCriteria basicTagProxAndFOVFilterCriteria;  //use this to FILTER before bothering with more complex computations of "detectability"?  include a condition/criteria to check if the object has "request stealth" set to true ...no that will be a pivot criteria, a "do full computation" criteria
+    private objectCriteria lineOfSightCriteria;
+    private objectCriteria lineOfSightToShadowCriteria;
+    private objectCriteria visibleSilhouetteCriteria;
+    private objectCriteria advancedSensingRequestingStealthCriteria;
+    private objectEvaluator objectIlluminationDetectabilityEvaluator;  //the more complex calculations will likely go here?
     //private objectSetGrabber setOfSensedObjects;  //is this a good way to do things???????  buuuut it's "boolean"?  well, ya, a cutoff of evaluation float numbers either adds it here or doesn't.  you don't half-react to a threat....or do you?  if you are unsure WHAT it is, etc.......that's INTERPRETATION, happens LATER.  but does mean we may want to output/store the evaluator float, and any other data, not just the objects
     //public sensoryOutput theOutput;//????
     private beleifs theBeleifs;
@@ -540,11 +774,14 @@ public class visualSensor1 : sensor
         theBeleifs = theBeleifsIn;
         thePerceptions = theObject.GetComponent<perceptions>();
         baseSetGrabberBeforeSensing = new setOfAllObjectsInZone(theObject);
-        basicSensingFilterCriteria = new objectMeetsAllCriteria(
+        basicTagProxAndFOVFilterCriteria = new objectMeetsAllCriteria(
             new reverseCriteria(new objectHasTag(excludeThisTagIn)),
-            new lineOfSight(theObject, theVisualRangeIn));
-        advancedSensingAdditionalFilterCriteria = new requestingStealthCriteria();
-        detectabilityEvaluator = new detectabilityIlluminationEvaluator1(theObject);
+            new proximityCriteriaBool(theObject, theVisualRangeIn),
+            new objectVisibleInFOV(theObject.transform)
+            ); 
+        lineOfSightCriteria = new lineOfSight(theObject, theVisualRangeIn);
+        advancedSensingRequestingStealthCriteria = new requestingStealthCriteria();
+        objectIlluminationDetectabilityEvaluator = new detectabilityIlluminationEvaluator1(theObject);
     }
 
     public void sense()
@@ -559,60 +796,158 @@ public class visualSensor1 : sensor
 
         List<GameObject> newList = new List<GameObject>();
 
+        List < lightIlluminationCalculator > listOfLights = getLights();
 
         foreach (GameObject thisObject in baseSetGrabberBeforeSensing.grab())
         {
-            //basic filter [line of sight]
-            //then choice of what next
-            //      either nothing, auto-detection,
-            //      or (if "requested"), stealth cmputatiions
-
-            //Debug.Log("foreach");
-
-            if (basicSensingFilterCriteria.evaluateObject(thisObject) == false) { continue; }
-
-
-            //Debug.Log("basicSensingFilterCriteria met");
-
-            if (advancedSensingAdditionalFilterCriteria.evaluateObject(thisObject) == false)
+            if (objectDetection(thisObject, listOfLights))
             {
-                //theBeleifs.weDetectedThisObject(thisObject);
-                //thePerceptions.weDetectedThisObject(thisObject);
+                //Debug.Log("newList.Add(thisObject);");
                 newList.Add(thisObject);
-                continue; 
             }
-
-            //Debug.Log("advancedSensingAdditionalFilterCriteria met");
-
-            //List<GameObject> stealthArmature = thisObject.GetComponentsInChildren<GameObject>();
-            List<GameObject> theStealthArmature = getStealthArmature(thisObject);
-
-
-            float intensity = 0f;
-            //for now, just "detect" if any ONE "body part" reaches detectability threshhold
-            foreach (GameObject thisPart in theStealthArmature)
-            {
-                intensity = detectabilityEvaluator.evaluateObject(thisPart);
-                //Debug.Log("intensity:  " + intensity);
-                //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
-
-                if (intensity < illuminationIntensityThresholdForDetection)
-                {
-                    continue;
-                }
-
-                //Debug.Log("weDetectedThisObject:  " + thisObject);
-                //theBeleifs.weDetectedThisObject(thisObject);
-                //thePerceptions.weDetectedThisObject(thisObject);
-                newList.Add(thisObject);
-                break;
-            }
-            //newList.Add(tagging2.singleton.idPairGrabify(thisObject));
-            //theBeleifs.sensoryInput(newList);
         }
 
         thePerceptions.sensoryInput(newList);
         theBeleifs.sensoryInput(newList);
+    }
+
+    private bool objectDetection(GameObject thisObject, List<lightIlluminationCalculator> listOfLights)
+    {
+
+        //basic filter [tag, range, FOV]
+        //then, different ways to detect, starting with computationally easiest to eliminate?????:
+        //[for each stealth armature peice]
+        //      line of sight:
+        //          not requesting stealth = detected
+        //          requesting stealth:                                         [ADD TO ADVANCED LINE OF SIGHT LIST (no don't use list that would result in calculating items on list even if other steps already detected them?) AND PROCESS AFTER SHADOWS, WHICH ARE EASIER I THINK???  AT LEAST FOR SILHOUETTE, MAYBE TINY BIT EASIER THAN ILLUMINATION BECAUSE NO QUANTITY CALCULATION WELL NO I HAVE TO COMPARE DIFFERENCE IN BRIGHTNESS FOR SHADOW SOOO MAYBE DO REGULAR ILLUMINATION BEFORE SHADOWS]
+        //              direct illumination = detected
+        //              shadow visible = detected
+        //              silhouette = detected
+        //              CONTINUE LOOP [don't do shadows AGAIN if they requested stealth]
+        //      shadow visible = detected
+
+
+        //Debug.Log("foreach");
+
+        if (basicTagProxAndFOVFilterCriteria.evaluateObject(thisObject) == false) { return false; }
+
+        if (advancedSensingRequestingStealthCriteria.evaluateObject(thisObject) == false)//hmm, doesn't work for armature PART???
+        {
+            //not requesting stealth = detected
+            //Debug.Log("return true, advancedSensingRequestingStealthCriteria = FALSE");
+            return true;
+        }
+
+
+        List<GameObject> theStealthArmature = getStealthArmature(thisObject);
+        foreach (GameObject thisPart in theStealthArmature)
+        {
+            bool theBool = evaluateArmaturePart(thisPart, listOfLights);
+            //Debug.Log("theBool:  "+ theBool);
+
+            if (theBool == true) {  return true; }
+        }
+        //Debug.Log("return false;");
+        return false;
+    }
+
+    private bool evaluateArmaturePart(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)
+    {
+        //[for each stealth armature peice]
+        //      line of sight:
+        //          not requesting stealth = detected
+        //          requesting stealth:                                         [ADD TO ADVANCED LINE OF SIGHT LIST (no don't use list that would result in calculating items on list even if other steps already detected them?) AND PROCESS AFTER SHADOWS, WHICH ARE EASIER I THINK???  AT LEAST FOR SILHOUETTE, MAYBE TINY BIT EASIER THAN ILLUMINATION BECAUSE NO QUANTITY CALCULATION WELL NO I HAVE TO COMPARE DIFFERENCE IN BRIGHTNESS FOR SHADOW SOOO MAYBE DO REGULAR ILLUMINATION BEFORE SHADOWS]
+        //              direct illumination = detected
+        //              shadow visible = detected
+        //              silhouette = detected
+        //              CONTINUE LOOP [don't do shadows AGAIN if they requested stealth]
+        //      shadow visible = detected
+
+
+
+
+        if (lineOfSightCriteria.evaluateObject(thisPart) == false)
+        {
+            //      line of sight:  no
+            //      shadow visible = detected
+            //Debug.Log("return shadowVisible(thisPart,listOfLights);:  " + shadowVisible(thisPart, listOfLights));
+            return shadowVisible(thisPart,listOfLights);//lineOfSightToShadowCriteria.evaluateObject(thisPart);
+        }
+
+
+
+
+        //          requesting stealth:                                         [ADD TO ADVANCED LINE OF SIGHT LIST(no don't use list that would result in calculating items on list even if other steps already detected them?) AND PROCESS AFTER SHADOWS, WHICH ARE EASIER I THINK???  AT LEAST FOR SILHOUETTE, MAYBE TINY BIT EASIER THAN ILLUMINATION BECAUSE NO QUANTITY CALCULATION WELL NO I HAVE TO COMPARE DIFFERENCE IN BRIGHTNESS FOR SHADOW SOOO MAYBE DO REGULAR ILLUMINATION BEFORE SHADOWS]
+        //              direct illumination = detected
+        //              shadow visible = detected
+        //              silhouette = detected
+        //              CONTINUE LOOP [don't do shadows AGAIN if they requested stealth]
+
+        if (directIllumination(thisPart, listOfLights) == true) { return true; }
+        if (shadowVisible(thisPart, listOfLights) == true) { return true; }
+        if (silhouetteVisible(thisPart, listOfLights) == true) { return true; }
+
+
+
+        //Debug.Log("reached end, return FALSE");
+        return false;
+    }
+
+    private bool shadowVisible(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)
+    {
+        //return lineOfSightToShadowCriteria.evaluateObject(thisPart);
+
+        //project a shadow point from armature part
+        //look for line of sight to shadow
+        //maybe calculate the relative darkness of shadow compared to that point if there WAS no shadow
+        return false;
+    }
+
+    private bool silhouetteVisible(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)
+    {
+        //return visibleSilhouetteCriteria.evaluateObject(thisPart);
+
+        //raycast to the sides in tiny (exponential?) increments
+        //[add small vector to armature part position, DON'T use angles]
+        //first thing you hit that is NOT the same game object, test illumination THERE
+        //[well, not first thing.  FIRST make sure you go back to fine-grained to make SURE you found THE edge]
+        //if bright enough, that means silhouette! [assume object is dark]
+
+        bool theBool = (new findSilhouetteBrightness().calculate(theVisualSenseApparatus, thisPart, listOfLights) > 0.2f);
+        Debug.Log("return silhouetteVisible:  " +theBool);
+
+        return theBool;
+    }
+
+    private bool directIllumination(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)
+    {
+        float intensity = 0f;
+
+        //for now, just "detect" if any ONE "body part" reaches detectability threshhold
+        intensity = objectIlluminationDetectabilityEvaluator.evaluateObject(thisPart);
+        //Debug.Log("intensity:  " + intensity);
+        //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
+
+
+        Debug.Log("return (intensity > illuminationIntensityThresholdForDetection)" + (intensity > illuminationIntensityThresholdForDetection));
+
+        return (intensity > illuminationIntensityThresholdForDetection);
+    }
+
+
+    private List<lightIlluminationCalculator> getLights()
+    {
+        //for now:
+        List < GameObject > lightObjects = new setOfAllObjectsWithTag(tag2.lightSource).grab();
+
+        List<lightIlluminationCalculator> newList = new List<lightIlluminationCalculator>();
+
+        foreach(GameObject thisObject in lightObjects)
+        {
+            newList.Add(thisObject.GetComponent<lightIlluminationCalculator>());
+        }
+
+        return newList;
     }
 
     private List<GameObject> getStealthArmature(GameObject thisObject)

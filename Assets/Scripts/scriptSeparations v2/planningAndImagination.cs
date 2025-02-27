@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
@@ -21,6 +22,142 @@ public class planningAndImagination : MonoBehaviour
 
 
 }
+
+
+
+
+
+public abstract class pathFinder
+{
+    //currently only for flat surfaces!
+
+    internal GameObject theTraveler;
+    internal Vector3 desiredEndpoint;
+    internal boolSampleProcedure pointEvaluator;
+
+    internal float smallestLengthToTest = 1f;
+    internal int recursionCounter = 0;
+    internal int recursionLimit = 5;
+
+    public abstract List<Vector3> findPath();
+
+
+    internal void displayPath(List<Vector3> thePath)
+    {
+        int pointIndex = 1;
+
+        while (pointIndex < thePath.Count)
+        {
+            Debug.DrawLine(thePath[pointIndex - 1], thePath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(thePath[pointIndex], thePath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+}
+
+public class coarseMaze1 : pathFinder
+{
+    // true = good, acceptable navigation point
+    boolDataSet cachedData;
+
+    Vector3 gridSpan;
+    float gridSpanLength;
+
+    public coarseMaze1(GameObject theTravelerIn, Vector3 desiredEndpointIn, boolSampleProcedure pointEvaluatorIn)
+    {
+        theTraveler = theTravelerIn;
+        desiredEndpoint = desiredEndpointIn;
+        pointEvaluator = pointEvaluatorIn;
+
+
+        cachedData = new boolDataSet();
+    }
+
+    public override List<Vector3> findPath()
+    {
+        recursionCounter = 0;
+        return findCoarseMaze1(theTraveler.transform.position, desiredEndpoint);
+    }
+
+    private List<Vector3> findCoarseMaze1(Vector3 startPoint, Vector3 endpoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+
+        Vector3 midpoint = findInitialMidpoint(startPoint, endpoint);
+        bool evaluatePoint = pointEvaluator.sampleOne(midpoint);
+        cachedData.add(midpoint, evaluatePoint);
+
+        if(evaluatePoint == true) { return threeSet(startPoint, midpoint, endpoint); }
+
+        Vector3 perpendicular = horizontalPerpendicular(startPoint, midpoint);
+        Vector3 firstPerpendicularGoodPoint = firstGoodPointOutOfTwoDirections(midpoint, perpendicular);
+
+        return threeSet(startPoint, firstPerpendicularGoodPoint, endpoint);  //????  good enough for this one???
+    }
+
+    private Vector3 firstGoodPointOutOfTwoDirections(Vector3 startPoint, Vector3 span)
+    {
+        int attemptNumber = -1;  //[use negatives to reverse direction]
+
+        Vector3 newPoint = new Vector3();
+
+        while (attemptNumber < 20)
+        {
+            newPoint = startPoint + span * attemptNumber*(-attemptNumber);
+            bool evaluatePoint = pointEvaluator.sampleOne(newPoint);
+            cachedData.add(newPoint, evaluatePoint);
+
+            if(evaluatePoint == true) { return newPoint; }
+        }
+
+        return newPoint;  //....eh...
+    }
+
+    private List<Vector3> threeSet(Vector3 startPoint, Vector3 midpoint, Vector3 endpoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(midpoint);
+        newList.Add(endpoint);
+
+        return newList;
+    }
+
+    private Vector3 findInitialMidpoint(Vector3 startPoint, Vector3 endpoint)
+    {
+        Vector3 lineBetween = endpoint - startPoint;
+        gridSpanLength = lineBetween.magnitude / 2;
+        gridSpan = (lineBetween.normalized * gridSpanLength);
+        Vector3 midpoint = startPoint + gridSpan;
+
+        return midpoint;
+    }
+
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
 
 public class makeImaginary
 {

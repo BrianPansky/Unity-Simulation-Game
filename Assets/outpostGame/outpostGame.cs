@@ -291,7 +291,7 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
     boolSampleProcedure theSampleProcedure;
     float samplePointSpacing = 7f;
     int recursionCounter = 0;
-    int recursionLimit = 135;
+    int recursionLimit = 5;
 
     public makeStealthRouteToTargetPickerDestination(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
     {
@@ -320,7 +320,51 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
         recursionCounter = 0;
         currentPath = makeNewPath(theSneaker.transform.position, theTargetPicker.pickNext().realPositionOfTarget());
         //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
         displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while(currentIndex < currentPath.Count)
+        {
+            if(recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count-1;
+        while(currentIndex >-1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if(distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
     }
 
     internal void displayPath()
@@ -329,7 +373,8 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
 
         while(pointIndex < currentPath.Count)
         {
-            Debug.DrawLine(currentPath[pointIndex-1], currentPath[pointIndex],Color.magenta,44);
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex]+new Vector3(0,1,0), Color.yellow, 44);
             pointIndex++;
         }
     }
@@ -349,7 +394,7 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
         int indexOfFirstBreak = findFirstBreak(samples);
 
         //so, is there a break?
-        if(indexOfFirstBreak < 1) { return lineOfPoints; }//this means there is no break, so the line is good on its own
+        if(indexOfFirstBreak < 1) { return justStartAndEnd(startPoint,endPoint); }//this means there is no break, so the line is good on its own
 
 
         //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
@@ -412,6 +457,14 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
         List<Vector3> fixedSecondHalfOfPath = makeNewPath(tentativeDetourPoint, endPoint);
         return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
         //return lineOfPoints;
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
     }
 
     private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)

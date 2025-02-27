@@ -1950,6 +1950,7 @@ public class stickyTrueCriteria : objectCriteria
 
 public class objectVisibleInFOV : objectCriteria, positionCriteria
 {
+    //FOV = "feild of view" or "field of view".  we assume line of sight is clear
     float horizontalAngleRange = 90f;
     float verticalAngleRange = 60f;
     Transform theSensoryTransform;
@@ -2442,6 +2443,7 @@ public class lineOfSight : objectCriteria, positionCriteria
         return true;
     }
 }
+
 
 
 public class intertypeXisOnObject : objectCriteria
