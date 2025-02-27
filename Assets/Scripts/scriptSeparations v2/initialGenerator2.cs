@@ -228,11 +228,11 @@ public class initialGenerator2 : MonoBehaviour
 
         //new globalLightGenerator1(new Vector3(5, 15, 10),0.006f).doIt();
 
-        new pointLightGenerator1(new Vector3(530 * 0.3f, 2, 300 * 0.5f), 30).doIt();
+        new pointLightGenerator1(new Vector3(530 * 0.3f, 3, 300 * 0.5f), 70).doIt();
         //new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
         //new testStealthDetectorGuardWithBeleifMarkers(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
         new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
-        new testStealthNPC(tag2.team3, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
+        //      new testStealthNPC(tag2.team3, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
 
         //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, 67), 50, 160, 0.9f).doIt();
         //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, -67), 50, 160, 0.9f).doIt();

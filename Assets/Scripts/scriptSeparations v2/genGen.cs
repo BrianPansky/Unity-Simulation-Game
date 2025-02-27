@@ -759,7 +759,7 @@ internal class interactUsingInterTypeXOnTargetYPlugin : simpleOneStateAndReturn
     {
         //get all from perception, then filter basic threat criteria
         return new setOfAllObjectThatMeetCriteria(theObjectDoingTheEnaction.GetComponent<perceptions>().setOfAllCurrentlySensedObjects,
-            new objectMeetsAllCriteria(new hasVirtualGamepad(), new reverseCriteria(new objectHasTag(team))));
+            new objectMeetsAllCriteria(new hasVirtualGamepad(), new reverseCriteria(new objectHasTag(team)), new lineOfSight(theObjectDoingTheEnaction)));
     }
 
     public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
@@ -1256,14 +1256,35 @@ public class lightIlluminationCalculator : MonoBehaviour
         return theSubTypeCalculator.evaluate(thePoint);
     }
 
+    internal bool boolIllumination(GameObject theObject)
+    {
+        return theSubTypeCalculator.boolIllumination(theObject);
+    }
+
+    internal float evaluateShadowless(Vector3 thePoint)
+    {
+        return theSubTypeCalculator.evaluateShadowless(thePoint);
+    }
+
+    internal Vector3 shadowPoint(GameObject theObject)
+    {
+        //we assume all other conditions [such as feild of view] have been met, so sub-type doesn't matter here
+        //wait, range could still cut off SHADOW, sooo....
+
+        return theSubTypeCalculator.shadowPoint(theObject);
+        
+    }
 }
 
 
 
 public interface lightSourceTypeCalculator
 {
+    bool boolIllumination(GameObject theObject);
     float evaluate(GameObject theObject);
     float evaluate(Vector3 thePoint);
+    float evaluateShadowless(Vector3 thePoint);
+    Vector3 shadowPoint(GameObject theObject);
 }
 
 public class pointLightTypeCalculator : lightSourceTypeCalculator
@@ -1298,16 +1319,11 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
         //return zero if there is no line of sight
         if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
 
-        if (theRange < 0)
-        {
-            //this means infinite range.  just return intensity
-            return theIntensity;
-        }
 
-        return thisComplexCalculation(theObject);
+        return evaluateShadowless(theObject);
     }
 
-    private float thisComplexCalculation(GameObject theObject)
+    public float evaluateShadowless(GameObject theObject)
     {
         float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
 
@@ -1318,7 +1334,7 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
         return illumination;
     }
 
-    private float thisComplexCalculation(Vector3 thePoint)
+    public float evaluateShadowless(Vector3 thePoint)
     {
         Vector3 vectorBetween = thePoint - theLightEmittingObject.transform.position;
         float distance = vectorBetween.magnitude;
@@ -1369,8 +1385,41 @@ public class pointLightTypeCalculator : lightSourceTypeCalculator
             return theIntensity;
         }
 
-        return thisComplexCalculation(thePoint);
+        return evaluateShadowless(thePoint);
     }
+
+    public bool boolIllumination(GameObject theObject)
+    {
+        //return false if there is no line of sight
+        if (lineOfSight.evaluateObject(theObject) == false) { return false; }
+
+        float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
+
+        return (distance < theRange);
+    }
+
+    public Vector3 shadowPoint(GameObject theObject)
+    {
+        Vector3 theDirection = theObject.transform.position - theLightEmittingObject.transform.position;
+
+        RaycastHit myHit;
+
+        Ray myRay = new Ray(theObject.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject != null)
+            {
+                return myHit.point;
+            }
+        }
+
+        //i never know how to handle the fail states, especially when it CAN'T be null:
+        return new Vector3(43210, -1234, -5678);// theObject.transform.position + theDirection * 10000;  //hopefully sensor range rules out "seeing" this non-shadow???
+
+    }
+
 }
 
 public class directionalLightTypeCalculator : lightSourceTypeCalculator
@@ -1434,6 +1483,38 @@ public class directionalLightTypeCalculator : lightSourceTypeCalculator
 
         return theIntensity;
     }
+
+    public bool boolIllumination(GameObject theObject)
+    {
+        return fakeLineOfSight(theObject.transform.position);
+    }
+
+    public Vector3 shadowPoint(GameObject theObject)
+    {
+        Vector3 theDirection = theObject.transform.position - theLightEmittingObject.transform.position;
+
+        RaycastHit myHit;
+
+        Ray myRay = new Ray(theLightEmittingObject.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theFakeInfiniteRangeForRaycast, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject != null)
+            {
+                return myHit.point;
+            }
+        }
+
+        //i never know how to handle the fail states, especially when it CAN'T be null:
+        return new Vector3(43210, -1234, -5678);// theObject.transform.position + theDirection * theFakeInfiniteRangeForRaycast;  //hopefully sensor range rules out "seeing" this non-shadow???
+
+    }
+
+    public float evaluateShadowless(Vector3 thePoint)
+    {
+        return theIntensity;
+    }
 }
 
 
@@ -1475,10 +1556,10 @@ public class spotLightTypeCalculator : lightSourceTypeCalculator
         if (lineOfSight.evaluateObject(theObject) == false) { return 0f; }
         if (theFOVCriteria.evaluateObject(theObject) == false) { return 0f; }
 
-        return thisComplexCalculation(theObject);
+        return evaluateShadowless(theObject);
     }
 
-    private float thisComplexCalculation(GameObject theObject)
+    public float evaluateShadowless(GameObject theObject)
     {
         float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
 
@@ -1488,7 +1569,7 @@ public class spotLightTypeCalculator : lightSourceTypeCalculator
 
         return illumination;
     }
-    private float thisComplexCalculation(Vector3 thePoint)
+    public float evaluateShadowless(Vector3 thePoint)
     {
         Vector3 vectorBetween = thePoint - theLightEmittingObject.transform.position;
         float distance = vectorBetween.magnitude;
@@ -1532,7 +1613,42 @@ public class spotLightTypeCalculator : lightSourceTypeCalculator
         if (lineOfSight.evaluatePosition(thePoint) == false) { return 0f; }
         if (theFOVCriteria.evaluatePosition(thePoint) == false) { return 0f; }
 
-        return thisComplexCalculation(thePoint);
+        return evaluateShadowless(thePoint);
+    }
+
+    public bool boolIllumination(GameObject theObject)
+    {
+        if (lineOfSight.evaluateObject(theObject) == false) { return false; }
+
+
+        float distance = new proximityCalculator(theLightEmittingObject, theObject).calculate();
+
+        if (distance > theRange) { return false; }
+
+        return theFOVCriteria.evaluateObject(theObject);
+    }
+
+    public Vector3 shadowPoint(GameObject theObject)
+    {
+        //assume FOV already taken into accounr prior to this function call
+        Vector3 theDirection = theObject.transform.position - theLightEmittingObject.transform.position;
+
+        RaycastHit myHit;
+
+        Ray myRay = new Ray(theLightEmittingObject.transform.position, theDirection);
+
+
+        if (Physics.Raycast(myRay, out myHit, theRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (myHit.collider.gameObject != null)
+            {
+                return myHit.point;
+            }
+        }
+
+        //i never know how to handle the fail states, especially when it CAN'T be null:
+        return new Vector3(43210, -1234, -5678);// theObject.transform.position + theDirection * 10000;  //hopefully sensor range rules out "seeing" this non-shadow???
+
     }
 }
 

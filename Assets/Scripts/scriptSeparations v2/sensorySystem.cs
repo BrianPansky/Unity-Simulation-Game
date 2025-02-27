@@ -135,7 +135,76 @@ public class sensorySystem : MonoBehaviour
 
 
 
+public class findRelativeShadowBrightnessPercentage
+{
+    public float calculate(Transform theViewer, float viewerSightRange, GameObject theShadowcasterObject, List<lightIlluminationCalculator> theLights)
+    {
+        //100% means no shadow, same brigthness. 95% is faint shadow, not much difference in brightness.
+        //then return as decimal instead of "percent"
 
+        //raycast from armature parts away from light sources it has line of sight to
+        //get point on environment or whatever where that shadow would fall
+        //calculate:
+        //      current illumination of that shadow point
+        //      calculate what illumination that point WOULD have if it wasn't for this current individual light source...ehhh but what if it's a bunch of dim lights clustered together making same shadow?  do i need to do all together???  how?  hmmm...
+        //          maybe for each "shadow point" we DO need to construct from each light source?  wait, WOULD the above problem cause a false result EVER?  well, faint ones makes relative small....umm...
+        //          RIGHT!  just add up the relative difference for ALL light sources.  then that FINAL relative difference is the answer? will it always be between zero and one?  will it all be the same scale?  
+        //i dunno, could i cut corners for now and just do a bool, not a float?
+
+        //hmmm, but i don't have a way to calculate hypothetical lighting.  i need a way to calculate what it WOULD be with no shadows.  easy to add to lights?
+        //buuuut no, it's not "without shadows".  other shadows matter!  just not the shadows of the stealth object.  hmm.
+        //so, make an "evaluate EXCLUDING input object"?  i guess that's what i need...
+        //mmm, but, as with their pathfinding, i don't know how to disable one object from raycasts.
+        //soo, have to FIRST ensure light DOES hit the armature object?  ya.  of course.  ok
+
+        //so:
+        //      make sure there is line of sight from light to armature object [or did i do that in a previous filter step?]
+        //      calculate "shadowless"
+        //      calculate WITH shadow
+        //      get percent of one from the other
+        //      do that for all lights, add up the percentages?  do these percentages add up?  just assume they do
+        //      return aggregate percent [as decimal], ya.
+
+        //wait, i'm adding them UP starting from ZERO?
+        //so, invisible faint shadow will return a result closer to zero than to 1?
+        //aaaaand can't do percent, because shadow can have zero illumination.  just add illumination?  why was i bothering with percent?
+
+        Vector3 shadowPoint;
+        float totalBrightnessChange = 0;
+        float illuminationWithShadow = 0;
+        float illuminationWITHOUTShadow = 0;
+
+        foreach (var light in theLights)
+        {
+            //Debug.Log(":::::::::::::::::::::::::::::::::::::::");
+            if (light.boolIllumination(theShadowcasterObject) == false) { continue; }
+
+            shadowPoint = light.shadowPoint(theShadowcasterObject);
+            //Debug.Log("shadowPoint :  " + shadowPoint);
+            if (shadowPoint == new Vector3(43210, -1234, -5678)) { continue; }  //this means "null"
+
+            //draw line to shadow point:
+            //      Debug.DrawLine(theViewer.transform.position, shadowPoint,Color.magenta,2f);
+
+            //need line of sight from viewer to shadow!
+            bool theLineOfSightFromViewerToShadow = new lineOfSight(theViewer.gameObject, viewerSightRange).evaluatePosition(shadowPoint);
+            //Debug.Log("theLineOfSightFromViewerToShadow :  " + theLineOfSightFromViewerToShadow);
+            if (theLineOfSightFromViewerToShadow == false) { continue; }
+
+            illuminationWithShadow = light.evaluate(shadowPoint);
+            illuminationWITHOUTShadow = light.evaluateShadowless(shadowPoint);
+
+            //Debug.Log("illuminationWithShadow :  " + illuminationWithShadow);
+            //Debug.Log("illuminationWITHOUTShadow :  " + illuminationWITHOUTShadow);
+            totalBrightnessChange += illuminationWITHOUTShadow-illuminationWithShadow;
+            //Debug.Log("totalBrightnessChange :  " + totalBrightnessChange);
+        }
+
+        Debug.Log("----------totalBrightnessChange :  " + totalBrightnessChange);
+        return totalBrightnessChange;
+    }
+    
+}
 
 public class findSilhouetteBrightness
 {
@@ -767,6 +836,8 @@ public class visualSensor1 : sensor
     
     private tag2 excludeThisTag;
 
+    float umDontIHaveARANGE = 450f;
+
     public visualSensor1(GameObject theObject, beleifs theBeleifsIn, tag2 excludeThisTagIn, float theVisualRangeIn = 60f)
     {
         theVisualSenseApparatus = theObject.transform;
@@ -895,12 +966,18 @@ public class visualSensor1 : sensor
 
     private bool shadowVisible(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)
     {
+        //so, if we use this to "detect" objects, they will go into "current perceptions" DESPITE there being no line of sight
+        //kinda makes sense.  can obviously happen for SOUND.  but that means need to filter line of sight AGAIN for shooting behavior etc
         //return lineOfSightToShadowCriteria.evaluateObject(thisPart);
 
         //project a shadow point from armature part
         //look for line of sight to shadow
         //maybe calculate the relative darkness of shadow compared to that point if there WAS no shadow
-        return false;
+
+        bool theBool = (new findRelativeShadowBrightnessPercentage().calculate(theVisualSenseApparatus, umDontIHaveARANGE, thisPart, listOfLights) > 0.02f);//< 0.98f);
+        Debug.Log("return :  " + theBool);
+
+        return theBool;
     }
 
     private bool silhouetteVisible(GameObject thisPart, List<lightIlluminationCalculator> listOfLights)

@@ -2430,13 +2430,18 @@ public class lineOfSight : objectCriteria, positionCriteria
 
         Vector3 theDirection = thePosition - theCentralObserver.transform.position;
 
-        if(theDirection.magnitude > theRange) { return false; }
+        //Debug.Log("(theDirection.magnitude > theRange) :  " + (theDirection.magnitude > theRange));
+        if (theDirection.magnitude > theRange) { return false; }
 
         Ray myRay = new Ray(theCentralObserver.transform.position, theDirection);
 
-        //we dont have objects for collision, soooo just see if NULL collider, ya
-        if (Physics.Raycast(myRay, out myHit, theDirection.magnitude, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        //we dont have objects for collision, soooo just see if NULL collider, ya MAY NEED TO SHORTEN RANGE SLIGHTLY to not hit any object at ENDPOINT
+        float range = theDirection.magnitude -0.01f;// - 10f;
+        if (Physics.Raycast(myRay, out myHit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
+            //Debug.Log("myHit:  " + myHit);
+            //Debug.Log("myHit.collider:  " + myHit.collider);
+            //Debug.Log("myHit.collider.gameObject:  " + myHit.collider.gameObject);
             return false;
         }
 
