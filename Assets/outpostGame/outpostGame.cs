@@ -156,6 +156,3452 @@ public class outpostGame : MonoBehaviour
 
 
 
+public class makeStealthRouteToTargetPickerDestination4DEBUGGER : MonoBehaviour
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 4f;
+    int recursionCounter = 0;
+    int recursionLimit = 2402;
+    float smallestDistanceOfInterest = 7f;
+
+
+    Vector3 startPoint0;
+    Vector3 endPoint0;
+
+    void Start()
+    {
+
+        theSneaker = this.gameObject;
+        team = tag2.team3;
+        //theTargetPicker = theTargetPickerIn;
+
+
+
+
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theSneaker,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theSneaker.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+
+
+        theSampleProcedure = new visibleToThreatSet(theSneaker, theSneaker.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+
+
+
+
+        startPoint0 = theSneaker.transform.position;
+        endPoint0 = new Vector3(342.001f, 4.0838f, 85.9995f);//(85.1f, 0.8f, -417.7f);// (40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
+    }
+
+
+    int sampleCounter = 0;
+    int sampleLimit = 1;
+    void Update()
+    {
+        recursionCounter = 0;
+        sampleCounter = 0;
+        Debug.Log("sampleLimit:  " + sampleLimit);
+        makeNewPathMIDPOINTS(startPoint0, endPoint0,1,-1);
+
+        sampleLimit++;
+
+
+        /*
+        Vector3 startPoint = startPoints[startPoints.Count - 1];
+        Vector3 endPoint = endPoints[endPoints.Count - 1];
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return; }// sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            count++;
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * count * count * sideReverser);
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+        //return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+
+
+        */
+    }
+
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        Vector3 startPoint = theSneaker.transform.position;
+        Vector3 endPoint = new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint, endPoint, Color.white, 22f);
+        currentPath = makeNewPath(startPoint, endPoint);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
+        displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+    private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint, int leftRight, int alternateOrNot)
+    {
+        //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }//to get rid of unnecessary midpoints //return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 3);  //TRISECTION!!!
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * samplePointSpacing;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = true;// testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        midpointTest = testOnePoint(midpoint);
+        if (sampleCounter > sampleLimit) { return null; }
+        if (midpointTest == false)
+        {
+
+
+            fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight,alternateOrNot);
+            if (fixedFirstHalfOfPath != null)
+            {
+                //return fixedFirstHalfOfPath;
+                if (fixedFirstHalfOfPath.Count > 0)
+                {
+                    fixedSecondHalfOfPath = new List<Vector3>();
+                    return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    Debug.Log("(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count-1] - endPoint0).magnitude:  " + (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count-1] - endPoint0).magnitude);
+                    if ((fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                    //fixedSecondHalfOfPath = makeNewPathMIDPOINTS(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1], endPoint);
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                else
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+
+            }
+        }
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = leftRight;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+
+
+                fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight, 1);
+                if (fixedFirstHalfOfPath != null)//no!  we NEED lists of count zero!   && fixedFirstHalfOfPath.Count > 0)
+                {
+                    if(fixedFirstHalfOfPath.Count >0)// && (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                        break;
+                    }
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint0, leftRight, 1);
+
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        break;
+                        //return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+
+                }
+            }
+
+            sideReverser = alternateOrNot* sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);// - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            //midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * sideReverser) - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(fixedFirstHalfOfPath, midpoint, fixedSecondHalfOfPath);//midpoint, 
+        //return lineOfPoints;
+    }
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                //Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                //Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    //Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+
+
+
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, Vector3 deviationPoint, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.AddRange(firstHalfOfPath);
+        newList.Add(deviationPoint);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> middleSection, Vector3 endPoint)
+    {
+        if (middleSection == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(middleSection);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        //newList.Add(endPoint);
+        return newList;
+    }
+
+}
+
+
+
+
+
+public class makeStealthRouteToTargetPickerDestination4 : targetPicker
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+    Vector3 startPoint0;
+    Vector3 endPoint0;
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 10f;
+    int recursionCounter = 0;
+    int recursionLimit = 2630;
+    float smallestDistanceOfInterest = 13f;
+
+    int frameCounter = 0;
+    int sampleCounter = 0;
+
+    public makeStealthRouteToTargetPickerDestination4(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
+    {
+        theSneaker = theSneakerIn;
+        team = teamIn;
+        theTargetPicker = theTargetPickerIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+
+        ensureWeHaveGoodPath();
+
+        //Debug.Log("currentPath.Count:  " + currentPath.Count);
+
+
+
+
+
+
+
+
+        //!!!!!!!!!!    for testing     !!!!!!!!!!!!
+        //return new agnosticTargetCalc(theSneaker.transform.position);
+
+        //currentPath = new List<Vector3>();
+
+
+
+
+
+
+
+
+
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+    private void ensureWeHaveGoodPath()
+    {
+        frameCounter++;
+        sampleCounter = 0;
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        startPoint0 = theSneaker.transform.position;
+        endPoint0 = theTargetPicker.pickNext().realPositionOfTarget(); //new Vector3(342.001f, 4.0838f, 85.9995f);// //new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
+        currentPath = makeNewPathMIDPOINTS(startPoint0, endPoint0);//sewUpPaths(startPoint, makeNewPathMIDPOINTS(startPoint, endPoint), endPoint);//newMainPathfinder(startPoint,endPoint);//
+        currentPath.Add(endPoint0);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        collapseRedundaciesInPath();
+        displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        //collapseNodesThatAreCloseTogether();
+
+        //sample JUST straight line between each point.  if good, can collapse everything in between
+        collapseRedundant1();
+    }
+
+    private void collapseRedundant1()
+    {
+
+        //sample JUST straight line between each point.  if good, can collapse everything in between
+        //the two points are chosen like this:  one point is from start to end, 2nd point is from end to start [thus getting biggest shortcut possible]
+        //so, how to do that?  seems easy, but with lists changing, how do i do a loop or whatever?
+        //[also, don't go backwards!  but the order of the algorithm should prevent that from being seen as sgortcut?  well, will still do redundant testing to see if there is backwards shortcut, so need to compare indexes or whatever
+
+        if(currentPath.Count < 2) { return; }
+
+        //from start point:
+        // while (currentIndex < currentPath.Count)
+
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(currentPath[0]);
+        int currentEarlyIndex = 0;
+        Vector3 earlyPoint;
+        while (currentEarlyIndex < currentPath.Count)
+        {
+            earlyPoint = currentPath[currentEarlyIndex];
+            newList.Add(earlyPoint);
+
+
+            
+            int currentLaterIndex = 0;
+            Vector3 laterPoint;
+            while (currentLaterIndex < currentPath.Count)
+            {
+                laterPoint = currentPath[currentPath.Count - 1 - currentLaterIndex];
+
+                
+                bool goodShortcut = testStraightLineBetween(earlyPoint,laterPoint);
+                //now what?
+                //      add these two points to the list [all earlier points should already have been added to the list]
+                //      set the early index to the later index
+                //      break this inner loop, continue outer loop
+
+                if (goodShortcut == true)
+                {
+                    newList.Add(laterPoint);
+                    currentEarlyIndex = currentPath.Count - 1 - currentLaterIndex;
+                    break;
+                }
+
+                currentLaterIndex++;
+            }
+
+            
+
+            currentEarlyIndex++;
+
+            
+        }
+
+
+        currentPath = newList;
+
+    }
+
+    private bool testStraightLineBetween(Vector3 startPoint, Vector3 endPoint)
+    {
+        //false = bad line, has "obstacle"
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return true; }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+
+
+        //test:
+        bool midpointTest =  testOnePoint(bisectionPoint);
+        //if (sampleCounter > sampleLimit) { return null; }
+        if (midpointTest == true){ return false; }
+        if (testStraightLineBetween(startPoint, bisectionPoint) == false) { return false; }
+        if (testStraightLineBetween(bisectionPoint, endPoint) == false) { return false; }
+
+        return true;
+    }
+
+    /*
+    private void collapseNodesThatAreCloseTogether()
+    {
+        //no idea what this does
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+    */
+
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        if (currentPath == null) { return; }
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+
+
+
+    /*
+    internal List<Vector3> newMainPathfinder(Vector3 startPoint, Vector3 endPoint)
+    {
+        //only proceed if necessary
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }
+
+        //ok, need to test the path.  use bisection:
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+
+        bool midpointRisksDetection = testOnePoint(midpoint);
+
+
+        while (midpointRisksDetection)
+        {
+            //need a way around
+
+
+            midpointRisksDetection = testOnePoint(midpoint);
+        }
+
+    }
+    */
+
+    /*
+    private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint)
+    {
+        //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }//to get rid of unnecessary midpoints //return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = true;// testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        midpointTest = testOnePoint(midpoint);
+
+        if (midpointTest == false)
+        {
+
+
+            fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint);
+            if (fixedFirstHalfOfPath != null)
+            {
+                //return fixedFirstHalfOfPath;
+                if(fixedFirstHalfOfPath.Count > 0)
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1], endPoint);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                else
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                
+            }
+        }
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+
+
+                fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint);
+                if (fixedFirstHalfOfPath != null)//no!  we NEED lists of count zero!   && fixedFirstHalfOfPath.Count > 0)
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint);
+
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        break;
+                        //return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                    
+                }
+            }
+
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+    /*
+        return sewUpPaths(fixedFirstHalfOfPath, midpoint, fixedSecondHalfOfPath);//midpoint, 
+        //return lineOfPoints;
+    }
+    */
+    private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint, int leftRight = 1, int alternateOrNot = -1)
+    {
+        //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }//to get rid of unnecessary midpoints //return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);  //TRISECTION!!!
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * samplePointSpacing;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = true;// testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        midpointTest = testOnePoint(midpoint);
+        //if (sampleCounter > sampleLimit) { return null; }
+        if (midpointTest == false)
+        {
+
+
+            fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight, alternateOrNot);
+            if (fixedFirstHalfOfPath != null)
+            {
+                //return fixedFirstHalfOfPath;
+                if (fixedFirstHalfOfPath.Count > 0)
+                {
+                    fixedSecondHalfOfPath = new List<Vector3>();
+                    return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    Debug.Log("(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count-1] - endPoint0).magnitude:  " + (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude);
+                    if ((fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                    //fixedSecondHalfOfPath = makeNewPathMIDPOINTS(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1], endPoint);
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                else
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+
+            }
+        }
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = leftRight;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            //if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+
+
+                fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight, 1);
+                if (fixedFirstHalfOfPath != null)//no!  we NEED lists of count zero!   && fixedFirstHalfOfPath.Count > 0)
+                {
+                    if (fixedFirstHalfOfPath.Count > 0)// && (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                        break;
+                    }
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint0, leftRight, 1);
+
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        break;
+                        //return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+
+                }
+            }
+
+            sideReverser = alternateOrNot * sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);// - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            //midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * sideReverser) - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(fixedFirstHalfOfPath, midpoint, fixedSecondHalfOfPath);//midpoint, 
+        //return lineOfPoints;
+    }
+
+
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        sampleCounter++;
+        //          sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+    
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+    
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, Vector3 deviationPoint, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.AddRange(firstHalfOfPath);
+        newList.Add(deviationPoint);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> middleSection, Vector3 endPoint)
+    {
+        if (middleSection == null ) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(middleSection);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        //newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+
+    private bool weDoHaveGoodPath()
+    {
+        if(currentPath == null) { currentPath = new List<Vector3>(); return false; }
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+
+
+
+public class makeStealthRouteToTargetPickerDestination3 : targetPicker
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 10f;
+    int recursionCounter = 0;
+    int recursionLimit = 62;
+    float smallestDistanceOfInterest = 14f;
+
+    public makeStealthRouteToTargetPickerDestination3(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
+    {
+        theSneaker = theSneakerIn;
+        team = teamIn;
+        theTargetPicker = theTargetPickerIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        
+        ensureWeHaveGoodPath();
+
+        //Debug.Log("currentPath.Count:  " + currentPath.Count);
+
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        Vector3 startPoint = theSneaker.transform.position;
+        Vector3 endPoint = new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint, endPoint, Color.white, 22f);
+        currentPath = makeNewPath(startPoint, endPoint);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
+        displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        if(currentPath == null) { return; }
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+
+
+
+
+
+
+
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //          if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                //Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                //Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    //Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        //          sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+public class makeStealthRouteToTargetPickerDestination2 : targetPicker
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 7f;
+    int recursionCounter = 0;
+    int recursionLimit = 2;
+    float smallestDistanceOfInterest = 6f;
+
+    public makeStealthRouteToTargetPickerDestination2(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
+    {
+        theSneaker = theSneakerIn;
+        team = teamIn;
+        theTargetPicker = theTargetPickerIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        ensureWeHaveGoodPath();
+
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        Vector3 startPoint = theSneaker.transform.position;
+        Vector3 endPoint = new Vector3(40,0,70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint, endPoint, Color.white, 22f);
+        currentPath = makeNewPath(startPoint, endPoint);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
+        displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return sewUpPaths(startPoint,endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint,bisectionPoint).normalized*smallestDistanceOfInterest;
+
+        //test:
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count <2)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            count++;
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * count * count * sideReverser);
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint,endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if(firstHalfOfPath ==null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+
+
+public class makeStealthRouteToTargetPickerDestination2DEBUGGER : MonoBehaviour
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 7f;
+    int recursionCounter = 0;
+    int recursionLimit = 725;
+    float smallestDistanceOfInterest = 3f;
+
+    /*
+    public static makeStealthRouteToTargetPickerDestination2DEBUGGER(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
+    {
+        theSneaker = theSneakerIn;
+        team = teamIn;
+        theTargetPicker = theTargetPickerIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+    */
+
+    Vector3 startPoint0;
+    Vector3 endPoint0;
+    void Start()
+    {
+
+        theSneaker = this.gameObject;
+        team = tag2.team3;
+        //theTargetPicker = theTargetPickerIn;
+
+
+
+
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theSneaker,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theSneaker.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+
+
+        theSampleProcedure = new visibleToThreatSet(theSneaker, theSneaker.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+
+
+
+
+        startPoint0 = theSneaker.transform.position;
+        endPoint0 = new Vector3(40, 0, 70);//(85.1f, 0.8f, -417.7f);// (40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
+    }
+
+
+    int sampleCounter = 0;
+    int sampleLimit = 1;
+    void Update()
+    {
+        sampleCounter = 0;
+        makeNewPath(startPoint0,endPoint0);
+
+        sampleLimit++;
+
+
+        /*
+        Vector3 startPoint = startPoints[startPoints.Count - 1];
+        Vector3 endPoint = endPoints[endPoints.Count - 1];
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return; }// sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            count++;
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * count * count * sideReverser);
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+        //return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+
+
+        */
+    }
+
+
+    /*
+
+    public agnosticTargetCalc pickNext()
+    {
+        ensureWeHaveGoodPath();
+
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        Vector3 startPoint = theSneaker.transform.position;
+        Vector3 endPoint = theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint, endPoint, Color.white, 22f);
+        currentPath = makeNewPath(startPoint, endPoint);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
+        displayPath();
+    }
+    */
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        //          recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+
+        if (sampleCounter > sampleLimit) { return null; }
+        bool midpointIsIlluminated = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        Debug.Log("ssss midpointIsIlluminated:  " + midpointIsIlluminated);
+        while (midpointIsIlluminated == true)
+        {
+            Debug.Log("midpointIsIlluminated:  " + midpointIsIlluminated);
+            Debug.Log("count:  " + count);
+
+            if (sampleCounter > sampleLimit) { return null; }
+            midpointIsIlluminated = testOnePoint(midpoint);
+            if (midpointIsIlluminated == false) { break; }
+                count++;
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * count * count * sideReverser);
+        }
+
+
+        if (midpointIsIlluminated == false)
+        {
+            fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+            //startPoint0 = midpoint;
+            fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+
+            Debug.Log("midpoint:  " + midpoint);
+            Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+            Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+            if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+            {
+                Debug.Log("either first half or second half is null");
+                midpointIsIlluminated = true;
+            }
+            else
+            {
+                Debug.Log("found a good point ???????????????????");
+                //break;
+            }
+        }
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+
+public class makeStealthRouteToTargetPickerDestination2DEBUGGER2 : MonoBehaviour
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+
+    private GameObject theSneaker;
+    private tag2 team;
+    targetPicker theTargetPicker;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 7f;
+    int recursionCounter = 0;
+    int recursionLimit = 402;
+    float smallestDistanceOfInterest = 4f;
+
+
+    Vector3 startPoint0;
+    Vector3 endPoint0;
+
+    void Start()
+    {
+
+        theSneaker = this.gameObject;
+        team = tag2.team3;
+        //theTargetPicker = theTargetPickerIn;
+
+
+
+
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theSneaker,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theSneaker.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+
+
+        theSampleProcedure = new visibleToThreatSet(theSneaker, theSneaker.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+
+
+
+
+        startPoint0 = theSneaker.transform.position;
+        endPoint0 = new Vector3(40, 0, 70);//(85.1f, 0.8f, -417.7f);// (40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
+    }
+
+
+    int sampleCounter = 0;
+    int sampleLimit = 1;
+    void Update()
+    {
+        recursionCounter = 0;
+        sampleCounter = 0;
+        Debug.Log("sampleLimit:  " + sampleLimit);
+        makeNewPath(startPoint0, endPoint0);
+
+        sampleLimit++;
+
+
+        /*
+        Vector3 startPoint = startPoints[startPoints.Count - 1];
+        Vector3 endPoint = endPoints[endPoints.Count - 1];
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return; }// sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            count++;
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * count * count * sideReverser);
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+        //return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+
+
+        */
+    }
+
+
+    private void ensureWeHaveGoodPath()
+    {
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        Vector3 startPoint = theSneaker.transform.position;
+        Vector3 endPoint = new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint, endPoint, Color.white, 22f);
+        currentPath = makeNewPath(startPoint, endPoint);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        //collapseRedundaciesInPath();
+        displayPath();
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        collapseNodesThatAreCloseTogether();
+    }
+
+    private void collapseNodesThatAreCloseTogether()
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+    private List<Vector3> makeNewPath(Vector3 startPoint, Vector3 endPoint)
+    {
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+                fixedFirstHalfOfPath = makeNewPath(startPoint, midpoint);
+                fixedSecondHalfOfPath = makeNewPath(midpoint, endPoint);
+                //Debug.Log("fixedFirstHalfOfPath:  " + fixedFirstHalfOfPath);
+                //Debug.Log("fixedSecondHalfOfPath:  " + fixedSecondHalfOfPath);
+                if (fixedFirstHalfOfPath == null || fixedSecondHalfOfPath == null)
+                {
+                    midpointTest = true;
+                }
+                else
+                {
+                    //Debug.Log("found a good point ???????????????????");
+                    break;
+                }
+            }
+
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(startPoint, fixedFirstHalfOfPath, fixedSecondHalfOfPath, endPoint);
+        //return lineOfPoints;
+    }
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(midpoint);
+        //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        return samples[0];
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+
+
+
+
+
+
+
+
 
 
 public class randomHidingLocationTargetPicker : targetPicker
@@ -291,7 +3737,7 @@ public class makeStealthRouteToTargetPickerDestination : targetPicker
     boolSampleProcedure theSampleProcedure;
     float samplePointSpacing = 7f;
     int recursionCounter = 0;
-    int recursionLimit = 5;
+    int recursionLimit = 25;
 
     public makeStealthRouteToTargetPickerDestination(GameObject theSneakerIn, tag2 teamIn, targetPicker theTargetPickerIn)
     {

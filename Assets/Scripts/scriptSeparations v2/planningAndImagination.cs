@@ -5,6 +5,7 @@ using System.Net;
 using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
 using static enactionCreator;
 using static tagging2;
 using static UnityEngine.GraphicsBuffer;
@@ -27,6 +28,8 @@ public class planningAndImagination : MonoBehaviour
 
 
 
+
+
 public abstract class pathFinder
 {
     //currently only for flat surfaces!
@@ -37,7 +40,7 @@ public abstract class pathFinder
 
     internal float smallestLengthToTest = 1f;
     internal int recursionCounter = 0;
-    internal int recursionLimit = 5;
+    internal int recursionLimit = 10;
 
     public abstract List<Vector3> findPath();
 
@@ -93,8 +96,34 @@ public class coarseMaze1 : pathFinder
         Vector3 perpendicular = horizontalPerpendicular(startPoint, midpoint);
         Vector3 firstPerpendicularGoodPoint = firstGoodPointOutOfTwoDirections(midpoint, perpendicular);
 
-        return threeSet(startPoint, firstPerpendicularGoodPoint, endpoint);  //????  good enough for this one???
+        return sewUpPaths(fillBetweenINCLUSIVE(startPoint, firstPerpendicularGoodPoint), fillBetweenINCLUSIVE(firstPerpendicularGoodPoint,endpoint));  //????  good enough for this one???
     }
+
+    private List<Vector3> fillBetweenINCLUSIVE(Vector3 startPoint, Vector3 endpoint)
+    {
+        //INCLUDES start and end point
+
+        //ummm ya just go recursive.  yes, it's less coarse-grained, but it necessary to be sure, so makes sense
+        return findCoarseMaze1(startPoint, endpoint);
+
+        //nahhh
+        //so.  how to fill with same grid size? [just input it?]
+        //      how to know whether left or right?
+        //      find perpendicular distance?  with linear algebra "projection"?
+        //          divide to get number of steps to side, walk from start [going recursive sorta if a point is bad]
+        //          then turn towards end point, do same in that direction
+
+
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+        return newList;
+    }
+
 
     private Vector3 firstGoodPointOutOfTwoDirections(Vector3 startPoint, Vector3 span)
     {
@@ -148,6 +177,177 @@ public class coarseMaze1 : pathFinder
 
 
 
+}
+
+
+
+/*
+public class pathfinderV2 : pathFinder
+{
+
+    public override List<Vector3> findPath()
+    {
+        return blackBoxPathfinder(theTraveler.transform.position, desiredEndpoint);
+    }
+
+    private List<Vector3> blackBoxPathfinder(Vector3 startPoint, Vector3 endpoint)
+    {
+        List<Vector3> currentEstimatedGoodPath = estimateGoodPath(startPoint, endpoint);
+        //then find "first" error [closest to start?]
+        //then ....see if there is a way around that error point?  or if some other way is likely better?  just do same "estimate good path" with this NEW updated data set?  maybe.  but might even need to go UP several layers of recursion to make sure we aren't redundandly pathfinding our way back out of a dead end we just hit into
+
+
+        //if we aren't below min distance, bisect and sample/test
+        Vector3 lineBetween = endpoint - startPoint;
+        float thisDistance = lineBetween.magnitude;
+        if(thisDistance < smallestLengthToTest)
+        {
+            return new List<Vector3>();
+        }
+
+        Vector3 halfPoint = startPoint + (lineBetween / 2);
+        bool theSample = pointEvaluator.sampleOne(halfPoint);
+
+        //if good, sew up
+        //if not:
+        //      update shape hypotheses
+        //      go exponential perpendicular to first edge [update shape hypotheses each step]
+
+    }
+}
+*/
+
+public class pathingData
+{
+    spatialDataHierarchy theGoodPoints;
+    List<obstacle> theObstacles = new List<obstacle>();
+}
+
+public class spatialDataHierarchy
+{
+    //List<Vector3> theGoodPointsOnThisLevel;
+    List<spatialDataTile> theTiles;
+    spatialDataHierarchy lowerLevel;
+    spatialDataHierarchy higherLevel;
+}
+
+internal class spatialDataTile
+{
+    //public List<spatialDatum> allData = new List<spatialDataTile>();  //only fill base layer though???
+    boolDataSet allData;
+
+    public Vector3 centerPosition;
+    public Vector3 tileSpan;  //the legth and width of the tile, plus the orientation of the grid
+    public Vector3 xtileSpan;  //for convenience?
+    public Vector3 ztileSpan;  //for convenience?
+    public spatialDataTile superTile;
+    //public int positionInSupertile;  //no no no, if i'm doing 2d, position should be 2 numbers, a Vector2
+    public int xAxisPosition;
+    public int zAxisPosition;
+
+    public List<spatialDataTile> subTiles = new List<spatialDataTile>();
+
+
+    public spatialDataTile(spatialDataTile superTileIn, Vector3 positionIn, Vector3 xtileSpanIn, Vector3 ztileSpanIn, int countX, int countZ)
+    {
+        superTile = superTileIn;
+        centerPosition = positionIn;
+        xAxisPosition = countX;
+        zAxisPosition = countZ;
+        xtileSpan = xtileSpanIn;
+        ztileSpan = ztileSpanIn;
+    }
+
+    public void createSubTiles()
+    {
+        //          Vector3 newPosition = centerPosition - tileSpanUp;
+        int counter1 = 0;
+
+        int numberOfTilesAcross = 3;
+
+        while (counter1 < numberOfTilesAcross)
+        {
+            int counter2 = 0;
+            while (counter2 < numberOfTilesAcross)
+            {
+                //          subTiles.Add(new pathfindingTile(this, newPosition, tileSpanUp / numberOfTilesAcross, tileSpanRight / numberOfTilesAcross, counter1 + counter2));
+            }
+
+        }
+    }
+}
+
+
+
+public class obstacle
+{
+    List<edgePair> samplePoints = new List<edgePair>();
+    Vector3 centerOfMass;  //what about rough length, width?
+    List<Vector3> hypotheticalVertexes = new List<Vector3>();
+    //List<Vector3> paddedSurfaceVertexes = new List<Vector3>();  eh, kinda depends on size of nav mesh agent trying to avoid edges?
+    List<Vector3> shrinkWrapVertexes = new List<Vector3>();
+
+}
+
+public class edgePair  //obstacleEdgePair
+{
+    Vector3 theGoodPoint;  //we want the CLOSEST good point to the bad point
+    Vector3 theBadPoint;
+}
+
+
+
+
+
+
+
+
+
+
+
+public class pathfindingTile
+{
+    public Vector3 centerPosition;
+    public Vector3 tileSpan;  //the legth and width of the tile, plus the orientation of the grid
+    public Vector3 tileSpanUp;  //for convenience?
+    public Vector3 tileSpanRight;  //for convenience?
+    public pathfindingTile superTile;
+    //public int positionInSupertile;  //no no no, if i'm doing 2d, position should be 2 numbers, a Vector2
+    public int xAxisPosition;
+    public int zAxisPosition;
+
+    public List<pathfindingTile> subTiles = new List<pathfindingTile>();
+
+    public bool currentEstimationOfTilePathability;
+
+
+
+    public pathfindingTile(pathfindingTile superTileIn, Vector3 positionIn, Vector3 tileSpanUpIn, Vector3 tileSpanRightIn, int count)
+    {
+        superTile = superTileIn;
+        centerPosition = positionIn;
+        //          positionInSupertile = count;
+        tileSpanUp = tileSpanUpIn;
+        tileSpanRight = tileSpanRightIn;
+    }
+
+    public void createSubTiles()
+    {
+        Vector3 newPosition = centerPosition - tileSpanUp;
+        int counter1 = 0;
+
+        int numberOfTilesAcross = 3;
+
+        while (counter1 < numberOfTilesAcross)
+        {
+            int counter2 = 0;
+            while (counter2 < numberOfTilesAcross)
+            {
+                subTiles.Add(new pathfindingTile(this, newPosition, tileSpanUp / numberOfTilesAcross, tileSpanRight / numberOfTilesAcross, counter1 + counter2));
+            }
+
+        }
+    }
 }
 
 

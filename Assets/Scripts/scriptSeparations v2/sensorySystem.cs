@@ -200,7 +200,7 @@ public class findRelativeShadowBrightnessPercentage
             //Debug.Log("totalBrightnessChange :  " + totalBrightnessChange);
         }
 
-        Debug.Log("----------totalBrightnessChange :  " + totalBrightnessChange);
+        //Debug.Log("----------totalBrightnessChange :  " + totalBrightnessChange);
         return totalBrightnessChange;
     }
     
@@ -527,7 +527,7 @@ public class debugFeild
                 theColor = Color.red;
             }
 
-            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up, theColor, 2f);
+            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up*3, theColor, 2f);
             index++;
         }
     }
@@ -770,8 +770,7 @@ public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleP
 
 
 
-
-
+//visibleToThreatSetUsingVisualSensor1  hmmm, gonna need way to predict then evaluate IMAGINARY silhouette and shadow!!!
 
 
 
@@ -975,7 +974,7 @@ public class visualSensor1 : sensor
         //maybe calculate the relative darkness of shadow compared to that point if there WAS no shadow
 
         bool theBool = (new findRelativeShadowBrightnessPercentage().calculate(theVisualSenseApparatus, umDontIHaveARANGE, thisPart, listOfLights) > 0.02f);//< 0.98f);
-        Debug.Log("return :  " + theBool);
+        //Debug.Log("return :  " + theBool);
 
         return theBool;
     }
@@ -991,7 +990,7 @@ public class visualSensor1 : sensor
         //if bright enough, that means silhouette! [assume object is dark]
 
         bool theBool = (new findSilhouetteBrightness().calculate(theVisualSenseApparatus, thisPart, listOfLights) > 0.2f);
-        Debug.Log("return silhouetteVisible:  " +theBool);
+        //Debug.Log("return silhouetteVisible:  " +theBool);
 
         return theBool;
     }
@@ -1006,7 +1005,7 @@ public class visualSensor1 : sensor
         //Debug.DrawLine(theVisualSenseApparatus.position, thisPart.transform.position, new Color(intensity, intensity, intensity), 20f);
 
 
-        Debug.Log("return (intensity > illuminationIntensityThresholdForDetection)" + (intensity > illuminationIntensityThresholdForDetection));
+        //Debug.Log("return (intensity > illuminationIntensityThresholdForDetection)" + (intensity > illuminationIntensityThresholdForDetection));
 
         return (intensity > illuminationIntensityThresholdForDetection);
     }
