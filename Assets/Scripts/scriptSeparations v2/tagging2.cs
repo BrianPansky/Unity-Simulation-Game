@@ -1121,6 +1121,67 @@ public class pickMostXFromListYTargetPicker : targetPicker
 
 
 
+public class pickSegmentedPathTowardsX: targetPicker
+{
+    GameObject targetSeeker;
+    agnosticTargetCalc theCurrentUltimateTarget;
+    targetPicker nestedTargetPicker;
+
+
+    float maxDistance = 30f;
+    agnosticTargetCalc theCurrectTarget;
+
+    //just from current position, make UNIT vector towards ultimate target, then multiply by maxDistance
+
+    public pickSegmentedPathTowardsX(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn, float maxDistanceIn = 30f)
+    {
+        targetSeeker = targetSeekerIn;
+        nestedTargetPicker = nestedTargetPickerIn;
+        maxDistance = maxDistanceIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        theCurrectTarget = pickNewIfNeeded();
+        return theCurrectTarget;
+    }
+
+    private agnosticTargetCalc pickNewIfNeeded()
+    {
+
+        theCurrentUltimateTarget = nestedTargetPicker.pickNext();
+
+        if (theCurrectTarget ==null || new proximityCriteriaBool(theCurrectTarget).evaluateObject(targetSeeker))
+        {
+            return new agnosticTargetCalc(nextSegmentPoint());
+        }
+
+        return theCurrectTarget;
+    }
+
+
+    private Vector3 nextSegmentPoint()
+    {
+        //current issue:  the point it picks can itself be "unpathable".  how to ensure pathable point?  [don't worry about larger maze-solving for now]
+        //use stuff like "makeStealthRouteToTargetPickerDestination4"?
+        //but then, that should be nested inside of THIS, instead of the other way around......because why calculate that twice?
+        Vector3 ultimateEndpoint = theCurrentUltimateTarget.realPositionOfTarget();
+
+        Vector3 fromStartToUltimateEndPoint = ultimateEndpoint - targetSeeker.transform.position;
+
+        if(fromStartToUltimateEndPoint.magnitude < maxDistance)
+        {
+            return ultimateEndpoint;
+        }
+
+        return targetSeeker.transform.position + (maxDistance * fromStartToUltimateEndPoint.normalized);
+    }
+
+
+
+
+}
+
 
 public class pickNextWhenTargetReached : targetPicker
 {
@@ -1128,10 +1189,13 @@ public class pickNextWhenTargetReached : targetPicker
     agnosticTargetCalc theCurrectTarget;
     targetPicker nestedTargetPicker;
 
-    public pickNextWhenTargetReached(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn)
+    float prox;
+
+    public pickNextWhenTargetReached(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn, float proxIn = 2f)
     {
         targetSeeker = targetSeekerIn;
         nestedTargetPicker = nestedTargetPickerIn;
+        prox = proxIn;
     }
 
     public override agnosticTargetCalc pickNext()
@@ -1147,13 +1211,33 @@ public class pickNextWhenTargetReached : targetPicker
             return nestedTargetPicker.pickNext();
         }
 
-        if (new proximityCriteriaBool(theCurrectTarget).evaluateObject(targetSeeker))
+        if (new proximityCriteriaBool(theCurrectTarget, prox).evaluateObject(targetSeeker))
         {
             return nestedTargetPicker.pickNext();
         }
 
         return theCurrectTarget;
     }
+}
+
+
+public class pickNextFromNested : targetPicker
+{
+    GameObject targetSeeker;
+    agnosticTargetCalc theCurrectTarget;
+    targetPicker nestedTargetPicker;
+
+    public pickNextFromNested(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn)
+    {
+        targetSeeker = targetSeekerIn;
+        nestedTargetPicker = nestedTargetPickerIn;
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        return nestedTargetPicker.pickNext();
+    }
+
 }
 
 

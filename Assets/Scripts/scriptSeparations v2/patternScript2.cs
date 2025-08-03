@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.UI.Image;
 using UnityEngine.UIElements;
+using System.Net;
 
 public class patternScript2 : MonoBehaviour
 {
@@ -341,3 +342,42 @@ public class gridOfPoints
     }
 
 }
+
+
+public class relativePointSet : List<Vector3>
+{
+    private List<Vector3> updatedSpatialPoints = new List<Vector3>();
+
+    public relativePointSet(Vector3 newOrigin, List<Vector3> spatialPointsIn)
+    {
+        foreach (Vector3 thisPoint in spatialPointsIn)
+        {
+            this.Add(thisPoint+ newOrigin);
+        }
+    }
+}
+
+
+/*
+private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+{
+    //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+    Vector3 perpendicular = new Vector3();
+
+    perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+    return perpendicular;
+}
+
+private Vector3 horizontalPerpendicular(Vector3 lineWeWantSomethingPerpendicularTo)
+{
+    //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+    Vector3 perpendicular = new Vector3();
+
+    perpendicular = Vector3.Cross(lineWeWantSomethingPerpendicularTo, Vector3.up);
+
+    return perpendicular;
+}
+
+
+*/

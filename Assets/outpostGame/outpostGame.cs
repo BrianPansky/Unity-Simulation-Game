@@ -156,6 +156,1733 @@ public class outpostGame : MonoBehaviour
 
 
 
+
+public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
+{
+    //currently only for flat surfaces!
+    //gets desired destination from a target picker
+    //calculates a safe path
+    //stores that path
+    //returns first/closest/next node
+    //updates which node that is once proximity to current node is reached
+    //whew!  [should i split that functionality into different classes etc?]
+    //      well, i already have "pickNextWhenTargetReached"...not sure it's exactly right though....
+    //      ya it's good enough, if i build this one to accomodate
+
+    int currentIndexOfCurrentPath = 0;
+    List<Vector3> currentPath = new List<Vector3>();
+    Vector3 startPoint0;
+    Vector3 endPoint0;
+
+    //what was this for?  to fix tall NPC offset?  it isn't working correctly
+    //Vector3 downWardOffset = new Vector3(0,-3,0);
+
+    private GameObject theSneaker;
+    private tag2 team;
+    boolSampleProcedure theSampleProcedure;
+    float samplePointSpacing = 10f;
+    int recursionCounter = 0;
+    //int recursionLimit = 2630;
+    int recursionLimit = 130;
+    float smallestDistanceOfInterest = 13f;
+
+    int frameCounter = 0;
+    int sampleCounter = 0;
+
+
+
+
+
+    GameObject targetSeeker;
+    agnosticTargetCalc theCurrentUltimateTarget;
+
+    //targetPicker theTargetPicker;
+    //targetPicker nestedTargetPicker;
+    targetPicker nestedUltimateTargetPicker;
+
+
+    float maxDistance = 30f;
+    agnosticTargetCalc theCurrectSegmentTarget;
+
+    //just from current position, make UNIT vector towards ultimate target, then multiply by maxDistance
+
+    /*
+    public pickSegmentedPathTowardsX(GameObject targetSeekerIn, targetPicker nestedTargetPickerIn, float maxDistanceIn = 30f)
+    {
+        targetSeeker = targetSeekerIn;
+        nestedTargetPicker = nestedTargetPickerIn;
+        maxDistance = maxDistanceIn;
+    }
+    */
+
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //segmentaton logic:
+        theCurrectSegmentTarget = pickNewSegmentEndpointIfNeeded();
+        //return theCurrectTarget;
+
+
+
+        //pathing logic:
+        ensureWeHaveGoodPath();
+
+        //Debug.Log("currentPath.Count:  " + currentPath.Count);
+
+
+        if (currentPath == null || currentPath.Count <1) { return null; }
+        agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
+        currentIndexOfCurrentPath++;
+
+        return theOutput;
+    }
+
+    private agnosticTargetCalc pickNewSegmentEndpointIfNeeded()
+    {
+        if (theCurrentUltimateTarget == null || new proximityCriteriaBool(theCurrentUltimateTarget).evaluateObject(targetSeeker))
+        {
+            theCurrentUltimateTarget = nestedUltimateTargetPicker.pickNext();
+        }
+
+        if (theCurrectSegmentTarget == null || new proximityCriteriaBool(theCurrectSegmentTarget).evaluateObject(targetSeeker))
+        {
+            Debug.Log("need new Currect Segment Target");
+            //buuuut, simple segmented point can be WRONG.  that is, it might be in a patch of light
+            return aSafeSegmentMidpoint();
+        }
+
+        return theCurrectSegmentTarget;
+    }
+
+    private agnosticTargetCalc aSafeSegmentMidpoint()
+    {
+        //do similar as we would for finding "midpoint".  can i modularize that logic?
+        Vector3 testPoint0 = nextSegmentPoint(theCurrentUltimateTarget.realPositionOfTarget());
+        Vector3 testPoint = testPoint0;
+        Vector3 lineBetween = testPoint0 - targetSeeker.transform.position;
+        Vector3 perpendicularSpan = horizontalPerpendicular(lineBetween).normalized * samplePointSpacing;
+
+
+        int sideReverser = 1;
+        int multiplierCount = 1;
+        bool midpointTest = true;
+        int count = 0;
+
+        while (count < 26)
+        {
+            Debug.Log("testPoint:  " + testPoint);
+            Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            //if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testSmallCluster(testPoint);
+
+            if (midpointTest == false)
+            {
+                return new agnosticTargetCalc(testPoint);
+            }
+
+            sideReverser = -1 * sideReverser;// *multiplierCount;
+
+            //testPoint = testPoint0 + (perpendicularSpan * multiplierCount * sideReverser) - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            testPoint = testPoint0 + (perpendicularSpan * multiplierCount * sideReverser);// - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+
+
+
+
+        return new agnosticTargetCalc(testPoint);
+    }
+
+    private Vector3 ground(Vector3 inputVector)
+    {
+        //for now, just set y value to zero? or tiny bit above...
+        return new Vector3(inputVector.x,0.9f, inputVector.z);
+    }
+
+    private Vector3 nextSegmentPoint(Vector3 UltimateEndPoint)
+    {
+        Vector3 current = targetSeeker.transform.position;
+        Vector3 fullDistance = UltimateEndPoint - current;
+
+        if (fullDistance.magnitude < maxDistance)
+        {
+            return UltimateEndPoint;
+        }
+
+        return current + (maxDistance * fullDistance.normalized);
+    }
+
+
+
+
+    private void ensureWeHaveGoodPath()
+    {
+        frameCounter++;
+        sampleCounter = 0;
+        //if not, make new "currentPath" list AND reset the indexer
+        if (weDoHaveGoodPath()) { return; }
+
+        currentIndexOfCurrentPath = 0;
+        recursionCounter = 0;
+
+        //tall NPC can make test points too high up.  need to keep it on ground for this test?
+        startPoint0 = groundPointUnderInputPoint(theSneaker.transform.position);//theSneaker.transform.position;
+        //likewise....end points COULD be a bit below ground?  unsure...
+        endPoint0 = groundPointUnderInputPoint(theCurrectSegmentTarget.realPositionOfTarget()); //new Vector3(342.001f, 4.0838f, 85.9995f);// //new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
+        currentPath = makeNewPathMIDPOINTS(startPoint0, endPoint0);//sewUpPaths(startPoint, makeNewPathMIDPOINTS(startPoint, endPoint), endPoint);//newMainPathfinder(startPoint,endPoint);//
+
+        if (currentPath == null) { return; }
+
+        currentPath.Add(endPoint0);
+        //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
+        collapseRedundaciesInPath();
+        displayPath();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    private List<Vector3> pickPathfinderAlgorithmBasedOnDistance(Vector3 theCurrentUltimateEndpoint)
+    {
+        //current issue:  the point it picks can itself be "unpathable".  how to ensure pathable point?  [don't worry about larger maze-solving for now]
+        //use stuff like "makeStealthRouteToTargetPickerDestination4"?
+        //but then, that should be nested inside of THIS, instead of the other way around......because why calculate that twice?
+        
+        //       = theCurrentUltimateTarget.realPositionOfTarget();
+
+        //      Vector3 fromStartToUltimateEndPoint = theCurrentUltimateEndpoint - targetSeeker.transform.position;
+
+        if (fromStartToUltimateEndPoint.magnitude < maxDistance)
+        {
+            return makeNewPathMIDPOINTS();//ultimateEndpoint;
+        }
+
+        Vector3 segmentPoint = nextSegmentPoint(fromStartToUltimateEndPoint);
+        return makeNewPathMIDPOINTS();
+    }
+    */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public makeSegmentedStealthRouteToTargetPickerDestination(GameObject theSneakerIn, tag2 teamIn, targetPicker theUltimateTargetPickerIn, float maxDistanceIn = 30f)
+    {
+        theSneaker = theSneakerIn;
+        targetSeeker = theSneakerIn;  //redundant?
+        team = teamIn;
+        nestedUltimateTargetPicker = theUltimateTargetPickerIn;
+        maxDistance = maxDistanceIn;
+        theSampleProcedure = new visibleToThreatSet(theSneakerIn, theSneakerIn.GetComponent<beleifs>().beleifObjectSets[0]);//gahhhhhhhhhhhh ad-hoc
+    }
+
+
+    private Vector3 groundPointUnderInputPoint(Vector3 theInputPoint)
+    {
+        RaycastHit hit;
+        Ray downRay = new Ray(theInputPoint, -Vector3.up);
+
+        // Cast a ray straight downwards.
+        if (Physics.Raycast(downRay, out hit))
+        {
+            //Debug.DrawLine(new Vector3(), hit.point,Color.magenta,14f);
+            return hit.point;
+        }
+
+        Vector3 estimate = new Vector3(theInputPoint.x, 0, theInputPoint.z);
+
+        //Debug.DrawLine(new Vector3(), estimate, Color.yellow, 14f);
+        return estimate;
+    }
+
+    private void collapseRedundaciesInPath()
+    {
+        //three ways to do this.  two relatively simple [no sampling] one with sampling:
+        //      look for nodes that are close together
+        //      look for lines that intersect or NEARLY intersect
+        //      sample the path between each node
+
+        //for now, just #1:
+        //collapseNodesThatAreCloseTogether();
+
+        //sample JUST straight line between each point.  if good, can collapse everything in between
+        collapseRedundant1();
+    }
+
+    private void collapseRedundant1()
+    {
+
+        //sample JUST straight line between each point.  if good, can collapse everything in between
+        //the two points are chosen like this:  one point is from start to end, 2nd point is from end to start [thus getting biggest shortcut possible]
+        //so, how to do that?  seems easy, but with lists changing, how do i do a loop or whatever?
+        //[also, don't go backwards!  but the order of the algorithm should prevent that from being seen as sgortcut?  well, will still do redundant testing to see if there is backwards shortcut, so need to compare indexes or whatever
+
+        if (currentPath.Count < 2) { return; }
+
+        //from start point:
+        // while (currentIndex < currentPath.Count)
+
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(currentPath[0]);
+        int currentEarlyIndex = 0;
+        Vector3 earlyPoint;
+        while (currentEarlyIndex < currentPath.Count)
+        {
+            earlyPoint = currentPath[currentEarlyIndex];
+            newList.Add(earlyPoint);
+
+
+
+            int currentLaterIndex = 0;
+            Vector3 laterPoint;
+            while (currentLaterIndex < currentPath.Count)
+            {
+                laterPoint = currentPath[currentPath.Count - 1 - currentLaterIndex];
+
+
+                bool goodShortcut = testStraightLineBetween(earlyPoint, laterPoint);
+                //now what?
+                //      add these two points to the list [all earlier points should already have been added to the list]
+                //      set the early index to the later index
+                //      break this inner loop, continue outer loop
+
+                if (goodShortcut == true)
+                {
+                    newList.Add(laterPoint);
+                    currentEarlyIndex = currentPath.Count - 1 - currentLaterIndex;
+                    break;
+                }
+
+                currentLaterIndex++;
+            }
+
+
+
+            currentEarlyIndex++;
+
+
+        }
+
+
+        currentPath = newList;
+
+    }
+
+    private bool testStraightLineBetween(Vector3 startPoint, Vector3 endPoint)
+    {
+        //false = bad line, has "obstacle"
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return true; }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+
+
+        //test:
+        bool midpointTest = testOnePoint(bisectionPoint);
+        //if (sampleCounter > sampleLimit) { return null; }
+        if (midpointTest == true) { return false; }
+        if (testStraightLineBetween(startPoint, bisectionPoint) == false) { return false; }
+        if (testStraightLineBetween(bisectionPoint, endPoint) == false) { return false; }
+
+        return true;
+    }
+
+    /*
+    private void collapseNodesThatAreCloseTogether()
+    {
+        //no idea what this does
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(currentPath[0]);
+        int currentIndex = 0;
+        while (currentIndex < currentPath.Count)
+        {
+            if (recursionCounter > recursionLimit) { break; }
+            recursionCounter++;
+            currentIndex = lastNearPoint(currentPath[currentIndex]);
+
+            newList.Add(currentPath[currentIndex]);
+
+            currentIndex++;
+        }
+
+        currentPath = newList;
+    }
+    */
+
+
+    private int lastNearPoint(Vector3 thisPoint)
+    {
+        //start from end
+        int currentIndex = currentPath.Count - 1;
+        while (currentIndex > -1)
+        {
+            float distance = (currentPath[currentIndex] - thisPoint).magnitude;
+            if (distance < samplePointSpacing * 2) { break; }
+        }
+
+        return currentIndex;
+    }
+
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        if (currentPath == null) { return; }
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+
+
+
+    /*
+    internal List<Vector3> newMainPathfinder(Vector3 startPoint, Vector3 endPoint)
+    {
+        //only proceed if necessary
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }
+
+        //ok, need to test the path.  use bisection:
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+
+        bool midpointRisksDetection = testOnePoint(midpoint);
+
+
+        while (midpointRisksDetection)
+        {
+            //need a way around
+
+
+            midpointRisksDetection = testOnePoint(midpoint);
+        }
+
+    }
+    */
+
+    /*
+    private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint)
+    {
+        //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }//to get rid of unnecessary midpoints //return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * smallestDistanceOfInterest;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = true;// testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        midpointTest = testOnePoint(midpoint);
+
+        if (midpointTest == false)
+        {
+
+
+            fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint);
+            if (fixedFirstHalfOfPath != null)
+            {
+                //return fixedFirstHalfOfPath;
+                if(fixedFirstHalfOfPath.Count > 0)
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1], endPoint);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                else
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                
+            }
+        }
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = 1;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            midpointTest = testOnePoint(midpoint);
+
+            if (midpointTest == false)
+            {
+
+
+                fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint);
+                if (fixedFirstHalfOfPath != null)//no!  we NEED lists of count zero!   && fixedFirstHalfOfPath.Count > 0)
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint);
+
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        break;
+                        //return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                    
+                }
+            }
+
+            sideReverser = -sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+    /*
+        return sewUpPaths(fixedFirstHalfOfPath, midpoint, fixedSecondHalfOfPath);//midpoint, 
+        //return lineOfPoints;
+    }
+    */
+    private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint, int leftRight = 1, int alternateOrNot = -1)
+    {
+        //displayPoint(startPoint);
+        //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
+        if (recursionCounter > recursionLimit) { return null; }
+        recursionCounter++;
+        //sample a line of points between them
+        //if a break is found, try finding a way around
+        //unify into complete path
+        //[i never know what to do if no path is found, if there is no way, if it's impossible, etc]
+
+
+
+        //bisect
+        //any time a point is bad:
+        //      find FIRST good point [exponential? or base span unit?]
+        //      repeat
+        //oh...is that it?
+        //      well, kinda want to continue until we reach base span....
+        Vector3 lineBetween = endPoint - startPoint;
+        float distanceBetween = lineBetween.magnitude;
+        if (distanceBetween < smallestDistanceOfInterest) { return new List<Vector3>(); }//to get rid of unnecessary midpoints //return sewUpPaths(startPoint, endPoint); }
+
+        //so.  bisect.
+        Vector3 bisectionPoint = startPoint + (lineBetween / 2);  //TRISECTION!!!
+        Vector3 midpoint = bisectionPoint;
+        Vector3 perpendicularSpan = horizontalPerpendicular(startPoint, bisectionPoint).normalized * samplePointSpacing;
+
+        //test:
+        //          if (sampleCounter > sampleLimit) { return null; }
+        bool midpointTest = true;// testOnePoint(midpoint);
+
+        //for now:
+        List<Vector3> fixedFirstHalfOfPath;
+        List<Vector3> fixedSecondHalfOfPath;
+        fixedFirstHalfOfPath = null;
+        fixedSecondHalfOfPath = null;
+
+        //displayPoint(midpoint);
+        midpointTest = testSmallCluster(midpoint);
+        //if (sampleCounter > sampleLimit) { return null; }
+        if (midpointTest == false)
+        {
+
+
+            fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight, alternateOrNot);
+            if (fixedFirstHalfOfPath != null)
+            {
+                //return fixedFirstHalfOfPath;
+                if (fixedFirstHalfOfPath.Count > 0)
+                {
+                    fixedSecondHalfOfPath = new List<Vector3>();
+                    return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    Debug.Log("(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count-1] - endPoint0).magnitude:  " + (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude);
+                    if ((fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                    //fixedSecondHalfOfPath = makeNewPathMIDPOINTS(fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1], endPoint);
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+                else
+                {
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint, leftRight, alternateOrNot);
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+                }
+
+            }
+        }
+
+        //if good, repeat for the new two halves
+        //if not, look to each side until a good point is found
+        int sideReverser = leftRight;
+        int count = 1;
+        int multiplierCount = 1;
+        //Debug.Log("cccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        //Debug.Log("ssss midpointTest:  " + midpointTest);
+        while (count < 26)
+        {
+
+            fixedFirstHalfOfPath = null;
+            fixedSecondHalfOfPath = null;
+            //Debug.Log("midpointTest:  " + midpointTest);
+            //Debug.Log("count:  " + count);
+            //if (sampleCounter > frameCounter) { return null; }
+            //if (sampleCounter > sampleLimit) { return null; }
+            midpointTest = testSmallCluster(midpoint);
+
+            if (midpointTest == false)
+            {
+
+
+                fixedFirstHalfOfPath = makeNewPathMIDPOINTS(startPoint, midpoint, leftRight, 1);
+                if (fixedFirstHalfOfPath != null)//no!  we NEED lists of count zero!   && fixedFirstHalfOfPath.Count > 0)
+                {
+                    if (fixedFirstHalfOfPath.Count > 0)// && (fixedFirstHalfOfPath[fixedFirstHalfOfPath.Count - 1] - endPoint0).magnitude < smallestDistanceOfInterest)
+                    {
+                        fixedSecondHalfOfPath = new List<Vector3>();
+                        return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                        break;
+                    }
+
+                    fixedSecondHalfOfPath = makeNewPathMIDPOINTS(midpoint, endPoint0, leftRight, 1);
+
+                    if (fixedSecondHalfOfPath != null)
+                    {
+                        break;
+                        //return sewUpPaths(fixedFirstHalfOfPath, fixedSecondHalfOfPath);
+                    }
+
+                }
+            }
+
+            sideReverser = alternateOrNot * sideReverser;
+
+            midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * multiplierCount * sideReverser);// - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            //midpoint = bisectionPoint + (perpendicularSpan * multiplierCount * sideReverser) - (lineBetween.normalized * multiplierCount * multiplierCount);
+
+            if (sideReverser > 0) { multiplierCount++; }
+            count++;
+        }
+
+
+        //Debug.DrawLine(startPoint, tentativeDetourPoint, Color.cyan, 0.1f);
+
+
+
+
+
+
+
+        /*
+
+        Vector3 o1 = new Vector3(0.14f, 0.6f,0.1f);
+
+        List<Vector3> lineOfPoints2 = new directionalLineOfPoints(startPoint+o1, tentativeDetourPoint + o1, samplePointSpacing).returnIt();
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstBreak2 = findFirstBreak(samples2);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak2 < 1) { return lineOfPoints2; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint2 = firstDetourPoint(startPoint + o1, lineOfPoints2[indexOfFirstBreak2]);
+
+        Debug.DrawLine(startPoint + o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+        Debug.DrawLine(o1, tentativeDetourPoint2, Color.yellow, 0.2f);
+
+
+
+
+
+
+
+
+        Vector3 o2 = new Vector3(0.24f, 1.2f, -0.2f);
+        List<Vector3> lineOfPoints3 = new directionalLineOfPoints(tentativeDetourPoint+o2, endPoint + o2, samplePointSpacing).returnIt();
+        List<bool> samples3 = new spatialDataSet(lineOfPoints3).sample(theSampleProcedure);
+
+        int indexOfFirstBreak3 = findFirstBreak(samples3);
+
+        //so, is there a break?
+        //if (indexOfFirstBreak3 < 1) { return lineOfPoints3; }//this means there is no break, so the line is good on its own
+
+
+        //if so, break in two by finding a detour point, go recursive [but could backfire with odd shapes, because these middle points don't need to be clung to the way start and end points do...]
+        Vector3 tentativeDetourPoint3 = firstDetourPoint(tentativeDetourPoint + o2, lineOfPoints3[indexOfFirstBreak3]);
+
+        Debug.DrawLine(tentativeDetourPoint + o2, tentativeDetourPoint3, Color.blue, 0.3f);
+        */
+
+
+
+        return sewUpPaths(fixedFirstHalfOfPath, midpoint, fixedSecondHalfOfPath);//midpoint, 
+        //return lineOfPoints;
+    }
+
+
+    internal void displayPoint(Vector3 thePoint)
+    {
+        Vector3 testOrigin = new Vector3(-40, -33, -200);
+        float duration = 22f;
+
+        Debug.DrawLine(testOrigin, thePoint, Color.blue, duration);
+        Debug.DrawLine(thePoint + new Vector3(0.3f, 0, 0.2f), thePoint + new Vector3(2f, 0, 1f) + Vector3.up * 5, Color.white, duration);
+
+    }
+
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        sampleCounter++;
+        //          sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(ground(midpoint));// +downWardOffset);
+        //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        new debugField(lineOfPoints, samples);
+        return samples[0];
+    }
+
+    private bool testSmallCluster(Vector3 midpoint)
+    {
+        //returns "true" if ANY are true?  or return false if any are false?  i think true is the one we don't want, so do true
+        float radius = 1f;
+
+        Vector3 extraPoint1 = midpoint + new Vector3(radius, 0, 0);
+        Vector3 extraPoint2 = midpoint + new Vector3(-radius, 0, 0);
+        Vector3 extraPoint3 = midpoint + new Vector3(0, 0, radius);
+        Vector3 extraPoint4 = midpoint + new Vector3(0, 0, -radius);
+
+        if (testOnePoint(midpoint) == true) { return true; }
+        if (testOnePoint(extraPoint1) == true) { return true; }
+        if (testOnePoint(extraPoint2) == true) { return true; }
+        if (testOnePoint(extraPoint3) == true) { return true; }
+        if (testOnePoint(extraPoint4) == true) { return true; }
+
+        return false;
+    }
+
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, Vector3 endPoint)
+    {
+        return justStartAndEnd(startPoint, endPoint);
+    }
+
+    private List<Vector3> justStartAndEnd(Vector3 startPoint, Vector3 endPoint)
+    {
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, Vector3 deviationPoint, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.AddRange(firstHalfOfPath);
+        newList.Add(deviationPoint);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath, Vector3 endPoint)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(Vector3 startPoint, List<Vector3> middleSection, Vector3 endPoint)
+    {
+        if (middleSection == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        newList.Add(startPoint);
+        newList.AddRange(middleSection);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        newList.Add(endPoint);
+        return newList;
+    }
+
+    private List<Vector3> sewUpPaths(List<Vector3> firstHalfOfPath, List<Vector3> secondHalfOfPath)
+    {
+        if (firstHalfOfPath == null || secondHalfOfPath == null) { return null; }
+        List<Vector3> newList = new List<Vector3>();
+        //newList.Add(startPoint);
+        newList.AddRange(firstHalfOfPath);
+        newList.AddRange(secondHalfOfPath);
+
+        /*
+        foreach (var point in firstHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        foreach (var point in secondHalfOfPath)
+        {
+            newList.Add(point);
+        }
+        */
+
+        //newList.Add(endPoint);
+        return newList;
+    }
+
+    private Vector3 firstDetourPoint(Vector3 startPoint, Vector3 breakPoint)
+    {
+        //k, need to sample a line perpendicular to our previous line, find the edge of the break
+        Vector3 direction = horizontalPerpendicular(startPoint, breakPoint);
+        List<Vector3> lineOfPoints = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, direction, 10).returnIt();
+        List<Vector3> lineOfPoints2 = new directionalLineOfExponentialPoints(breakPoint, samplePointSpacing, -direction, 10).returnIt();
+
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        List<bool> samples2 = new spatialDataSet(lineOfPoints2).sample(theSampleProcedure);
+
+        int indexOfFirstUnBreak = findFirstUnBreak(samples);
+        int indexOfFirstUnBreak2 = findFirstUnBreak(samples2);
+
+        if (indexOfFirstUnBreak < indexOfFirstUnBreak2)
+        {
+
+            Debug.Log("lineOfPoints.Count:  " + lineOfPoints.Count);
+            Debug.Log("indexOfFirstUnBreak:  " + indexOfFirstUnBreak);
+            return lineOfPoints[indexOfFirstUnBreak];
+        }
+
+        Debug.Log("lineOfPoints2.Count:  " + lineOfPoints2.Count);
+        Debug.Log("indexOfFirstUnBreak2:  " + indexOfFirstUnBreak2);
+        return lineOfPoints2[indexOfFirstUnBreak2];
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 startPoint, Vector3 endPoint)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(endPoint - startPoint, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private Vector3 horizontalPerpendicular(Vector3 lineWeWantSomethingPerpendicularTo)
+    {
+        //https://docs.unity3d.com/2019.3/Documentation/Manual/ComputingNormalPerpendicularVector.html
+        Vector3 perpendicular = new Vector3();
+
+        perpendicular = Vector3.Cross(lineWeWantSomethingPerpendicularTo, Vector3.up);
+
+        return perpendicular;
+    }
+
+    private int findFirstBreak(List<bool> samples)
+    {
+        //but we ignore first point, it cannot be a "break".  same with last point
+        int index = 1;
+
+        while (index < samples.Count - 1)
+        {
+            if (samples[index] == true) { return index; }
+            index++;
+        }
+
+
+        return 0;
+    }
+
+    private int findFirstUnBreak(List<bool> samples)
+    {
+        //but we ignore first point
+        int index = 1;
+        Debug.Log("-------------------------findFirstUnBreak");
+
+        while (index < samples.Count)
+        {
+            Debug.Log(samples[index]);
+            if (samples[index] == false)
+            {
+
+                Debug.Log("return index:  " + index);
+                return index;
+            }
+            index++;
+        }
+
+
+        Debug.Log("return samples.Count+1:  " + (samples.Count + 1));
+        return samples.Count + 1;  //yes that's impossible.  need better way to handle
+    }
+
+
+    private bool weDoHaveGoodPath()
+    {
+        if (currentPath == null) { currentPath = new List<Vector3>(); return false; }
+        if (currentPath.Count == 0) { return false; }
+        if (currentPath.Count < currentIndexOfCurrentPath + 1) { return false; }
+
+
+
+
+        return true;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+public class teamBaseGen : doAtPoint
+{
+    //So, for each team I need the following
+    //      a base LOCATION
+    //      a base object that is properly tagged
+    //      a leader
+    //      a hoarde wave callable update component  monobehavior I think? that can generate the waves at the correct times
+    //      I need two of those.or I need two different ways and two different conditions.so two of those probably.
+    //  one for attackers one for defenders.
+    //      Attackers need to be tagged as attackers, Defenders need to be tagged as Defenders
+    //      each of them needs to be able to receive orders
+    //      the leader needs to give attackers and Defenders different orders based on their tagged classification. 
+    //      And let's have one type of soldier generator, because I hate having to update two of them
+    //  and check two of them and everything. just have one. [that i can somehow plug in the "attacker" or "defender" tags]
+
+    tag2 team;
+
+    public teamBaseGen(tag2 teamIn)
+    {
+        team = teamIn;
+    }
+
+    internal override void doIt(Vector3 thisPoint)
+    {
+        GameObject baseMarker = new makeBaseMarker(team).doIt(thisPoint);
+        //new makeLeader(team).doIt(thisPoint * 8);
+        List<objectSetInstantiator> attackerWaveSet = new makeAdvancedUpdatedWaveList(team, tag2.attackSquad).returnWaves();
+        List<objectSetInstantiator> defenderWaveSet = new makeAdvancedUpdatedWaveList(team, tag2.defenseSquad).returnWaves();
+        Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDict = new Dictionary<condition, List<objectSetInstantiator>>();
+        condition attackerRespawnCondition = noUnitsWithThisTag(tag2.attackSquad);
+        condition defenderRespawnCondition = noUnitsWithThisTag(tag2.defenseSquad);
+        wavesAndConditionDict[attackerRespawnCondition] = attackerWaveSet;
+        wavesAndConditionDict[defenderRespawnCondition] = defenderWaveSet;
+        callableThatGeneratesWavesWhenTheirConditionIsMet.addThisComponent(baseMarker, relativeSpawnPoints(), wavesAndConditionDict); //can assume condition just checks their tags?  but then.....need to input those tags, or else hard wire them....
+
+
+
+        //new makeTestLeader(team).doIt(thisPoint * 5);
+        new testNewestFSMGeneratorLeader(team, thisPoint * 6).doIt();
+
+        new makeBaseStorage1(thisPoint + new Vector3(-9, 1, 13));
+    }
+
+    private List<Vector3> relativeSpawnPoints()
+    {
+        List<Vector3> listOfOffsetSpawnLocations = new List<Vector3>();
+        listOfOffsetSpawnLocations.Add(new Vector3(5, 0, 5));
+        listOfOffsetSpawnLocations.Add(new Vector3(-5, 0, 3));
+        listOfOffsetSpawnLocations.Add(new Vector3(-7, 0, -4));
+        listOfOffsetSpawnLocations.Add(new Vector3(6, 0, -5));
+
+        return listOfOffsetSpawnLocations;
+    }
+
+    private condition noUnitsWithThisTag(tag2 unitGroupIn)
+    {
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            new hasVirtualGamepad(),
+            new objectHasTag(unitGroupIn),
+            new reverseCriteria(new objectHasTag(tag2.teamLeader))
+            );
+
+
+
+        objectSetGrabber theTeamObjectSet = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), theCriteria);
+
+        condition theCondition = new reverseCondition(new isThereAtLeastOneObjectInSet(theTeamObjectSet));
+
+        return theCondition;
+    }
+
+}
+
+public class makeAdvancedUpdatedWaveList
+{
+
+    tag2 team;//this is annoying, messy
+    public tag2 unitGroup;
+    List<objectSetInstantiator> theWaves = new List<objectSetInstantiator>();
+
+    public makeAdvancedUpdatedWaveList(tag2 teamIn, tag2 unitGroupIn)
+    {
+        team = teamIn;
+        unitGroup = unitGroupIn;
+    }
+
+
+    public List<objectSetInstantiator> returnWaves()
+    {
+        addWave(
+            new objectGen[]
+                {
+                    unit1()//,unit2(),unit2(),unit4()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit1()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit3()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit2(),unit2(),unit3()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit3(),unit3(),unit3()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit1(),unit1(),unit1(),
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2(),unit2(),unit4()
+                }
+            );
+
+
+        addWave(
+            new objectGen[]
+                {
+                    unit2(),unit2(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit3(),unit3(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit1(),unit2(),unit4()
+                }
+            );
+
+        addWave(
+            new objectGen[]
+                {
+                    unit1(),unit1(),unit2(),unit3(),unit4()
+                }
+            );
+
+        return theWaves;
+    }
+
+    public objectGen unit1()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 1f;
+        int firingRateIn = 10;
+        float projectileSizeIn = 0.2f;
+        float projectileSpeedIn = 1f;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.3f;
+        float gunWidthIn = 0.2f;
+        float gunLengthIn = 1.4f;
+
+        return unitMaker2(1, 2.9f, 0.9f, 5, 20,
+            weaponMaker(1, 40, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 50;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.4f;
+        float gunWidthIn = 0.4f;
+        float gunLengthIn = 1.7f;
+
+        return unitMaker2(1, 3f, 1f, 3.7f, 33,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+
+    }
+    public objectGen unit3()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 20;
+        float projectileSpeedIn = 4;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 1;
+        float gunHeightIn = 0.5f;
+        float gunWidthIn = 0.3f;
+        float gunLengthIn = 0.8f;
+        return unitMaker2(3, 3.3f, 1f, 3.7f, 28,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+
+    }
+    public objectGen unit4()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 5;
+        int firingRateIn = 70;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 2;
+        float gunHeightIn = 0.6f;
+        float gunWidthIn = 0.7f;
+        float gunLengthIn = 1.3f;
+        return unitMaker2(3, 3.9f, 1f, 7f, 25,
+
+        weaponMaker(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn));
+    }
+
+
+    /*
+    
+    public objectGen unit1()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn =1f;
+        int firingRateIn = 10;
+        float projectileSizeIn = 0.2f;
+        float projectileSpeedIn = 1f;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.3f;
+        float gunWidthIn = 0.2f;
+        float gunLengthIn = 1.4f;
+
+        return unitMaker2(1, 2.9f, 0.9f, 5, 20, 
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));//weaponMaker(1, 10, 4, 1, true, 0, 0.3f, 0.2f, 1.4f//(1,10,4,1,true,0,0.3f,0.2f,1.4f));
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+        int firingRateIn = 50;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 0;
+        float gunHeightIn = 0.4f;
+        float gunWidthIn = 0.4f;
+        float gunLengthIn = 1.7f;
+    
+            return unitMaker2(1, 3f, 1f, 3.7f, 33,
+
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+        
+    }
+    public objectGen unit3()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 2;
+            int firingRateIn = 20;
+            float projectileSpeedIn = 4;
+            float projectileSizeIn = 1;
+            bool sdOnCollisionIn = true;
+            int levelIn = 1;
+            float gunHeightIn = 0.5f;
+            float gunWidthIn = 0.3f;
+            float gunLengthIn = 0.8f;
+            return unitMaker2(3, 3.3f, 1f, 3.7f, 28,
+
+            weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+
+    }
+    public objectGen unit4()
+    {
+        interType theIntertype = interType.peircing;
+        float magnitudeOfInteractionIn = 5;
+        int firingRateIn = 70;
+        float projectileSpeedIn = 3;
+        float projectileSizeIn = 1;
+        bool sdOnCollisionIn = true;
+        int levelIn = 2;
+        float gunHeightIn = 0.6f;
+        float gunWidthIn = 0.7f;
+        float gunLengthIn = 1.3f;
+        return unitMaker2(3, 3.9f, 1f, 7f, 25,
+
+        weaponMaker2(firingRateIn, projectileMaker(
+                new objectModifier[] {
+            new simpleMovingMod(projectileSpeedIn, sdOnCollisionIn, 99),
+            new collisionInteractionMod(theIntertype, magnitudeOfInteractionIn, levelIn),
+            new modifyScale(projectileSizeIn, projectileSizeIn, projectileSizeIn)
+            }), new objectModifier[]
+            {
+                new modifyScale(gunLengthIn, gunHeightIn, gunWidthIn)
+            }
+            ));
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    public objectGen unit1()
+    {
+        return unit(1, 2.9f, 0.9f, 5, 20);
+        //return new basicPaintByNumbersSoldierGeneratorG(team, 1, 2.4f, 1, 4, 33);//unit(1, 0.8f, 0.9f, 5, 20);
+    }
+    public objectGen unit2()
+    {
+        return unit(1, 3f, 1f, 3.7f, 33);
+    }
+    public objectGen unit3()
+    {
+        return unit(3, 3.3f, 1f, 3.7f, 28);
+    }
+    public objectGen unit4()
+    {
+        return unit(3, 3.9f, 1f, 7f, 25);
+    }
+
+
+
+
+    */
+
+
+
+
+
+    public void addWave(objectGen[] theWave)
+    {
+        theWaves.Add(new objectSetInstantiator(theWave));
+    }
+
+    /*
+    objectGen unit(float health, float height, float width, float speed, float targetDetectionRange)
+    {
+        return new basicPaintByNumbersSoldierGeneratorG(team, health, height, width, speed, targetDetectionRange);
+    }
+    */
+
+    objectGen unitMaker2(float health, float height, float width, float speed, float targetDetectionRange, objectGen weapon)
+    {
+        return new updatedSoldierGen(team, unitGroup, health, height, width, speed, targetDetectionRange, weapon);
+    }
+
+    objectGen weaponMaker(float magnitudeOfInteractionIn, int firingRateIn, float projectileSpeedIn, float projectileSizeIn, bool sdOnCollisionIn = true, int levelIn = 0, float gunHeightIn = 1, float gunWidthIn = 1, float gunLengthIn = 1)
+    {
+        return new paintByNumbersGun1(magnitudeOfInteractionIn, firingRateIn, projectileSpeedIn, projectileSizeIn, sdOnCollisionIn, levelIn, gunHeightIn, gunWidthIn, gunLengthIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType)
+    {
+
+        return new newGunGen(projectileType, new objectModifier[]{
+        },
+        firingRateIn);
+    }
+    objectGen weaponMaker2(int firingRateIn, genObjectAndModify projectileType, objectModifier[] gunItselfMods)
+    {
+
+        return new newGunGen(projectileType, gunItselfMods,
+        firingRateIn);
+    }
+
+    genObjectAndModify projectileMaker(objectModifier[] projectileModifiers) //should be a class?  like newGunGen?
+    {
+        //float magnitudeOfInteractionIn, int firingRateIn,
+        //float projectileSpeedIn, float projectileSizeIn,
+        //bool sdOnCollisionIn = true, int levelIn = 0)
+
+        return new genObjectAndModify(new sphereGen(), projectileModifiers);
+
+
+    }
+
+
+}
+
+public class updatedSoldierGen : objectGen
+{
+    tagging2.tag2 team;
+    public tag2 unitGroup;
+    private Vector3 thePosition;
+
+    float health;
+    float height;
+    float width;
+    objectGen weapon;
+    //List<OldFSM> theBehavior;  //gah!  needs the object as an input!
+    float speed;
+    float targetDetectionRange;
+
+
+    //(tagging2.tag2 theTeamIn, float health, float speed, float height, float width, float targetDetectionRange, objectGen weapon, List<OldFSM> theBehavior )
+
+    // 
+    //basicBodyProperties
+    public updatedSoldierGen(tag2 theTeamIn, tag2 unitGroupIn, float health, float height, float width, float speed, float targetDetectionRange, objectGen weaponGenIn)
+    {
+        this.team = theTeamIn;
+        this.unitGroup = unitGroupIn;
+        this.health = health;
+        this.height = height;
+        this.width = width;
+        this.speed = speed;
+        weapon = weaponGenIn;
+    }
+
+    public GameObject generate()
+    {
+        GameObject newObj = new makeBasicHuman(3, 1, 6).generate();
+        addTeamColors(newObj);
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, unitGroup);
+
+
+        //newObj.AddComponent<rtsModule>();
+        newObj.AddComponent<advancedRtsModule>();
+
+        addWeapon(newObj, weapon);
+        //addSoldierOldFSM(newObj);
+
+        new FSMgen(newObj, new followAdvancedCommands());
+
+        return newObj;
+    }
+
+    private void addWeapon(GameObject theObject, objectGen theWeaponIn)
+    {
+        inventory1 theirInventory = theObject.GetComponent<inventory1>();
+        //GameObject gun = weapon.generate();
+        GameObject gun = theWeaponIn.generate();//genGen.singleton.returnGun1(newObj.transform.position);
+        theirInventory.inventoryItems.Add(gun);
+        interactionCreator.singleton.dockXToY(gun, theObject);
+
+    }
+
+    private void addSoldierOldFSM(GameObject theObject)
+    {
+        OldFSMcomponent theOldFSMcomponent = theObject.AddComponent<OldFSMcomponent>();
+        theOldFSMcomponent.theOldFSMList = new soldierWithUnitGroupOldFSM(theObject, team, unitGroup, speed).returnIt();
+    }
+
+    public void addTeamColors(GameObject theObject)
+    {
+        Renderer theRenderer = theObject.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        //Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+    }
+
+    private void newTorso(GameObject newObj, GameObject torso)
+    {
+        //torso.transform.localScale = new Vector3(width, height / 2, width);
+
+
+        //torso.transform.position += new Vector3(0, (height / 2) - 1, 0);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+        Renderer theRenderer2 = torso.GetComponent<Renderer>();
+        //theRenderer2.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        //hitbox.size += new Vector3(width-1, height-1, width-1);
+        //hitbox.center += new Vector3(0, (height-1)/2, 0);
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+
+
+        torso.transform.SetParent(newObj.transform, false);
+        newObj.transform.localScale = new Vector3(width, (height - 1) / 2, width);
+        //newObj.transform.position += new Vector3(0, ((height - 1) / 2), 0);
+    }
+
+    private void oldTorso(GameObject newObj, GameObject torso)
+    {
+        torso.transform.SetParent(newObj.transform, false);
+        torso.transform.position += new Vector3(0, 1f, 0);
+
+
+        Renderer theRenderer = newObj.GetComponent<Renderer>();
+        theRenderer.material.color = tagging2.singleton.teamColors[team];
+
+        GameObject.Destroy(newObj.GetComponent<Collider>());
+        BoxCollider hitbox = newObj.AddComponent<BoxCollider>();
+        hitbox.size += new Vector3(0, 1f, 0);
+        hitbox.center += new Vector3(0, 0.5f, 0);
+    }
+}
+
+
+
+
+
+
+
+public class makeBaseStorage1
+{
+    public makeBaseStorage1(Vector3 thisPoint)
+    {
+
+
+        GameObject wall = new GameObject();
+        wall.AddComponent<BoxCollider>();
+        genGen.singleton.addCube(wall);
+        wall.transform.position = thisPoint;// + new Vector3(0, 5, 0);
+        wall.transform.localScale = new Vector3(0.4f, 14, 18);
+        wall.name = "wall";// + team.ToString();
+        //Renderer theRenderer = wall.AddComponent<MeshRenderer>();
+        //theRenderer.material.color = Color.black;//teamColor;
+
+        //tagging2.singleton.addTag(wall, tag2.zoneable);
+
+        //      float intensity = 0.7f;
+        //      float angle = 145;
+
+        float intensity = 0.97f;
+        float angle = 167;
+        //float intensity = 0.97f;
+        //float angle = 167;
+
+        new spotLightGenerator1(thisPoint + new Vector3(2, 6, -2), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+        new spotLightGenerator1(thisPoint + new Vector3(-33, 6, 22), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
+
+    }
+}
+
+
+
+
 public class makeStealthRouteToTargetPickerDestination4DEBUGGER : MonoBehaviour
 {
     //currently only for flat surfaces!
@@ -967,13 +2694,17 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
     Vector3 startPoint0;
     Vector3 endPoint0;
 
+    //what was this for?  to fix tall NPC offset?  it isn't working correctly
+    //Vector3 downWardOffset = new Vector3(0,-3,0);
+
     private GameObject theSneaker;
     private tag2 team;
     targetPicker theTargetPicker;
     boolSampleProcedure theSampleProcedure;
     float samplePointSpacing = 10f;
     int recursionCounter = 0;
-    int recursionLimit = 2630;
+    //int recursionLimit = 2630;
+    int recursionLimit = 130;
     float smallestDistanceOfInterest = 13f;
 
     int frameCounter = 0;
@@ -1014,6 +2745,7 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
 
 
 
+        if (currentPath == null) { return null; }
         agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
         currentIndexOfCurrentPath++;
 
@@ -1030,14 +2762,37 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
         currentIndexOfCurrentPath = 0;
         recursionCounter = 0;
 
-        startPoint0 = theSneaker.transform.position;
-        endPoint0 = theTargetPicker.pickNext().realPositionOfTarget(); //new Vector3(342.001f, 4.0838f, 85.9995f);// //new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
+        //tall NPC can make test points too high up.  need to keep it on ground for this test?
+        startPoint0 = groundPointUnderInputPoint(theSneaker.transform.position);//theSneaker.transform.position;
+        //likewise....end points COULD be a bit below ground?  unsure...
+        endPoint0 = groundPointUnderInputPoint(theTargetPicker.pickNext().realPositionOfTarget()); //new Vector3(342.001f, 4.0838f, 85.9995f);// //new Vector3(40, 0, 70);//theTargetPicker.pickNext().realPositionOfTarget();
         Debug.DrawLine(startPoint0, endPoint0, Color.white, 22f);
         currentPath = makeNewPathMIDPOINTS(startPoint0, endPoint0);//sewUpPaths(startPoint, makeNewPathMIDPOINTS(startPoint, endPoint), endPoint);//newMainPathfinder(startPoint,endPoint);//
+        
+        if(currentPath == null) { return; }
+
         currentPath.Add(endPoint0);
         //currentPath = makeNewPath(theTargetPicker.pickNext().realPositionOfTarget(), theSneaker.transform.position);
         collapseRedundaciesInPath();
         displayPath();
+    }
+
+    private Vector3 groundPointUnderInputPoint(Vector3 theInputPoint)
+    {
+        RaycastHit hit;
+        Ray downRay = new Ray(theInputPoint, -Vector3.up);
+
+        // Cast a ray straight downwards.
+        if (Physics.Raycast(downRay, out hit))
+        {
+            //Debug.DrawLine(new Vector3(), hit.point,Color.magenta,14f);
+            return hit.point;
+        }
+
+        Vector3 estimate = new Vector3(theInputPoint.x, 0, theInputPoint.z);
+
+        //Debug.DrawLine(new Vector3(), estimate, Color.yellow, 14f);
+        return estimate;
     }
 
     private void collapseRedundaciesInPath()
@@ -1383,6 +3138,7 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
     */
     private List<Vector3> makeNewPathMIDPOINTS(Vector3 startPoint, Vector3 endPoint, int leftRight = 1, int alternateOrNot = -1)
     {
+        //displayPoint(startPoint);
         //so, (at MOST) we ONLY want the points that are OFFSET midpoints.  end point is added by original function call location
         if (recursionCounter > recursionLimit) { return null; }
         recursionCounter++;
@@ -1418,6 +3174,7 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
         fixedFirstHalfOfPath = null;
         fixedSecondHalfOfPath = null;
 
+        //displayPoint(midpoint);
         midpointTest = testOnePoint(midpoint);
         //if (sampleCounter > sampleLimit) { return null; }
         if (midpointTest == false)
@@ -1467,6 +3224,9 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
         //Debug.Log("ssss midpointTest:  " + midpointTest);
         while (count < 26)
         {
+
+            fixedFirstHalfOfPath = null;
+            fixedSecondHalfOfPath = null;
             //Debug.Log("midpointTest:  " + midpointTest);
             //Debug.Log("count:  " + count);
             //if (sampleCounter > frameCounter) { return null; }
@@ -1566,6 +3326,16 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
     }
 
 
+    internal void displayPoint(Vector3 thePoint)
+    {
+        Vector3 testOrigin = new Vector3(-40, -33, -200);
+        float duration = 22f;
+
+        Debug.DrawLine(testOrigin, thePoint, Color.blue, duration);
+        Debug.DrawLine(thePoint + new Vector3(0.3f, 0, 0.2f), thePoint + new Vector3(2f, 0, 1f) + Vector3.up * 5, Color.white, duration);
+
+    }
+
 
     private bool testOnePoint(Vector3 midpoint)
     {
@@ -1573,9 +3343,10 @@ public class makeStealthRouteToTargetPickerDestination4 : targetPicker
         //          sampleCounter++;
         //umm ya annoying messy ad-hoc for now:
         List<Vector3> lineOfPoints = new List<Vector3>();
-        lineOfPoints.Add(midpoint);
+        lineOfPoints.Add(midpoint);// +downWardOffset);
         //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
         List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        new debugField(lineOfPoints, samples);
         return samples[0];
     }
 
@@ -3602,6 +5373,113 @@ public class makeStealthRouteToTargetPickerDestination2DEBUGGER2 : MonoBehaviour
 
 
 
+public class randomHidingLocationTargetPicker2 : targetPicker
+{
+    //randomly pick from sampled locations where they won't be seen
+
+    //bool currentlyDoingMainBehavior = true;
+    List<Vector3> nearbyHidingPositions = new List<Vector3>();
+
+    targetPicker targetToBeNear;
+    float spreadFactor = 1.0f;
+    visibleToThreatSet visibilityCalc;
+
+    private tag2 team;
+
+    public randomHidingLocationTargetPicker2(GameObject objectToBeNearIn, targetPicker targetToBeNearIn, tag2 teamIn, float spreadFactorIn = 1f)
+    {
+        targetToBeNear = targetToBeNearIn;
+        this.team = teamIn;
+        spreadFactor = spreadFactorIn;
+        visibilityCalc = new visibleToThreatSet(objectToBeNearIn, threatSet(objectToBeNearIn), 0.05f);//objectToBeNearIn.GetComponent<beleifs>().beleifObjectSets[0]); //very ad-hoc
+    }
+
+    private objectSetGrabber threatSet(GameObject theObject)
+    {
+        //return theObjectDoingTheEnaction.GetComponent<beleifs>().threatMarkerSet;
+
+        //so:
+        //      for feet, use shadow object markers
+        //      that are "threats" [meet threat criteria]
+        //ALSO this is where i CREATE the "beleif set", beleif component just UPDATES it....
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(theObject,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+        beleifs theComponent = theObject.GetComponent<beleifs>();
+        theComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+        //objectSetGrabber theGrabber = threatObjectPermanence;//????i think???? //new setOfAllObjectThatMeetCriteria(threatObjectPermanence);
+        return threatObjectPermanence;//????i think????
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+
+        //Vector3 target = patternScript2.singleton.randomNearbyVector(objectToBeNear.transform.position, spreadFactor);
+        //Debug.Log(target);
+        //agnosticTargetCalc targ = new agnosticTargetCalc(objectToBeNear, target);
+        //return targ;
+
+
+
+        //attempt to stop raycast from hitting this object:
+        //objectToBeNear.GetComponent<Collider>().enabled = false;
+        Vector3 hidingSpot = new Vector3();
+        int tries = 25;
+        while (tries > 0)
+        {
+            hidingSpot = patternScript2.singleton.randomNearbyVector(targetToBeNear.pickNext().realPositionOfTarget(), spreadFactor);
+
+            if (thisIsAnUndetectableLocation(hidingSpot) == false)
+            {
+                //objectToBeNear.GetComponent<Collider>().enabled = true;
+                return new agnosticTargetCalc(hidingSpot);
+            }
+
+            tries--;
+        }
+
+        //objectToBeNear.GetComponent<Collider>().enabled = true;
+        return new agnosticTargetCalc(new Vector3(-1000, 0, -1500)); //just to be obvious
+
+        //int index = UnityEngine.Random.Range(0, nearbyHidingPositions.Count-1);
+        //return new agnosticTargetCalc(nearbyHidingPositions[index]);
+    }
+
+    private bool thisIsAnUndetectableLocation(Vector3 hidingSpot)
+    {
+        //to be more robust, let's test 3 offset locations around this point [and use "one drop visible rule"]
+        List<Vector3> offsets = new List<Vector3>();
+        offsets.Add(new Vector3(0, 0.1f, 0.9f));
+        offsets.Add(new Vector3(-0.7f, -0.1f, 0.6f));
+        offsets.Add(new Vector3(0.5f, 0.1f, -0.6f));
+        foreach (Vector3 offset in offsets)
+        {
+            if (visibilityCalc.sampleOnePoint(hidingSpot + offset) == true) { return true; }
+        }
+
+        return false;
+    }
+
+    internal void updateSetOfNearbyHidingPositions()
+    {
+        //so:
+        //      sample field of points
+        //the data:
+        //      [armature?] line of sight to:
+        //          object permanence threat marker set
+        //          lights
+        //[and if those are both "true"]:
+        //      illumination level [or bool?]
+        //                  spatialDataSet myData = new spatialDataSet();
+
+    }
+}
+
 
 
 public class randomHidingLocationTargetPicker : targetPicker
@@ -4583,15 +6461,22 @@ public class teamGen:doAtPoint
     internal override void doIt(Vector3 thisPoint)
     {
         GameObject baseMarker=  new makeBaseMarker(team).doIt(thisPoint);
-        new makeLeader(team).doIt(thisPoint * 8);
-        List<objectSetInstantiator> attackerWaveSet = new makeWaveList(team, tag2.attackSquad).returnWaves();
+        //new makeLeader(team).doIt(thisPoint * 8);
+        //List<objectSetInstantiator> attackerWaveSet = new makeWaveList(team, tag2.attackSquad).returnWaves();
         List<objectSetInstantiator> defenderWaveSet = new makeWaveList(team, tag2.defenseSquad).returnWaves();
         Dictionary<condition, List<objectSetInstantiator>> wavesAndConditionDict = new Dictionary<condition, List<objectSetInstantiator>>();
         condition attackerRespawnCondition = noUnitsWithThisTag(tag2.attackSquad);
         condition defenderRespawnCondition = noUnitsWithThisTag(tag2.defenseSquad);
-        wavesAndConditionDict[attackerRespawnCondition] = attackerWaveSet;
+        //wavesAndConditionDict[attackerRespawnCondition] = attackerWaveSet;
         wavesAndConditionDict[defenderRespawnCondition] = defenderWaveSet;
         callableThatGeneratesWavesWhenTheirConditionIsMet.addThisComponent(baseMarker, relativeSpawnPoints(), wavesAndConditionDict); //can assume condition just checks their tags?  but then.....need to input those tags, or else hard wire them....
+
+
+
+        //new makeTestLeader(team).doIt(thisPoint * 5);
+        new testNewestFSMGeneratorLeader(team, thisPoint * 6).doIt();
+
+        new makeBaseStorage1(thisPoint + new Vector3(-9, 1, 13));
     }
 
     private List<Vector3> relativeSpawnPoints()
@@ -6427,6 +8312,7 @@ public class teamLeaderWithUnitGroupsOldFSM : OldFSM
         objectSetGrabber allDefendersWithNoOrders = new setOfAllObjectThatMeetCriteria(new setOfAllObjectsWithTag(team), defenderHasNoOrders);
 
         fakeRepeater.MOREINFOgiveXRTSTargetsToYUnits(allAttackersWithNoOrders);
+        //fakeRepeater.MOREINFOgivePatrolOrders(allDefendersWithNoOrders);
         OldFSM giveOrders = new generateOldFSM(fakeRepeater);//new goToX(newObj, hihgigigiygiyTargetPicker(), 10000).returnIt());
 
         giveOrders.name = "giveOrders";
@@ -7748,6 +9634,12 @@ public class oneTeamBaseGenAtPoint : doAtPoint
         newObj.AddComponent<BoxCollider>();
 
         teamBaseGen.theBaseGeneratorObject = newObj;
+
+
+
+        //GameObject baseMarker = new makeBaseMarker(team).doIt(thisPoint);
+        //new makeTestRadar(team, thisPoint);
+        //new makeTestAircraft(thisPoint + new Vector3(9, 1, 7));
     }
 }
 

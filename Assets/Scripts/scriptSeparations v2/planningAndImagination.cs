@@ -704,6 +704,18 @@ public class FSMcomponent : MonoBehaviour, IupdateCallable
         theFSM.setup(this.gameObject);
         theFSMList.Add(theFSM);
     }
+
+    public void debug(int limit)
+    {
+        foreach (FSM theFSM in theFSMList)
+        {
+            limit = theFSM.debugFSM(limit); /// State(theFSM, limit);
+
+            limit--;
+            if(limit <1 ){ break; }
+        }
+    }
+
 }
 
 public class FSM
@@ -791,6 +803,31 @@ public class FSM
         }
     }
     */
+
+    public int debugFSM(int limit)
+    {
+
+        if (limit < 1) { return 0; }
+
+        Debug.Log("this state name: " + this.name);
+
+        foreach (condition thisCondition in switchBoard.Keys)
+        {
+            Debug.Log("switch condition: " + thisCondition + ".  switch to:  " + switchBoard[thisCondition].name);
+            
+        }
+
+        limit--;
+
+        foreach (condition thisCondition in switchBoard.Keys)
+        {
+            limit = switchBoard[thisCondition].debugFSM(limit);
+        }
+
+        return limit;
+    }
+
+
 }
 
 public interface state
@@ -988,13 +1025,13 @@ public class doSimplePatrolState1 : state
         theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
 
         GameObject p1 = new GameObject();
-        p1.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, 6);
+        p1.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(20, 0, 25);
         GameObject p2 = new GameObject();
-        p2.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, 16);
+        p2.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(20, 0, -25);
         GameObject p3 = new GameObject();
-        p3.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(10, 0, -6);
+        p3.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-20, 0, -25);
         GameObject p4 = new GameObject();
-        p4.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-10, 0, -16);
+        p4.transform.position = theObjectDoingTheEnaction.transform.position + new Vector3(-20, 0, 25);
         theListOfLocationMarkers.Add(p1);
         theListOfLocationMarkers.Add(p2);
         theListOfLocationMarkers.Add(p3);
@@ -1203,7 +1240,12 @@ public class goToTargetPickerState : state
     public void doThisThing()
     {
 
-        theNavAgent.enact(new inputData(theTargetPicker.pickNext().realPositionOfTarget()));
+        //      inputData theEnactionInputData = new inputData(theTargetPicker.pickNext().realPositionOfTarget());
+        //for some reason i got a null object reference one time, guess i better separate by line so i can debug if it happens again:
+        agnosticTargetCalc theTargetCalc = theTargetPicker.pickNext();
+        Vector3 thePickedTargetLocation = theTargetCalc.realPositionOfTarget();
+        inputData theEnactionInputData = new inputData(thePickedTargetLocation);
+        theNavAgent.enact(theEnactionInputData);
 
 
         //new spatialDataSet(new gridOfPoints(theObjectDoingTheEnaction.transform.position, 11, 11, 5, 5, 1, 1).returnIt()).sample(
@@ -1230,6 +1272,31 @@ public class goToTargetPickerState : state
     }
 }
 
+
+public class emptyState : state
+{
+
+    public emptyState()
+    {
+    }
+
+
+    public void doThisThing()
+    {
+
+    }
+
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new emptyState();
+        newState.myConstructor(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
+    {
+    }
+}
 
 
 

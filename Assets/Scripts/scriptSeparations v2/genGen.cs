@@ -626,7 +626,167 @@ public class genGen : MonoBehaviour
 
 
 
+public class testStealthNPC2
+{
 
+    private tag2 team;
+    private tag2 squad;
+    private Vector3 vector3;
+
+    public testStealthNPC2(tag2 teamIn, tag2 squadIn, Vector3 vector3)
+    {
+        team = teamIn;
+        squad = squadIn;
+        this.vector3 = vector3;
+    }
+    internal void doIt()
+    {
+        GameObject newObj = new makeBasicHuman(8, 1, 6).generate();
+        newObj.name = "testStealthNPC2";
+        newObj.transform.position = vector3;
+        //newObj.AddComponent<advancedRtsModule>();
+        beleifs beleifComponent = beleifs.addThisComponent(newObj);
+        perceptions.addThisComponent(newObj);
+
+
+        updateableSetGrabber threatObjectPermanence = new objectsMeetingCriteriaBeleifSet1(newObj,
+            new objectMeetsAllCriteria(
+                new hasVirtualGamepad(),
+                new reverseCriteria(new objectHasTag(team))
+                ));
+
+
+        beleifComponent.beleifObjectSets.Add(threatObjectPermanence);
+
+        //debugFieldUpdateable.addThisComponent(newObj, new visibleToThreatSet(newObj, newObj.GetComponent<beleifs>().beleifObjectSets[0], 0.0014f));
+
+        stealthModule stealthModule = newObj.AddComponent<stealthModule>();
+        stealthModule.requestingStealth = true;
+
+        sensorySystemComponent.addThisComponent(newObj, new visualSensor1(newObj, beleifComponent, team, 400));
+
+        tagging2.singleton.addTag(newObj, team);
+        tagging2.singleton.addTag(newObj, squad);
+
+        //addWeapon(newObj, weaponMaker(1, 40, 4, 1, true, 0, 0.3f, 0.2f, 1.4f));
+
+        //new FSMgen(newObj, new pursueThreatLastKnownLocation(team));
+        //new FSMgen(newObj, new goToTargetPicker(new pickNextWhenTargetReached(newObj, new randomNearbyLocationTargetPicker(newObj))));//new randomHidingLocationTargetPicker(newObj,team)));
+        //new FSMgen(newObj, new goToTargetPicker(
+        //new pickNextWhenTargetReached(newObj, new randomHidingLocationTargetPicker(newObj, team))));//new randomHidingLocationTargetPicker(newObj,team)));
+        //new FSMgen(newObj, new equipIntertypeXFSM(interType.peircing), new interactUsingInterTypeXOnTargetYPlugin(interType.peircing, team));
+
+        //new FSMgen(newObj, new goToTargetPicker(
+        //new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination(newObj, team,
+        //new randomHidingLocationTargetPicker(newObj, team, 10)))));
+
+        //new FSMgen(newObj, new goToTargetPicker(
+        //  new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination2(newObj, team,
+        //new randomHidingLocationTargetPicker(newObj, team, 10)))));
+
+        //newObj.AddComponent<makeStealthRouteToTargetPickerDestination2DEBUGGER>();
+        //newObj.AddComponent<makeStealthRouteToTargetPickerDestination2DEBUGGER2>();
+
+        //new FSMgen(newObj, new goToTargetPicker(
+        //  new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination3(newObj, team,
+        //new randomHidingLocationTargetPicker(newObj, team, 10)))));
+
+
+        //new FSMgen(newObj, new goToTargetPicker(
+        //new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination4(newObj, team,
+        //new randomHidingLocationTargetPicker(newObj, team, 10)))));
+
+
+        objectCriteria enemyBaseCriteria = new objectMeetsAllCriteria(
+            new objectHasTag(tag2.militaryBase),
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        objectSetGrabber theEnemyBaseObjectSet = new setOfAllObjectThatMeetCriteria(
+            new setOfAllObjectsWithTag(tag2.militaryBase), enemyBaseCriteria);
+
+        targetPicker theAttackTargetPicker = new randomTargetPicker(theEnemyBaseObjectSet); //
+        //targetPicker theAttackTargetPicker = new nearestTargetPicker(newObj, theEnemyBaseObjectSet);
+        /*
+        targetPicker hidingSpotNearFinalTargetPicker = new randomHidingLocationTargetPicker2(newObj, theAttackTargetPicker, team, 1f);
+
+        new FSMgen(newObj, new goToTargetPicker(
+          new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination4(newObj, team,
+            new pickSegmentedPathTowardsX(newObj, hidingSpotNearFinalTargetPicker, 77f)))));
+        */
+
+
+        /*
+        new FSMgen(newObj, new goToTargetPicker(
+            new pickNextWhenTargetReached(newObj,
+            new randomHidingLocationTargetPicker2(newObj,
+            new pickNextFromNested(newObj,
+            new makeStealthRouteToTargetPickerDestination4(newObj, team,
+            new pickSegmentedPathTowardsX(newObj, theAttackTargetPicker, 77f))), team, 1.5f)
+            )));
+        */
+
+        /*
+        new FSMgen(newObj,
+            new goToTargetPicker(
+                new pickNextWhenTargetReached(newObj,
+                    new makeStealthRouteToTargetPickerDestination4(newObj, team,
+                        new randomHidingLocationTargetPicker2(newObj,
+                                //new pickNextFromNested(newObj,
+                                new pickSegmentedPathTowardsX(newObj, new pickNextWhenTargetReached(newObj, theAttackTargetPicker, 13f), 77f),
+                        team, 1.5f
+                        )
+                    ),
+                1.8f)
+            )
+        );
+        */
+
+        /*
+        targetPicker thePathFinderTargetPicker = new makeStealthRouteToTargetPickerDestination4(newObj, team,
+                                        //new randomHidingLocationTargetPicker2(newObj,
+                                        //new pickNextFromNested(newObj,
+                                        new pickSegmentedPathTowardsX(newObj, new pickNextWhenTargetReached(newObj, theAttackTargetPicker, 13f), 77f));
+        */
+
+        targetPicker thePathFinderTargetPicker = new makeSegmentedStealthRouteToTargetPickerDestination(newObj, team,
+                                        new pickNextWhenTargetReached(newObj, theAttackTargetPicker, 13f), 77f);
+
+
+
+        //new FSMgen(newObj,
+        //pathTowardsTargetBase(newObj, thePathFinderTargetPicker), stopWhenThereIsNoSafePath(newObj, team, thePathFinderTargetPicker)
+        //);
+        //new FSMgen(newObj, new lookAroundForGuards(thePathFinderTargetPicker),
+        //pathTowardsTargetBase(newObj, thePathFinderTargetPicker));
+        //new FSMgen(newObj, new lookAroundState());
+        //new FSMgen(newObj, new lookAroundForGuards(thePathFinderTargetPicker));
+        new FSMgen(newObj, new lookAroundForGuards(thePathFinderTargetPicker),
+            pathTowardsTargetBase(newObj, thePathFinderTargetPicker));
+        //newObj.AddComponent<makeStealthRouteToTargetPickerDestination4DEBUGGER>();
+
+
+    }
+
+
+    private plugInFSM stopWhenThereIsNoSafePath(GameObject theNPC, tag2 team, targetPicker thePathFinderTargetPicker)
+    {
+        condition haveGoodPath = new canAcquireTarget(new makeStealthRouteToTargetPickerDestination4(theNPC,team, thePathFinderTargetPicker));
+
+        return new waitOnCondition(haveGoodPath);
+    }
+
+    private plugInFSM pathTowardsTargetBase(GameObject newObj, targetPicker theAttackTargetPicker)
+    {
+        return new goToTargetPickerWithPathCondition(
+                        new pickNextWhenTargetReached(newObj, theAttackTargetPicker,2.8f)
+                    );
+    }
+}
+
+
+
+/*
 public class testStealthNPC
 {
 
@@ -681,9 +841,26 @@ public class testStealthNPC
         //new randomHidingLocationTargetPicker(newObj, team, 10)))));
 
 
+        //new FSMgen(newObj, new goToTargetPicker(
+        //new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination4(newObj, team,
+        //new randomHidingLocationTargetPicker(newObj, team, 10)))));
+
+
+        objectCriteria theCriteria = new objectMeetsAllCriteria(
+            //new objectHasTag(tag2.militaryBase),
+            new reverseCriteria(new objectHasTag(team))
+            );
+
+        targetPicker theAttackTargetPicker = new nearestTargetPicker(theObjectDoingTheEnaction, theEnemyBaseObjectSet);
+
+        objectSetGrabber theEnemyBaseObjectSet = new setOfAllObjectThatMeetCriteria(
+            new setOfAllObjectsWithTag(tag2.militaryBase), enemyBaseCriteria(theObjectDoingTheEnaction, team));
+
+
+
         new FSMgen(newObj, new goToTargetPicker(
           new pickNextWhenTargetReached(newObj, new makeStealthRouteToTargetPickerDestination4(newObj, team,
-            new randomHidingLocationTargetPicker(newObj, team, 10)))));
+            new pickNextWhenTargetReached(newObj, new pickSegmentedPathTowardsX())))));
 
         //newObj.AddComponent<makeStealthRouteToTargetPickerDestination4DEBUGGER>();
 
@@ -692,7 +869,7 @@ public class testStealthNPC
 
 
 }
-
+*/
 
 
 
@@ -1148,7 +1325,6 @@ internal class testBeleifMarkerSet : state
 }
 
 
-
 public class goToTargetPicker : simpleOneStateAndReturn
 {
     GameObject theObjectDoingTheEnaction;
@@ -1193,6 +1369,257 @@ public class goToTargetPicker : simpleOneStateAndReturn
     }
 }
 
+
+
+public class lookAroundForGuards : simpleOneStateAndReturn
+{
+    GameObject theObjectDoingTheEnaction;
+    targetPicker theTargetPicker;
+
+    public lookAroundForGuards(targetPicker thePathFinderTargetPickerIn)
+    {
+        theTargetPicker = thePathFinderTargetPickerIn;
+    }
+
+
+
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //hmm, this is still oddly clunky and confusing to make........how to make it easier to make?
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new lookAroundState();
+
+        FSM theFSM = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        theFSM.name = "feet, lookAround";
+        return theFSM;
+    }
+
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        return theCondition();
+    }
+
+    private condition theCondition()
+    {
+        condition timeCondition = new stickyCondition(new autoRepeatingTimer(5), 3);//new autoCondition();//
+        //condition haveGoodPath = new stickyCondition(new multicondition(new autoRepeatingTimer(5), new canAcquireTarget(theTargetPicker)), 5, false);// new makeStealthRouteToTargetPickerDestination4(theObjectDoingTheEnaction, team, theTargetPicker));
+
+        return timeCondition;
+    }
+}
+
+public class goToTargetPickerWithPathCondition : simpleOneStateAndReturn
+{
+    GameObject theObjectDoingTheEnaction;
+    targetPicker theTargetPicker;
+
+    public goToTargetPickerWithPathCondition(targetPicker theTargetPickerIn)
+    {
+        theTargetPicker = theTargetPickerIn;
+    }
+
+
+
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //hmm, this is still oddly clunky and confusing to make........how to make it easier to make?
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new goToTargetPickerState(theTargetPicker);
+
+        FSM goToThreat = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        goToThreat.name = "feet, goToTargetPicker";
+        return goToThreat;
+    }
+
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        return theCondition();
+    }
+
+    private condition theCondition()
+    {
+        condition haveGoodPath = new multicondition(
+            new stickyCondition(new autoRepeatingTimer(2), 5, true),
+            new stickyCondition(new canAcquireTarget(theTargetPicker), 5, false));// new makeStealthRouteToTargetPickerDestination4(theObjectDoingTheEnaction, team, theTargetPicker));
+
+        haveGoodPath = new stickyCondition(new canAcquireTarget(theTargetPicker), 5, false);
+
+        return haveGoodPath;
+    }
+}
+
+
+
+
+
+public class lookAroundState : state
+{
+    List<GameObject> theListOfABSOLUTELocationMarkers = new List<GameObject>();
+    GameObject theObjectDoingTheEnaction;
+    navAgent theNavAgent;
+    condition proxCondition;
+
+    bool needToReset = true;
+    public void doThisThing()
+    {
+        //how to go to one until proximity to it, then another, then another?
+        //well, start with first point on list
+        //[when done with it, remove it and add it to end of list]
+        //i have a bunch of "goToX" code........
+
+
+        //old code basically boils down thos this, i think:
+        //      gets nav agent enaction
+        //      adds proximity condition to enaction/exe
+        //      gets target position
+        //      uses target position as input data for the vector enaction [nav agent enaction]
+        //see:
+        //      navAgent theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+        //      proximityRef condition = new proximityRef(theObjectDoingTheEnaction, theEXE, offsetRoom);
+        //      theEXE.endConditions.Add(condition);
+        //      Vector3 targetPosition = theTargetCalculator.targetPosition();
+        //      theEnaction.enact(new inputData(targetPosition));
+
+
+        theListOfABSOLUTELocationMarkers[0].transform.position = (-theObjectDoingTheEnaction.transform.forward*1.5f) - theObjectDoingTheEnaction.transform.right;
+        makeProxConditionForFirstItemOnList();
+        handleProxCondition();
+        Vector3 relativePosition = theListOfABSOLUTELocationMarkers[0].transform.position + theObjectDoingTheEnaction.transform.position;
+        new makeShortMastLineAtPoint(relativePosition, Color.cyan);
+        theNavAgent.enact(new inputData(relativePosition));
+
+        /*
+        if (needToReset) 
+        {
+            makeProxConditionForFirstItemOnList();
+            needToReset = false;
+        }
+        handleProxCondition();
+        Vector3 relativePosition = theListOfABSOLUTELocationMarkers[0].transform.position + theObjectDoingTheEnaction.transform.position;
+        new makeShortMastLineAtPoint(relativePosition, Color.cyan);
+        theNavAgent.enact(new inputData(relativePosition));
+        UICharInfo*/
+    }
+
+    public state reConstructor(GameObject theObjectDoingTheEnactionIn)
+    {
+        state newState = new lookAroundState();
+        newState.myConstructor(theObjectDoingTheEnactionIn);
+        return newState;
+    }
+
+    public void myConstructor(GameObject theObjectDoingTheEnactionIn)
+    {
+        theObjectDoingTheEnaction = theObjectDoingTheEnactionIn;
+        theNavAgent = theObjectDoingTheEnaction.GetComponent<navAgent>();
+
+        GameObject p1 = new GameObject();
+        float amount = 2.5f;
+        p1.transform.position = new Vector3(amount, 0, amount);
+        GameObject p2 = new GameObject();
+        p2.transform.position = new Vector3(amount, 0, -amount);
+        GameObject p3 = new GameObject();
+        p3.transform.position =  new Vector3(-amount, 0, -amount);
+        GameObject p4 = new GameObject();
+        p4.transform.position =  new Vector3(-amount, 0, amount);
+        theListOfABSOLUTELocationMarkers.Add(p1);
+        theListOfABSOLUTELocationMarkers.Add(p2);
+        theListOfABSOLUTELocationMarkers.Add(p3);
+        theListOfABSOLUTELocationMarkers.Add(p4);
+
+
+
+        makeProxConditionForFirstItemOnList();
+    }
+
+    private void handleProxCondition()
+    {
+        //looks to see if they are close to first point
+        //if so, moves first point of list to the end
+        //then makes new prox condition using that new first point
+        if (proxCondition.met())
+        {
+            moveFirstItemInListToTheEnd();
+            needToReset = true;
+        }
+    }
+
+    private void makeProxConditionForFirstItemOnList()
+    {
+        Vector3 relativePosition = theListOfABSOLUTELocationMarkers[0].transform.position + theObjectDoingTheEnaction.transform.position;
+        //Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  relativePosition = " + relativePosition);
+        new makeMastLine(relativePosition+new Vector3(0,2,0), Color.yellow);
+        proxCondition = new proximity(theObjectDoingTheEnaction, relativePosition, 0, 3);
+    }
+
+    private void moveFirstItemInListToTheEnd()
+    {
+        GameObject item1 = theListOfABSOLUTELocationMarkers[0];
+        theListOfABSOLUTELocationMarkers.RemoveAt(0);
+        theListOfABSOLUTELocationMarkers.Add(item1);
+
+    }
+}
+
+
+
+public class waitOnCondition : simpleOneStateAndReturn
+{
+    GameObject theObjectDoingTheEnaction;
+    condition theWaitCondition;
+
+    public waitOnCondition(condition theWaitConditionIn)
+    {
+        theWaitCondition = theWaitConditionIn;
+    }
+
+
+
+
+
+    public override FSM generateTheFSM(GameObject theObjectDoingTheEnaction)
+    {
+        //hmm, this is still oddly clunky and confusing to make........how to make it easier to make?
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        state stateSetup = new emptyState();
+
+        FSM theFSM = new FSM(stateSetup.reConstructor(theObjectDoingTheEnaction));
+
+        theFSM.name = "feet, waitOnCondition";
+        return theFSM;
+    }
+
+
+
+    public override condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction)
+    {
+        this.theObjectDoingTheEnaction = theObjectDoingTheEnaction;
+
+        return theCondition();
+    }
+
+    private condition theCondition()
+    {
+        return theWaitCondition;
+    }
+}
 
 
 
@@ -1288,7 +1715,7 @@ public class lightIlluminationCalculator : MonoBehaviour
 
     internal Vector3 shadowPoint(GameObject theObject)
     {
-        //we assume all other conditions [such as feild of view] have been met, so sub-type doesn't matter here
+        //we assume all other conditions [such as field of view] have been met, so sub-type doesn't matter here
         //wait, range could still cut off SHADOW, sooo....
 
         return theSubTypeCalculator.shadowPoint(theObject);
@@ -1896,12 +2323,12 @@ public class testNewestFSMGeneratorSoldier
 
 public class testNewestFSMGeneratorLeader
 {
-    private tag2 team2;
+    private tag2 team;
     private Vector3 vector3;
 
-    public testNewestFSMGeneratorLeader(tag2 team2, Vector3 vector3)
+    public testNewestFSMGeneratorLeader(tag2 teamIn, Vector3 vector3)
     {
-        this.team2 = team2;
+        this.team = teamIn;
         this.vector3 = vector3;
     }
     internal void doIt()
@@ -1911,7 +2338,8 @@ public class testNewestFSMGeneratorLeader
 
 
 
-        new FSMgen(newObj, new giveSquadXAdvancedCommandY(team2, tag2.defenseSquad, new doSimplePatrolState1()));
+        new FSMgen(newObj, new giveSquadXAdvancedCommandY(team, tag2.defenseSquad, new doSimplePatrolState1()));
+        //new FSMgen(newObj, new giveSquadXAdvancedCommandY(team, tag2.attackSquad, new doSimplePatrolState1()));
     }
 }
 
@@ -1950,7 +2378,7 @@ public class testStealthDetectorGuard
 
 internal class testStealthDetection1 : state
 {
-    //a feild of view
+    //a field of view
     //detection state
     //      uses my new detection code
     //      targets....all enemy units in range/zone
@@ -2086,19 +2514,62 @@ public class FSMgen
 
     public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1)
     {
+        //theBaseFSM = addon1.theFSM;
+
+        
         theBaseFSM = new FSM(); //idle
-        theBaseFSM.name = "idle";
+        theBaseFSM.name = "FSMgen default idle1";
         addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
         addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+        
     }
     public FSMgen(GameObject theObjectDoingTheEnactionIn, plugInFSM addon1, plugInFSM addon2)
     {
+        //theBaseFSM = addon1.theFSM;
+        //theBaseFSM = addon1.;
+        //Debug.Assert(theBaseFSM != null);
+        //Debug.Assert(theBaseFSM != null);
+
         theBaseFSM = new FSM(); //idle
-        theBaseFSM.name = "idle";
+        theBaseFSM.name = "FSMgen default idle2";
+        //Debug.Log(addon1);
+        //Debug.Log(addon2);
         addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
         addon2.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
         addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
     }
+
+
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, state baseStateIn, plugInFSM addon1)
+    {
+        //theBaseFSM = addon1.theFSM;
+
+
+        theBaseFSM = new FSM(baseStateIn);
+        //theBaseFSM = new FSM(); //idle
+        //theBaseFSM.name = "FSMgen default idle1";
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+
+    }
+    public FSMgen(GameObject theObjectDoingTheEnactionIn, state baseStateIn, plugInFSM addon1, plugInFSM addon2)
+    {
+        //theBaseFSM = addon1.theFSM;
+        //theBaseFSM = addon1.;
+        //Debug.Assert(theBaseFSM != null);
+        //Debug.Assert(theBaseFSM != null);
+
+        //theBaseFSM = new FSM(); //idle
+
+        theBaseFSM = new FSM(baseStateIn);
+        //theBaseFSM.name = "FSMgen default idle2";
+        //Debug.Log(addon1);
+        //Debug.Log(addon2);
+        addon1.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addon2.addPlugin(theBaseFSM, theObjectDoingTheEnactionIn);
+        addTheGeneratedFSMToTheirFSMComponent(theObjectDoingTheEnactionIn);
+    }
+
 
     private void addTheGeneratedFSMToTheirFSMComponent(GameObject theObjectDoingTheEnactionIn)
     {
@@ -2120,6 +2591,7 @@ public class FSMgen
 
         //theFSMComponent.theFSMList.Add(theBaseFSM);
         theFSMComponent.addAndSetupFSM(theBaseFSM);
+        theFSMComponent.debug(6);
 
         /*
         Debug.Log("(theFSMComponent != null):  " + (theFSMComponent != null));
@@ -2210,12 +2682,23 @@ public abstract class simpleOneStateAndReturn : plugInFSM, generateFSM
 {
     public override void addPlugin(FSM theFSMToAddItTo, GameObject theObjectDoingTheEnaction)
     {
+        Debug.Log("generateTheSwitchCondition:  " + generateTheSwitchCondition(theObjectDoingTheEnaction));
         addSwitchAndReverse(theFSMToAddItTo, generateTheSwitchCondition(theObjectDoingTheEnaction), generateTheFSM(theObjectDoingTheEnaction));
     }
     public void addSwitchAndReverse(FSM theFSMToAddItTo,condition switchCondition, FSM otherFSM)
     {
+        Debug.Assert(theFSMToAddItTo!=null);
+        Debug.Assert(theFSMToAddItTo.switchBoard != null);
+        //Debug.Assert(theFSMToAddItTo != null);
+
         theFSMToAddItTo.switchBoard[switchCondition] = otherFSM;
         otherFSM.switchBoard[new reverseCondition(switchCondition)] = theFSMToAddItTo;
+
+        //Debug.Log("=================================================");
+        //otherFSM.debugFSM(6);
+        //Debug.Log("-------------------------------------------------");
+        //theFSMToAddItTo.debugFSM(6);
+        //Debug.Log("/////////////////////////////////////////////////");
     }
 
     public abstract condition generateTheSwitchCondition(GameObject theObjectDoingTheEnaction);

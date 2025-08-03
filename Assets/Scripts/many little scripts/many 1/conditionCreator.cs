@@ -511,6 +511,77 @@ public class cooldown : baseCondition
 
 }
 
+public class autoRepeatingTimer0 : baseCondition
+{
+    public int cooldownMax = 130;
+    public int cooldownTimer = 0;
+
+    public autoRepeatingTimer0(int cooldownMax = 130)
+    {
+        this.cooldownMax = cooldownMax;
+    }
+
+    public override bool met()
+    {
+        if (cooldownTimer < 1)
+        {
+            cooldownTimer = cooldownMax;
+            return true; 
+        }
+
+        return false;
+    }
+
+    public void cooling()
+    {
+        cooldownTimer--;
+    }
+}
+
+public class autoRepeatingTimer : nesterCondition
+{
+    //automatically resets cooldown as soon as condition becomes true
+    //for time, need reference to absolute game time or whatever, so i don't need to update a timer, just like my "stickyCondition"
+
+    int maxTimer = 2;
+
+    float startTime = 0;
+    bool timeToReset = true;
+
+    public autoRepeatingTimer(int maxTimerInSeconds = 2)
+    {
+        if (maxTimerInSeconds > 11)
+        {
+            Debug.Log("(maxTimerInSeconds > 11), are you sure you want this to possibly delay effects by " + maxTimerInSeconds + " seconds?");
+        }
+        maxTimer = maxTimerInSeconds;
+    }
+
+
+    public override bool met()
+    {
+        //Debug.Log("timeToReset:  "+ timeToReset);
+        if(timeToReset)
+        {
+            //Debug.Log("timeToReset");
+            startTime = Time.fixedTime;
+            timeToReset = false;
+        }
+
+        if (Time.fixedTime - startTime < maxTimer)
+        {
+            //Debug.Log("(Time.fixedTime - startTime < maxTimer)");
+            //countdown--;
+            return false;
+        }
+
+        //Debug.Log("(Time.fixedTime - startTime < maxTimer) is FALSE!!!!!!!!!!");
+        timeToReset = true;
+        return true;
+    }
+}
+
+
 public class planListComplete : baseCondition
 {
     List<planEXE2> planList;
@@ -582,9 +653,9 @@ public class stickyCondition : nesterCondition
     int maxTimer = 2;
 
     float startTime = 0;
+    bool stickyTrue = true;
 
-
-    public stickyCondition(condition nestedConditionIn, int maxTimerInSeconds =2)
+    public stickyCondition(condition nestedConditionIn, int maxTimerInSeconds =2, bool stickyTrueIn = true)
     {
         if(maxTimerInSeconds > 11)
         {
@@ -592,11 +663,39 @@ public class stickyCondition : nesterCondition
         }
         theNestedCondition = nestedConditionIn;
         maxTimer = maxTimerInSeconds;
+        stickyTrue = stickyTrueIn;
     }
 
 
     public override bool met()
     {
+        if(stickyTrue == true) { return regularMet(); }
+
+        return stickyFalseMet();
+    }
+
+    private bool stickyFalseMet()
+    {
+        if (Time.fixedTime - startTime < maxTimer)
+        {
+            //countdown--;
+            return false;
+        }
+
+        if (theNestedCondition.met())
+        {
+            //countdown = maxTimer;
+            return true;
+        }
+
+        startTime = Time.fixedTime;
+
+        return false;
+    }
+
+    private bool regularMet()
+    {
+
         //Debug.Log("Time.fixedTime:  " + Time.fixedTime);
         //Debug.Log("startTime:  " + startTime);
         //Debug.Log("Time.fixedTime - startTime:  " + (Time.fixedTime - startTime));
@@ -861,13 +960,14 @@ public class proximity : baseCondition
         this.allowedMargin = allowedMargin;
     }
 
-    public proximity(GameObject object1, Vector3 targetLocation2In, float desiredDistance = 4f)
+    public proximity(GameObject object1, Vector3 targetLocation2In, float desiredDistance = 4f, float allowedMargin = 2f)
     {
         this.object1 = object1;
         //this.targetLocation2 = targetLocation2In;
 
         targetCalc = new staticVectorTargetCalculator(object1, targetLocation2In);//, desiredDistance);
         this.desiredDistance = desiredDistance;
+        this.allowedMargin = allowedMargin;
     }
 
     public override bool met()
@@ -1844,6 +1944,7 @@ public class canAcquireTarget : baseCondition
 
     public override bool met()
     {
+        Debug.Log("canAcquireTarget:  "+(theTargetPicker.pickNext() != null));
         return (theTargetPicker.pickNext() != null);
     }
 
@@ -1950,7 +2051,7 @@ public class stickyTrueCriteria : objectCriteria
 
 public class objectVisibleInFOV : objectCriteria, positionCriteria
 {
-    //FOV = "feild of view" or "field of view".  we assume line of sight is clear
+    //FOV = "field of view" or "field of view".  we assume line of sight is clear
     float horizontalAngleRange = 90f;
     float verticalAngleRange = 60f;
     Transform theSensoryTransform;

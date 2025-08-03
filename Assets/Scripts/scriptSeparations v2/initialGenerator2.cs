@@ -131,14 +131,15 @@ public class initialGenerator2 : MonoBehaviour
 
         List<Vector3> listOfTeamStartLocations = new List<Vector3>();
         listOfTeamStartLocations = bigMapStartLocations1();
-        listOfTeamStartLocations = scalableMapStartLocations1(0.35f);
+        //      listOfTeamStartLocations = scalableMapStartLocations1(0.55f);
+        listOfTeamStartLocations = scalableMapStartLocations1(0.25f);
 
 
         //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
         //new doAtEachPoint(new randomlyAssignToEachPoint(listOfTeamBaseGenerators), listOfTeamStartLocations);
         List<doAtPoint> listOfTeamBaseGenerators = new List<doAtPoint>();
 
-        /*
+        
         List<Vector3> listOfOffsetSpawnLocations = new List<Vector3>();
         listOfOffsetSpawnLocations.Add(new Vector3(5, 0, 5));
         listOfOffsetSpawnLocations.Add(new Vector3(-5, 0, 3));
@@ -151,11 +152,12 @@ public class initialGenerator2 : MonoBehaviour
 
 
         //listOfTeamBaseGenerators.Add(new twoUnitGeneratorsPerTeam(tag2.team2, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
-        */
 
 
-        /*
+
+
         //listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(new playerTeamBase1_1(tag2.team1, listOfOffsetSpawnLocations)));
+        /*
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team2, new hoardeWaveGen1_1(tag2.team2, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team3, new hoardeWaveGen1_1(tag2.team3, listOfOffsetSpawnLocations)));
         listOfTeamBaseGenerators.Add(new oneTeamBaseGenAtPoint(tag2.team4, new hoardeWaveGen1_1(tag2.team4, listOfOffsetSpawnLocations)));
@@ -194,9 +196,6 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(new playerTeamGen());
         //listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
 
-
-
-
         /*
         listOfTeamBaseGenerators.Add(new playerTeamGen());
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team2));
@@ -206,16 +205,31 @@ public class initialGenerator2 : MonoBehaviour
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team6));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team7));
         listOfTeamBaseGenerators.Add(new teamGen(tag2.team8));
-        //, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
-        
-        new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
-        new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
         */
 
+        //listOfTeamBaseGenerators.Add(new playerTeamBaseGen());
+
+        
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team2));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team3));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team4));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team5));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team6));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team7));
+        listOfTeamBaseGenerators.Add(new teamBaseGen(tag2.team8));
+        
+
+        //, new waveGen(tag2.attackSquad, listOfOffsetSpawnLocations), new waveGen(tag2.defenseSquad, listOfOffsetSpawnLocations)));
+
+        new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
+        new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
+        
+
         new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
         new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
 
 
+        new testStealthNPC2(tag2.team9, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
 
 
         //new testNewOldFSMGenerator(new Vector3(820, 1.5f, 855)).doIt();
@@ -232,9 +246,9 @@ public class initialGenerator2 : MonoBehaviour
         //new testStealthDetectorGuard(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
         //new testStealthDetectorGuardWithBeleifMarkers(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 660 * 0.3f)).doIt();
         //new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
-        new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 420 * 0.3f)).doIt();
-        new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, -220 * 0.3f)).doIt();
-        new testStealthNPC(tag2.team3, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
+        //new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, 420 * 0.3f)).doIt();
+        //new testGuardPursueLastKnownLocation(tag2.team2, tag2.defenseSquad, new Vector3(350 * 0.3f, 1.5f, -220 * 0.3f)).doIt();
+        //          new testStealthNPC(tag2.team3, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
 
         //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, 67), 50, 160, 0.9f).doIt();
         //new spotLightGenerator1(new Vector3(540 * 0.3f, 14, 470 * 0.3f), new Vector3(20, 30, -67), 50, 160, 0.9f).doIt();
@@ -249,7 +263,8 @@ public class initialGenerator2 : MonoBehaviour
         float angle = 55;
         
 
-        
+        //nice two lines of spot lights:
+        /*
         Vector3 lineOrigin = new Vector3(430 * 0.3f, 50, 550 * 0.3f);
         new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -20), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
         new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -50), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
@@ -273,7 +288,7 @@ public class initialGenerator2 : MonoBehaviour
         new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -220), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
         new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -250), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
         new spotLightGenerator1(lineOrigin + new Vector3(0, 0, -270), new Vector3(90, 170, 67), angle, 300, intensity).doIt();
-        
+        */
 
 
         //new pointLightGenerator1(new Vector3(500 * 0.3f, 2, 500 * 0.5f), 30).doIt();

@@ -510,9 +510,9 @@ public interface vectorSampleProcedure// : sampleProcedure
 
 
 
-public class debugFeild
+public class debugField
 {
-    public debugFeild(List<Vector3> spatialPointSet, List<bool> theSamples)
+    public debugField(List<Vector3> spatialPointSet, List<bool> theSamples, float duration = 14f)
     {
         int index = 0;
         Color theColor;
@@ -527,12 +527,35 @@ public class debugFeild
                 theColor = Color.red;
             }
 
-            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up*3, theColor, 2f);
+            //Debug.Log("duration:  "+duration);
+            //Debug.DrawLine(new Vector3(), spatialPoint, Color.blue, duration);
+            Debug.DrawLine(spatialPoint, spatialPoint + Vector3.up*3, theColor, duration);
             index++;
         }
     }
 }
 
+public class debugFieldUpdateable: MonoBehaviour
+{
+    internal boolSampleProcedure theSampleProcedure;
+    private List<Vector3> spatialPointFieldShape;
+
+    internal static debugFieldUpdateable addThisComponent(GameObject theObject, boolSampleProcedure theSampleProcedureIn)
+    {
+        debugFieldUpdateable theComponent = theObject.AddComponent<debugFieldUpdateable>();
+        theComponent.theSampleProcedure = theSampleProcedureIn;
+        theComponent.spatialPointFieldShape = new gridOfPoints(new Vector3(-60,-3,-60),28, 28, 2f, 2f).returnIt();
+
+        return theComponent;
+    }
+
+    void Update() 
+    { 
+        List<Vector3> currentPoints = new relativePointSet(transform.position, spatialPointFieldShape);
+        new debugField(currentPoints, theSampleProcedure.sample(currentPoints), 0.00001f);
+        //theSampleProcedure.sample(currentPoints);
+    }
+}
 
 public abstract class spatialDataSampleProcedure
 {
@@ -545,7 +568,7 @@ public abstract class spatialDataSampleProcedure
             newList.Add(sampleOnePoint(thisPoint));
         }
 
-        new debugFeild(spatialPointSet, newList);
+        //      new debugField(spatialPointSet, newList);
         return newList;
     }
 
@@ -692,7 +715,7 @@ public class meetsIlluminationThreshhold : stealthArmaturableSampleProcedure, bo
 
 public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleProcedure
 {
-    float illuminationIntensityThresholdForDetection = 0.15f;
+    float illuminationIntensityThresholdForDetection = 0.0015f;
     private detectabilityIlluminationEvaluator1 detectabilityEvaluator;
 
     public visibleToThreatSet(GameObject objectForZone, objectSetGrabber theSetIn)
@@ -710,13 +733,15 @@ public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleP
     {
         //"true" = yes, line of sight, visible
 
-        //Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
+
+        //      Debug.Log("theSet.grab().Count:  " + theSet.grab().Count);
         if (oneSubPointLineOfSightFilter(subPoint) == false) { return false; }
 
         if (baseCalculation(subPoint) == true) { return true; }
 
         return false;
     }
+    
     internal bool baseCalculation(Vector3 subPoint)
     {
         float intensity = detectabilityEvaluator.evaluatePosition(subPoint);
@@ -741,6 +766,7 @@ public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleP
 
         return false;
     }
+    
     internal bool baseCalculationLineOfSightFilter(Vector3 subPoint, Vector3 observerPosition)
     {
         //"true" = yes, line of sight, visible
@@ -749,6 +775,8 @@ public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleP
         //new Ray(this.transform.position, theBody.theWorldScript.theTagScript.semiRandomUsuallyNearTargetPickerFromList(theBody.theLocalMapZoneScript.theList, this.gameObject).transform.position);
         Vector3 theDirection = subPoint - observerPosition;
         Ray myRay = new Ray(observerPosition, theDirection);
+
+        //Debug.DrawLine(observerPosition, subPoint, Color.cyan, 100f);
 
         //we don;t have objects for collision, soooo just see if LENGTH of the ray goes full distance???  or if NULL collider, ya
         //Debug.Log("theDirection.magnitude:  "+ theDirection.magnitude);
@@ -759,10 +787,10 @@ public class visibleToThreatSet : stealthArmaturableSampleProcedure, boolSampleP
             //Debug.Log("myHit.transform:  " + myHit.transform);
             //Debug.Log("myHit.transform.gameObject:  " + myHit.transform.gameObject);
             //Debug.DrawLine(observerPosition, observerPosition+ theDirection,Color.yellow,3f);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
 
@@ -859,7 +887,7 @@ public class visualSensor1 : sensor
         //detection:
         //    BEFORE any complex calculations are run:
         //	run FILTER conditions[can either result in simple detection, or complete ignorance]
-        //        line of sight for vision[then distance, then feild of view]
+        //        line of sight for vision[then distance, then field of view]
         //        boolean "request stealth" on target / "theif"
         //THEN[if requersted] run some more advanced light / dark / camoflage code[in an "interface" plug -in]
         //    for now, collisions with light - source volumes[like with map zones] and simultaneous distance / line of sight[from mlultiple body parts] to lights AND guard's vision
@@ -1928,9 +1956,9 @@ public class OldSpatialDataSet
     }
 
 
-    public void graphFeildAdHoc()
+    public void graphFieldAdHoc()
     {
-        //just do regular blue vector feild of the "end points" for now.
+        //just do regular blue vector field of the "end points" for now.
 
         foreach (OldSpatialDataPoint thisDataPoint in theDataSet)
         {

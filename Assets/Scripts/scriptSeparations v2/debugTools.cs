@@ -38,6 +38,31 @@ public class makeMastLineAtPoint : doAtPoint
         Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 105)), Color.white, 17f);
     }
 }
+public class makeMastLine
+{
+    public makeMastLine(Vector3 thisPoint)
+    {
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 104)), Color.white, 14f);
+    }
+
+    public makeMastLine(Vector3 thisPoint, Color theColor)
+    {
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 104)), theColor, 14f);
+    }
+}
+
+public class makeShortMastLineAtPoint
+{
+    public makeShortMastLineAtPoint(Vector3 thisPoint)
+    {
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 4)), Color.white, 14f);
+    }
+
+    public makeShortMastLineAtPoint(Vector3 thisPoint, Color theColor)
+    {
+        Debug.DrawLine(thisPoint, (thisPoint + (Vector3.up * 4)), theColor, 14f);
+    }
+}
 
 
 public class debugSwitchboard : MonoBehaviour
