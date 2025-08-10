@@ -156,6 +156,307 @@ public class outpostGame : MonoBehaviour
 
 
 
+public class avoidNearbyLightTargetPickerTowardsOtherDestination : targetPicker
+{
+
+    private GameObject targetSeeker;
+    float rangeScaling = 5f;
+    targetPicker nestedTargetPicker;
+
+    boolSampleProcedure theSampleProcedure;
+
+    public avoidNearbyLightTargetPickerTowardsOtherDestination(GameObject targetSeekerIn, targetPicker targetPickerIn, float rangeScalingIn)
+    {
+        targetSeeker = targetSeekerIn;
+        nestedTargetPicker = targetPickerIn;
+        rangeScaling = rangeScalingIn;
+
+
+        theSampleProcedure = new meetsIlluminationThreshhold(targetSeeker);
+
+    }
+
+    public override agnosticTargetCalc pickNext()
+    {
+        //needs to make progress towards target over time, but pushing away from nearby light
+        //will need weighting for VERY CLOSE light,
+        //and weights to make sure it does ultimately end up at desired destination
+        //similar to my "run away from nearby enemies" type thing, and using nearby light sampling
+
+        //so, let's start with JUST that fleeing behavior, and plug in the most basic nearby light sensor
+
+        //Vector3 fullLengthNewDestinationAbsolute = combinationAlgorithmAbsolute(firstNonzeroOffsetVector(3));
+        //- targetSeeker.transform.position, 5f);
+
+        //Vector3 segmentNewDestinationRelative = segmentationAlgorithmRelative(fullLengthNewDestinationAbsolute - targetSeeker.transform.position, 15f);
+
+        //Vector3 segmentNewDestinationAbsolute = segmentNewDestinationRelative + targetSeeker.transform.position;
+
+
+        //well, lets take a segment towards target, THEN add the offset
+        Vector3 currentTargetRELATIVE = currentTargetRELATIVEposition();
+        Vector3 segmentOldDestinationRelative = segmentationAlgorithmRelative(currentTargetRELATIVE, 25f);
+
+        Vector3 localOffset = firstNonzeroOffsetVector(3);
+
+        Vector3 offsetSegmentEndRelative = segmentOldDestinationRelative + (localOffset * currentTargetRELATIVE.magnitude)/55f;
+        //- targetSeeker.transform.position, 5f);
+
+        
+        Vector3 segmentNewDestinationAbsolute = offsetSegmentEndRelative + targetSeeker.transform.position;
+
+
+
+        return new agnosticTargetCalc(segmentNewDestinationAbsolute);
+            
+    }
+
+    private Vector3 segmentationAlgorithmRelative(Vector3 inputRelativeVectorWeWantASegmentOf, float desiredSegmentLength)
+    {
+        if(inputRelativeVectorWeWantASegmentOf.magnitude < desiredSegmentLength) { return inputRelativeVectorWeWantASegmentOf; }
+        return inputRelativeVectorWeWantASegmentOf.normalized * desiredSegmentLength;
+    }
+
+    private Vector3 combinationAlgorithmAbsoluteEHHHH(Vector3 shadowOffsetVectorRELATIVE)
+    {
+        Vector3 targetAbsolutePosition = currentTargetAbsolutePosition();
+        return targetAbsolutePosition + (20*shadowOffsetVectorRELATIVE/ currentTargetRELATIVEposition().magnitude);
+    }
+
+    private Vector3 currentTargetAbsolutePosition()
+    {
+        agnosticTargetCalc target = nestedTargetPicker.pickNext();
+        if (target == null) { return targetSeeker.transform.position; }// new Vector3(); }
+        return target.realPositionOfTarget();
+    }
+    private Vector3 currentTargetRELATIVEposition()
+    {
+        return currentTargetAbsolutePosition() - targetSeeker.transform.position;
+    }
+
+
+    private Vector3 firstNonzeroOffsetVector(int numberOfShells)
+    {
+        int count = 0;
+        while (count < numberOfShells)
+        {
+            Vector3 sampleOffset = centerOfShadow(5 * (count + 1));
+
+            if (sampleOffset.magnitude > 0.1f)
+            {
+                return sampleOffset / (count + 1);
+            }
+
+            count++;
+        }
+
+
+        return new Vector3();
+    }
+
+
+
+
+
+    private Vector3 smallSegment()
+    {
+        Vector3 fullRelativeTargetLength = combineOffsetWithEndpointRELATIVE();
+
+        Vector3 absoluteCombination = fullRelativeTargetLength + targetSeeker.transform.position;// combinationRelative + targetSeeker.transform.position;
+        Debug.Log(absoluteCombination);
+
+        //return centerOfShadow() + targetSeeker.transform.position; //(fullRelativeTargetLength.normalized*13) + targetSeeker.transform.position;
+        return (fullRelativeTargetLength.normalized*13) + targetSeeker.transform.position;
+    }
+
+
+    private Vector3 combineOffsetWithEndpointRELATIVE()
+    {
+        float scaleOfSegment = 10f;
+        Vector3 fullOffset = centerOfShadow();  //is this already relative to the target seeker?
+        agnosticTargetCalc target = nestedTargetPicker.pickNext();
+        if(target == null) { return new Vector3(); }
+        Vector3 endpoint = target.realPositionOfTarget();
+
+        //so, how to do this?  sometimes offset will be BEHIND, target will be in FRONT,
+        //so the NPC will get stuck in the middle of them.
+        //need some way to...either overpower the offset, or stop counting it the more it is "behind"...
+        //so, as distance to endpoint decreases, so does strength of offset
+
+        Vector3 vectorFromSeekerToEndpoint = endpoint - targetSeeker.transform.position;
+
+        //Vector3 combinationRelative = vectorFromSeekerToEndpoint + scaleOfSegment * (fullOffset / vectorFromSeekerToEndpoint.magnitude);
+        Vector3 combinationRelative = vectorFromSeekerToEndpoint + fullOffset* vectorFromSeekerToEndpoint.magnitude/3f;
+
+        //Vector3 absoluteOffset = fullOffset + targetSeeker.transform.position;
+
+        //Vector3 absoluteCombination = combinationRelative + targetSeeker.transform.position;
+
+        Debug.Log("------------------------------------------");
+        Debug.Log(fullOffset);
+        Debug.Log(endpoint);
+        Debug.Log(vectorFromSeekerToEndpoint);
+        Debug.Log(combinationRelative);
+        //Debug.Log(absoluteCombination);
+
+        //return absoluteCombination;
+        return combinationRelative;
+    }
+
+    /*
+    Vector3 weightedRadialFleeingPoint()
+    {
+        OldSpatialDataPoint myData = new OldSpatialDataPoint(theSet.grab(), theFleeer.transform.position);
+
+        Vector3 newDirection = myData.weightedRadialPattern();
+        //Debug.Log(newDirection - Vector3.zero);
+
+        return theFleeer.transform.position + (newDirection.normalized * 20);
+    }
+    */
+    public Vector3 centerOfShadow(float rangeScaling = 30f)
+    {
+        Vector3 theOutputVector = new Vector3();
+
+        List<Vector3> samplePointPatternRelative = new List<Vector3>();
+        samplePointPatternRelative.Add(targetSeeker.transform.right * rangeScaling);
+        samplePointPatternRelative.Add(-targetSeeker.transform.right * rangeScaling);
+        
+
+        foreach (Vector3 thisPoint in samplePointPatternRelative)
+        {
+            Vector3 samplePointAbsolutePosition = thisPoint + targetSeeker.transform.position;
+            //so, false, means good, dark, which means TOWARDS, so INCLUDE it in final vector, SKIP "true"
+            if (testOnePoint(samplePointAbsolutePosition) == true){ continue; }
+
+
+            theOutputVector += thisPoint;
+
+            //Vector3 absoluteCumulativeOutput = theOutputVector + targetSeeker.transform.position;
+            //Vector3 absoluteThisPoint = thisPoint + targetSeeker.transform.position;
+            //Debug.DrawLine(absoluteCumulativeOutput, absoluteThisPoint + new Vector3(0, -20, 0), Color.magenta, 22f);
+        }
+
+        return theOutputVector;
+
+
+
+        samplePointPatternRelative.Add(new Vector3(0, 0, 1) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(0, 0, -1) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(1, 0, 0) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(-1, 0, 0) * rangeScaling);
+
+        samplePointPatternRelative.Add(new Vector3(0, 0, 3) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(0, 0, -3) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(3, 0, 0) * rangeScaling);
+        samplePointPatternRelative.Add(new Vector3(-3, 0, 0) * rangeScaling);
+
+
+
+        int plusOrMinus = 1;
+        //old version
+
+        foreach (Vector3 thisPoint in samplePointPatternRelative)
+        {
+            Vector3 samplePointAbsolutePosition = thisPoint + targetSeeker.transform.position;
+            if (testOnePoint(samplePointAbsolutePosition) == false)
+            {
+                //so, false, means good, dark, which means TOWARDS, sooo, positive?
+                //hmm, no seems maybe negative?
+                plusOrMinus = 1;
+            }
+            else
+            {
+                plusOrMinus = -1;
+            }
+
+            //Vector3 fromObjectToSamplePoint = thisPoint - targetSeeker.transform.position;
+
+            //theOutputVector += plusOrMinus * thisPoint.normalized / thisPoint.magnitude;
+            theOutputVector += plusOrMinus * thisPoint;
+
+            Vector3 absoluteCumulativeOutput = theOutputVector + targetSeeker.transform.position;
+            Vector3 absoluteThisPoint = thisPoint + targetSeeker.transform.position;
+            Debug.DrawLine(absoluteCumulativeOutput, absoluteThisPoint + new Vector3(0, -20, 0), Color.magenta, 22f);
+        }
+    }
+
+
+
+
+    private bool testOnePoint(Vector3 midpoint)
+    {
+        //      sampleCounter++;
+        //          sampleCounter++;
+        //umm ya annoying messy ad-hoc for now:
+        List<Vector3> lineOfPoints = new List<Vector3>();
+        lineOfPoints.Add(ground(midpoint));// +downWardOffset);
+                                           //Debug.Log("ummmmmmmmmmmmmmmmmm??????????????????????");
+
+
+
+        Debug.Assert(theSampleProcedure != null);
+        List<bool> samples = new spatialDataSet(lineOfPoints).sample(theSampleProcedure);
+        new debugField(lineOfPoints, samples);
+        return samples[0];
+    }
+
+    private bool testSmallCluster(Vector3 midpoint)
+    {
+        //returns "true" if ANY are true?  or return false if any are false?  i think true is the one we don't want, so do true
+        float radius = 1f;
+
+        Vector3 extraPoint1 = midpoint + new Vector3(radius, 0, 0);
+        Vector3 extraPoint2 = midpoint + new Vector3(-radius, 0, 0);
+        Vector3 extraPoint3 = midpoint + new Vector3(0, 0, radius);
+        Vector3 extraPoint4 = midpoint + new Vector3(0, 0, -radius);
+
+        if (testOnePoint(midpoint) == true) { return true; }
+        if (testOnePoint(extraPoint1) == true) { return true; }
+        if (testOnePoint(extraPoint2) == true) { return true; }
+        if (testOnePoint(extraPoint3) == true) { return true; }
+        if (testOnePoint(extraPoint4) == true) { return true; }
+
+        return false;
+    }
+
+
+
+
+    private Vector3 ground(Vector3 inputVector)
+    {
+        //for now, just set y value to zero? or tiny bit above...
+        return new Vector3(inputVector.x, 0.9f, inputVector.z);
+    }
+
+
+    /*
+    internal void displayPath()
+    {
+        int pointIndex = 1;
+
+        if (currentPath == null) { return; }
+
+        while (pointIndex < currentPath.Count)
+        {
+            Debug.DrawLine(currentPath[pointIndex - 1], currentPath[pointIndex], Color.magenta, 44);
+            Debug.DrawLine(currentPath[pointIndex], currentPath[pointIndex] + new Vector3(0, 1, 0), Color.yellow, 44);
+            pointIndex++;
+        }
+    }
+
+
+    internal void displayPoint(Vector3 thePoint)
+    {
+        Vector3 testOrigin = new Vector3(-40, -33, -200);
+        float duration = 22f;
+
+        Debug.DrawLine(testOrigin, thePoint, Color.blue, duration);
+        Debug.DrawLine(thePoint + new Vector3(0.3f, 0, 0.2f), thePoint + new Vector3(2f, 0, 1f) + Vector3.up * 5, Color.white, duration);
+
+    }
+    */
+}
 
 public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
 {
@@ -189,7 +490,7 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
     int frameCounter = 0;
     int sampleCounter = 0;
 
-
+    int alternativeTryer = 1;
 
 
 
@@ -218,6 +519,7 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
 
     public override agnosticTargetCalc pickNext()
     {
+        alternativeTryer = -alternativeTryer;
         //segmentaton logic:
         theCurrectSegmentTarget = pickNewSegmentEndpointIfNeeded();
         //return theCurrectTarget;
@@ -232,7 +534,12 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
 
         if (currentPath == null || currentPath.Count <1) { return null; }
         agnosticTargetCalc theOutput = new agnosticTargetCalc(currentPath[currentIndexOfCurrentPath]);
-        currentIndexOfCurrentPath++;
+        
+        if(new proximityCriteriaBool(theOutput).evaluateObject(targetSeeker))
+        {
+            currentIndexOfCurrentPath++;
+
+        }
 
         return theOutput;
     }
@@ -248,7 +555,19 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
         {
             Debug.Log("need new Currect Segment Target");
             //buuuut, simple segmented point can be WRONG.  that is, it might be in a patch of light
-            return aSafeSegmentMidpoint();
+
+            agnosticTargetCalc newPointThing = aSafeSegmentMidpoint();
+            //but, only use it if it's more than a tiny bit closer to ultimate target:
+            Vector3 currentPosition = targetSeeker.transform.position;
+            Vector3 newEndPosition = newPointThing.realPositionOfTarget();
+            Vector3 fromCurrentToUltimateEnd = theCurrentUltimateTarget.realPositionOfTarget() - currentPosition;
+            Vector3 fromNewSegmentEndToUltimateEnd = theCurrentUltimateTarget.realPositionOfTarget() - newEndPosition;
+            float difference = (fromCurrentToUltimateEnd.magnitude - fromNewSegmentEndToUltimateEnd.magnitude);
+            
+            if ((difference/ fromCurrentToUltimateEnd.magnitude) > 0.05f)
+            {
+                return newPointThing;
+            }
         }
 
         return theCurrectSegmentTarget;
@@ -285,7 +604,7 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
 
             //testPoint = testPoint0 + (perpendicularSpan * multiplierCount * sideReverser) - (lineBetween.normalized * multiplierCount * multiplierCount);
 
-            testPoint = testPoint0 + (perpendicularSpan * multiplierCount * sideReverser);// - (lineBetween.normalized * multiplierCount * multiplierCount);
+            testPoint = testPoint0 + (perpendicularSpan * multiplierCount * sideReverser* alternativeTryer);// - (lineBetween.normalized * multiplierCount * multiplierCount);
 
             if (sideReverser > 0) { multiplierCount++; }
             count++;
@@ -293,8 +612,7 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
 
 
 
-
-
+        
 
         return new agnosticTargetCalc(testPoint);
     }
@@ -382,7 +700,6 @@ public class makeSegmentedStealthRouteToTargetPickerDestination : targetPicker
         return makeNewPathMIDPOINTS();
     }
     */
-
 
 
 
@@ -1870,7 +2187,7 @@ public class makeBaseStorage1
         //      float angle = 145;
 
         float intensity = 0.97f;
-        float angle = 167;
+        float angle = 166;
         //float intensity = 0.97f;
         //float angle = 167;
 

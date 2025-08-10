@@ -749,8 +749,11 @@ public class testStealthNPC2
                                         new pickSegmentedPathTowardsX(newObj, new pickNextWhenTargetReached(newObj, theAttackTargetPicker, 13f), 77f));
         */
 
-        targetPicker thePathFinderTargetPicker = new makeSegmentedStealthRouteToTargetPickerDestination(newObj, team,
+        targetPicker thePathFinderTargetPicker0 = new makeSegmentedStealthRouteToTargetPickerDestination(newObj, team,
                                         new pickNextWhenTargetReached(newObj, theAttackTargetPicker, 13f), 77f);
+
+        targetPicker thePathFinderTargetPicker = new avoidNearbyLightTargetPickerTowardsOtherDestination(newObj, thePathFinderTargetPicker0, 5f);
+
 
 
 
@@ -2591,7 +2594,7 @@ public class FSMgen
 
         //theFSMComponent.theFSMList.Add(theBaseFSM);
         theFSMComponent.addAndSetupFSM(theBaseFSM);
-        theFSMComponent.debug(6);
+        //          theFSMComponent.debug(6);
 
         /*
         Debug.Log("(theFSMComponent != null):  " + (theFSMComponent != null));

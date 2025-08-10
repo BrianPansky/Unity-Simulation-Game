@@ -1944,7 +1944,7 @@ public class canAcquireTarget : baseCondition
 
     public override bool met()
     {
-        Debug.Log("canAcquireTarget:  "+(theTargetPicker.pickNext() != null));
+        //Debug.Log("canAcquireTarget:  "+(theTargetPicker.pickNext() != null));
         return (theTargetPicker.pickNext() != null);
     }
 

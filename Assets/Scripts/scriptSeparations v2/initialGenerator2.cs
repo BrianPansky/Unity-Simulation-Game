@@ -225,8 +225,8 @@ public class initialGenerator2 : MonoBehaviour
         new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
         
 
-        new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
-        new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
+        //new assignToEachPoint(listOfTeamBaseGenerators, listOfTeamStartLocations);
+        //new doAtEachPoint(new makeMastLineAtPoint(), listOfTeamStartLocations);
 
 
         new testStealthNPC2(tag2.team9, tag2.attackSquad, new Vector3(540 * 0.3f, 1.5f, 220 * 0.3f)).doIt();
